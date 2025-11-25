@@ -5,19 +5,19 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from hydromt._typing import SourceMetadata
 from hydromt.data_catalog.adapters import RasterDatasetAdapter
 from hydromt.data_catalog.drivers import RasterDatasetDriver
 from hydromt.data_catalog.sources import RasterDatasetSource
 from hydromt.data_catalog.uri_resolvers import URIResolver
 from hydromt.gis.gis_utils import _to_geographic_bbox
+from hydromt.typing import SourceMetadata
 
 
 class TestRasterDatasetSource:
     def test_read_data(
         self,
         raster_ds: xr.Dataset,
-        mock_raster_ds_driver: RasterDatasetDriver,
+        MockRasterDatasetDriver: type[RasterDatasetDriver],
         mock_raster_ds_adapter: RasterDatasetAdapter,
         mock_resolver: URIResolver,
         managed_tmp_path: Path,
@@ -25,7 +25,7 @@ class TestRasterDatasetSource:
         source = RasterDatasetSource(
             root=".",
             name="example_rasterds",
-            driver=mock_raster_ds_driver,
+            driver=MockRasterDatasetDriver(),
             data_adapter=mock_raster_ds_adapter,
             uri_resolver=mock_resolver,
             uri=str(managed_tmp_path / "rasterds.zarr"),
@@ -47,7 +47,9 @@ class TestRasterDatasetSource:
         self, writable_source: RasterDatasetSource, rioda: xr.DataArray
     ):
         rioda_expected_bbox = (3.0, -11.0, 6.0, -9.0)
-        rioda_detected_bbox = _to_geographic_bbox(*writable_source.detect_bbox(rioda))
+        rioda_detected_bbox = _to_geographic_bbox(
+            *writable_source._detect_bbox(ds=rioda)
+        )
 
         assert np.all(np.equal(rioda_expected_bbox, rioda_detected_bbox))
 

@@ -8,8 +8,8 @@ from pyogrio import write_dataframe
 from pytest_mock import MockerFixture
 from shapely import box
 
-from hydromt._typing import Bbox
 from hydromt.data_catalog.drivers import PyogrioDriver
+from hydromt.typing import Bbox
 
 
 class TestPyogrioDriver:

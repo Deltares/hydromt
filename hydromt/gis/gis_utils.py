@@ -16,8 +16,8 @@ from pyproj.transformer import Transformer
 from shapely.geometry import box
 from shapely.geometry.base import BaseGeometry
 
-from hydromt._typing import Bbox, Geom, GpdShapeGeom, Zoom
 from hydromt.gis.raster_utils import cellres
+from hydromt.typing import Bbox, Geom, GpdShapeGeom, Zoom
 
 __all__ = [
     "_axes_attrs",
@@ -28,6 +28,7 @@ __all__ = [
     "utm_crs",
     "zoom_to_overview_level",
 ]
+
 
 logger = logging.getLogger(__name__)
 

@@ -11,7 +11,7 @@ from hydromt._validators.data_catalog_v1x import (
     DataCatalogV1MetaData,
     DataCatalogV1Validator,
 )
-from hydromt.io.readers import _yml_from_uri_or_path
+from hydromt.readers import _yml_from_uri_or_path
 from tests.conftest import TEST_DATA_DIR
 
 
@@ -52,7 +52,7 @@ def test_geodataframe_v1_entry_validation():
     assert entry.metadata.crs == 4326
     assert entry.data_type == "GeoDataFrame"
     assert entry.driver.name == "pyogrio"
-    assert entry.driver.options == {"layer": "BasinATLAS_v10_lev12"}
+    assert entry.driver.options.model_dump() == {"layer": "BasinATLAS_v10_lev12"}
 
     assert entry.metadata.category == "hydrography"
     assert entry.metadata.notes == "renaming and units might require some revision"
@@ -97,7 +97,7 @@ def test_valid_v1_catalog_variants():
                     "driver": {
                         "name": "raster",
                         "filesystem": "s3",
-                        "options": {"anon": True},
+                        "options": {"anon": "true"},
                     },
                 },
             ],
@@ -164,7 +164,7 @@ def test_raster_dataset_v1_entry_validation():
     assert entry.data_type == "RasterDataset"
     assert entry.driver.name == "raster"
     assert entry.uri == Path("meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif")
-    assert entry.driver.options == {"chunks": {"x": 3600, "y": 3600}}
+    assert entry.driver.options.model_dump() == {"chunks": {"x": 3600, "y": 3600}}
     assert entry.metadata is not None
     assert entry.metadata.category == "meteo"
     assert entry.metadata.paper_doi == "10.1038/sdata.2017.122"

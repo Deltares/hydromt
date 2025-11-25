@@ -1,9 +1,9 @@
 import pytest
 
 from hydromt._utils.steps_validator import _validate_steps
-from hydromt.model import hydromt_step
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.model import Model
+from hydromt.model.steps import hydromt_step
 
 
 class FooComponent(ModelComponent):

@@ -1,16 +1,17 @@
 """Driver for GeoDataFrames."""
 
+import logging
 from abc import ABC, abstractmethod
-from logging import Logger, getLogger
-from typing import List, Optional
+from pathlib import Path
+from typing import Any
 
 import geopandas as gpd
 
-from hydromt._typing import SourceMetadata, StrPath
 from hydromt.data_catalog.drivers import BaseDriver
 from hydromt.error import NoDataStrategy
+from hydromt.typing import SourceMetadata
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class GeoDataFrameDriver(BaseDriver, ABC):
@@ -19,29 +20,66 @@ class GeoDataFrameDriver(BaseDriver, ABC):
     @abstractmethod
     def read(
         self,
-        uris: List[str],
+        uris: list[str],
         *,
-        metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
+        metadata: SourceMetadata | None = None,
+        mask: Any = None,
+        variables: str | list[str] | None = None,
     ) -> gpd.GeoDataFrame:
-        """Read in any compatible data source to a geopandas `GeoDataFrame`."""
+        """
+        Read geospatial data into a GeoDataFrame.
+
+        Parameters
+        ----------
+        uris : list[str]
+            List of URIs to read data from.
+        handle_nodata : NoDataStrategy, optional
+            Strategy to handle missing or empty data. Default is NoDataStrategy.RAISE.
+        metadata : SourceMetadata | None, optional
+            Optional metadata object describing the dataset source (e.g. CRS).
+        mask : Any, optional
+            Optional spatial mask to filter the data. The mask can be a geometry, GeoDataFrame,
+            or any geometry-like object depending on driver support.
+        variables : str | list[str] | None, optional
+            Optional variable(s) or column(s) to read from the source file.
+
+        Returns
+        -------
+        gpd.GeoDataFrame
+            The loaded geospatial data.
+        """
         ...
 
+    @abstractmethod
     def write(
         self,
-        path: StrPath,
-        gdf: gpd.GeoDataFrame,
-        **kwargs,
-    ) -> str:
+        path: Path | str,
+        data: gpd.GeoDataFrame,
+        *,
+        write_kwargs: dict[str, Any] | None = None,
+    ) -> Path:
         """
-        Write out a GeoDataFrame to file.
+        Write a GeoDataFrame to disk.
 
-        Not all drivers should have a write function, so this method is not
-        abstract.
+        This abstract method defines the interface for all geospatial data drivers.
+        Subclasses should implement logic for writing to supported vector formats
+        (e.g., GeoPackage, Shapefile, GeoJSON).
 
-        args:
+        Parameters
+        ----------
+        path : Path | str
+            Destination path or URI where the GeoDataFrame will be written.
+        data : gpd.GeoDataFrame
+            The GeoDataFrame to write.
+        write_kwargs : dict[str, Any], optional
+            Additional keyword arguments passed to the underlying write function
+            (e.g., `pyogrio.write_dataframe`). Default is None.
+
+        Returns
+        -------
+        Path
+            The path where the data was written.
+
         """
-        raise NotImplementedError(
-            f"Writing using driver '{self.name}' is not supported."
-        )
+        ...

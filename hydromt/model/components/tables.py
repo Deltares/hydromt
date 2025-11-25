@@ -1,7 +1,7 @@
 """Tables component."""
 
 import glob
-from logging import Logger, getLogger
+import logging
 from os.path import basename, join
 from typing import TYPE_CHECKING, Dict, Optional, Union, cast
 
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 __all__ = ["TablesComponent"]
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class TablesComponent(ModelComponent):

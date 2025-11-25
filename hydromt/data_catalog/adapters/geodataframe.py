@@ -1,6 +1,6 @@
 """The GeoDataFrame adapter performs transformations on GeoDataFrames."""
 
-from logging import Logger, getLogger
+import logging
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 import geopandas as gpd
@@ -8,15 +8,15 @@ import numpy as np
 import pyproj
 from pyproj import CRS
 
-from hydromt._typing import (
-    Geom,
-    SourceMetadata,
-)
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
 from hydromt.gis.vector_utils import _filter_gdf
+from hydromt.typing import (
+    Geom,
+    SourceMetadata,
+)
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class GeoDataFrameAdapter(DataAdapterBase):

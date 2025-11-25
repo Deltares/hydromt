@@ -1,22 +1,22 @@
 """Xarrays component."""
 
-from logging import Logger, getLogger
-from typing import TYPE_CHECKING, Union, cast
+import logging
+from typing import TYPE_CHECKING, Any, Union, cast
 
 import xarray as xr
 from pandas import DataFrame
 from xarray import DataArray, Dataset
 
-from hydromt._typing.type_def import XArrayDict
-from hydromt.io.readers import open_ncs
-from hydromt.io.writers import write_nc
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.steps import hydromt_step
+from hydromt.readers import open_ncs
+from hydromt.typing.type_def import XArrayDict
+from hydromt.writers import write_nc
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class DatasetsComponent(ModelComponent):
@@ -110,7 +110,7 @@ class DatasetsComponent(ModelComponent):
     def read(self, filename: str | None = None, **kwargs) -> None:
         """Read model dataset files at <root>/<filename>.
 
-        key-word arguments are passed to :py:func:`hydromt.io.readers.open_ncs`
+        key-word arguments are passed to :py:func:`hydromt.readers.open_ncs`
 
         Parameters
         ----------
@@ -120,7 +120,7 @@ class DatasetsComponent(ModelComponent):
             if None, the path that was provided at init will be used.
         **kwargs:
             Additional keyword arguments that are passed to the
-            `hydromt.io.readers.open_ncs` function.
+            `hydromt.readers.open_ncs` function.
         """
         self.root._assert_read_mode()
         self._initialize(skip_read=True)
@@ -143,7 +143,7 @@ class DatasetsComponent(ModelComponent):
         gdal_compliant: bool = False,
         rename_dims: bool = False,
         force_sn: bool = False,
-        **kwargs,
+        to_netcdf_kwargs: dict[str, Any] | None = None,
     ) -> None:
         """Write dictionary of xarray.Dataset and/or xarray.DataArray to netcdf files.
 
@@ -161,17 +161,17 @@ class DatasetsComponent(ModelComponent):
         filename: str, optional
             filename relative to model root and should contain a {name} placeholder
             Can be a relative path.
-        gdal_compliant: bool
+        gdal_compliant: bool, optional
             If True, convert xarray.Dataset and/or xarray.DataArray to gdal compliant
             format using :py:meth:`~hydromt.raster.gdal_compliant`
-        rename_dims: bool
+        rename_dims: bool, optional
             If True, rename x_dim and y_dim to standard names depending on the CRS
             (x/y for projected and lat/lon for geographic). Only used if
             ``gdal_compliant`` is set to True. By default, False.
-        force_sn: bool
+        force_sn: bool, optional
             If True, forces the dataset to have South -> North orientation. Only used
             if ``gdal_compliant`` is set to True. By default, False.
-        **kwargs:
+        to_netcdf_kwargs: dict, optional
             Additional keyword arguments that are passed to the `to_netcdf`
             function.
         """
@@ -183,7 +183,8 @@ class DatasetsComponent(ModelComponent):
             )
             return
 
-        kwargs.setdefault("engine", "netcdf4")
+        to_netcdf_kwargs = to_netcdf_kwargs or {}
+        to_netcdf_kwargs.setdefault("engine", "netcdf4")
 
         filename = filename or self._filename
 
@@ -200,7 +201,7 @@ class DatasetsComponent(ModelComponent):
                 rename_dims=rename_dims,
                 force_sn=force_sn,
                 force_overwrite=self.root.mode.is_override_mode(),
-                **kwargs,
+                to_netcdf_kwargs=to_netcdf_kwargs,
             )
             if close_handle is not None:
                 self._deferred_file_close_handles.append(close_handle)

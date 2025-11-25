@@ -1,21 +1,20 @@
 """Model Region class."""
 
+import logging
 from abc import ABC, abstractmethod
-from logging import Logger, getLogger
-from typing import TYPE_CHECKING, Dict, Optional, Tuple, cast
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, cast
 
 import geopandas as gpd
 from geopandas import GeoDataFrame
 from pyproj import CRS
 
-from hydromt.io.writers import write_region
 from hydromt.model.components.base import ModelComponent
+from hydromt.writers import write_region
 
 if TYPE_CHECKING:
     from hydromt.model import Model
 
-
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class SpatialModelComponent(ModelComponent, ABC):
@@ -90,7 +89,7 @@ class SpatialModelComponent(ModelComponent, ABC):
         filename: Optional[str] = None,
         *,
         to_wgs84: bool = False,
-        **write_kwargs,
+        to_file_kwargs: dict[str, Any] | None = None,
     ) -> None:
         """Write the model region to file.
 
@@ -104,7 +103,7 @@ class SpatialModelComponent(ModelComponent, ABC):
             The filename to write the region to. If None, the filename provided at initialization is used.
         to_wgs84 : bool
             If True, the region is reprojected to WGS84 before writing.
-        **write_kwargs:
+        to_file_kwargs: dict, optional
             Additional keyword arguments passed to the `geopandas.GeoDataFrame.to_file` function.
         """
         self.root._assert_write_mode()
@@ -131,7 +130,7 @@ class SpatialModelComponent(ModelComponent, ABC):
             self.region,
             file_path=full_path,
             to_wgs84=to_wgs84,
-            **write_kwargs,
+            to_file_kwargs=to_file_kwargs,
         )
 
     def test_equal(self, other: ModelComponent) -> Tuple[bool, Dict[str, str]]:

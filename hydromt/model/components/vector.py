@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """HydroMT VectorComponent class definition."""
 
-from logging import Logger, getLogger
+import logging
 from os.path import basename, dirname, isfile, join
-from typing import TYPE_CHECKING, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Optional, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -13,18 +13,18 @@ from pyproj import CRS
 from shapely.geometry import box
 
 from hydromt.gis.vector import GeoDataset
-from hydromt.io.readers import open_ncs
-from hydromt.io.writers import write_nc
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step
+from hydromt.readers import open_ncs
+from hydromt.writers import write_nc
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model
 
 __all__ = ["VectorComponent"]
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class VectorComponent(SpatialModelComponent):
@@ -250,7 +250,8 @@ class VectorComponent(SpatialModelComponent):
         geometry_filename: Optional[str] = "vector/vector.geojson",
         *,
         ogr_compliant: bool = False,
-        **kwargs,
+        to_netcdf_kwargs: dict[str, Any] | None = None,
+        to_gdf_kwargs: dict[str, Any] | None = None,
     ) -> None:
         """Write model vector to combined netcdf and geojson files.
 
@@ -283,9 +284,10 @@ class VectorComponent(SpatialModelComponent):
             If filename only, write the netCDF4 file in an ogr compliant format
             This makes it readable as a vector file in e.g. QGIS
             see :py:meth:`~hydromt.vector.GeoBase.ogr_compliant` for more details.
-        **kwargs:
-            Additional keyword arguments that are passed to the `write_nc`
-            function.
+        to_netcdf_kwargs: dict, optional
+            Additional keyword arguments that are passed to the `write_nc` function.
+        to_gdf_kwargs: dict, optional
+            Additional keyword arguments that are passed to the `GeoDataset.to_gdf` function.
         """
         self.root._assert_write_mode()
 
@@ -338,12 +340,13 @@ class VectorComponent(SpatialModelComponent):
             logger.info(
                 f"{self.model.name}.{self.name_in_model}: Writing vector to {geojson_path}."
             )
+            to_netcdf_kwargs = to_netcdf_kwargs or {}
+            to_netcdf_kwargs.setdefault("engine", "netcdf4")
             close_handle = write_nc(
                 ds,
                 file_path=geojson_path,
-                engine="netcdf4",
                 force_overwrite=self.root.mode.is_override_mode(),
-                **kwargs,
+                to_netcdf_kwargs=to_netcdf_kwargs,
             )
             if close_handle is not None:
                 self._deferred_file_close_handles.append(close_handle)
@@ -354,7 +357,7 @@ class VectorComponent(SpatialModelComponent):
             logger.info(
                 f"{self.model.name}.{self.name_in_model}: Writing vector to {geojson_path}."
             )
-            gdf = ds.vector.to_gdf(**kwargs)
+            gdf = ds.vector.to_gdf(**(to_gdf_kwargs or {}))
             gdf.to_file(geojson_path)
         # write data to netcdf and geometry to geojson
         else:
@@ -369,10 +372,12 @@ class VectorComponent(SpatialModelComponent):
             gdf = ds.vector.geometry.to_frame("geometry")
             gdf.to_file(geojson_path)
 
+            to_netcdf_kwargs = to_netcdf_kwargs or {}
+            to_netcdf_kwargs.setdefault("engine", "netcdf4")
             close_handle = write_nc(
                 ds.drop_vars("geometry"),
                 file_path=nc_path,
-                **kwargs,
+                to_netcdf_kwargs=to_netcdf_kwargs,
             )
             if close_handle is not None:
                 self._deferred_file_close_handles.append(close_handle)

@@ -2,15 +2,16 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from hydromt._typing import SourceMetadata
 from hydromt.data_catalog.adapters.dataset import DatasetAdapter
 from hydromt.error import NoDataException, NoDataStrategy
+from hydromt.typing import SourceMetadata
+from hydromt.typing.type_def import TimeRange
 
 
 class TestRasterDatasetAdapter:
     def test_transform_nodata(self, timeseries_ds: xr.Dataset):
         adapter = DatasetAdapter()
-        time_range = ("01-01-1970", "01-01-1971")
+        time_range = TimeRange(start="01-01-1970", end="01-01-1971")
         with pytest.raises(NoDataException):
             adapter.transform(
                 timeseries_ds, metadata=SourceMetadata(), time_range=time_range

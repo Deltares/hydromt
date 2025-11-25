@@ -1,17 +1,12 @@
 """the new model root class."""
 
-from logging import FileHandler, Logger, getLogger
-from os import makedirs, remove
-from os.path import dirname, exists, isdir, join
+import logging
 from pathlib import Path
-from shutil import SameFileError, copyfile
 from typing import Optional
 
-from hydromt._typing import ModeLike, ModelMode
-from hydromt._typing.type_def import StrPath
-from hydromt._utils.log import _add_filehandler
+from hydromt.typing import ModeLike, ModelMode
 
-logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 __all__ = ["ModelRoot"]
 
@@ -21,38 +16,29 @@ class ModelRoot:
 
     def __init__(
         self,
-        path: StrPath,
+        path: Path,
         mode: ModeLike = "w",
     ):
-        self.set(path, mode)
+        self._mode = ModelMode.from_str_or_mode(mode)
+        if self.is_reading_mode():
+            self._check_root_exists(path)
+        self.path = Path(path).resolve()
+        self.path.mkdir(parents=True, exist_ok=True)
 
     def set(
         self,
-        path: StrPath,
+        path: Path,
         mode: Optional[ModeLike] = None,
     ) -> Path:
-        """Set the path of the root, and create the necessary loggers."""
-        if hasattr(self, "path"):
-            old_path = self.path
-        else:
-            old_path = None
-
-        logger.info(f"setting root to {path}")
-
-        self.path = Path(path)
-
+        """Set the path and mode of the root."""
         if mode:
-            self._mode = ModelMode.from_str_or_mode(mode)
+            self.mode = mode
 
         if self.is_reading_mode():
-            self._check_root_exists()
+            self._check_root_exists(path)
 
-        if self.mode is not None:
-            is_override = self.mode.is_override_mode()
-        else:
-            is_override = False
+        self.path = Path(path).resolve()
 
-        self._update_logger_filehandler(old_path, is_override)
         return self.path
 
     def _assert_write_mode(self) -> None:
@@ -86,48 +72,10 @@ class ModelRoot:
         """Test whether we are in override mode or not."""
         return self._mode.is_override_mode()
 
-    def _update_logger_filehandler(
-        self, old_path: Optional[Path] = None, overwrite: bool = False
-    ):
-        """Update the file handler to save logs in self.path/hydromt.log. If a log file at old_path exists copy it to self.path and append."""
-        new_path = join(self.path, "hydromt.log")
-        if old_path == new_path:
-            return
-
-        makedirs(self.path, exist_ok=True)
-
-        main_logger: Logger = getLogger("hydromt")
-
-        log_level = 20  # default, but overwritten by the level of active loggers
-        for handler in main_logger.handlers:
-            log_level = handler.level
-            if isinstance(handler, FileHandler):
-                if dirname(handler.baseFilename) != self.path:
-                    # first remove so no new logs come in
-                    main_logger.removeHandler(handler)
-                    # wait for all messages to be processed
-                    handler.flush()
-                    # close the handler
-                    handler.close()
-                break
-
-        if overwrite and exists(new_path):
-            remove(new_path)
-
-        if old_path is not None and exists(old_path):
-            old_log_path = join(old_path, "hydromt.log")
-            if exists(old_log_path):
-                try:
-                    copyfile(old_log_path, new_path)
-                except SameFileError:
-                    pass
-
-        _add_filehandler(main_logger, new_path, log_level)
-
     def __repr__(self):
         return f"ModelRoot(path={self.path}, mode={self._mode})"
 
-    def _check_root_exists(self):
-        # check directory
-        if not isdir(self.path):
-            raise IOError(f'model root not found at "{self.path}"')
+    def _check_root_exists(self, path: Optional[Path] = None) -> None:
+        path = path or self.path
+        if not path.exists():
+            raise IOError(f'model root not found at "{path}"')

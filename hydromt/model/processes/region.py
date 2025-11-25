@@ -1,6 +1,6 @@
 """parse a region from a dict. See parse_region for information on usage."""
 
-from logging import Logger, getLogger
+import logging
 from os.path import isdir, isfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
@@ -12,18 +12,19 @@ import xugrid as xu
 from pyproj import CRS
 from shapely import box
 
-from hydromt._typing.type_def import StrPath
 from hydromt.data_catalog import DataCatalog
 from hydromt.data_catalog.sources import RasterDatasetSource
 from hydromt.error import NoDataStrategy
 from hydromt.gis import parse_crs
 from hydromt.model.processes.basin_mask import get_basin_geometry
 from hydromt.plugins import PLUGINS
+from hydromt.typing.type_def import StrPath
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model
 
-logger: Logger = getLogger(__name__)
+
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "parse_region_basin",
@@ -208,10 +209,8 @@ def parse_region_geom(
 
 
 def parse_region_grid(
-    region: dict,
-    *,
-    data_catalog: Optional[DataCatalog],
-) -> Union[xr.DataArray, xr.Dataset]:
+    region: dict[str, Any], *, data_catalog: DataCatalog | None = None
+) -> xr.DataArray | xr.Dataset | None:
     """Parse a region of kind grid and return the corresponding xarray object.
 
     Note that additional arguments from the region can be passed to the
@@ -225,7 +224,7 @@ def parse_region_grid(
         For a region based on a grid:
 
         * {'grid': /path/to/grid}
-    data_catalog : DataCatalog
+    data_catalog : DataCatalog, optional
         DataCatalog object containing the data sources.
 
     Returns
@@ -233,25 +232,30 @@ def parse_region_grid(
     xr.DataArray or xr.Dataset
         The parsed xarray object.
     """
-    kwargs = region.copy()
+    options = region.copy()
     kind = next(iter(region))
-    value0 = kwargs.pop(kind)
+    value0 = options.pop(kind)
 
     _assert_parse_key(kind, "grid")
 
-    kwargs_str = dict()
-    for k, v in kwargs.items():
+    parsed_region = {}
+    for k, v in options.items():
         if isinstance(v, xr.DataArray):
             v = f"DataArray {v.raster.bounds} (crs = {v.raster.crs})"
-        kwargs_str.update({k: v})
-    logger.debug(f"Parsed region (kind={kind}): {str(kwargs_str)}")
+        parsed_region.update({k: v})
+    logger.debug(f"Parsed region (kind={kind}): {str(parsed_region)}")
 
     data_catalog = data_catalog or DataCatalog()
     da = data_catalog.get_rasterdataset(
         value0,
         handle_nodata=NoDataStrategy.RAISE,
         single_var_as_array=True,
-        driver={"name": RasterDatasetSource._fallback_driver_read, "options": kwargs},
+        source_kwargs={
+            "driver": {
+                "name": RasterDatasetSource._fallback_driver_read,
+                "options": options,
+            }
+        },
     )
 
     return da
