@@ -1,6 +1,6 @@
 """Utility functions for hydromt that have no other home."""
 
-from hydromt._utils.caching import _cache_vrt_tiles, _copy_to_local
+from hydromt._utils.caching import cache_vrt_tiles, copy_to_local
 from hydromt._utils.dataset import (
     _rename_vars,
     _set_metadata,
@@ -21,8 +21,8 @@ from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt._utils.uris import _is_valid_url, _strip_scheme
 
 __all__ = [
-    "_cache_vrt_tiles",
-    "_copy_to_local",
+    "cache_vrt_tiles",
+    "copy_to_local",
     "_deep_merge",
     "_rename_vars",
     "_set_metadata",

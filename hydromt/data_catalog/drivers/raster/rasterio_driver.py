@@ -11,7 +11,7 @@ import xarray as xr
 from pydantic import Field, field_serializer, model_validator
 from pyproj import CRS
 
-from hydromt._utils import _cache_vrt_tiles, _strip_scheme, temp_env
+from hydromt._utils import _strip_scheme, cache_vrt_tiles, temp_env
 from hydromt.config import SETTINGS
 from hydromt.data_catalog.drivers.base_driver import DriverOptions
 from hydromt.data_catalog.drivers.raster import RasterDatasetDriver
@@ -150,11 +150,11 @@ class RasterioDriver(RasterDatasetDriver):
             metadata = SourceMetadata()
 
         # Caching portion, only when the flag is True and the file format is vrt
-        if all([uri.endswith(".vrt") for uri in uris]) and self.options.cache:
+        if all(uri.endswith(".vrt") for uri in uris) and self.options.cache:
             cache_dir: Path = self.options.get_cache_path(uris)
             uris_cached = []
             for uri in uris:
-                cached_uri = _cache_vrt_tiles(
+                cached_uri = cache_vrt_tiles(
                     uri, geom=mask, fs=self.filesystem.get_fs(), cache_dir=cache_dir
                 )
                 uris_cached.append(cached_uri)
