@@ -10,7 +10,7 @@ from hydromt._validators.data_catalog_v0x import (
     DataCatalogV0MetaData,
     DataCatalogV0Validator,
 )
-from hydromt.io.readers import _yml_from_uri_or_path
+from hydromt.readers import _yml_from_uri_or_path
 
 
 def test_deltares_data_catalog_v0(dd_v0_catalog):
@@ -85,7 +85,7 @@ def test_valid_v0_catalog_variants():
                     "path": "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt",
                     "rename": {"ESA_WorldCover_10m_2020_v100_Map_AWS": "landuse"},
                     "filesystem": "s3",
-                    "storage_options": {"anon": True},
+                    "storage_options": {"anon": "true"},
                 },
             ],
         },

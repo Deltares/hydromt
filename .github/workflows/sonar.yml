@@ -41,15 +41,15 @@ jobs:
     name: run test coverage and SonarQube scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - uses: prefix-dev/setup-pixi@v0.9.0
+      - uses: prefix-dev/setup-pixi@v0.9.3
         with:
-          pixi-version: "v0.49.0"
+          pixi-version: "v0.59.0"
       - name: Test
         run: pixi run --locked test-cov
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN_2025 }}

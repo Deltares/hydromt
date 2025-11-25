@@ -1,19 +1,19 @@
-import typing
-from logging import getLogger
-from typing import Dict, Optional, cast
+import logging
+from typing import TYPE_CHECKING, Dict, Optional, cast
 
 import numpy as np
 import pandas as pd
 import xarray as xr
 
-if typing.TYPE_CHECKING:
+from hydromt._utils.nodata import _has_no_data
+from hydromt.typing.metadata import SourceMetadata
+from hydromt.typing.type_def import TimeRange, Variables
+
+if TYPE_CHECKING:
     from pandas._libs.tslibs.timedeltas import TimeDeltaUnitChoices
 
-from hydromt._typing.metadata import SourceMetadata
-from hydromt._typing.type_def import TimeRange, Variables
-from hydromt._utils.nodata import _has_no_data
 
-logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "_set_metadata",
@@ -72,7 +72,7 @@ def _slice_temporal_dimension(
             and np.issubdtype(ds["time"].dtype, np.datetime64)
         ):
             logger.debug(f"Slicing time dim {time_range}")
-            ds = ds.sel(time=slice(*time_range))
+            ds = ds.sel(time=slice(time_range.start, time_range.end))
         if _has_no_data(ds):
             return None
         else:
@@ -92,7 +92,10 @@ def _set_metadata(
             for k in metadata.attrs:
                 ds[k].attrs.update(metadata.attrs[k])
 
-    ds.attrs.update(metadata.model_dump(exclude_unset=True, exclude={"attrs"}))
+    # exclude extent and attrs that are dict
+    ds.attrs.update(
+        metadata.model_dump(exclude_unset=True, exclude={"attrs", "extent"})
+    )
     return ds
 
 

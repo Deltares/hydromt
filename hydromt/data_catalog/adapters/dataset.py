@@ -2,18 +2,12 @@
 
 from __future__ import annotations
 
-from logging import getLogger
+import logging
 from typing import Optional
 
 import numpy as np
 import xarray as xr
 
-from hydromt._typing import (
-    Data,
-    SourceMetadata,
-    TimeRange,
-    Variables,
-)
 from hydromt._utils import (
     _has_no_data,
     _set_metadata,
@@ -22,8 +16,14 @@ from hydromt._utils import (
 )
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
+from hydromt.typing import (
+    Data,
+    SourceMetadata,
+    TimeRange,
+    Variables,
+)
 
-logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 __all__ = ["DatasetAdapter"]
 
@@ -65,6 +65,7 @@ class DatasetAdapter(DataAdapterBase):
             return ds
         except NoDataException:
             exec_nodata_strat("No data to export", strategy=handle_nodata)
+            return None
 
     def _rename_vars(self, ds: Data) -> Data:
         rm = {k: v for k, v in self.rename.items() if k in ds}
@@ -160,7 +161,7 @@ class DatasetAdapter(DataAdapterBase):
             and np.issubdtype(ds["time"].dtype, np.datetime64)
         ):
             logger.debug(f"Slicing time dim {time_range}")
-            ds = ds.sel(time=slice(*time_range))
+            ds = ds.sel(time=slice(time_range.start, time_range.end))
         if _has_no_data(ds):
             return None
         else:

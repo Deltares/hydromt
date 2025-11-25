@@ -1,151 +1,102 @@
 .. currentmodule:: hydromt.data_catalog.drivers
 
-.. _drivers:
+.. _driver_api:
 
 =======
 Drivers
 =======
 
-Base
-----
+The Hydromt drivers module provides drivers for various datasets and formats.
+Each driver implements `read` and optionally `write` methods, along with configuration options and a file system handler.
+
+
+FileSystem
+--------------
+
+All drivers rely on shared type definitions from :mod:`hydromt.typing`.
+
+.. currentmodule:: hydromt.typing
 
 .. autosummary::
    :toctree: ../_generated
+   :nosignatures:
+
+   FSSpecFileSystem
+
+.. currentmodule:: hydromt.data_catalog.drivers
+
+
+Driver Base Classes
+--------------------
+
+.. autosummary::
+   :toctree: ../_generated
+   :nosignatures:
 
    BaseDriver
+   DriverOptions
 
-RasterDataset
--------------
+Raster Data Drivers
+--------------------
 
 .. autosummary::
    :toctree: ../_generated
+   :nosignatures:
 
    RasterDatasetDriver
-   RasterDatasetDriver.read
-   RasterDatasetDriver.write
-
-RasterDatasetXarrayDriver
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autosummary::
-   :toctree: ../_generated
-
    RasterDatasetXarrayDriver
-   RasterDatasetXarrayDriver.read
-   RasterDatasetXarrayDriver.write
-
-RasterioDriver
-^^^^^^^^^^^^^^
-
-.. autosummary::
-   :toctree: ../_generated
-
+   RasterXarrayOptions
    RasterioDriver
-   RasterioDriver.read
-   RasterioDriver.write
+   RasterioOptions
 
-GeoDataFrame
-------------
+Vector & Geospatial Drivers
+----------------------------
 
 .. autosummary::
    :toctree: ../_generated
+   :nosignatures:
 
    GeoDataFrameDriver
-   GeoDataFrameDriver.read
-   GeoDataFrameDriver.write
-
-PyogrioDriver
-^^^^^^^^^^^^^
-
-.. autosummary::
-   :toctree: ../_generated
-
    PyogrioDriver
-   PyogrioDriver.read
-   PyogrioDriver.write
-
-GeoDataFrameTableDriver
-^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autosummary::
-   :toctree: ../_generated
-
    GeoDataFrameTableDriver
-   GeoDataFrameTableDriver.read
-   GeoDataFrameTableDriver.write
+   GeoDataFrameTableOptions
 
-DataFrame
----------
+Tabular Data Drivers
+---------------------
 
 .. autosummary::
    :toctree: ../_generated
+   :nosignatures:
 
    DataFrameDriver
-   DataFrameDriver.read
-   DataFrameDriver.write
-
-PandasDriver
-^^^^^^^^^^^^
-
-.. autosummary::
-   :toctree: ../_generated
-
    PandasDriver
-   PandasDriver.read
-   PandasDriver.write
 
-GeoDataset
-----------
+Geospatial Dataset Drivers
+---------------------------
 
 .. autosummary::
    :toctree: ../_generated
+   :nosignatures:
 
    GeoDatasetDriver
-   GeoDatasetDriver.read
-   GeoDatasetDriver.write
-
-GeoDatasetXarrayDriver
-^^^^^^^^^^^^^^^^^^^^^^
-
-.. autosummary::
-   :toctree: ../_generated
-
+   GeoDatasetOptions
    GeoDatasetXarrayDriver
-   GeoDatasetXarrayDriver.read
-   GeoDatasetXarrayDriver.write
+   GeoDatasetVectorDriver
 
-GeoDatasetVectorDriver
-^^^^^^^^^^^^^^^^^^^^^^
-
-.. autosummary::
-    :toctree: ../_generated
-
-    GeoDatasetVectorDriver
-    GeoDatasetVectorDriver.read
-    GeoDatasetVectorDriver.write
-
-Dataset
--------
-
-.. autosummary::
-    :toctree: ../_generated
-
-    DatasetDriver
-    DatasetDriver.read
-    DatasetDriver.write
-
-DatasetXarrayDriver
-^^^^^^^^^^^^^^^^^^^^^^
+General Dataset Drivers
+------------------------
 
 .. autosummary::
    :toctree: ../_generated
+   :nosignatures:
 
+   DatasetDriver
    DatasetXarrayDriver
-   DatasetXarrayDriver.read
-   DatasetXarrayDriver.write
+   DatasetXarrayOptions
 
 Preprocessing
 -------------
+
 .. autosummary::
    :toctree: ../_generated
 

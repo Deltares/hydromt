@@ -23,6 +23,7 @@ if HAS_GDAL:
 
     gdal.UseExceptions()
 
+
 logger = logging.getLogger(__name__)
 
 __all__ = ["copy_to_local", "cache_vrt_tiles"]

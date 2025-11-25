@@ -29,6 +29,7 @@ corine:
   data_type: RasterDataset
   metadata:
     category: landuse & landcover
+    source_author: European Environment Agency
     source_license: https://land.copernicus.eu/pan-european/corine-land-cover/clc2018?tab=metadata
     source_url: https://land.copernicus.eu/pan-european/corine-land-cover/clc2018
     source_version: v.2020_20u1
@@ -44,6 +45,7 @@ dtu10mdt:
     paper_ref: Andersen and Knudsen (2009)
     source_url: https://www.space.dtu.dk/english/research/scientific_data_and_models/global_mean_dynamic_topography
     source_version: '2010'
+    unit: m+EGM2008
   uri: dtu10mdt.tif
 dtu10mdt_egm96:
   data_type: RasterDataset
@@ -56,6 +58,7 @@ dtu10mdt_egm96:
     paper_ref: Andersen and Knudsen (2009)
     source_url: https://www.space.dtu.dk/english/research/scientific_data_and_models/global_mean_dynamic_topography
     source_version: '2010'
+    unit: m+EGM96
   uri: dtu10mdt_egm96.tif
 eobs:
   data_adapter:
@@ -104,6 +107,11 @@ era5:
   metadata:
     category: meteo
     crs: 4326
+    attrs:
+      precip:
+        unit: mm
+    history: Extracted from Copernicus Climate Data Store; resampled by Deltares to
+      daily frequency
     paper_doi: 10.1002/qj.3803
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
@@ -117,6 +125,8 @@ era5_daily_zarr:
   metadata:
     category: meteo
     crs: 4326
+    history: Extracted from Copernicus Climate Data Store; resampled by Deltares to
+      daily frequency
     paper_doi: 10.1002/qj.3803
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
@@ -138,6 +148,7 @@ era5_hourly:
   metadata:
     category: meteo
     crs: 4326
+    history: Extracted from Copernicus Climate Data Store
     paper_doi: 10.1002/qj.3803
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
@@ -151,6 +162,7 @@ era5_hourly_zarr:
   metadata:
     category: meteo
     crs: 4326
+    history: Extracted from Copernicus Climate Data Store
     paper_doi: 10.1002/qj.3803
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
@@ -167,6 +179,7 @@ era5_orography:
   metadata:
     category: meteo
     crs: 4326
+    history: Extracted from Copernicus Climate Data Store
     paper_doi: 10.1002/qj.3803
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
@@ -181,6 +194,7 @@ gadm_level1:
     category: geography
     crs: 4326
     notes: last downloaded 2020-10-19; license required for commercial use
+    source_author: gadm
     source_license: https://gadm.org/license.html
     source_url: https://gadm.org/download_world.html
     source_version: '1.0'
@@ -193,6 +207,7 @@ gadm_level2:
     category: geography
     crs: 4326
     notes: last downloaded 2020-10-19; license required for commercial use
+    source_author: gadm
     source_license: https://gadm.org/license.html
     source_url: https://gadm.org/download_world.html
     source_version: '1.0'
@@ -205,6 +220,7 @@ gadm_level3:
     category: geography
     crs: 4326
     notes: last downloaded 2020-10-19; license required for commercial use
+    source_author: gadm
     source_license: https://gadm.org/license.html
     source_url: https://gadm.org/download_world.html
     source_version: '1.0'
@@ -215,6 +231,7 @@ gcn250:
     name: rasterio
   metadata:
     category: soil
+    nodata: 255
     paper_doi: 10.1038/s41597-019-0155-x
     paper_ref: Jaafar et al. (2019)
     source_license: CC BY 4.0
@@ -228,6 +245,9 @@ gdp_world:
   metadata:
     category: socio economic
     crs: 4326
+    source_author: Wilfred Altena
+    source_info: data combined from World Bank (https://data.worldbank.org/indicator/NY.GDP.MKTP.CD)
+      and CIA World Factbook (https://www.cia.gov/the-world-factbook/field/real-gdp-per-capita/country-comparison)
     source_license: CC BY-4.0
     source_version: '1.0'
   uri: gdp_world.gpkg
@@ -243,6 +263,7 @@ gebco:
     source_license: https://www.gebco.net/data_and_products/gridded_bathymetry_data/#a1
     source_url: https://www.bodc.ac.uk/data/open_download/gebco/gebco_2020/geotiff/
     source_version: '2020'
+    unit: m+MSL
   uri: gebco.tif
 ghs-smod_2015_v2:
   data_type: RasterDataset
@@ -253,6 +274,7 @@ ghs-smod_2015_v2:
     crs: esri:54009
     paper_doi: 10.2905/42E8BE89-54FF-464E-BE7B-BF9E64DA5218
     paper_ref: Pesaresi et al (2019)
+    source_author: JRC-ISPRA EC
     source_license: https://data.jrc.ec.europa.eu/licence/com_reuse
     source_url: https://data.jrc.ec.europa.eu/dataset/42e8be89-54ff-464e-be7b-bf9e64da5218
     source_version: R2019A_v2.0
@@ -266,6 +288,7 @@ ghs_pop_2015:
     crs: 4326
     paper_doi: 10.2905/0C6B9751-A71F-4062-830B-43C9F432370F
     paper_ref: Schiavina et al (2019)
+    source_author: JRC-ISPRA EC
     source_license: https://data.jrc.ec.europa.eu/licence/com_reuse
     source_url: https://data.jrc.ec.europa.eu/dataset/0c6b9751-a71f-4062-830b-43c9f432370f
     source_version: R2019A_v1.0
@@ -290,6 +313,7 @@ ghs_smod_2015:
     category: socio economic
     crs: esri:54009
     paper_ref: Pesaresi and Freire (2016)
+    source_author: JRC-ISPRA EC
     source_license: https://data.jrc.ec.europa.eu/licence/com_reuse
     source_url: https://data.jrc.ec.europa.eu/dataset/jrc-ghsl-ghs_smod_pop_globe_r2016a
     source_version: R2016A_v1.0
@@ -315,6 +339,7 @@ glw_buffaloes:
     crs: 4326
     paper_doi: 10.7910/DVN/5U8MWI
     paper_ref: Gilbert at al (2018)
+    source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
     source_version: GLW 3, last downloaded 2020-06-11
@@ -328,6 +353,7 @@ glw_cattle:
     crs: 4326
     paper_doi: 10.7910/DVN/GIVQ75
     paper_ref: Gilbert at al (2018)
+    source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
     source_version: GLW 3, last downloaded 2020-06-11
@@ -341,6 +367,7 @@ glw_chicken:
     crs: 4326
     paper_doi: 10.7910/DVN/SUFASB
     paper_ref: Gilbert at al (2018)
+    source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
     source_version: GLW 3, last downloaded 2020-06-11
@@ -354,6 +381,7 @@ glw_ducks:
     crs: 4326
     paper_doi: 10.7910/DVN/ICHCBH
     paper_ref: Gilbert at al (2018)
+    source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
     source_version: GLW 3, last downloaded 2020-06-11
@@ -367,6 +395,7 @@ glw_goats:
     crs: 4326
     paper_doi: 10.7910/DVN/OCPH42
     paper_ref: Gilbert at al (2018)
+    source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
     source_version: GLW 3, last downloaded 2020-06-11
@@ -380,6 +409,7 @@ glw_horses:
     crs: 4326
     paper_doi: 10.7910/DVN/7Q52MV
     paper_ref: Gilbert at al (2018)
+    source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
     source_version: GLW 3, last downloaded 2020-06-11
@@ -393,6 +423,7 @@ glw_pigs:
     crs: 4326
     paper_doi: 10.7910/DVN/33N0JG
     paper_ref: Gilbert at al (2018)
+    source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
     source_version: GLW 3, last downloaded 2020-06-11
@@ -406,6 +437,7 @@ glw_sheep:
     crs: 4326
     paper_doi: 10.7910/DVN/BLWPZN
     paper_ref: Gilbert at al (2018)
+    source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
     source_version: GLW 3, last downloaded 2020-06-11
@@ -417,6 +449,7 @@ grdc:
   metadata:
     category: observed data
     crs: 4326
+    source_info: GRDC-Station Catalogue, last downloaded 2020-07-16
     source_license: https://www.bafg.de/GRDC/EN/02_srvcs/21_tmsrs/210_prtl/tou.html;jsessionid=A56D50D4A36D3D8707CBF00CBD71F106.live11291?nn=2862854
     source_url: https://portal.grdc.bafg.de/applications/public.html?publicuser=PublicUser#dataDownload/StationCatalogue
   uri: grdc.csv
@@ -457,6 +490,7 @@ grwl_mask:
         method: nearest
       tileindex: location
   metadata:
+    nodata: 0
     paper_doi: 10.1126/science.aat0636
     paper_ref: Allen and Pavelsky (2018)
     source_license: CC BY 4.0
@@ -469,6 +503,7 @@ gswo:
     name: rasterio
   metadata:
     category: surface water
+    nodata: 255
     paper_doi: 10.1038/nature20584
     paper_ref: Pekel et al. (2016)
     source_url: https://global-surface-water.appspot.com/download
@@ -509,6 +544,8 @@ hydro_lakes:
   metadata:
     category: surface water
     crs: 4326
+    source_author: Arjen Haag
+    source_info: HydroLAKES.v10_extract
     source_version: '1.0'
   uri: hydro_lakes.gpkg
 hydro_reservoirs:
@@ -525,6 +562,9 @@ hydro_reservoirs:
   metadata:
     category: surface water
     crs: 4326
+    nodata: -99
+    source_author: Alessia Matano
+    source_info: GRanD.v1.1_HydroLAKES.v10_JRC.2016
     source_version: '1.0'
   uri: hydro_reservoirs.gpkg
 koppen_geiger:
@@ -534,6 +574,7 @@ koppen_geiger:
   metadata:
     category: meteo
     crs: 4326
+    nodata: 0
     paper_doi: 10.1127/0941-2948/2006/0130
     paper_ref: Kottek et al. (2006)
     source_url: http://koeppen-geiger.vu-wien.ac.at/present.htm
@@ -550,6 +591,7 @@ mdt_cnes_cls18:
     paper_ref: Mulet et al (2021)
     source_url: https://www.aviso.altimetry.fr/en/data/products/auxiliary-products/mdt.html
     source_version: '18'
+    unit: m+GOCO05S
   uri: mdt_cnes_cls18.tif
 merit_hydro:
   data_type: RasterDataset
@@ -613,6 +655,8 @@ osm_coastlines:
   metadata:
     category: geography
     crs: 4326
+    source_author: OpenStreetMap
+    source_info: OpenStreetMap coastlines water polygons, last updated 2020-01-09T05:29
     source_license: ODbL
     source_url: https://osmdata.openstreetmap.de/data/coastlines.html
     source_version: '1.0'
@@ -624,6 +668,8 @@ osm_landareas:
   metadata:
     category: geography
     crs: 4326
+    source_author: OpenStreetMap
+    source_info: OpenStreetMap coastlines land polygons, last updated 2020-01-09T05:29
     source_license: ODbL
     source_url: https://osmdata.openstreetmap.de/data/coastlines.html
     source_version: '1.0'
@@ -637,6 +683,7 @@ rgi:
     crs: 4326
     paper_doi: 10.3189/2014JoG13J176
     paper_ref: Pfeffer et al. (2014)
+    source_info: Randolph Glacier Inventory
     source_license: CC BY 4.0
     source_url: https://cds.climate.copernicus.eu/cdsapp#!/dataset/insitu-glaciers-extent?tab=overview
     source_version: '6.0'
@@ -724,10 +771,12 @@ wb_countries:
   driver:
     name: pyogrio
   metadata:
+    author: World Bank
     category: socio-economic
     crs: 4326
     source_license: CC-BY 4.0
     source_url: https://datacatalog.worldbank.org/dataset/world-bank-official-boundaries
+    timestamp: February 2020
   uri: wb_countries.gpkg
 worldclim:
   data_type: RasterDataset

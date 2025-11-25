@@ -9,7 +9,8 @@ from typing import Callable, ClassVar, Optional
 import packaging.version
 import pooch
 
-from hydromt._utils import _is_valid_url, copy_to_local
+from hydromt._utils.caching import copy_to_local
+from hydromt._utils.uris import _is_valid_url
 from hydromt.config import SETTINGS
 
 logger = logging.getLogger(__name__)

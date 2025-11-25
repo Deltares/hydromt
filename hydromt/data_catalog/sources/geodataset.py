@@ -1,35 +1,33 @@
 """DataSource class for the GeoDataset type."""
 
-from logging import Logger, getLogger
+import logging
 from os.path import basename, splitext
-from typing import Any, ClassVar, Dict, List, Literal, Optional, Union, cast
+from pathlib import Path
+from typing import Any, ClassVar, List, Literal, Optional, Union
 
-import pandas as pd
 import xarray as xr
-from fsspec import filesystem
 from pydantic import Field
-from pyproj import CRS
 from pyproj.exceptions import CRSError
 from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 from pystac import MediaType
 
-from hydromt._typing import (
-    Bbox,
-    Geom,
-    StrPath,
-    TimeRange,
-    TotalBounds,
-)
-from hydromt._typing.type_def import GeomBuffer, Predicate
 from hydromt.data_catalog.adapters.geodataset import GeoDatasetAdapter
 from hydromt.data_catalog.drivers.geodataset.geodataset_driver import GeoDatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
 from hydromt.error import NoDataStrategy
 from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
+from hydromt.typing import (
+    Bbox,
+    Geom,
+    TimeRange,
+    TotalBounds,
+)
+from hydromt.typing.fsspec_types import FSSpecFileSystem
+from hydromt.typing.type_def import GeomBuffer, Predicate
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class GeoDatasetSource(DataSource):
@@ -61,23 +59,23 @@ class GeoDatasetSource(DataSource):
         self._log_start_read_data()
 
         # Transform time_range and variables to match the data source
-        tr = self.data_adapter._to_source_timerange(time_range)
+        src_time_range = self.data_adapter._to_source_timerange(time_range)
         vrs = self.data_adapter._to_source_variables(variables)
 
         uris: List[str] = self.uri_resolver.resolve(
             self.full_uri,
-            time_range=tr,
+            time_range=src_time_range,
             variables=vrs,
             metadata=self.metadata,
             handle_nodata=handle_nodata,
         )
 
-        ds: Optional[xr.Dataset] = self.driver.read(
+        ds: xr.Dataset = self.driver.read(
             uris,
-            time_range=tr,
-            variables=vrs,
-            metadata=self.metadata,
             handle_nodata=handle_nodata,
+            mask=mask,
+            predicate=predicate,
+            metadata=self.metadata,
         )
         return self.data_adapter.transform(
             ds,
@@ -92,19 +90,19 @@ class GeoDatasetSource(DataSource):
 
     def to_file(
         self,
-        file_path: StrPath,
+        file_path: Path | str,
         *,
-        driver_override: Optional[GeoDatasetDriver] = None,
-        bbox: Optional[Bbox] = None,
-        mask: Optional[Geom] = None,
+        driver_override: GeoDatasetDriver | None = None,
+        bbox: Bbox | None = None,
+        mask: Geom | None = None,
         buffer: GeomBuffer = 0,
         predicate: Predicate = "intersects",
-        variables: Optional[List[str]] = None,
-        time_range: Optional[TimeRange] = None,
+        variables: list[str] | None = None,
+        time_range: TimeRange | None = None,
         single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
-    ) -> Optional["GeoDatasetSource"]:
+        write_kwargs: dict[str, Any] | None = None,
+    ) -> "GeoDatasetSource | None":
         """
         Write the GeoDatasetSource to a local file.
 
@@ -112,19 +110,17 @@ class GeoDatasetSource(DataSource):
         """
         if driver_override is None and not self.driver.supports_writing:
             # default to fallback driver.
-            driver: GeoDatasetDriver = GeoDatasetDriver.model_validate(
-                self._fallback_driver_write
-            )
+            driver = GeoDatasetDriver.model_validate(self._fallback_driver_write)
         elif driver_override:
             if not driver_override.supports_writing:
                 raise RuntimeError(
                     f"driver: '{driver_override.name}' does not support writing data."
                 )
-            driver: GeoDatasetDriver = driver_override
+            driver = driver_override
         else:
             # use local filesystem
-            driver: GeoDatasetDriver = self.driver.model_copy(
-                update={"filesystem": filesystem("local")}
+            driver = self.driver.model_copy(
+                update={"filesystem": FSSpecFileSystem.create("local")}
             )
 
         if bbox is not None or (mask is not None and buffer > 0):
@@ -140,75 +136,21 @@ class GeoDatasetSource(DataSource):
         if ds is None:  # handle_nodata == ignore
             return None
 
-        dest_path: str = driver.write(
-            file_path,
-            ds,
-            **kwargs,
-        )
+        dest_path = driver.write(file_path, ds, write_kwargs=write_kwargs)
 
         # update driver based on local path
-        update: Dict[str, Any] = {"uri": dest_path, "root": None, "driver": driver}
+        update = {
+            "uri": dest_path.as_posix(),
+            "root": None,
+            "driver": driver,
+        }
 
         return self.model_copy(update=update)
 
-    def get_bbox(self, crs: Optional[CRS] = None, detect: bool = True) -> TotalBounds:
-        """Return the bounding box and espg code of the dataset.
-
-        if the bounding box is not set and detect is True,
-        :py:meth:`hydromt.GeoDatasetAdapter.detect_bbox` will be used to detect it.
-
-        Parameters
-        ----------
-        detect: bool, Optional
-            whether to detect the bounding box if it is not set. If False, and it's not
-            set None will be returned.
-
-        Returns
-        -------
-        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
-            the bounding box coordinates of the data. coordinates are returned as
-            [xmin,ymin,xmax,ymax]
-        crs: int
-            The ESPG code of the CRS of the coordinates returned in bbox
-        """
-        bbox = self.metadata.extent.get("bbox", None)
-        crs = cast(int, crs)
-        if bbox is None and detect:
-            bbox, crs = self.detect_bbox()
-
-        return bbox, crs
-
-    def get_time_range(
+    def _detect_bbox(
         self,
-        detect: bool = True,
-    ) -> TimeRange:
-        """Detect the time range of the dataset.
-
-        if the time range is not set and detect is True,
-        :py:meth:`hydromt.GeoDatasetAdapter.detect_time_range` will be used
-        to detect it.
-
-
-        Parameters
-        ----------
-        detect: bool, Optional
-            whether to detect the time range if it is not set. If False, and it's not
-            set None will be returned.
-
-        Returns
-        -------
-        range: Tuple[np.datetime64, np.datetime64]
-            A tuple containing the start and end of the time dimension. Range is
-            inclusive on both sides.
-        """
-        time_range = self.metadata.extent.get("time_range", None)
-        if time_range is None and detect:
-            time_range = self.detect_time_range()
-
-        return time_range
-
-    def detect_bbox(
-        self,
+        *,
+        strict: bool = False,
         ds: Optional[xr.Dataset] = None,
     ) -> TotalBounds:
         """Detect the bounding box and crs of the dataset.
@@ -241,10 +183,12 @@ class GeoDatasetSource(DataSource):
 
         return bounds, crs
 
-    def detect_time_range(
+    def _detect_time_range(
         self,
+        *,
+        strict: bool = False,
         ds: Optional[xr.Dataset] = None,
-    ) -> TimeRange:
+    ) -> TimeRange | None:
         """Detect the temporal range of the dataset.
 
         If no dataset is provided, it will be fetched accodring to the settings in the
@@ -259,15 +203,15 @@ class GeoDatasetSource(DataSource):
 
         Returns
         -------
-        range: Tuple[np.datetime64, np.datetime64]
-            A tuple containing the start and end of the time dimension. Range is
+        range: TimeRange
+            A TimeRange containing the start and end of the time dimension. Range is
             inclusive on both sides.
         """
         if ds is None:
             ds = self.read_data()
-        return (
-            ds[ds.vector.time_dim].min().values,
-            ds[ds.vector.time_dim].max().values,
+        return TimeRange(
+            start=ds[ds.vector.time_dim].min().values,
+            end=ds[ds.vector.time_dim].max().values,
         )
 
     def to_stac_catalog(
@@ -294,9 +238,7 @@ class GeoDatasetSource(DataSource):
         try:
             bbox, crs = self.get_bbox(detect=True)
             bbox = list(bbox)
-            start_dt, end_dt = self.get_time_range(detect=True)
-            start_dt = pd.to_datetime(start_dt)
-            end_dt = pd.to_datetime(end_dt)
+            time_range = self.get_time_range(detect=True)
             props = {**self.metadata.model_dump(exclude_none=True), "crs": crs}
             ext = splitext(self.uri)[-1]
             if ext in [".nc", ".vrt"]:
@@ -325,8 +267,8 @@ class GeoDatasetSource(DataSource):
             bbox=bbox,
             properties=props,
             datetime=None,
-            start_datetime=start_dt,
-            end_datetime=end_dt,
+            start_datetime=time_range.start,
+            end_datetime=time_range.end,
         )
         stac_asset = StacAsset(str(self.uri), media_type=media_type)
         base_name = basename(self.uri)

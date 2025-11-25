@@ -1,32 +1,29 @@
-===========
-URIResolver
-===========
-
 .. currentmodule:: hydromt.data_catalog.uri_resolvers
 
-General
--------
+.. _uri_resolver_api:
+
+==============
+URI Resolvers
+==============
+
+The Hydromt URI resolvers module provides mechanisms for resolving and interpreting
+dataset URIs, including convention-based and index-based resolution schemes.
+
+Base Classes
+------------
 
 .. autosummary::
    :toctree: ../_generated
+   :nosignatures:
 
    URIResolver
-   URIResolver.resolve
 
-ConventionResolver
-------------------
+Resolver Implementations
+------------------------
 
 .. autosummary::
    :toctree: ../_generated
+   :nosignatures:
 
    ConventionResolver
-   ConventionResolver.resolve
-
-RasterTindexResolver
---------------------
-
-.. autosummary::
-   :toctree: ../_generated
-
    RasterTindexResolver
-   RasterTindexResolver.resolve

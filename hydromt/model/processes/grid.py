@@ -1,6 +1,6 @@
 """Implementation for grid based workflows."""
 
-from logging import Logger, getLogger
+import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
@@ -11,7 +11,6 @@ from affine import Affine
 from pyproj import CRS, Transformer
 from shapely.geometry import Polygon
 
-from hydromt._typing.type_def import Number
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis import parse_crs, raster_utils
 from hydromt.model.processes.region import (
@@ -20,8 +19,9 @@ from hydromt.model.processes.region import (
     parse_region_geom,
     parse_region_grid,
 )
+from hydromt.typing.type_def import Number
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "create_grid_from_region",

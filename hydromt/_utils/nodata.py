@@ -4,7 +4,7 @@ import geopandas as gpd
 import pandas as pd
 import xarray as xr
 
-from hydromt._typing import SourceMetadata
+from hydromt.typing import SourceMetadata
 
 __all__ = ["_has_no_data", "_set_vector_nodata", "_set_raster_nodata"]
 

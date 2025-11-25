@@ -1,6 +1,6 @@
 """Mesh Component."""
 
-from logging import Logger, getLogger
+import logging
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union, cast
 
 import geopandas as gpd
@@ -10,10 +10,10 @@ from pyproj import CRS
 from shapely.geometry import box
 
 from hydromt.gis.raster import GEO_MAP_COORD
-from hydromt.io.readers import open_ncs
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step
+from hydromt.readers import open_ncs
 
 if TYPE_CHECKING:
     from hydromt.model import Model
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 __all__ = ["MeshComponent"]
 
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class MeshComponent(SpatialModelComponent):

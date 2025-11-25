@@ -8,6 +8,7 @@ from hydromt.data_catalog.drivers import __hydromt_eps__ as driver_eps
 from hydromt.data_catalog.predefined_catalog import __hydromt_eps__ as catalog_eps
 from hydromt.model.components import __hydromt_eps__ as component_eps
 from hydromt.model.components.grid import GridComponent
+from hydromt.model.example.example_model import ExampleModel
 from hydromt.model.model import Model
 
 
@@ -19,7 +20,10 @@ def test_core_component_plugins(PLUGINS):
 
 def test_core_model_plugins(PLUGINS):
     models = PLUGINS.model_plugins
-    assert models == {"model": Model}
+    assert models == {
+        "model": Model,
+        "example_model": ExampleModel,
+    }
 
 
 def test_core_driver_plugins(PLUGINS):

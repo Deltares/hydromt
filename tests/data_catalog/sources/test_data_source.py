@@ -14,18 +14,19 @@ from hydromt.error import NoDataException
 class TestDataSource:
     def test_summary(
         self,
-        mock_geodf_driver: GeoDataFrameDriver,
-        mock_geodataframe_adapter: GeoDataFrameAdapter,
+        MockGeoDataFrameDriver: type[GeoDataFrameDriver],
+        mock_gdf_adapter: GeoDataFrameAdapter,
         mock_resolver: URIResolver,
         root: str,
     ):
+        driver = MockGeoDataFrameDriver()
         submodel: DataSource = GeoDataFrameSource.model_validate(
             {
                 "root": root,
                 "name": "geojsonfile",
                 "data_type": "GeoDataFrame",
-                "driver": mock_geodf_driver,
-                "data_adapter": mock_geodataframe_adapter,
+                "driver": driver,
+                "data_adapter": mock_gdf_adapter,
                 "uri_resolver": mock_resolver,
                 "uri": "test_uri",
                 "metadata": {"url": "www.example.com"},
@@ -34,14 +35,14 @@ class TestDataSource:
         summ: Dict[str, Any] = submodel.summary()
         assert summ["data_type"] == "GeoDataFrame"
         assert summ["uri"] == "test_uri"
-        assert summ["driver"] == "MockGeoDataFrameDriver"
+        assert summ["driver"] == driver.__repr_name__()
         assert summ["url"] == "www.example.com"
 
     def test_copies_fs(
         self,
-        mock_geodf_driver: GeoDataFrameDriver,
+        MockGeoDataFrameDriver: type[GeoDataFrameDriver],
         mock_resolver: URIResolver,
-        mock_geodataframe_adapter: GeoDataFrameAdapter,
+        mock_gdf_adapter: GeoDataFrameAdapter,
         root: str,
     ):
         GeoDataFrameSource.model_validate(
@@ -49,8 +50,8 @@ class TestDataSource:
                 "root": root,
                 "name": "geojsonfile",
                 "data_type": "GeoDataFrame",
-                "driver": mock_geodf_driver,
-                "data_adapter": mock_geodataframe_adapter,
+                "driver": MockGeoDataFrameDriver(),
+                "data_adapter": mock_gdf_adapter,
                 "uri_resolver": mock_resolver,
                 "uri": "test_uri",
                 "metadata": {"url": "www.example.com"},
@@ -59,8 +60,8 @@ class TestDataSource:
 
     def test_serializes_data_type(
         self,
-        mock_geodf_driver: GeoDataFrameDriver,
-        mock_geodataframe_adapter: GeoDataFrameAdapter,
+        MockGeoDataFrameDriver: type[GeoDataFrameDriver],
+        mock_gdf_adapter: GeoDataFrameAdapter,
         mock_resolver: URIResolver,
         root: str,
     ):
@@ -69,8 +70,8 @@ class TestDataSource:
                 "root": root,
                 "name": "geojsonfile",
                 "data_type": "GeoDataFrame",
-                "driver": mock_geodf_driver,
-                "data_adapter": mock_geodataframe_adapter,
+                "driver": MockGeoDataFrameDriver(),
+                "data_adapter": mock_gdf_adapter,
                 "uri_resolver": mock_resolver,
                 "uri": "test_uri",
                 "metadata": {"url": "www.example.com"},
@@ -80,8 +81,8 @@ class TestDataSource:
 
     def test_read_no_file_found(
         self,
-        mock_geodf_driver,
-        mock_geodataframe_adapter,
+        MockGeoDataFrameDriver,
+        mock_gdf_adapter,
     ):
         class MockRaisingResolver(URIResolver):
             name = "raises"
@@ -91,8 +92,8 @@ class TestDataSource:
 
         source = GeoDataFrameSource(
             name="raises",
-            data_adapter=mock_geodataframe_adapter,
-            driver=mock_geodf_driver,
+            data_adapter=mock_gdf_adapter,
+            driver=MockGeoDataFrameDriver(),
             uri_resolver=MockRaisingResolver(),
             uri="myfile",
         )

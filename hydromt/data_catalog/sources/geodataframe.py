@@ -1,33 +1,32 @@
 """DataSource class for the GeoDataFrame type."""
 
+import logging
 from datetime import datetime
-from logging import Logger, getLogger
 from os.path import basename, splitext
-from typing import Any, ClassVar, Dict, List, Literal, Optional
+from pathlib import Path
+from typing import Any, ClassVar, List, Literal, Optional
 
 import geopandas as gpd
-from fsspec import filesystem
 from pydantic import Field
-from pyproj import CRS
 from pyproj.exceptions import CRSError
 from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 from pystac import MediaType
 
-from hydromt._typing import (
-    Bbox,
-    Geom,
-    StrPath,
-    TotalBounds,
-)
 from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog.drivers import GeoDataFrameDriver
 from hydromt.data_catalog.sources.data_source import DataSource
 from hydromt.error import NoDataStrategy
 from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
+from hydromt.typing import (
+    Bbox,
+    Geom,
+    TotalBounds,
+)
+from hydromt.typing.fsspec_types import FSSpecFileSystem
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class GeoDataFrameSource(DataSource):
@@ -72,11 +71,10 @@ class GeoDataFrameSource(DataSource):
 
         gdf: gpd.GeoDataFrame = self.driver.read(
             uris,
-            mask=mask,
-            predicate=predicate,
-            variables=vrs,
-            metadata=self.metadata,
             handle_nodata=handle_nodata,
+            metadata=self.metadata,
+            mask=mask,
+            variables=vrs,
         )
         return self.data_adapter.transform(
             gdf,
@@ -89,17 +87,17 @@ class GeoDataFrameSource(DataSource):
 
     def to_file(
         self,
-        file_path: StrPath,
+        file_path: Path | str,
         *,
-        driver_override: Optional[GeoDataFrameDriver] = None,
-        bbox: Optional[Bbox] = None,
-        mask: Optional[Geom] = None,
+        driver_override: GeoDataFrameDriver | None = None,
+        bbox: Bbox | None = None,
+        mask: Geom | None = None,
         buffer: float = 0.0,
-        variables: Optional[List[str]] = None,
+        variables: list[str] | None = None,
         predicate: str = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
-    ) -> "GeoDataFrameSource":
+        write_kwargs: dict[str, Any] | None = None,
+    ) -> "GeoDataFrameSource | None":
         """
         Write the GeoDataFrameSource to a local file.
 
@@ -107,19 +105,17 @@ class GeoDataFrameSource(DataSource):
         """
         if driver_override is None and not self.driver.supports_writing:
             # default to fallback driver
-            driver: GeoDataFrameDriver = GeoDataFrameDriver.model_validate(
-                self._fallback_driver_write
-            )
+            driver = GeoDataFrameDriver.model_validate(self._fallback_driver_write)
         elif driver_override:
             if not driver_override.supports_writing:
                 raise RuntimeError(
                     f"driver: '{driver_override.name}' does not support writing data."
                 )
-            driver: GeoDataFrameDriver = driver_override
+            driver = driver_override
         else:
             # use local filesystem
-            driver: GeoDataFrameDriver = self.driver.model_copy(
-                update={"filesystem": filesystem("local")}
+            driver = self.driver.model_copy(
+                update={"filesystem": FSSpecFileSystem.create("local")}
             )
 
         gdf: Optional[gpd.GeoDataFrame] = self.read_data(
@@ -133,45 +129,21 @@ class GeoDataFrameSource(DataSource):
         if gdf is None:  # handle_nodata == ignore
             return None
 
-        dest_path: str = driver.write(
-            file_path,
-            gdf,
-            **kwargs,
-        )
+        dest_path = driver.write(file_path, gdf, write_kwargs=write_kwargs)
 
         # update source and its driver based on local path
-        update: Dict[str, Any] = {"uri": dest_path, "root": None, "driver": driver}
+        update = {
+            "uri": dest_path.as_posix(),
+            "root": None,
+            "driver": driver,
+        }
 
         return self.model_copy(update=update)
 
-    def get_bbox(self, crs: Optional[CRS] = None, detect: bool = True) -> TotalBounds:
-        """Return the bounding box and espg code of the dataset.
-
-        if the bounding box is not set and detect is True,
-        :py:meth:`hydromt.GeoDataframeAdapter.detect_bbox` will be used to detect it.
-
-        Parameters
-        ----------
-        detect: bool, Optional
-            whether to detect the bounding box if it is not set. If False, and it's not
-            set None will be returned.
-
-        Returns
-        -------
-        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
-            the bounding box coordinates of the data. coordinates are returned as
-            [xmin,ymin,xmax,ymax]
-        crs: int
-            The ESPG code of the CRS of the coordinates returned in bbox
-        """
-        bbox = self.metadata.extent.get("bbox", None)
-        if bbox is None and detect:
-            bbox, crs = self.detect_bbox()
-
-        return bbox, crs
-
-    def detect_bbox(
+    def _detect_bbox(
         self,
+        *,
+        strict: bool = False,
         gdf: Optional[gpd.GeoDataFrame] = None,
     ) -> TotalBounds:
         """Detect the bounding box and crs of the dataset.

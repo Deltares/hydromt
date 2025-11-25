@@ -24,7 +24,6 @@ from shapely import box
 from yaml import dump
 
 from hydromt._compat import HAS_GCSFS, HAS_GDAL, HAS_OPENPYXL, HAS_S3FS
-from hydromt._typing import Bbox, TimeRange
 from hydromt.config import Settings
 from hydromt.data_catalog.adapters import (
     GeoDataFrameAdapter,
@@ -46,7 +45,8 @@ from hydromt.data_catalog.sources import (
 from hydromt.data_catalog.sources.dataframe import DataFrameSource
 from hydromt.error import NoDataException, NoDataStrategy
 from hydromt.gis.gis_utils import _to_geographic_bbox
-from hydromt.io.writers import write_xy
+from hydromt.typing import Bbox, TimeRange
+from hydromt.writers import write_xy
 from tests.conftest import DATA_DIR, TEST_DATA_DIR
 
 _CATALOG_DIR = join(DATA_DIR, "catalogs")
@@ -291,11 +291,11 @@ def test_catalog_entry_merged_correct_version_provider(merged_aws_worldcover):
     # make sure we can read merged catalogs
     assert len(merged_catalog) == 3
     source_aws = merged_catalog.get_source("esa_worldcover")  # last variant is default
-    assert source_aws.driver.filesystem.protocol[0] == "s3"
+    assert source_aws.driver.filesystem.protocol == "s3"
     assert merged_catalog.get_source("esa_worldcover", provider="aws") == source_aws
     source_loc = merged_catalog.get_source("esa_worldcover", provider="local")
     assert source_loc != source_aws
-    assert source_loc.driver.filesystem.protocol[0] == "file"
+    assert source_loc.driver.filesystem.protocol == "file"
     assert source_loc.version == "2021"  # get newest version
     # test get_source with version only
     assert merged_catalog.get_source("esa_worldcover", version="2021") == source_loc
@@ -320,7 +320,7 @@ def test_catalog_entry_merging(aws_worldcover, legacy_aws_worldcover):
     aws_and_legacy_catalog = DataCatalog(data_libs=[legacy_yml_path, aws_yml_path])
     assert len(aws_and_legacy_catalog) == 2
     source_aws = aws_and_legacy_catalog.get_source("esa_worldcover")
-    assert source_aws.driver.filesystem.protocol[0] == "s3"
+    assert source_aws.driver.filesystem.protocol == "s3"
     source_aws2 = aws_and_legacy_catalog.get_source("esa_worldcover", provider="aws")
     assert source_aws2 == source_aws
     source_loc = aws_and_legacy_catalog.get_source(
@@ -345,7 +345,7 @@ def test_catalog_entry_merging_round_trip(aws_worldcover, legacy_aws_worldcover)
 def test_versioned_catalogs_no_version(data_catalog):
     data_catalog._sources = {}  # reset
     data_catalog.from_predefined_catalogs("deltares_data")
-    assert len(data_catalog.sources) > 0
+    assert len(data_catalog) > 0
 
 
 def test_version_catalogs_errors_on_unknown_version(data_catalog):
@@ -355,9 +355,12 @@ def test_version_catalogs_errors_on_unknown_version(data_catalog):
 
 def test_data_catalog_lazy_loading():
     data_catalog = DataCatalog()
-    assert len(data_catalog._sources) == 0
-    # global data sources from artifacts are automatically added
-    assert len(data_catalog.sources) > 0
+
+    assert len(data_catalog) == 0
+
+    # global data sources from fallback_lib are automatically added
+    _ = data_catalog.sources  # trigger loading
+    assert len(data_catalog) > 0
 
 
 def test_data_catalog_contains_source_version_permissive(data_catalog):
@@ -442,7 +445,7 @@ def export_test_slice_objects(
     tmp_path: Path, data_catalog: DataCatalog
 ) -> Tuple[DataCatalog, Bbox, TimeRange, List[str], Path]:
     bbox = [12.0, 46.0, 13.0, 46.5]  # Piava river
-    time_range = ("2010-02-10", "2010-02-15")
+    time_range = TimeRange(start="2010-02-10", end="2010-02-15")
     data_lib_path = tmp_path / "data_catalog.yml"
     source_names = [
         "era5[precip,temp]",
@@ -569,7 +572,7 @@ def test_export_dataframe(tmp_path: Path, df, df_time):
     data_catalog_reread_path = tmp_path / "newdir_filter"
     data_catalog.export_data(
         str(data_catalog_reread_path),
-        time_range=("2010-02-01", "2010-02-14"),
+        time_range=TimeRange(start="2010-02-01", end="2010-02-14"),
         bbox=[11.70, 45.35, 12.95, 46.70],
         handle_nodata=NoDataStrategy.IGNORE,
     )
@@ -685,9 +688,7 @@ class TestGetRasterDataset:
         name = "chirps_global"
         source = cast(RasterDatasetSource, data_catalog.get_source(name))
         bbox, _ = source.get_bbox()
-        start_dt, end_dt = source.get_time_range(detect=True)
-        start_dt = pd.to_datetime(start_dt)
-        end_dt = pd.to_datetime(end_dt)
+        time_range = source.get_time_range(detect=True)
         raster_stac_catalog = StacCatalog(id=name, description=name)
         raster_stac_item = StacItem(
             name,
@@ -695,8 +696,8 @@ class TestGetRasterDataset:
             bbox=list(bbox),
             properties=source.metadata.model_dump(exclude_none=True),
             datetime=None,
-            start_datetime=start_dt,
-            end_datetime=end_dt,
+            start_datetime=time_range.start,
+            end_datetime=time_range.end,
         )
         raster_stac_asset = StacAsset(str(source.uri))
         raster_base_name = basename(source.uri)
@@ -867,9 +868,11 @@ class TestGetRasterDataset:
         data = r"s3://copernicus-dem-30m/Copernicus_DSM_COG_10_N29_00_E105_00_DEM/Copernicus_DSM_COG_10_N29_00_E105_00_DEM.tif"
         da = data_catalog.get_rasterdataset(
             data,
-            driver={
-                "name": "rasterio",
-                "filesystem": {"protocol": "s3", "anon": "true"},
+            source_kwargs={
+                "driver": {
+                    "name": "rasterio",
+                    "filesystem": {"protocol": "s3", "anon": "true"},
+                },
             },
         )
 
@@ -879,7 +882,11 @@ class TestGetRasterDataset:
     @pytest.mark.skipif(not HAS_S3FS, reason="S3FS not installed.")
     def test_aws_worldcover(self, test_settings: Settings):
         catalog_fn = join(_CATALOG_DIR, "aws_data", "v1.0.0", "data_catalog.yml")
-        data_catalog = DataCatalog(data_libs=[catalog_fn], cache=True)
+        data_catalog = DataCatalog(
+            data_libs=[catalog_fn],
+            cache=True,
+            cache_dir=test_settings.cache_root.as_posix(),
+        )
         da = data_catalog.get_rasterdataset(
             "esa_worldcover_2020_v100",
             bbox=[12.0, 46.0, 12.5, 46.50],
@@ -916,7 +923,7 @@ class TestGetRasterDataset:
         ds = data_catalog.get_rasterdataset(
             "cmip6_NOAA-GFDL/GFDL-ESM4_historical_r1i1p1f1_Amon",
             variables=["precip", "temp"],
-            time_range=("1990-01-01", "1990-03-01"),
+            time_range=TimeRange(start="1990-01-01", end="1990-03-01"),
         )
         # Check reading and some preprocess
         assert "precip" in ds
@@ -992,7 +999,7 @@ class TestGetGeoDataFrame:
             uri_geojson,
             bbox=geodf.total_bounds,
             buffer=1000,
-            data_adapter={"rename": {"test": "test1"}},
+            source_kwargs={"data_adapter": {"rename": {"test": "test1"}}},
         )
         assert np.all(gdf == geodf)
 
@@ -1004,7 +1011,7 @@ class TestGetGeoDataFrame:
             uri_shp,
             bbox=geodf.total_bounds,
             buffer=1000,
-            data_adapter={"rename": {"test": "test1"}},
+            source_kwargs={"data_adapter": {"rename": {"test": "test1"}}},
         )
         assert np.all(gdf == geodf)
 
@@ -1093,18 +1100,18 @@ def test_get_geodataframe_path(data_catalog):
 def test_get_geodataframe_geodataframe_table_driver(data_catalog):
     uri = data_catalog.get_source("grdc").uri
     p = Path(data_catalog.root) / uri
-    gdf = data_catalog.get_geodataframe(p, metadata={"crs": 4326})
+    gdf = data_catalog.get_geodataframe(p, source_kwargs={"metadata": {"crs": 4326}})
     assert isinstance(gdf, gpd.GeoDataFrame)
-    assert "grdc.csv" in data_catalog.sources
+    assert data_catalog.contains_source("grdc.csv")
     grdc_source = data_catalog.get_source("grdc.csv")
     assert grdc_source.driver.name == "geodataframe_table"
 
     # Should get the same results when supplying driver argument
     data_catalog.sources.pop("grdc.csv")
     gdf = data_catalog.get_geodataframe(
-        p, metadata={"crs": 4326}, driver="geodataframe_table"
+        p, source_kwargs={"metadata": {"crs": 4326}, "driver": "geodataframe_table"}
     )
-    assert "grdc.csv" in data_catalog.sources
+    assert data_catalog.contains_source("grdc.csv")
     grdc_source = data_catalog.get_source("grdc.csv")
     assert grdc_source.driver.name == "geodataframe_table"
 
@@ -1178,7 +1185,12 @@ class TestGetGeoDataset:
     ):
         da: Union[xr.DataArray, xr.Dataset, None] = data_catalog.get_geodataset(
             geojson_dataset,
-            driver={"name": "geodataset_vector", "options": {"data_path": csv_dataset}},
+            source_kwargs={
+                "driver": {
+                    "name": "geodataset_vector",
+                    "options": {"data_path": csv_dataset},
+                }
+            },
         )
         assert isinstance(da, xr.DataArray), type(da)
         da = da.sortby("index")
@@ -1192,7 +1204,7 @@ class TestGetGeoDataset:
             nc_dataset,
             variables=["test1"],
             bbox=geoda.vector.bounds,
-            driver="geodataset_xarray",
+            source_kwargs={"driver": "geodataset_xarray"},
         )
         assert isinstance(da, xr.DataArray)
         da = da.sortby("index")
@@ -1204,7 +1216,9 @@ class TestGetGeoDataset:
         self, nc_dataset: str, data_catalog: DataCatalog
     ):
         ds: Union[xr.DataArray, xr.Dataset, None] = data_catalog.get_geodataset(
-            nc_dataset, single_var_as_array=False, driver="geodataset_xarray"
+            nc_dataset,
+            single_var_as_array=False,
+            source_kwargs={"driver": "geodataset_xarray"},
         )
         assert isinstance(ds, xr.Dataset)
         assert "test" in ds
@@ -1220,11 +1234,13 @@ class TestGetGeoDataset:
     ):
         da: Union[xr.DataArray, xr.Dataset, None] = data_catalog.get_geodataset(
             xy_dataset,
-            driver={
-                "name": "geodataset_vector",
-                "options": {"data_path": csv_dataset},
+            source_kwargs={
+                "driver": {
+                    "name": "geodataset_vector",
+                    "options": {"data_path": csv_dataset},
+                },
+                "metadata": {"crs": 4326},
             },
-            metadata={"crs": geodf.crs},
         )
         assert isinstance(da, xr.DataArray)
         da = da.sortby("index")
@@ -1241,7 +1257,7 @@ class TestGetGeoDataset:
         da: Optional[xr.DataArray] = data_catalog.get_geodataset(
             nc_dataset,
             # only really care that the bbox doesn't intersect with anythign
-            driver="geodataset_xarray",
+            source_kwargs={"driver": "geodataset_xarray"},
             bbox=[12.5, 12.6, 12.7, 12.8],
             handle_nodata=NoDataStrategy.IGNORE,
         )
@@ -1252,7 +1268,7 @@ class TestGetGeoDataset:
         with pytest.raises(NoDataException):
             data_catalog.get_geodataset(
                 nc_dataset,
-                driver="geodataset_xarray",
+                source_kwargs={"driver": "geodataset_xarray"},
                 # only really care that the bbox doesn't intersect with anythign
                 bbox=(12.5, 12.6, 12.7, 12.8),
                 handle_nodata=NoDataStrategy.RAISE,
@@ -1294,9 +1310,7 @@ class TestGetGeoDataset:
         name = "gtsmv3_eu_era5"
         source = cast(GeoDatasetSource, data_catalog.get_source(name))
         bbox, _ = source.get_bbox()
-        start_dt, end_dt = source.get_time_range(detect=True)
-        start_dt = pd.to_datetime(start_dt)
-        end_dt = pd.to_datetime(end_dt)
+        time_range = source.get_time_range(detect=True)
         gds_stac_catalog = StacCatalog(id=name, description=name)
         gds_stac_item = StacItem(
             name,
@@ -1304,8 +1318,8 @@ class TestGetGeoDataset:
             bbox=list(bbox),
             properties=source.metadata.model_dump(exclude_none=True),
             datetime=None,
-            start_datetime=start_dt,
-            end_datetime=end_dt,
+            start_datetime=time_range.start,
+            end_datetime=time_range.end,
         )
         gds_stac_asset = StacAsset(str(source.uri))
         gds_base_name = basename(source.uri)
@@ -1336,13 +1350,16 @@ def test_get_geodataset_bbox_time_range(data_catalog: DataCatalog):
     p = Path(data_catalog.root) / uri
 
     # vector dataset using three different ways
-    da = data_catalog.get_geodataset(p, driver="geodataset_xarray")
+    da = data_catalog.get_geodataset(
+        p,
+        source_kwargs={"driver": "geodataset_xarray"},
+    )
     bbox = [12.22412, 45.25635, 12.25342, 45.271]
     da = data_catalog.get_geodataset(
         da,
         bbox=bbox,
-        time_range=("2010-02-01", "2010-02-05"),
-        driver="geodataset_xarray",
+        time_range=TimeRange(start="2010-02-01", end="2010-02-05"),
+        source_kwargs={"driver": "geodataset_xarray"},
     )
     assert da.vector.index.size == 2
     assert da.time.size == 4 * 24 * 6 + 1  # 4 days, 24 hours, data point per 10 minutes
@@ -1368,9 +1385,9 @@ def test_get_geodataset_unknown_keys(data_catalog):
 def test_get_dataset(timeseries_df: pd.DataFrame, data_catalog: DataCatalog):
     test_dataset: xr.Dataset = timeseries_df.to_xarray()
     subset_timeseries = timeseries_df.iloc[[0, len(timeseries_df) // 2]]
-    time_range = (
-        subset_timeseries.index[0].to_pydatetime(),
-        subset_timeseries.index[1].to_pydatetime(),
+    time_range = TimeRange(
+        start=subset_timeseries.index[0].to_pydatetime(),
+        end=subset_timeseries.index[1].to_pydatetime(),
     )
     ds = data_catalog.get_dataset(test_dataset, time_range=time_range)
     assert isinstance(ds, xr.Dataset)
@@ -1411,7 +1428,8 @@ class TestGetDataFrame:
 
     def test_reads_csv(self, df: pd.DataFrame, uri_csv: str, data_catalog: DataCatalog):
         df1 = data_catalog.get_dataframe(
-            uri_csv, driver={"name": "pandas", "options": {"index_col": 0}}
+            uri_csv,
+            source_kwargs={"driver": {"name": "pandas", "options": {"index_col": 0}}},
         )
         assert isinstance(df1, pd.DataFrame)
         pd.testing.assert_frame_equal(df, df1)
@@ -1425,7 +1443,10 @@ class TestGetDataFrame:
 
     def test_reads_fwf(self, df: pd.DataFrame, uri_fwf: str, data_catalog: DataCatalog):
         df1 = data_catalog.get_dataframe(
-            uri_fwf, driver={"name": "pandas", "options": {"colspecs": "infer"}}
+            uri_fwf,
+            source_kwargs={
+                "driver": {"name": "pandas", "options": {"colspecs": "infer"}}
+            },
         )
         assert isinstance(df1, pd.DataFrame)
         pd.testing.assert_frame_equal(df1, df)
@@ -1435,7 +1456,8 @@ class TestGetDataFrame:
         self, df: pd.DataFrame, uri_xlsx: str, data_catalog: DataCatalog
     ):
         df1 = data_catalog.get_dataframe(
-            uri_xlsx, driver={"name": "pandas", "options": {"index_col": 0}}
+            uri_xlsx,
+            source_kwargs={"driver": {"name": "pandas", "options": {"index_col": 0}}},
         )
         assert isinstance(df1, pd.DataFrame)
         pd.testing.assert_frame_equal(df1, df.set_index("id"))
@@ -1477,7 +1499,12 @@ class TestGetDataFrame:
     ):
         dfts = data_catalog.get_dataframe(
             csv_uri_time,
-            driver={"name": "pandas", "options": {"index_col": 0, "parse_dates": True}},
+            source_kwargs={
+                "driver": {
+                    "name": "pandas",
+                    "options": {"index_col": 0, "parse_dates": True},
+                }
+            },
         )
         assert isinstance(dfts, pd.DataFrame)
         assert np.all(
@@ -1493,8 +1520,13 @@ class TestGetDataFrame:
         }
         dfts = data_catalog.get_dataframe(
             csv_uri_time,
-            driver={"name": "pandas", "options": {"index_col": 0, "parse_dates": True}},
-            data_adapter={"rename": rename},
+            source_kwargs={
+                "driver": {
+                    "name": "pandas",
+                    "options": {"index_col": 0, "parse_dates": True},
+                },
+                "data_adapter": {"rename": rename},
+            },
         )
         assert np.all(list(dfts.columns) == list(rename.values()))
 
@@ -1513,8 +1545,13 @@ class TestGetDataFrame:
         }
         dfts = data_catalog.get_dataframe(
             csv_uri_time,
-            driver={"name": "pandas", "options": {"index_col": 0, "parse_dates": True}},
-            data_adapter={"unit_mult": unit_mult, "unit_add": unit_add},
+            source_kwargs={
+                "driver": {
+                    "name": "pandas",
+                    "options": {"index_col": 0, "parse_dates": True},
+                },
+                "data_adapter": {"unit_mult": unit_mult, "unit_add": unit_add},
+            },
         )
         # Do checks
         for var in df_time.columns:
@@ -1523,8 +1560,13 @@ class TestGetDataFrame:
     def test_time_slice(self, csv_uri_time: str, data_catalog: DataCatalog):
         dfts = data_catalog.get_dataframe(
             csv_uri_time,
-            time_range=("2007-01-02", "2007-01-04"),
-            driver={"name": "pandas", "options": {"index_col": 0, "parse_dates": True}},
+            time_range=TimeRange(start="2007-01-02", end="2007-01-04"),
+            source_kwargs={
+                "driver": {
+                    "name": "pandas",
+                    "options": {"index_col": 0, "parse_dates": True},
+                }
+            },
         )
         assert dfts.shape[0] == 3
 
@@ -1534,9 +1576,11 @@ class TestGetDataFrame:
         dfts = data_catalog.get_dataframe(
             csv_uri_time,
             variables=vars_slice,
-            driver={
-                "name": "pandas",
-                "options": {"parse_dates": True, "index_col": 0},
+            source_kwargs={
+                "driver": {
+                    "name": "pandas",
+                    "options": {"parse_dates": True, "index_col": 0},
+                },
             },
         )
         assert np.all(dfts.columns == vars_slice)
@@ -1606,7 +1650,7 @@ def test_detect_extent_rasterdataset(data_catalog):
     # raster dataset
     name = "chirps_global"
     bbox = 11.60, 45.20, 13.00, 46.80
-    expected_temporal_range = tuple(pd.to_datetime(["2010-02-02", "2010-02-15"]))
+    expected_temporal_range = TimeRange(start="2010-02-02", end="2010-02-15")
     ds = cast(RasterDatasetAdapter, data_catalog.get_source(name))
     detected_spatial_range = _to_geographic_bbox(*ds.get_bbox(detect=True))
     detected_temporal_range = ds.get_time_range(detect=True)
@@ -1627,9 +1671,9 @@ def test_detect_extent_geodataframe(data_catalog):
 def test_detect_extent_geodataset(data_catalog):
     name = "gtsmv3_eu_era5"
     bbox = (12.22412, 45.22705, 12.99316, 45.62256)
-    expected_temporal_range = (
-        np.datetime64("2010-02-01"),
-        np.datetime64("2010-02-14T23:50:00.000000000"),
+    expected_temporal_range = TimeRange(
+        start=pd.to_datetime("2010-02-01"),
+        end=pd.to_datetime("2010-02-14T23:50:00.000000000"),
     )
     ds = cast(GeoDatasetAdapter, data_catalog.get_source(name))
     detected_spatial_range = _to_geographic_bbox(*ds.get_bbox(detect=True))
@@ -1638,9 +1682,16 @@ def test_detect_extent_geodataset(data_catalog):
     assert detected_temporal_range == expected_temporal_range
 
 
-def test_to_stac_raster_dataset(tmp_path: Path, data_catalog):
-    data_catalog._sources = {}
-    _ = data_catalog.get_rasterdataset("chirps_global")
+def test_to_stac_raster_dataset(tmp_path: Path):
+    data_catalog = DataCatalog()
+    _ = data_catalog.sources  # load artifact data
+
+    _ = data_catalog.get_rasterdataset(  # mark as used
+        "chirps_global",
+        source_kwargs={
+            "metadata": {"crs": 4326},
+        },
+    )
 
     sources = [
         "chirps_global",
@@ -1680,3 +1731,24 @@ def test_yml_from_uri_path():
     yml = _yml_from_uri_or_path(uri)
     assert isinstance(yml, dict)
     assert len(yml) > 0
+
+
+def test_get_rasterdataset_with_unit_add(data_catalog: DataCatalog):
+    region = gpd.GeoDataFrame(
+        [],
+        geometry=[box(12.008333333333351, 46.341666666666661, 12.325, 46.675)],
+        crs="EPSG:4326",
+    )
+
+    ds = data_catalog.get_rasterdataset(
+        "era5",
+        geom=region,
+        buffer=1,
+        time_range=("2010-02-01T00:00:00", "2010-02-10T00:00:00"),
+        variables=["temp", "press_msl", "kin", "kout"],
+        single_var_as_array=False,
+    )
+
+    # assert that the ds goes from 2010-02-02 to 2010-02-10, because of unit_add time (+1 day) in the data catalog
+    assert ds["time"].values[0] == np.datetime64("2010-02-02T00:00:00")
+    assert ds["time"].values[-1] == np.datetime64("2010-02-10T00:00:00")

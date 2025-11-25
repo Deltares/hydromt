@@ -1,23 +1,36 @@
 """Driver for reading in GeoDataFrames from tabular formats."""
 
-from copy import deepcopy
-from logging import Logger, getLogger
-from typing import ClassVar, List, Optional
+import logging
+from pathlib import Path
+from typing import Any, ClassVar
 
 import geopandas as gpd
+from pydantic import Field
 
-from hydromt._typing.metadata import SourceMetadata
+from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
+from hydromt.data_catalog.drivers.base_driver import (
+    DRIVER_OPTIONS_DESCRIPTION,
+    DriverOptions,
+)
 from hydromt.data_catalog.drivers.geodataframe.geodataframe_driver import (
     GeoDataFrameDriver,
 )
 from hydromt.error import NoDataStrategy, exec_nodata_strat
-from hydromt.io.readers import open_vector_from_table
+from hydromt.readers import open_vector_from_table
+from hydromt.typing.metadata import SourceMetadata
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 # possible labels for the x and y dimensions
 X_DIM_LABELS = ("x", "longitude", "lon", "long")
 Y_DIM_LABELS = ("y", "latitude", "lat")
+
+
+class GeoDataFrameTableOptions(DriverOptions):
+    """Options for the GeoDataFrameTableDriver."""
+
+    x_dim: str | None = None
+    y_dim: str | None = None
 
 
 class GeoDataFrameTableDriver(GeoDataFrameDriver):
@@ -27,29 +40,63 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
     Supports reading point geometries from csv, excel (xls, xlsx), and parquet files
     using a combination of the pandas and geopandas libraries.
 
-    Driver **options** include:
-
-    * x_dim: Optional[str], name of the column containing the x coordinate. Not needed
-      if one of the default names is used ('x', 'longitude', 'lon', 'long').
-    * y_dim: Optional[str], name of the column containing the y coordinate. Not needed
-      if one of the default names is used ('y', 'latitude', 'lat').
-    * Any other option supported by the underlying pandas read functions,
-      e.g. `pd.read_csv`, `pd.read_excel`, `pd.read_parquet`.
-
     """
 
     name: ClassVar[str] = "geodataframe_table"
     SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {".csv", ".xlsx", ".xls", ".parquet"}
 
+    options: GeoDataFrameTableOptions = Field(
+        default_factory=GeoDataFrameTableOptions, description=DRIVER_OPTIONS_DESCRIPTION
+    )
+
     def read(
         self,
-        uris: List[str],
+        uris: list[str],
         *,
-        metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
+        metadata: SourceMetadata | None = None,
+        mask: Any = None,
+        variables: str | list[str] | None = None,
     ) -> gpd.GeoDataFrame:
-        """Read tabular data using a combination of the pandas and geopandas libraries."""
+        """
+        Read tabular geospatial data (CSV, Excel, or Parquet) into a GeoDataFrame.
+
+        Supports reading point geometries from tabular sources using latitude and longitude
+        columns. Coordinates are mapped to geometry based on configured dimension names or
+        detected automatically from the column headers.
+
+        Parameters
+        ----------
+        uris : list[str]
+            List of URIs to read data from. Only one file is supported per read operation.
+        handle_nodata : NoDataStrategy, optional
+            Strategy to handle missing or empty data. Default is NoDataStrategy.RAISE.
+        metadata : SourceMetadata | None, optional
+            Optional metadata object describing the dataset source (e.g. CRS).
+        mask : Any, optional
+            Unused in this driver. Present for interface consistency.
+        variables : str | list[str] | None, optional
+            Unused in this driver. Present for interface consistency.
+
+        Returns
+        -------
+        gpd.GeoDataFrame
+            The loaded geospatial data.
+
+        Raises
+        ------
+        ValueError
+            If multiple URIs are provided.
+
+        Warning
+        -------
+        The `mask` and `variables` parameters are not used directly in this driver, but are included
+        for consistency with the GeoDataFrameDriver interface.
+        """
+        _warn_on_unused_kwargs(
+            self.__class__.__name__, {"mask": mask, "variables": variables}
+        )
+
         if not metadata:
             metadata = SourceMetadata()
         if len(uris) > 1:
@@ -59,20 +106,51 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
             )
 
         _uri: str = uris[0]
-
-        options = deepcopy(self.options)
-        x_dim = options.pop("x_dim", None)
-        y_dim = options.pop("y_dim", None)
         gdf = open_vector_from_table(
             path=_uri,
-            x_dim=x_dim,
-            y_dim=y_dim,
+            x_dim=self.options.x_dim,
+            y_dim=self.options.y_dim,
             crs=metadata.crs,
-            **options,
+            **self.options.get_kwargs(),
         )
         if gdf.index.size == 0:
-            exec_nodata_strat(
-                f"No data from driver {self}'.",
-                strategy=handle_nodata,
-            )
+            exec_nodata_strat(f"No data from driver {self}'.", strategy=handle_nodata)
         return gdf
+
+    def write(
+        self,
+        path: Path | str,
+        data: gpd.GeoDataFrame,
+        *,
+        write_kwargs: dict[str, Any] | None = None,
+    ) -> Path:
+        """
+        Write a GeoDataFrame to disk.
+
+        Writing is not supported for this driver, as tabular sources (CSV, Excel,
+        Parquet) are typically read-only in this context. This method is included
+        to maintain consistency with the GeoDataFrameDriver interface.
+
+        Parameters
+        ----------
+        path : Path | str
+            Destination path or URI where the GeoDataFrame would be written.
+        data : gpd.GeoDataFrame
+            The GeoDataFrame to write.
+        write_kwargs : dict[str, Any], optional
+            Additional keyword arguments that would be passed to the underlying write
+            function. Default is None.
+
+        Returns
+        -------
+        Path
+            The path where the GeoDataFrame would be written.
+
+        Raises
+        ------
+        NotImplementedError
+            Always raised, as writing is not supported for this driver.
+        """
+        raise NotImplementedError(
+            f"Writing using driver '{self.name}' is not supported."
+        )

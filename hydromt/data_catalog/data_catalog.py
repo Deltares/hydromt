@@ -22,7 +22,6 @@ from typing import (
     cast,
 )
 
-import dateutil.parser
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -35,7 +34,6 @@ from pystac import Catalog as StacCatalog
 from pystac import CatalogType, MediaType
 
 from hydromt import __version__
-from hydromt._typing import Bbox, SourceSpecDict, StrPath, TimeRange
 from hydromt._utils import (
     _deep_merge,
     _partition_dictionaries,
@@ -65,8 +63,9 @@ from hydromt.data_catalog.sources import (
 )
 from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
 from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
-from hydromt.io.readers import _yml_from_uri_or_path
 from hydromt.plugins import PLUGINS
+from hydromt.readers import _yml_from_uri_or_path
+from hydromt.typing import Bbox, SourceSpecDict, TimeRange
 
 logger = logging.getLogger(__name__)
 
@@ -124,7 +123,7 @@ class DataCatalog(object):
 
         self._sources: Dict[str, DataSource] = {}
         self._catalogs: Dict[str, PredefinedCatalog] = {}
-        self.root: Optional[StrPath] = None
+        self.root: str | Path | None = None
         self._fallback_lib = fallback_lib
 
         # caching
@@ -182,7 +181,12 @@ class DataCatalog(object):
         """
         meta = meta or {}
         stac_catalog = StacCatalog(id=catalog_name, description=description)
-        for _name, source in self.list_sources(used_only):
+
+        sources = self.list_sources(used_only)
+        if not used_only and source_names is not None:
+            sources = [s for s in sources if s[0] in source_names]
+
+        for _name, source in sources:
             stac_child_catalog = source.to_stac_catalog(handle_nodata)
             if stac_child_catalog:
                 stac_catalog.add_child(stac_child_catalog)
@@ -294,17 +298,9 @@ class DataCatalog(object):
         crs: int
             The ESPG code of the CRS of the coordinates returned in bbox
         """
-        s: DataSource = self.get_source(source, provider, version)
-        try:
-            return s.get_bbox(detect=detect)  # type: ignore
-        except TypeError as e:
-            if strict:
-                raise e
-            else:
-                logger.warning(
-                    f"Source of type {type(s)} does not support detecting spatial"
-                    "extents. skipping..."
-                )
+        return self.get_source(source, provider, version).get_bbox(
+            detect=detect, strict=strict
+        )
 
     def get_source_time_range(
         self,
@@ -338,17 +334,9 @@ class DataCatalog(object):
             A tuple containing the start and end of the time dimension. Range is
             inclusive on both sides.
         """
-        s = self.get_source(source, provider, version)
-        try:
-            return s.get_time_range(detect=detect)  # type: ignore
-        except TypeError as e:
-            if strict:
-                raise e
-            else:
-                logger.warning(
-                    f"Source of type {type(s)} does not support detecting"
-                    " temporalextents. skipping..."
-                )
+        return self.get_source(source, provider, version).get_time_range(
+            detect=detect, strict=strict
+        )
 
     def get_source(
         self,
@@ -662,7 +650,7 @@ class DataCatalog(object):
     def from_yml(
         self,
         urlpath: Union[Path, str],
-        root: Optional[StrPath] = None,
+        root: str | Path | None = None,
         catalog_name: Optional[str] = None,
         catalog_version: Optional[str] = None,
         mark_used: bool = False,
@@ -783,7 +771,7 @@ class DataCatalog(object):
         data_dict: Dict[str, Any],
         catalog_name: str = "",
         catalog_version: Optional[str] = None,
-        root: Optional[StrPath] = None,
+        root: str | Path | None = None,
         category: Optional[str] = None,
         mark_used: bool = False,
     ) -> DataCatalog:
@@ -924,7 +912,7 @@ class DataCatalog(object):
     def to_dict(
         self,
         source_names: Optional[List[str]] = None,
-        root: Optional[StrPath] = None,
+        root: str | Path | None = None,
         meta: Optional[Dict[str, Any]] = None,
         used_only: bool = False,
     ) -> Dict[str, Any]:
@@ -1022,7 +1010,7 @@ class DataCatalog(object):
         self,
         new_root: Union[Path, str],
         bbox: Optional[Bbox] = None,
-        time_range: Optional[TimeRange] = None,
+        time_range: TimeRange | tuple | dict | None = None,
         source_names: Optional[List[str]] = None,
         unit_conversion: bool = True,
         metadata: Optional[Dict[str, Any]] = None,
@@ -1038,9 +1026,10 @@ class DataCatalog(object):
             Path to output folder
         bbox : array-like of floats
             (xmin, ymin, xmax, ymax) bounding box of area of interest.
-        time_range: tuple of str, datetime, optional
+        time_range : TimeRange | tuple | dict | None, optional
             Start and end date of period of interest. By default the entire time period
-            of the dataset is returned.
+            of the dataset is returned. If not None, must be parsable by TimeRange.create,
+            by default None
         source_names: list, optional
             List of source names to export, by default None in which case all sources
             are exported. Specific variables can be selected by appending them to the
@@ -1057,6 +1046,9 @@ class DataCatalog(object):
         append: bool, optional
             If True, append to existing data catalog, by default False.
         """
+        if time_range is not None:
+            time_range = TimeRange.create(time_range)
+
         # Create new root
         source_names = source_names or []
         metadata = metadata or {}
@@ -1065,9 +1057,6 @@ class DataCatalog(object):
 
         new_root = new_root.absolute()
         new_root.mkdir(exist_ok=True)
-
-        if time_range:
-            time_range: TimeRange = _parse_time_range(time_range)
 
         # create copy of data with selected source names
         source_vars = {}
@@ -1217,11 +1206,11 @@ class DataCatalog(object):
         chunks: Optional[dict] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         variables: Optional[Union[List, str]] = None,
-        time_range: Optional[TimeRange] = None,
+        time_range: TimeRange | tuple | dict | None = None,
         single_var_as_array: Optional[bool] = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
-        **kwargs,
+        source_kwargs: Dict[str, Any] | None = None,
     ) -> Optional[Union[xr.Dataset, xr.DataArray]]:
         """Return a clipped, sliced and unified RasterDataset.
 
@@ -1262,8 +1251,10 @@ class DataCatalog(object):
             How to react when no data is found, by default NoDataStrategy.RAISE
         variables : Optional[List], optional
             Names of RasterDataset variables to return, or all if None, by default None
-        time_range : Optional[TimeRange], optional
-            Start and end date of period of interest, or entire period if None, by default None
+        time_range : TimeRange | tuple | dict | None, optional
+            Start and end date of period of interest. By default the entire time period
+            of the dataset is returned. If not None, must be parsable by TimeRange.create,
+            by default None
         single_var_as_array : bool, optional
             Wether to return a xr.DataArray if the dataset consists of a single variable,
             by default True
@@ -1271,7 +1262,7 @@ class DataCatalog(object):
             Specifies a data provider, by default None
         version : Optional[str], optional
             Specifies a data version, by default None
-        **kwargs:
+        source_kwargs : dict
             Extra keyword arguments passed to the RasterDatasetSource construction
 
         Returns
@@ -1286,11 +1277,11 @@ class DataCatalog(object):
         NoDataException
             If no data is found and handle_nodata is NoDataStrategy.RAISE
         """
+        if time_range is not None:
+            time_range = TimeRange.create(time_range)
+
         if isinstance(variables, str):
             variables = [variables]
-
-        if time_range:
-            time_range = _parse_time_range(time_range)
 
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
@@ -1298,19 +1289,22 @@ class DataCatalog(object):
             )
 
         if isinstance(data_like, (str, Path)):
-            if isinstance(data_like, str) and data_like in self.sources:
+            if isinstance(data_like, str) and self.contains_source(data_like):
                 name = data_like
                 source = self.get_source(name, provider=provider, version=version)
             else:
-                if "provider" not in kwargs:
-                    kwargs.update({"provider": "user"})
+                source_kwargs = source_kwargs or {}
+                source_kwargs.setdefault("provider", "user")
 
-                driver: str = kwargs.pop(
+                driver: str = source_kwargs.pop(
                     "driver", RasterDatasetSource._fallback_driver_read
                 )
                 name = basename(data_like)
                 source = RasterDatasetSource(
-                    name=name, uri=str(data_like), driver=driver, **kwargs
+                    name=name,
+                    uri=str(data_like),
+                    driver=driver,
+                    **source_kwargs,
                 )
                 self.add_source(name, source)
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
@@ -1343,7 +1337,8 @@ class DataCatalog(object):
 
         # This isnt briliant but works the best at this stage
         if isinstance(source.driver, RasterioDriver):
-            source.driver.options.update({"cache": self.cache})
+            source.driver.options.cache = self.cache
+            source.driver.options.cache_root = self._cache_dir.as_posix()
 
         return source.read_data(
             bbox=bbox,
@@ -1370,7 +1365,7 @@ class DataCatalog(object):
         predicate: str = "intersects",
         provider: Optional[str] = None,
         version: Optional[str] = None,
-        **kwargs,
+        source_kwargs: dict[str, Any] | None = None,
     ) -> Optional[gpd.GeoDataFrame]:
         """Return a clipped and unified GeoDataFrame (vector).
 
@@ -1409,7 +1404,7 @@ class DataCatalog(object):
             Specifies a data provider, by default None
         version : Optional[str], optional
             Specifies a data version, by default None
-        **kwargs:
+        source_kwargs : dict[str, Any]
             Extra keyword arguments passed to the GeoDataFrameSource construction
 
         Returns
@@ -1433,14 +1428,16 @@ class DataCatalog(object):
                 data_like, provider, version
             )
         if isinstance(data_like, (str, Path)):
-            if str(data_like) in self.sources:
+            if isinstance(data_like, str) and self.contains_source(data_like):
                 name = str(data_like)
                 source = self.get_source(name, provider=provider, version=version)
             else:
-                if "provider" not in kwargs:
-                    kwargs.update({"provider": "user"})
+                source_kwargs = source_kwargs or {}
+                source_kwargs.setdefault("provider", "user")
                 name = basename(data_like)
-                source = GeoDataFrameSource(name=name, uri=str(data_like), **kwargs)
+                source = GeoDataFrameSource(
+                    name=name, uri=str(data_like), **source_kwargs
+                )
                 self.add_source(name, source)
         elif isinstance(data_like, gpd.GeoDataFrame):
             data_like = GeoDataFrameAdapter._slice_data(
@@ -1460,13 +1457,12 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown vector data type "{type(data_like).__name__}"')
 
-        gdf = source.read_data(
+        return source.read_data(
             mask=mask,
             handle_nodata=handle_nodata,
             predicate=predicate,
             variables=variables,
         )
-        return gdf
 
     def get_geodataset(
         self,
@@ -1479,11 +1475,11 @@ class DataCatalog(object):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         predicate: str = "intersects",
         variables: Optional[List[str]] = None,
-        time_range: Optional[Union[Tuple[str, str], Tuple[datetime, datetime]]] = None,
+        time_range: TimeRange | tuple | dict | None = None,
         single_var_as_array: bool = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
-        **kwargs,
+        source_kwargs: dict[str, Any] | None = None,
     ) -> xr.Dataset:
         """Return a clipped, sliced and unified GeoDataset.
 
@@ -1522,8 +1518,10 @@ class DataCatalog(object):
             by default 'intersects'
         variables : Optional[List], optional
             Names of GeoDataset variables to return, or all if None, by default None
-        time_range : Optional[TimeRange], optional
-            Start and end date of period of interest, or entire period if None, by default None
+        time_range : TimeRange | tuple | dict | None, optional
+            Start and end date of period of interest. By default the entire time period
+            of the dataset is returned. If not None, must be parsable by TimeRange.create,
+            by default None
         single_var_as_array : bool, optional
             Wether to return a xr.DataArray if the dataset consists of a single variable,
             by default True
@@ -1531,7 +1529,7 @@ class DataCatalog(object):
             Specifies a data provider, by default None
         version : Optional[str], optional
             Specifies a data version, by default None
-        **kwargs:
+        source_kwargs : dict[str, Any] | None
             Extra keyword arguments passed to the GeoDatasetSource construction
 
         Returns
@@ -1546,13 +1544,13 @@ class DataCatalog(object):
         NoDataException
             If no data is found and handle_nodata is NoDataStrategy.RAISE
         """
+        if time_range is not None:
+            time_range = TimeRange.create(time_range)
+
         if geom is not None or bbox is not None:
             mask = _parse_geom_bbox_buffer(geom=geom, bbox=bbox, buffer=buffer)
         else:
             mask = None
-
-        if time_range:
-            time_range = _parse_time_range(time_range)
 
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
@@ -1560,13 +1558,13 @@ class DataCatalog(object):
             )
 
         if isinstance(data_like, (str, Path)):
-            if isinstance(data_like, str) and data_like in self.sources:
+            if isinstance(data_like, str) and self.contains_source(data_like):
                 name = data_like
                 source = self.get_source(name, provider=provider, version=version)
             else:
-                if "provider" not in kwargs:
-                    kwargs.update({"provider": "user"})
-                driver: str = kwargs.pop(
+                source_kwargs = source_kwargs or {}
+                source_kwargs.setdefault("provider", "user")
+                driver: str = source_kwargs.pop(
                     "driver", GeoDatasetSource._fallback_driver_read
                 )
                 name = basename(data_like)
@@ -1574,7 +1572,7 @@ class DataCatalog(object):
                     name=name,
                     uri=str(data_like),
                     driver=driver,
-                    **kwargs,
+                    **source_kwargs,
                 )
                 self.add_source(name, source)
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
@@ -1612,11 +1610,11 @@ class DataCatalog(object):
         ],
         variables: Optional[List] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        time_range: Optional[TimeRange] = None,
+        time_range: TimeRange | tuple | dict | None = None,
         single_var_as_array: bool = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
-        **kwargs,
+        source_kwargs: dict[str, Any] | None = None,
     ) -> xr.Dataset:
         """Return a clipped, sliced and unified Dataset.
 
@@ -1640,8 +1638,10 @@ class DataCatalog(object):
             Names of Dataset variables to return, or all if None, by default None
         handle_nodata : NoDataStrategy, optional
             How to react when no data is found, by default NoDataStrategy.RAISE
-        time_range : Optional[TimeRange], optional
-            Start and end date of period of interest, or entire period if None, by default None
+        time_range : TimeRange | tuple | dict | None, optional
+            Start and end date of period of interest. By default the entire time period
+            of the dataset is returned. If not None, must be parsable by TimeRange.create,
+            by default None
         single_var_as_array : bool, optional
             Wether to return a xr.DataArray if the dataset consists of a single variable,
             by default True
@@ -1649,7 +1649,7 @@ class DataCatalog(object):
             Specifies a data provider, by default None
         version : Optional[str], optional
             Specifies a data version, by default None
-        **kwargs:
+        source_kwargs : dict[str, Any] | None
             Extra keyword arguments passed to the DatasetSource construction
 
         Returns
@@ -1664,23 +1664,23 @@ class DataCatalog(object):
         NoDataException
             If no data is found and handle_nodata is NoDataStrategy.RAISE
         """
+        if time_range is not None:
+            time_range = TimeRange.create(time_range)
+
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
                 data_like, provider, version
             )
 
-        if time_range:
-            time_range = _parse_time_range(time_range)
-
         if isinstance(data_like, (str, Path)):
-            if isinstance(data_like, str) and data_like in self.sources:
+            if isinstance(data_like, str) and self.contains_source(data_like):
                 name = data_like
                 source = self.get_source(name, provider=provider, version=version)
             else:
-                if "provider" not in kwargs:
-                    kwargs.update({"provider": "user"})
+                source_kwargs = source_kwargs or {}
+                source_kwargs.setdefault("provider", "user")
                 name = basename(data_like)
-                source = DatasetSource(uri=str(data_like), name=name, **kwargs)
+                source = DatasetSource(uri=str(data_like), name=name, **source_kwargs)
                 self.add_source(name, source)
 
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
@@ -1709,11 +1709,11 @@ class DataCatalog(object):
         self,
         data_like: Union[str, SourceSpecDict, Path, pd.DataFrame, DataFrameSource],
         variables: Optional[List] = None,
-        time_range: Optional[TimeRange] = None,
+        time_range: TimeRange | tuple | dict | None = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         provider: Optional[str] = None,
         version: Optional[str] = None,
-        **kwargs,
+        source_kwargs: dict[str, Any] | None = None,
     ) -> pd.DataFrame:
         """Return a clipped, sliced and unified DataFrame.
 
@@ -1728,15 +1728,17 @@ class DataCatalog(object):
             to the catalog with its based on the file basename.
         variables : Optional[List], optional
             Names of DataFrame variables to return, or all if None, by default None
-        time_range : Optional[TimeRange], optional
-            Start and end date of period of interest, or entire period if None, by default None
+        time_range : TimeRange | tuple | dict | None, optional
+            Start and end date of period of interest. By default the entire time period
+            of the dataset is returned. If not None, must be parsable by TimeRange.create,
+            by default None
         handle_nodata : NoDataStrategy, optional
             How to react when no data is found, by default NoDataStrategy.RAISE
         provider : Optional[str], optional
             Specifies a data provider, by default None
         version : Optional[str], optional
             Specifies a data version, by default None
-        **kwargs:
+        source_kwargs : dict[str, Any] | None
             Extra keyword arguments passed to the DataFrameSource construction
 
         Returns
@@ -1751,16 +1753,16 @@ class DataCatalog(object):
         NoDataException
             If no data is found and handle_nodata is NoDataStrategy.RAISE
         """
+        if time_range is not None:
+            time_range = TimeRange.create(time_range)
+
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
                 data_like, provider, version
             )
 
-        if time_range:
-            time_range = _parse_time_range(time_range)
-
         if isinstance(data_like, (str, Path)):
-            if isinstance(data_like, str) and data_like in self.sources:
+            if isinstance(data_like, str) and self.contains_source(data_like):
                 name = data_like
                 source: DataSource = self.get_source(
                     name, provider=provider, version=version
@@ -1768,14 +1770,14 @@ class DataCatalog(object):
                 if not isinstance(source, DataFrameSource):
                     raise ValueError(f"Source '{source.name}' is not a DataFrame.")
             else:
-                if "provider" not in kwargs:
-                    kwargs.update({"provider": "user"})
-                driver: str = kwargs.pop(
+                source_kwargs = source_kwargs or {}
+                source_kwargs.setdefault("provider", "user")
+                driver: str = source_kwargs.pop(
                     "driver", DataFrameSource._fallback_driver_read
                 )
                 name = basename(data_like)
                 source = DataFrameSource(
-                    uri=str(data_like), name=name, driver=driver, **kwargs
+                    uri=str(data_like), name=name, driver=driver, **source_kwargs
                 )
                 self.add_source(name, source)
         elif isinstance(data_like, pd.DataFrame):
@@ -1789,12 +1791,9 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown tabular data type "{type(data_like).__name__}"')
 
-        obj = source.read_data(
-            variables=variables,
-            time_range=time_range,
-            handle_nodata=handle_nodata,
+        return source.read_data(
+            variables=variables, time_range=time_range, handle_nodata=handle_nodata
         )
-        return obj
 
 
 def _parse_data_like_dict(
@@ -1894,12 +1893,3 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
             data_list.extend(_denormalise_data_dict(item))
 
     return data_list
-
-
-def _parse_time_range(
-    time_range: Tuple[Union[str, datetime], Union[str, datetime]],
-) -> TimeRange:
-    """Parse timerange with strings to datetime."""
-    if any(map(lambda t: not isinstance(t, datetime), time_range)):
-        time_range = tuple(map(lambda t: dateutil.parser.parse(t), time_range))
-    return cast(TimeRange, time_range)

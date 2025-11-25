@@ -1,3 +1,7 @@
+.. _changelog:
+
+ Changelog
+
 ==========
 What's new
 ==========
@@ -14,7 +18,9 @@ ModelComponent API now contains functions for `ModelComponent.cleanup` and `Mode
 
 New
 ---
+- Added ``ExampleModel`` class and ``example_model`` entrypoint for demonstration purposes.
 - Added option for delayed compute in writing netcdf files
+- Added option to specify a 'fill_value' in `gis.raster_utils.full`, `full_from_transform` and `full_like`. (#1321)
 - Set compression in `write_nc`
 - Allow masking in `GridComponent.set`. (#1229)
 - Default driver is now inferred from file extension for RasterDataset, GeoDataFrame, and GeoDataset sources. (#1267)
@@ -23,6 +29,7 @@ New
 - `_io.writers.write_nc` writes to a temporary file inside of the working folder of the caller, not to a temporary directory. Changed, because hydromt cannot know how much space is required. The caller should handle their workspaces well.
 - `hydromt check` accepts a `--format` flag to check either v1 or v0 data catalogs (#1265)
 - `hydromt check` accepts a `--upgrade` flag to upgrade v0 datacatalogs to the new v1 format (#1265)
+- `Model` can now be used as a context manager. This ensures that all open files are closed when exiting the context. (#1272)
 
 Changed
 -------
@@ -32,10 +39,14 @@ Changed
 - HydroMT raster utilities such as `full`, `full_from_transform`, `full_like` and `merge` have been moved to `hydromt.gis.raster_utils`. (#1271)
 - `DataCatalog.driver.preprocessing` and its functions are now public (underscore removed). (#1271)
 - ``NoDataStrategy`` is now part of of ``hydromt.error`` and thus public (#1277)
-
+- ``hydromt.typing`` and its functions are now public (underscore removed). (#1286)
+- remove ``io`` submodule and move ``readers`` and ``writers`` to the root module (#1308)
+- `write_nc` function no longer accepts kwargs, instead a dict `to_netcdf_kwargs` is used to pass arguments to `xarray.to_netcdf`. The function raises an error when "compute" is one of the arguments.
+- Function signatures of `DataCatalog` functions `get_rasterdataset`, `get_geodataframe`, `get_geodataset`, `get_dataset` and `get_dataframe` now have: ``source_kwargs`` (passed to `DataSource.__init__`) instead of just ``kwargs``, and ``time_tuple`` was renamed to ``time_range``. (#1291)
 
 Fixed
 -----
+- Actually having 'nan' values in a lazy DataArray from `gis.raster_utils.full`. (#1321)
 - CLI update command was not working. (#1244)
 - Allow models to not have a spatial component (allows updating if region is None). (#1244)
 - CF compliant dimensions in netcdf files
@@ -43,8 +54,13 @@ Fixed
 - Improved logging information for build and update functions. (#1237)
 - Better documentation of drivers and their options. (#1271)
 - Passing options to ``geodataframe_table`` driver now works. (#1271)
+- Relative path in the workflow yaml were not correctly resolved. (#1304)
+- Fix pydantic for V1 catalog for nodata and fix the catalog upgrade to convert nodata and extra metadata arguments. (#1304)
+- Fix pydantic for V1 catalog for attrs and fix the catalog upgrade to convert attrs arguments.
+- Do not pass metadata "extent" from catalog in xarray objects to avoid issues when writting to netcdf. (#1304)
 - Build and update functions call `ModelComponent.cleanup` and `ModelComponent.finish_write`. Stabilizing the write functionality and making sure that netCDF files can be overwritten when the source and destination are the same. (#778)
 - `hydromt check` has been updated to validate v1 data catalogs (#1265)
+- All handling of log files is now done with the context manager `hydromt._utils.log.to_file`. This means that they are always closed by the the function that opened them. (#1272)
 
 Deprecated
 ----------

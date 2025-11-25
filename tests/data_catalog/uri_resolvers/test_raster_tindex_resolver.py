@@ -3,14 +3,13 @@ from pathlib import Path
 
 import geopandas as gpd
 import pytest
-from fsspec import AbstractFileSystem
 from shapely.geometry import box
 
-from hydromt._typing import SourceMetadata
 from hydromt.data_catalog.uri_resolvers.raster_tindex_resolver import (
     RasterTindexResolver,
 )
 from hydromt.error import NoDataException
+from hydromt.typing import FSSpecFileSystem, SourceMetadata
 
 
 class TestRasterTindexResolver:
@@ -71,9 +70,7 @@ class TestRasterTindexResolver:
         geom = gpd.GeoDataFrame(geometry=[box(-78, 0.0005, -65, 4)], crs=4326)
         metadata = SourceMetadata()
         options = {"tileindex": "location"}
-        resolver = RasterTindexResolver(
-            filesystem=AbstractFileSystem(), options=options
-        )
+        resolver = RasterTindexResolver(filesystem=FSSpecFileSystem(), options=options)
         paths = resolver.resolve(
             uri=raster_tindex,
             metadata=metadata,
@@ -101,7 +98,7 @@ class TestRasterTindexResolver:
 
     def test_raises_no_tileindex(self, raster_tindex):
         metadata = SourceMetadata()
-        resolver = RasterTindexResolver(filesystem=AbstractFileSystem())
+        resolver = RasterTindexResolver(filesystem=FSSpecFileSystem())
         geom = gpd.GeoDataFrame(geometry=[box(-78, 0.0005, -65, 4)], crs=4326)
         with pytest.raises(
             ValueError,
@@ -115,9 +112,7 @@ class TestRasterTindexResolver:
 
     def test_raises_missing_tileindex(self, raster_tindex):
         options = {"tileindex": "file"}
-        resolver = RasterTindexResolver(
-            filesystem=AbstractFileSystem(), options=options
-        )
+        resolver = RasterTindexResolver(filesystem=FSSpecFileSystem(), options=options)
         metadata = SourceMetadata()
         geom = gpd.GeoDataFrame(geometry=[box(-78, 0.0005, -65, 4)], crs=4326)
         with pytest.raises(
@@ -132,9 +127,7 @@ class TestRasterTindexResolver:
 
     def test_raises_no_intersecting_files(self, raster_tindex):
         options = {"tileindex": "file"}
-        resolver = RasterTindexResolver(
-            filesystem=AbstractFileSystem(), options=options
-        )
+        resolver = RasterTindexResolver(filesystem=FSSpecFileSystem(), options=options)
         metadata = SourceMetadata()
         geom = gpd.GeoDataFrame(geometry=[box(4, 52, 5, 53)], crs=4326)
         with pytest.raises(NoDataException, match="found no intersecting tiles."):

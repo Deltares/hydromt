@@ -1,0 +1,23 @@
+20,255,187,34,255,20 Shrubs
+30,255,255,76,255,30 Herbaceous vegetation
+40,240,150,255,255,40 Cropland
+50,250,0,0,255,50 Urban
+60,180,180,180,255,60 Bare/sparse vegetation
+70,240,240,240,255,70 Snow and ice
+80,0,50,200,255,80 Permanent water bodies
+90,0,150,160,255,90 Herbaceous wetland
+100,250,230,160,255,100 Moss and lichen
+111,88,72,31,255,111 Closed deciduous needleleaf forest
+112,0,153,0,255,112 Closed evergreen broadleaf forest
+113,112,102,62,255,113 Closed deciduous needleleaf forest
+114,0,204,0,255,114 Closed deciduous broadleaf forest
+115,78,117,31,255,115 Closed mixed forest
+116,0,120,0,255,116 Closed forest unknown
+121,102,96,0,255,121 Open evergreen needleleaf forest
+122,141,180,0,255,122 Open evergreen needleleaf forest
+123,141,116,0,255,123 Open deciduous needleleaf forest
+124,160,220,0,255,124 Open deciduous broadleaf forest
+125,146,153,0,255,125 Open mixed forest
+126,100,140,0,255,126 Open forest unknown
+200,0,0,128,255,200 Open sea
+255,255,255,255,0,255 No data

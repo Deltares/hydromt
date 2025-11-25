@@ -2,21 +2,14 @@
 
 from __future__ import annotations
 
-from logging import getLogger
-from typing import Any, Dict, List, Optional, Union, cast
+import logging
+from typing import Any, Dict, List, Optional, cast
 
 import numpy as np
 import pyproj
 import xarray as xr
 from pyproj import CRS
 
-from hydromt._typing import (
-    Data,
-    Geom,
-    SourceMetadata,
-    TimeRange,
-    Variables,
-)
 from hydromt._utils import (
     _has_no_data,
     _shift_dataset_time,
@@ -27,8 +20,15 @@ from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.gis.raster_utils import _meridian_offset
+from hydromt.typing import (
+    Data,
+    Geom,
+    SourceMetadata,
+    TimeRange,
+    Variables,
+)
 
-logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 __all__ = ["RasterDatasetAdapter"]
 
@@ -48,7 +48,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         single_var_as_array: bool = True,
         buffer: int = 0,
-    ) -> Union[xr.Dataset, xr.DataArray, None]:
+    ) -> xr.Dataset | xr.DataArray | None:
         """Filter and harmonize the input RasterDataset.
 
         Parameters
@@ -114,6 +114,7 @@ class RasterDatasetAdapter(DataAdapterBase):
                 "No data was read from source",
                 strategy=handle_nodata,
             )
+            return None  # if handle_nodata ignore
 
     def _rename_vars(self, ds: Data) -> Data:
         rm = {k: v for k, v in self.rename.items() if k in ds}
@@ -297,5 +298,8 @@ class RasterDatasetAdapter(DataAdapterBase):
         for k in attrs:
             ds[k].attrs.update(attrs[k])
         # set meta data
-        ds.attrs.update(metadata.model_dump(exclude=["attrs"], exclude_unset=True))
+        # exclude extent and attrs that are dict
+        ds.attrs.update(
+            metadata.model_dump(exclude=["attrs", "extent"], exclude_unset=True)
+        )
         return ds
