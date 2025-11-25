@@ -432,7 +432,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">packaging.version</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pooch</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.caching</span><span class="w"> </span><span class="kn">import</span> <span class="n">_copy_to_local</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.caching</span><span class="w"> </span><span class="kn">import</span> <span class="n">copy_to_local</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.uris</span><span class="w"> </span><span class="kn">import</span> <span class="n">_is_valid_url</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">SETTINGS</span>
 
@@ -588,7 +588,7 @@
         <span class="k">if</span> <span class="n">registry_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
             <span class="n">registry_path</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>  <span class="c1"># try to retrieve and cache the registry file</span>
-            <span class="n">_copy_to_local</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_url</span><span class="si">}</span><span class="s2">/registry.txt&quot;</span><span class="p">,</span> <span class="n">registry_path</span><span class="p">)</span>
+            <span class="n">copy_to_local</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_url</span><span class="si">}</span><span class="s2">/registry.txt&quot;</span><span class="p">,</span> <span class="n">registry_path</span><span class="p">)</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">ConnectionError</span><span class="p">,</span> <span class="ne">FileNotFoundError</span><span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Failed to retrieve </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> versions file from </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_url</span><span class="si">}</span><span class="s2">.&quot;</span>
