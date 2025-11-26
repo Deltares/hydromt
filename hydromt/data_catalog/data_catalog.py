@@ -127,7 +127,7 @@ class DataCatalog(object):
         for name_or_path in data_libs:
             if str(name_or_path).split(".")[-1] in ["yml", "yaml"]:  # user defined
                 self.from_yml(name_or_path)
-            elif isinstance(name_or_path, (str, Path)):  # predefined
+            elif isinstance(name_or_path, str):  # predefined
                 self.from_predefined_catalogs(name_or_path)
 
     @property
