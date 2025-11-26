@@ -594,16 +594,14 @@ def test_export_dataframe(tmp_path: Path, df, df_time):
 
 
 @pytest.mark.integration
-def test_bulk_export_data(tmp_path: Path):
+def test_export_data_bulk(tmp_path: Path):
     data_catalog = DataCatalog(data_libs=["artifact_data"])
     data_catalog_reread_path = tmp_path / "bulk_exported"
     data_catalog_reread_path.mkdir(exist_ok=True)
     bbox = [11.989, 46.02, 12.253, 46.166]  # Small bounding box in Piave basin
-    data_catalog.export_data(
-        data_catalog_reread_path, source_names=["grdc"], bbox=bbox, force_overwrite=True
-    )
-    # for f in os.listdir(data_catalog_reread_path):
-    #     assert Path(f).stem in data_catalog.sources
+    data_catalog.export_data(data_catalog_reread_path, bbox=bbox, force_overwrite=True)
+    for f in os.listdir(data_catalog_reread_path):
+        assert Path(f).stem in data_catalog.sources
 
 
 @pytest.mark.skip("flakey test due to external http issues")
