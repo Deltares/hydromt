@@ -593,6 +593,7 @@ def test_export_dataframe(tmp_path: Path, df, df_time):
         assert isinstance(obj, dtypes), key
 
 
+@pytest.mark.integration
 def test_export_tiff_files_wild_card(tmp_path: Path, rioda: xr.DataArray):
     data_catalog = DataCatalog(data_libs=["artifact_data"])
     da = data_catalog.get_rasterdataset("modis_lai")
