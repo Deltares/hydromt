@@ -593,6 +593,10 @@ def test_export_dataframe(tmp_path: Path, df, df_time):
         assert isinstance(obj, dtypes), key
 
 
+def test_export_tiff_files_wild_card(tmp_path, rioda: xr.DataArray):
+    pass
+
+
 @pytest.mark.skip("flakey test due to external http issues")
 @pytest.mark.integration
 def test_http_data():
