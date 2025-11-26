@@ -134,7 +134,7 @@ class GeoDatasetSource(DataSource):
             handle_nodata=handle_nodata,
         )
         if ds is None:  # handle_nodata == ignore
-            return None
+            return self._handle_no_data_on_write(handle_nodata)
 
         dest_path = driver.write(file_path, ds, write_kwargs=write_kwargs)
 

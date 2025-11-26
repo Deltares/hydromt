@@ -120,7 +120,7 @@ class DatasetSource(DataSource):
             time_range=time_range, handle_nodata=handle_nodata
         )
         if ds is None:
-            return None
+            return self._handle_no_data_on_write(handle_nodata)
 
         # driver can return different path if file ext changes
         dest_path = driver.write(
