@@ -340,6 +340,20 @@ class DataSource(BaseModel, ABC):
             logger.warning(msg + " skipping...")
         return None
 
+    def _handle_no_data_on_write(self, handle_nodata: NoDataStrategy) -> None:
+        """Handle no data situation on write according to strategy."""
+        match handle_nodata:
+            case NoDataStrategy.IGNORE:
+                return None
+            case NoDataStrategy.RAISE:
+                raise NoDataException
+            case NoDataStrategy.WARN:
+                logger.warning(
+                    f"Skipping writing {self.name} to file"
+                    " because reading data returned no data."
+                )
+                return None
+
 
 def _abs_path(root: Union[Path, str], rel_path: Union[Path, str]) -> str:
     path = Path(str(rel_path))

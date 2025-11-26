@@ -1190,7 +1190,8 @@ class DataCatalog(object):
         for key, available_variants in sources_out.items():
             for _provider, available_versions in available_variants.items():
                 for _version, adapter in available_versions.items():
-                    data_catalog_out.add_source(key, adapter)
+                    if adapter is not None:
+                        data_catalog_out.add_source(key, adapter)
 
         data_catalog_out.to_yml(path, root="auto", meta=metadata)
 
