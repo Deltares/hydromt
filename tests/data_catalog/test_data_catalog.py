@@ -593,8 +593,31 @@ def test_export_dataframe(tmp_path: Path, df, df_time):
         assert isinstance(obj, dtypes), key
 
 
-def test_export_tiff_files_wild_card(tmp_path, rioda: xr.DataArray):
-    pass
+def test_export_tiff_files_wild_card(tmp_path: Path, rioda: xr.DataArray):
+    data_catalog = DataCatalog(data_libs=["artifact_data"])
+    da = data_catalog.get_rasterdataset("modis_lai")
+    files_dir = tmp_path / "tiff_files"
+    files_dir.mkdir(exist_ok=True)
+    for i in da.time.values:
+        da_sel = da.sel(time=i)
+        da_sel.raster.to_raster(str(files_dir / f"modis_lai_{i}.tif"))
+    data_dict = {
+        "test_tiff_files": {
+            "uri": str(files_dir / "*.tif"),
+            "driver": {
+                "name": "rasterio",
+                "options": {"chunks": {"x": "auto", "y": "auto"}, "concat": True},
+            },
+            "data_type": "RasterDataset",
+        }
+    }
+    data_catalog = DataCatalog()
+    data_catalog.from_dict(data_dict)
+    data_catalog_reread_path = tmp_path / "tiff_files_exported"
+    data_catalog.export_data(
+        new_root=str(data_catalog_reread_path), source_names=["test_tiff_files"]
+    )
+    assert len(os.listdir(data_catalog_reread_path)) > 12
 
 
 @pytest.mark.skip("flakey test due to external http issues")
