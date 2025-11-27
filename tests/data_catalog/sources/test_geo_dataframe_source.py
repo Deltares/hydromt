@@ -127,7 +127,7 @@ class TestGeoDataFrameSource:
     ):
         gdf_path = managed_tmp_path / "test.geojson"
         geodf.to_file(gdf_path, driver="GeoJSON")
-        data_catalog = DataCatalog()  # read artifacts
+        data_catalog = DataCatalog(data_libs=["artifact_data"])  # read artifacts
         _ = data_catalog.sources  # load artifact data as fallback
 
         # geodataframe

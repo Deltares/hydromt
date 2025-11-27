@@ -511,7 +511,7 @@ class Model(object, metaclass=ABCMeta):
             if isabs(data_lib_path)
             else join(self.root.path, data_lib_path)
         )
-        cat = DataCatalog(fallback_lib=None)
+        cat = DataCatalog()
         # read hydromt_data yml file and add to data catalog
         if self.root.is_reading_mode() and isfile(path) and append:
             cat.from_yml(path)

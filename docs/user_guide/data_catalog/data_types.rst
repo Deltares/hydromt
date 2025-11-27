@@ -92,9 +92,7 @@ and allows lazy reading of the data.
   :hide:
 
   catalog_path = "docs/assets/data_types/single_variable_geotiff_raster.yml"
-
-  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
-  catalog.from_yml(catalog_path)
+  catalog = DataCatalog(data_libs=[catalog_path])
 
 .. _VRT:
 
@@ -121,9 +119,7 @@ for large raster datasets which are often tiled and can be combined using
   :hide:
 
   catalog_path = "docs/assets/data_types/vrt_raster_dataset.yml"
-
-  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
-  catalog.from_yml(catalog_path)
+  catalog = DataCatalog(data_libs=[catalog_path])
 
 .. _Tile:
 
@@ -151,9 +147,7 @@ set the resampling method. The name of the column in the tile index attribute ta
   :hide:
 
   catalog_path = "docs/assets/data_types/tiled_raster_dataset.yml"
-
-  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
-  catalog.from_yml(catalog_path)
+  catalog = DataCatalog(data_libs=[catalog_path])
 
 .. NOTE::
 
@@ -201,9 +195,7 @@ unify the data to match the HydroMT naming and unit :ref:`terminology <terminolo
   :hide:
 
   catalog_path = "docs/assets/data_types/netcdf_raster_dataset.yml"
-
-  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
-  catalog.from_yml(catalog_path)
+  catalog = DataCatalog(data_libs=[catalog_path])
 
 Preprocess functions when combining multiple files
 """"""""""""""""""""""""""""""""""""""""""""""""""
@@ -273,9 +265,7 @@ columns of the attribute table in case of a GeoDataFrame.
   :hide:
 
   catalog_path = "docs/assets/data_types/gpkg_geodataframe.yml"
-
-  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
-  catalog.from_yml(catalog_path)
+  catalog = DataCatalog(data_libs=[catalog_path])
 
 .. _textdelimited_vector:
 
@@ -322,9 +312,7 @@ data entry in the yaml file as shown in the example below.
   :hide:
 
   catalog_path = "docs/assets/data_types/csv_geodataframe.yml"
-
-  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
-  catalog.from_yml(catalog_path)
+  catalog = DataCatalog(data_libs=[catalog_path])
 
 .. _binary_vector:
 
@@ -409,9 +397,7 @@ unify the data to match the HydroMT naming and unit :ref:`terminology <terminolo
   :hide:
 
   catalog_path = "docs/assets/data_types/netcdf_geodataset.yml"
-
-  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
-  catalog.from_yml(catalog_path)
+  catalog = DataCatalog(data_libs=[catalog_path])
 
 .. _CSV_point:
 
@@ -440,9 +426,7 @@ header) and point locations must match.
   :hide:
 
   catalog_path = "docs/assets/data_types/csv_geodataset.yml"
-
-  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
-  catalog.from_yml(catalog_path)
+  catalog = DataCatalog(data_libs=[catalog_path])
 
 *Tabulated time series text file*
 
@@ -497,9 +481,7 @@ dimension.
   :hide:
 
   catalog_path = "docs/assets/data_types/netcdf_dataset.yml"
-
-  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
-  catalog.from_yml(catalog_path)
+  catalog = DataCatalog(data_libs=[catalog_path])
 
 .. _DataFrame:
 
@@ -548,9 +530,7 @@ the delimiter can be given to the reader through the ``options``.
   :hide:
 
   catalog_path = "docs/assets/data_types/csv_dataframe.yml"
-
-  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
-  catalog.from_yml(catalog_path)
+  catalog = DataCatalog(data_libs=[catalog_path])
 
 .. note::
     The yml-parser does not correctly parses `None` arguments. When this is required, the `null` argument should be used instead.
