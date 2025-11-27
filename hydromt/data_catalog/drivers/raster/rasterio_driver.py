@@ -1,6 +1,7 @@
 """Driver using rasterio for RasterDataset."""
 
 import logging
+from os.path import splitext
 from pathlib import Path
 from typing import Any, ClassVar
 
@@ -16,6 +17,7 @@ from hydromt.config import SETTINGS
 from hydromt.data_catalog.drivers.base_driver import DriverOptions
 from hydromt.data_catalog.drivers.raster import RasterDatasetDriver
 from hydromt.error import NoDataStrategy, exec_nodata_strat
+from hydromt.gis._gdal_drivers import GDAL_DRIVER_CODE_MAP
 from hydromt.gis.gis_utils import zoom_to_overview_level
 from hydromt.readers import open_mfraster
 from hydromt.typing import (
@@ -26,6 +28,8 @@ from hydromt.typing import (
 )
 
 logger = logging.getLogger(__name__)
+
+_TIFF_EXT = ".tif"
 
 
 class RasterioOptions(DriverOptions):
@@ -92,11 +96,10 @@ class RasterioDriver(RasterDatasetDriver):
     """
 
     name = "rasterio"
+    supports_writing = True
     SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {
-        "." + extension
-        for extension in rasterio.drivers.raster_driver_extensions()
-        if extension != "nc"
-    }  # Exclude netcdf as a supported file type
+        "." + extension for extension in GDAL_DRIVER_CODE_MAP.keys()
+    }
     options: RasterioOptions = Field(default_factory=RasterioOptions)
 
     def read(
@@ -258,7 +261,20 @@ class RasterioDriver(RasterDatasetDriver):
         NotImplementedError
             Always raised because writing is not supported in this driver.
         """
-        raise NotImplementedError()
+        no_ext, ext = splitext(path)
+        write_kwargs = write_kwargs or {}
+        # set filepath if incompat
+        if ext not in self.SUPPORTED_EXTENSIONS:
+            logger.warning(
+                f"Unknown extension for RasterioDriver: {ext}, switching to .tif"
+            )
+            path = no_ext + _TIFF_EXT
+            ext = _TIFF_EXT
+
+        gdal_driver = GDAL_DRIVER_CODE_MAP.get(ext.lstrip(".").lower())
+
+        data.raster.to_raster(path, driver=gdal_driver, **write_kwargs)
+        return Path(path)
 
     @staticmethod
     def _get_zoom_levels_and_crs(uri: str) -> tuple[dict[int, float], int]:

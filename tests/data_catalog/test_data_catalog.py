@@ -597,13 +597,20 @@ def test_export_dataframe(tmp_path: Path, df, df_time):
 def test_export_tiff_files_wild_card(tmp_path: Path, rioda: xr.DataArray):
     data_catalog = DataCatalog(data_libs=["artifact_data"])
     da = data_catalog.get_rasterdataset("modis_lai")
+
+    # Write one GeoTIFF per time step
     files_dir = tmp_path / "tiff_files"
     files_dir.mkdir(exist_ok=True)
     for i in da.time.values:
-        da_sel = da.sel(time=i)
-        da_sel.raster.to_raster(str(files_dir / f"modis_lai_{i}.tif"))
+        # Select a single time step and keep time as a length-1 dimension
+        da_sel = da.sel(time=i).expand_dims("time")
+        # Write each time slice to its own GeoTIFF file
+        da_sel.raster.to_raster(str(files_dir / f"lai_{i}.tif"))
+
+    # Build a catalog entry that uses a wildcard to match all written TIFFs
+    # `concat=True` instructs the rasterio reader to concatenate matched files along the band/time axis
     data_dict = {
-        "test_tiff_files": {
+        "modis": {
             "uri": str(files_dir / "*.tif"),
             "driver": {
                 "name": "rasterio",
@@ -612,13 +619,21 @@ def test_export_tiff_files_wild_card(tmp_path: Path, rioda: xr.DataArray):
             "data_type": "RasterDataset",
         }
     }
+
+    # Load the wildcard source into a fresh DataCatalog
     data_catalog = DataCatalog()
     data_catalog.from_dict(data_dict)
+
+    # Export the concatenated dataset and re-open it from the exported catalog
     data_catalog_reread_path = tmp_path / "tiff_files_exported"
     data_catalog.export_data(
-        new_root=str(data_catalog_reread_path), source_names=["test_tiff_files"]
+        new_root=str(data_catalog_reread_path), source_names=["modis"]
     )
-    assert len(os.listdir(data_catalog_reread_path)) > 12
+    new_datacatalog = DataCatalog(str(data_catalog_reread_path / "data_catalog.yml"))
+
+    # Read back the dataset and assert it matches the original concatenated dataset
+    da_reread = new_datacatalog.get_rasterdataset("modis")
+    xr.testing.assert_equal(da_reread, data_catalog.get_rasterdataset("modis"))
 
 
 @pytest.mark.skip("flakey test due to external http issues")
