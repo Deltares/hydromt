@@ -300,7 +300,7 @@ docker-build = { cmd = [
 	"--build-arg",
 	"PIXIENV=$DOCKER_TARGET-latest",
 	".",
-], env = { DOCKER_TAG = "<DOCKER_TAG>", DOCKER_TARGET = "<DOCKER_TARGET>" } }
+] }
 docker-build-min = { cmd = [
 	"pixi",
 	"run",
