@@ -174,9 +174,9 @@ class SpatialModelComponent(ModelComponent, ABC):
                 raise ValueError(
                     f"Unable to find the referenced region component: '{self._region_component}'"
                 )
-            if region_component._region_data is None:
+            if region_component.region is None:
                 raise ValueError(
                     f"Unable to get region from the referenced region component: '{self._region_component}'"
                 )
-            return region_component._region_data
+            return region_component.region
         return None
