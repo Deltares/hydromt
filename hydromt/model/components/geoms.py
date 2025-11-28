@@ -5,15 +5,14 @@ from glob import glob
 from typing import TYPE_CHECKING, Dict, Optional, Tuple, Union, cast
 
 import geopandas as gpd
-import numpy as np
 from geopandas import GeoDataFrame, GeoSeries
 from geopandas.testing import assert_geodataframe_equal
-from shapely.geometry import box
 
 from hydromt._utils.naming_convention import _expand_uri_placeholders
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step
+from hydromt.typing.crs import CRS
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model
@@ -80,20 +79,44 @@ class GeomsComponent(SpatialModelComponent):
                 self.read()
 
     @property
+    def crs(self) -> Optional[CRS]:
+        """Return the CRS of the geometries.
+
+        If multiple geometries with different CRS are present, return the CRS of the first one found.
+        If no geometries have a CRS, return None.
+        """
+        for geom in self.data.values():
+            if geom.crs is not None:
+                return geom.crs
+        return None
+
+    @property
     def _region_data(self) -> Optional[GeoDataFrame]:
-        # Use the total bounds of all geometries as region
+        """
+        Provide the region as the union of all geometries in the data dictionary.
+
+        The region is constructed by calling explode on each GeoDataFrame to in self.data
+        to split multi-part geometries into single-part geometries, followed by computing the union.
+
+        Returns
+        -------
+        geopandas.GeoDataFrame or None
+            The region geometry as the union of all geometries in the data dictionary,
+        """
+        # Use the union of all geometries as region
         if len(self.data) == 0:
             return None
-        bounds = np.column_stack([geom.total_bounds for geom in self.data.values()])
-        total_bounds = (
-            bounds[0, :].min(),
-            bounds[1, :].min(),
-            bounds[2, :].max(),
-            bounds[3, :].max(),
-        )
-        region = gpd.GeoDataFrame(geometry=[box(*total_bounds)], crs=self.model.crs)
 
-        return region
+        # Flatten all geometries from all GeoDataFrames
+        all_geoms = [
+            geom
+            for gdf in self.data.values()
+            if not gdf.empty
+            for geom in gdf.geometry.explode(index_parts=False)
+            if geom is not None and not geom.is_empty and geom.geom_type == "Polygon"
+        ]
+        union_geom = gpd.GeoSeries(all_geoms, crs=self.crs).union_all()
+        return gpd.GeoDataFrame(geometry=[union_geom], crs=self.crs)
 
     def set(self, geom: Union[GeoDataFrame, GeoSeries], name: str):
         """Add data to the geom component.
@@ -114,7 +137,7 @@ class GeomsComponent(SpatialModelComponent):
             geom = cast(GeoDataFrame, geom.to_frame())
 
         # Verify if a geom is set to model crs and if not sets geom to model crs
-        model_crs = self.model.crs
+        model_crs = self.model.crs or self.crs
         if model_crs and model_crs != geom.crs:
             geom.to_crs(model_crs.to_epsg(), inplace=True)
         self._data[name] = geom
