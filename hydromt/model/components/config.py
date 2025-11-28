@@ -136,7 +136,7 @@ class ConfigComponent(ModelComponent):
         match read_path.suffix.lower():
             case ".yaml" | ".yml":
                 self._data = read_yaml(read_path)
-            case ".toml" | ".ini":
+            case ".toml":
                 self._data = read_toml(read_path)
             case _:
                 raise ValueError(f"Unknown file extension: {read_path.suffix}")
