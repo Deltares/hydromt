@@ -237,7 +237,7 @@ class RasterioDriver(RasterDatasetDriver):
     def write(
         self,
         path: Path | str,
-        data: xr.Dataset,
+        data: xr.DataArray,
         *,
         write_kwargs: dict[str, Any] | None = None,
     ) -> Path:
@@ -251,16 +251,18 @@ class RasterioDriver(RasterDatasetDriver):
         ----------
         path : Path | str
             Destination path for the raster dataset.
-        data : xr.Dataset
-            The xarray Dataset to write.
+        data : xr.DataArray
+            The xarray DataArray to write.
         write_kwargs : dict[str, Any] | None, optional
             Additional keyword arguments for writing. Default is None.
 
-        Raises
-        ------
-        NotImplementedError
-            Always raised because writing is not supported in this driver.
+        Returns
+        -------
+        Path
+            The path to the written raster dataset.
         """
+        if isinstance(data, xr.Dataset):
+            raise ValueError("RasterioDriver.write only supports xr.DataArray inputs.")
         no_ext, ext = splitext(path)
         write_kwargs = write_kwargs or {}
         # set filepath if incompat

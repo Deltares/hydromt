@@ -78,6 +78,29 @@ class TestRasterioDriver:
             uris, mosaic=False, mosaic_kwargs=mosaic_kwargs
         )
 
+    def test_write(
+        self, rioda: xr.DataArray, tmp_path: Path, caplog: pytest.LogCaptureFixture
+    ):
+        uri: str = tmp_path / "test_write.tif"
+        p = RasterioDriver().write(uri, rioda)
+        assert isinstance(p, Path)
+        assert uri.is_file()
+
+        caplog.set_level("WARNING")
+        uri_unknown_extension = tmp_path / "test_write.raster"
+        p = RasterioDriver().write(uri_unknown_extension, rioda)
+        assert (
+            "Unknown extension for RasterioDriver: .raster, switching to .tif"
+            in caplog.text
+        )
+        assert p.exists()
+        assert p.suffix == ".tif"
+
+        with pytest.raises(ValueError, match="only supports xr.DataArray inputs"):
+            RasterioDriver().write(
+                tmp_path / "test_write_invalid.tif", rioda.to_dataset()
+            )
+
 
 class TestOpenMFRaster:
     @pytest.fixture
