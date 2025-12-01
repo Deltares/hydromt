@@ -142,7 +142,9 @@ class RasterDatasetSource(DataSource):
         if ds is None:  # handle_nodata == ignore
             return None
 
-        if "*" in str(file_path.stem):
+        if (
+            "*" in Path(file_path).stem
+        ):  # Check for wildcard in filename, indicating multiple file rasters
             file_dir = file_path.parent / self.name
             file_dir.mkdir(parents=True, exist_ok=True)
             for i in ds.dim0:
