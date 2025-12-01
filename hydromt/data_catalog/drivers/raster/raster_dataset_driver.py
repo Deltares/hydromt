@@ -74,6 +74,7 @@ class RasterDatasetDriver(BaseDriver, ABC):
         data: xr.Dataset,
         *,
         write_kwargs: dict[str, Any] | None = None,
+        source_name: str | None = None,
     ) -> Path:
         """
         Write a RasterDataset to a local file.
@@ -88,6 +89,8 @@ class RasterDatasetDriver(BaseDriver, ABC):
         write_kwargs : dict[str, Any] | None, optional
             Additional keyword arguments to pass to the underlying write function.
             Default is None.
+        source_name : str | None, optional
+            Optional name of the source dataset, used for naming conventions if needed.
 
         Returns
         -------
