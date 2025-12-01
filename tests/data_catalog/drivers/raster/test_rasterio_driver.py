@@ -82,13 +82,13 @@ class TestRasterioDriver:
         self, rioda: xr.DataArray, tmp_path: Path, caplog: pytest.LogCaptureFixture
     ):
         uri: str = tmp_path / "test_write.tif"
-        p = RasterioDriver().write(uri, rioda)
+        p = RasterioDriver().write(uri, rioda, source_name="test")
         assert isinstance(p, Path)
         assert uri.is_file()
 
         caplog.set_level("WARNING")
         uri_unknown_extension = tmp_path / "test_write.raster"
-        p = RasterioDriver().write(uri_unknown_extension, rioda)
+        p = RasterioDriver().write(uri_unknown_extension, rioda, source_name="test")
         assert (
             "Unknown extension for RasterioDriver: .raster, switching to .tif"
             in caplog.text
@@ -96,10 +96,33 @@ class TestRasterioDriver:
         assert p.exists()
         assert p.suffix == ".tif"
 
-        with pytest.raises(ValueError, match="only supports xr.DataArray inputs"):
-            RasterioDriver().write(
-                tmp_path / "test_write_invalid.tif", rioda.to_dataset()
-            )
+    def test_write_wildcard(self, rioda: xr.DataArray, tmp_path: Path):
+        uri: str = tmp_path / "test_write_*.tif"
+        with pytest.raises(
+            ValueError,
+            match="Writing multiple files with wildcard requires at least 3 dimensions in data array",
+        ):
+            RasterioDriver().write(uri, rioda, source_name="test")
+
+        # expand dims to have at least 3 dimensions
+        rioda_expanded = rioda.expand_dims("time").assign_coords(time=[0])
+        p = RasterioDriver().write(uri, rioda_expanded, source_name="test")
+        assert p == tmp_path / "test" / "test_0.tif"
+        assert (tmp_path / "test" / "test_0.tif").is_file()
+
+    def test_write_dataset(self, rioda: xr.DataArray, tmp_path: Path):
+        ds = rioda.to_dataset(name="var1")
+        uri: str = tmp_path / "test_write_dataset.tif"
+        p = RasterioDriver().write(uri, ds, source_name="rasterdataset")
+        assert p == tmp_path / "rasterdataset" / "var1.tif"
+
+        # Test with two variables
+        ds["var2"] = rioda + 10
+        uri: str = tmp_path / "test_write_dataset2.tif"
+        p = RasterioDriver().write(uri, ds, source_name="rasterdataset")
+        assert p == tmp_path / "rasterdataset" / "*.tif"
+        tif_files = list((tmp_path / "rasterdataset").glob("*.tif"))
+        assert len(tif_files) == 2
 
 
 class TestOpenMFRaster:

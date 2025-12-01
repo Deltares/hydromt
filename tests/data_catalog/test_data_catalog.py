@@ -636,6 +636,23 @@ def test_export_tiff_files_wild_card(tmp_path: Path, rioda: xr.DataArray):
     xr.testing.assert_equal(da_reread, data_catalog.get_rasterdataset("modis"))
 
 
+def test_export_dataset_rasterio(tmp_path: Path):
+    dc = DataCatalog(data_libs=["artifact_data=v1.0.0"])
+    new_root = tmp_path / "exported_vrt"
+    bbox = [12.0, 46.0, 13.0, 46.5]
+    dc.export_data(
+        new_root=new_root,
+        bbox=bbox,
+        source_names=["merit_hydro[elevtn,flwdir]"],
+        time_range=("2010-02-02", "2010-02-15"),
+        metadata={"version": "1"},
+    )
+    tif_files = os.listdir(new_root / "merit_hydro")
+    assert len(tif_files) == 2
+    assert "elevtn.tif" in tif_files
+    assert "flwdir.tif" in tif_files
+
+
 @pytest.mark.skip("flakey test due to external http issues")
 @pytest.mark.integration
 def test_http_data():
