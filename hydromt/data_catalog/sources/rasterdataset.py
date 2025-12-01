@@ -142,8 +142,10 @@ class RasterDatasetSource(DataSource):
         if ds is None:  # handle_nodata == ignore
             return None
 
+        file_path = Path(file_path)
+
         if (
-            "*" in Path(file_path).stem
+            "*" in file_path.stem and file_path.suffix == ".tif"
         ):  # Check for wildcard in filename, indicating multiple file rasters
             file_dir = file_path.parent / self.name
             file_dir.mkdir(parents=True, exist_ok=True)
