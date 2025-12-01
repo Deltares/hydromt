@@ -11,7 +11,7 @@ from pystac import Catalog as StacCatalog
 from hydromt.data_catalog.adapters import DataFrameAdapter
 from hydromt.data_catalog.drivers import DataFrameDriver
 from hydromt.data_catalog.sources import DataSource
-from hydromt.error import NoDataStrategy
+from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.typing import TimeRange
 from hydromt.typing.fsspec_types import FSSpecFileSystem
 
@@ -97,7 +97,11 @@ class DataFrameSource(DataSource):
             variables=variables, time_range=time_range, handle_nodata=handle_nodata
         )
         if df is None:
-            return self._handle_no_data_on_write(handle_nodata)
+            exec_nodata_strat(
+                handle_nodata,
+                f"Reading file(s) for {self.name} returned no data.",
+            )
+            return None
 
         # driver can return different path if file ext changes
         dest_path = driver.write(file_path, df, write_kwargs=write_kwargs)

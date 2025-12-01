@@ -1016,7 +1016,7 @@ class DataCatalog(object):
         metadata: Optional[Dict[str, Any]] = None,
         force_overwrite: bool = False,
         append: bool = False,
-        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.WARN,
     ) -> None:
         """Export a data slice of each dataset and a data_catalog.yml file to disk.
 
@@ -1045,6 +1045,9 @@ class DataCatalog(object):
             override any existing files if True. False by default.
         append: bool, optional
             If True, append to existing data catalog, by default False.
+        handle_nodata: NoDataStrategy, optional
+            Strategy to handle no data situations when exporting data. By default
+            it will log a warning message.
         """
         if time_range is not None:
             time_range = TimeRange.create(time_range)

@@ -92,7 +92,10 @@ class PandasDriver(DataFrameDriver):
             else:
                 raise IOError(f"DataFrame: extension {extension} unknown.")
         if df.index.size == 0:
-            exec_nodata_strat(f"No data from driver {self}'.", strategy=handle_nodata)
+            exec_nodata_strat(
+                f"No data from {self.name} driver for file uris: {', '.join(uris)}.",
+                strategy=handle_nodata,
+            )
         return df
 
     def write(

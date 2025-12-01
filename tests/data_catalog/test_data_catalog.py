@@ -594,14 +594,25 @@ def test_export_dataframe(tmp_path: Path, df, df_time):
 
 
 @pytest.mark.integration
-def test_export_data_bulk(tmp_path: Path):
+def test_export_data_bulk(tmp_path: Path, caplog: pytest.LogCaptureFixture):
     data_catalog = DataCatalog(data_libs=["artifact_data"])
     data_catalog_reread_path = tmp_path / "bulk_exported"
     data_catalog_reread_path.mkdir(exist_ok=True)
     bbox = [11.989, 46.02, 12.253, 46.166]  # Small bounding box in Piave basin
+    caplog.set_level(WARNING)
     data_catalog.export_data(data_catalog_reread_path, bbox=bbox, force_overwrite=True)
-    for f in os.listdir(data_catalog_reread_path):
-        assert Path(f).stem in data_catalog.sources
+    # test if data catalog can be read
+    new_data_catalog = DataCatalog(
+        data_libs=[str(data_catalog_reread_path / "data_catalog.yml")]
+    )
+    assert (
+        len(new_data_catalog) == 45
+    )  # Number of exported sources, not all exported due to nodat for this bbox
+
+    with pytest.raises(NoDataException):
+        data_catalog.export_data(
+            data_catalog_reread_path, bbox=bbox, handle_nodata=NoDataStrategy.RAISE
+        )
 
 
 @pytest.mark.skip("flakey test due to external http issues")

@@ -16,7 +16,7 @@ from pystac import MediaType
 from hydromt.data_catalog.adapters.dataset import DatasetAdapter
 from hydromt.data_catalog.drivers import DatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
-from hydromt.error import NoDataStrategy
+from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.typing import (
     TimeRange,
 )
@@ -120,7 +120,11 @@ class DatasetSource(DataSource):
             time_range=time_range, handle_nodata=handle_nodata
         )
         if ds is None:
-            return self._handle_no_data_on_write(handle_nodata)
+            exec_nodata_strat(
+                handle_nodata,
+                f"Reading file(s) for {self.name} returned no data.",
+            )
+            return None
 
         # driver can return different path if file ext changes
         dest_path = driver.write(
