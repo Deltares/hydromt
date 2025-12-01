@@ -80,10 +80,18 @@ class GeomsComponent(SpatialModelComponent):
 
     @property
     def crs(self) -> Optional[CRS]:
-        """Return the CRS of the geometries.
+        """
+        Return the coordinate reference system associated with the geometries.
 
-        If multiple geometries with different CRS are present, return the CRS of the first one found.
-        If no geometries have a CRS, return None.
+        If multiple GeoDataFrames are present with differing CRS values, the CRS of the first
+        GeoDataFrame that defines one is returned. If none of the stored geometries provide a
+        CRS, the method returns None.
+
+        Returns
+        -------
+        CRS or None
+            The CRS of the first geometry with a defined coordinate reference system, or None
+            if no CRS is available.
         """
         for geom in self.data.values():
             if geom.crs is not None:
@@ -93,15 +101,17 @@ class GeomsComponent(SpatialModelComponent):
     @property
     def _region_data(self) -> Optional[GeoDataFrame]:
         """
-        Provide the region as the union of all geometries in the data dictionary.
+        Return the region as the geometric union of all polygonal features stored in the data dictionary.
 
-        The region is constructed by calling explode on each GeoDataFrame to in self.data
-        to split multi-part geometries into single-part geometries, followed by computing the union.
+        Each GeoDataFrame in ``self.data`` is exploded to ensure that multi-part geometries are treated
+        as individual components before computing the union. Only geometries with area contribute to the
+        resulting region; non-area features such as points and lines are ignored.
 
         Returns
         -------
         geopandas.GeoDataFrame or None
-            The region geometry as the union of all geometries in the data dictionary,
+            A GeoDataFrame containing the unified region geometry, or None if no polygonal features
+            are available.
         """
         # Use the union of all geometries as region
         if len(self.data) == 0:
