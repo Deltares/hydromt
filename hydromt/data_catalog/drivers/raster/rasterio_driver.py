@@ -237,8 +237,9 @@ class RasterioDriver(RasterDatasetDriver):
     def write(
         self,
         path: Path | str,
-        data: xr.DataArray,
+        data: xr.Dataset | xr.DataArray,
         *,
+        source_name: str,
         write_kwargs: dict[str, Any] | None = None,
     ) -> Path:
         """
@@ -255,14 +256,14 @@ class RasterioDriver(RasterDatasetDriver):
             The xarray DataArray to write.
         write_kwargs : dict[str, Any] | None, optional
             Additional keyword arguments for writing. Default is None.
+        source_name : str
+            Name of the RasterDataSource, used when writing multiple variables.
 
         Returns
         -------
         Path
             The path to the written raster dataset.
         """
-        if isinstance(data, xr.Dataset):
-            raise ValueError("RasterioDriver.write only supports xr.DataArray inputs.")
         no_ext, ext = splitext(path)
         write_kwargs = write_kwargs or {}
         # set filepath if incompat
@@ -274,6 +275,35 @@ class RasterioDriver(RasterDatasetDriver):
             ext = _TIFF_EXT
 
         gdal_driver = GDAL_DRIVER_CODE_MAP.get(ext.lstrip(".").lower())
+
+        if "*" in str(path) and isinstance(data, xr.DataArray):
+            if len(data.dims) < 3:
+                raise ValueError(
+                    "Writing multiple files with wildcard requires at least 3 dimensions in data array"
+                )
+            file_dir = path.parent / source_name
+            file_dir.mkdir(parents=True, exist_ok=True)
+            dim0 = data.dims[0]
+            for i in data[dim0]:
+                ds_sel = data.sel({dim0: i})
+                file_path = file_dir / f"{source_name}_{i.values}{ext}"
+                ds_sel.raster.to_raster(
+                    file_path,
+                    driver=gdal_driver,
+                    **write_kwargs,
+                )
+            return file_path if len(data[dim0]) == 1 else file_dir / f"*{ext}"
+
+        if isinstance(data, xr.Dataset):
+            file_dir = Path(path).parent / source_name
+            file_dir.mkdir(parents=True, exist_ok=True)
+            for var in data.data_vars:
+                file_path = file_dir / f"{var}{ext}"
+                data_raster = data[var]
+                data_raster.raster.to_raster(
+                    file_path, driver=gdal_driver, **write_kwargs
+                )
+            return file_path if len(data.data_vars) == 1 else file_dir / f"*{ext}"
 
         data.raster.to_raster(path, driver=gdal_driver, **write_kwargs)
         return Path(path)

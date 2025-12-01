@@ -110,6 +110,7 @@ class RasterDatasetSource(DataSource):
         zoom: Zoom | None = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         write_kwargs: dict[str, Any] | None = None,
+        variables: List[str] | None = None,
     ) -> "RasterDatasetSource | None":
         """
         Write the RasterDatasetSource to a local file.
@@ -138,27 +139,16 @@ class RasterDatasetSource(DataSource):
             time_range=time_range,
             zoom=zoom,
             handle_nodata=handle_nodata,
+            variables=variables,
         )
         if ds is None:  # handle_nodata == ignore
             return None
 
         file_path = Path(file_path)
 
-        if (
-            "*" in file_path.stem and file_path.suffix == ".tif"
-        ):  # Check for wildcard in filename, indicating multiple file rasters
-            file_dir = file_path.parent / self.name
-            file_dir.mkdir(parents=True, exist_ok=True)
-            for i in ds.dim0:
-                ds_sel = ds.sel({ds.dim0.name: i})
-                driver.write(
-                    file_dir / f"{self.name}_{i.values}{file_path.suffix}",
-                    data=ds_sel,
-                    write_kwargs=write_kwargs,
-                )
-            dest_path = file_dir / file_path.name
-        else:
-            dest_path = driver.write(file_path, ds, write_kwargs=write_kwargs)
+        dest_path = driver.write(
+            file_path, ds, write_kwargs=write_kwargs, source_name=self.name
+        )
 
         # update driver based on local path
         update = {
