@@ -540,7 +540,9 @@ def _create_vector_model(
 ) -> Model:
     region_component = mocker.Mock(spec_set=SpatialModelComponent)
     region_component.test_equal.return_value = (True, {})
-    region_component.region = geodf
+    type(region_component)._region_data = mocker.PropertyMock(return_value=geodf)
+    type(region_component).region = mocker.PropertyMock(return_value=geodf)
+
     components: Dict[str, Any] = {
         "area": region_component,
         "vector": {"type": VectorComponent.__name__, "region_component": "area"},

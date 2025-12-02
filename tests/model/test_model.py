@@ -911,9 +911,11 @@ def test_vectormodel(vector_model, tmp_path: Path, mocker: MockerFixture, geodf)
     vector_model.root.set(tmp_path, mode="w")
     vector_model.write()
     # read model
-    region_component = mocker.Mock(spec_set=SpatialModelComponent)
+    region_component = mocker.create_autospec(SpatialModelComponent, instance=True)
     region_component.test_equal.return_value = (True, {})
-    region_component.region = geodf
+    type(region_component).region = mocker.PropertyMock(return_value=geodf)
+    type(region_component)._region_data = mocker.PropertyMock(return_value=geodf)
+
     model1 = Model(
         root=tmp_path,
         mode="r",
