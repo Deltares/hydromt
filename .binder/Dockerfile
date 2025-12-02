@@ -10,4 +10,4 @@ ENV HOME=/home/deltares \
 WORKDIR ${HOME}
 
 ENTRYPOINT ["pixi", "run", "-e", "slim-latest"]
-CMD ["pixi", "run", "-e", "slim-latest" , "jupyter", "notebook", "--no-browser", --port=8888", "--ip=0.0.0.0"]
+CMD ["pixi", "run", "-e", "slim-latest" , "jupyter", "notebook", "--no-browser", "--port=8888", "--ip=0.0.0.0"]
