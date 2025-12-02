@@ -38,7 +38,7 @@ shown keys is highly recommended. The ``rename``, ``nodata``, ``unit_add`` and
 .. testcode:: read_catalog
   :hide:
 
-  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
+  catalog = DataCatalog()
   catalog.from_yml("docs/assets/example_catalog_simple.yml")
 
 The catalog file can start with an *optional* global **metadata** data section:
