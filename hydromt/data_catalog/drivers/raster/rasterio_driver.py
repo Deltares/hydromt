@@ -252,8 +252,8 @@ class RasterioDriver(RasterDatasetDriver):
         ----------
         path : Path | str
             Destination path for the raster dataset.
-        data : xr.DataArray
-            The xarray DataArray to write.
+        data : xr.DataArray | xr.Dataset
+            The xarray DataArray or Dataset to write.
         write_kwargs : dict[str, Any] | None, optional
             Additional keyword arguments for writing. Default is None.
         source_name : str
