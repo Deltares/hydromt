@@ -48,6 +48,9 @@ jobs:
             PIXIENV=slim-latest
       - name:
         run: |
+          # actually fail when something goes wrong
+          set -e
+
           # run the docker image detached, it will start the jupyter server for us
           docker run -d -p 8888:8888 deltares/hydromt-binder:test
 
