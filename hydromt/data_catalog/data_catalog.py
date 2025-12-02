@@ -83,7 +83,6 @@ class DataCatalog(object):
     def __init__(
         self,
         data_libs: Optional[Union[List, str]] = None,
-        fallback_lib: Optional[str] = "artifact_data",
         cache: Optional[bool] = False,
         cache_dir: Optional[str] = None,
     ) -> None:
@@ -99,10 +98,6 @@ class DataCatalog(object):
             data catalogs. By default the data catalog is initiated without data
             entries. See :py:func:`~hydromt.data_catalog.DataCatalog.from_yml` for
             accepted yaml format.
-        fallback_lib:
-            Name of pre-defined data catalog to read if no data_libs are provided,
-            by default 'artifact_data'.
-            If None, no default data catalog is used.
         cache: bool, optional
             Set to true to cache data locally before reading.
             Currently only implemented for tiled rasterdatasets.
@@ -124,8 +119,6 @@ class DataCatalog(object):
         self._sources: Dict[str, DataSource] = {}
         self._catalogs: Dict[str, PredefinedCatalog] = {}
         self.root: str | Path | None = None
-        self._fallback_lib = fallback_lib
-
         # caching
         self.cache = bool(cache)
         if cache_dir is not None:
@@ -134,15 +127,12 @@ class DataCatalog(object):
         for name_or_path in data_libs:
             if str(name_or_path).split(".")[-1] in ["yml", "yaml"]:  # user defined
                 self.from_yml(name_or_path)
-            else:  # predefined
+            elif isinstance(name_or_path, str):  # predefined
                 self.from_predefined_catalogs(name_or_path)
 
     @property
     def sources(self) -> Dict[str, DataSource]:
         """Returns dictionary of DataSources."""
-        if len(self._sources) == 0 and self._fallback_lib is not None:
-            # read artifacts by default if no catalogs are provided
-            self.from_predefined_catalogs(self._fallback_lib)
         return self._sources
 
     def get_source_names(self) -> List[str]:
