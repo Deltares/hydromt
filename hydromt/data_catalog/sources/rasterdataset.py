@@ -141,8 +141,8 @@ class RasterDatasetSource(DataSource):
         )
         if ds is None:
             exec_nodata_strat(
-                handle_nodata,
                 f"Reading file(s) for {self.name} returned no data.",
+                handle_nodata,
             )
             return None
 
