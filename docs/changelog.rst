@@ -44,6 +44,8 @@ Changed
 - `write_nc` function no longer accepts kwargs, instead a dict `to_netcdf_kwargs` is used to pass arguments to `xarray.to_netcdf`. The function raises an error when "compute" is one of the arguments.
 - Function signatures of `DataCatalog` functions `get_rasterdataset`, `get_geodataframe`, `get_geodataset`, `get_dataset` and `get_dataframe` now have: ``source_kwargs`` (passed to `DataSource.__init__`) instead of just ``kwargs``, and ``time_tuple`` was renamed to ``time_range``. (#1291)
 - `DataCatalog` argument fallback_lib has been removed. Users now have to specify the name of the data catalog they want to use, even if it is artifact_data (#1069).
+- `GeomsComponent.region` now returns the geometric union of all polygonal features in the component instead of a bounding box. Only geometries with area (Polygons and MultiPolygons) contribute to the union; Points, LineStrings, and MultiLineStrings are excluded and assumed to lie within the polygon-defined area. (#1334)
+
 
 Fixed
 -----
