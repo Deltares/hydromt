@@ -1,7 +1,5 @@
 .. _changelog:
 
- Changelog
-
 ==========
 What's new
 ==========
@@ -10,9 +8,14 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
+v1.3.0-rc5 (2025-11-11)
+=======================
+Fixed
+-----
+- Logging of warnings when unused kwargs are passed.
 
-Unreleased
-==========
+v1.3.0-rc4 (2025-09-30)
+=======================
 
 ModelComponent API now contains functions for `ModelComponent.cleanup` and `ModelComponent.finish_write` that are called by the build and update functions. This stabilizes the write functionality and makes sure that netCDF files can be overwritten when the source and destination are the same. (#778)
 

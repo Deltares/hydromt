@@ -7473,7 +7473,7 @@ packages:
   requires_python: '>=3.8'
 - pypi: ./
   name: hydromt
-  version: 1.2.0.dev0
+  version: 1.3.0rc3
   sha256: 7e2a479fb7f52459849597ccb71132d69473b2da55c48e479f8d02bad5b78ef3
   requires_dist:
   - affine
