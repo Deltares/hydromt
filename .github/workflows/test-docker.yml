@@ -52,7 +52,7 @@ jobs:
           set -e
 
           # run the docker image detached, it will start the jupyter server for us
-          docker run -d -p 8888:8888 deltares/hydromt-binder:test
+          docker run -itd -p 8888:8888 deltares/hydromt-binder:test
 
           # give it a second to start up
           sleep 10
