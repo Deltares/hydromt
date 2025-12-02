@@ -34,10 +34,11 @@ jobs:
           load: true
           build-args: |
             PIXIENV=slim-latest
-      - name: Test Binder integration with repo2docker
-        run: |
-          pip install jupyter-repo2docker
-          repo2docker . echo 'success!'
+      - name: test build
+        uses: jupyterhub/repo2docker-action@master
+        with:
+          NO_PUSH: 'true'
+          IMAGE_NAME: "deltares/binder-test"
   test-docker:
     runs-on: ubuntu-latest
     concurrency:
