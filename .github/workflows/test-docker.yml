@@ -34,13 +34,39 @@ jobs:
           target: slim
           tags: deltares/hydromt:slim
           load: true
+          push: false
           build-args: |
             PIXIENV=slim-latest
-      - name: test build
-        uses: jupyterhub/repo2docker-action@master
+      - name: Build actual binder image
+        uses: docker/build-push-action@v6
         with:
-          NO_PUSH: 'true'
-          IMAGE_NAME: "deltares/binder-test"
+          context: .binder
+          tags: deltares/hydromt-binder:test
+          load: true
+          push: false
+          build-args: |
+            PIXIENV=slim-latest
+      - name:
+        run: |
+          # fail if something goes wrong
+          set -e
+
+          # run the docker image detached, it will start the jupyter server for us
+          docker run -d -p 8888:8888 deltares/hydromt-binder:test
+
+          # give it a second to start up
+          sleep 1
+
+          # check if we can reach the server
+          curl -f "http://localhost:8888/api/"
+
+          # let's be nice and cleanup after ourselves
+          docker kill "$(docker ps -q)"
+
+
+
+
+
   test-docker:
     runs-on: ubuntu-latest
     concurrency:

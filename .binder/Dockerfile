@@ -8,6 +8,6 @@ ENV HOME=/home/deltares \
     PYTHONDONTWRITEBYTECODE=1 \
     PYDEVD_DISABLE_FILE_VALIDATION=1
 WORKDIR ${HOME}
-COPY --chown=${NB_USER}:${NB_USER} examples ${REPO_DIR}/image-tests
+
 ENTRYPOINT ["pixi", "run", "-e", "slim-latest"]
-CMD ["pixi", "run", "-e", "slim-latest" , "jupyter", "notebook", "--port=8888", "--ip=0.0.0.0"]
+CMD ["pixi", "run", "-e", "slim-latest" , "jupyter", "notebook", "--no-browser", --port=8888", "--ip=0.0.0.0"]
