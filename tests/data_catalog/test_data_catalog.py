@@ -353,14 +353,10 @@ def test_version_catalogs_errors_on_unknown_version(data_catalog):
         _ = data_catalog.from_predefined_catalogs("deltares_data", "v1993.7")
 
 
-def test_data_catalog_lazy_loading():
+def test_empty_data_catalog():
     data_catalog = DataCatalog()
-
     assert len(data_catalog) == 0
-
-    # global data sources from fallback_lib are automatically added
-    _ = data_catalog.sources  # trigger loading
-    assert len(data_catalog) > 0
+    assert data_catalog.sources == {}
 
 
 def test_data_catalog_contains_source_version_permissive(data_catalog):
@@ -1743,7 +1739,7 @@ def test_detect_extent_geodataset(data_catalog):
 
 
 def test_to_stac_raster_dataset(tmp_path: Path):
-    data_catalog = DataCatalog()
+    data_catalog = DataCatalog(data_libs=["artifact_data"])
     _ = data_catalog.sources  # load artifact data
 
     _ = data_catalog.get_rasterdataset(  # mark as used
