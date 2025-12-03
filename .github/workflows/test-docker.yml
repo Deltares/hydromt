@@ -6,14 +6,14 @@ on:
     branches: [main]
     paths:
       - .github/workflows/test-docker.yml
-      - .binder/*
+      - .binder/**
       - Dockerfile
       - pyproject.toml
   pull_request:
     branches: [main]
     paths:
       - .github/workflows/test-docker.yml
-      - .binder/*
+      - .binder/**
       - Dockerfile
       - pyproject.toml
 
