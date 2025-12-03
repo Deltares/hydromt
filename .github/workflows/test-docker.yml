@@ -27,35 +27,24 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v4
       - name: Build slim
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: slim
-          tags: deltares/hydromt:slim
-          load: true
-          push: false
-          build-args: |
-            PIXIENV=slim-latest
+        # run this before so the image gets build locally instead of it
+        # trying to download it
+        run: pixi run docker-build-slim
       - name: Build actual binder image
-        uses: docker/build-push-action@v6
-        with:
-          context: .binder
-          tags: deltares/hydromt-binder:test
-          load: true
-          push: false
-          build-args: |
-            PIXIENV=slim-latest
+        run: pixi run docker-build-binder
       - name:
         run: |
           # actually fail when something goes wrong
           set -e
 
           # run the docker image detached, it will start the jupyter server for us
-          docker run -d -p 8888:8888 deltares/hydromt-binder:test
+          docker run -d -p 8888:8888 deltares/hydromt:binder
 
-          # give it a second to start up
-          sleep 10
+          # give it a second or two to start up
+          sleep 2
 
           docker container logs "$(docker ps -q)"
 

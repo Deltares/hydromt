@@ -322,6 +322,14 @@ docker-build-latest = { cmd = [
 	"docker-build",
 ], env = { DOCKER_TAG = "latest", DOCKER_TARGET = "slim" } }
 
+docker-build-binder = { cmd = [
+	"docker",
+	"build",
+	"-t",
+	"deltares/hydromt:binder",
+	".binder/",
+]}
+
 docker-publish-min = { cmd = [
 	"docker",
 	"push",
