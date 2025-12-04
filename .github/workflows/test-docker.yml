@@ -43,13 +43,8 @@ jobs:
           # give it a second or two to start up
           sleep 2
 
-          docker container logs "$(docker ps -q)"
-
           # check if we can reach the server
           curl -f "http://localhost:8888/api/"
-
-          # let's be nice and cleanup after ourselves
-          docker kill "$(docker ps -q)"
 
 
 
