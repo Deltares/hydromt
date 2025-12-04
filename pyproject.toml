@@ -328,7 +328,7 @@ docker-build-binder = { cmd = [
 	"-t",
 	"deltares/hydromt:binder",
 	".binder/",
-]}
+], "depends-on"=["dockker-build-slim"]}
 
 docker-publish-min = { cmd = [
 	"docker",
