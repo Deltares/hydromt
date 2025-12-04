@@ -49,7 +49,7 @@ jobs:
 
       # only show logs if previous step failed
       - name: show logs
-        if: ${{ steps.test-image.conclusion != 'success' }}
+        if: failure()
         run: |
           echo "# Containers:"
           docker container ls
