@@ -70,7 +70,7 @@ io = [
 	"s3fs",             # S3 file system
 ]
 vrt = [
-	"gdal>=3.5.0",      # vrt for caching of mosaic raster
+	"gdal>=3.5.0", # vrt for caching of mosaic raster
 ]
 extra = [
 	"matplotlib", # plotting; required for slippy tiles
@@ -328,7 +328,9 @@ docker-build-binder = { cmd = [
 	"-t",
 	"deltares/hydromt:binder",
 	".binder/",
-], "depends-on"=["dockker-build-slim"]}
+], "depends-on" = [
+	"docker-build-slim",
+] }
 
 docker-publish-min = { cmd = [
 	"docker",
