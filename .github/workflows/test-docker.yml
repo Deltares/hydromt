@@ -42,7 +42,7 @@ jobs:
           docker run -d -p 8888:8888 deltares/hydromt:binder
 
           # give it a second or two to start up
-          sleep 2
+          sleep 10
 
           # check if we can reach the server
           curl -f "http://localhost:8888/api/"
