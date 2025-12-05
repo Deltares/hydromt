@@ -110,6 +110,7 @@ class RasterDatasetSource(DataSource):
         zoom: Zoom | None = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         write_kwargs: dict[str, Any] | None = None,
+        variables: List[str] | None = None,
     ) -> "RasterDatasetSource | None":
         """
         Write the RasterDatasetSource to a local file.
@@ -138,11 +139,16 @@ class RasterDatasetSource(DataSource):
             time_range=time_range,
             zoom=zoom,
             handle_nodata=handle_nodata,
+            variables=variables,
         )
         if ds is None:  # handle_nodata == ignore
             return None
 
-        dest_path = driver.write(file_path, ds, write_kwargs=write_kwargs)
+        file_path = Path(file_path)
+
+        dest_path = driver.write(
+            file_path, ds, write_kwargs=write_kwargs, source_name=self.name
+        )
 
         # update driver based on local path
         update = {
