@@ -1,7 +1,6 @@
 """Driver using rasterio for RasterDataset."""
 
 import logging
-from os.path import splitext
 from pathlib import Path
 from typing import Any, ClassVar
 
@@ -239,7 +238,6 @@ class RasterioDriver(RasterDatasetDriver):
         path: Path | str,
         data: xr.Dataset | xr.DataArray,
         *,
-        source_name: str,
         write_kwargs: dict[str, Any] | None = None,
     ) -> Path:
         """
@@ -264,15 +262,11 @@ class RasterioDriver(RasterDatasetDriver):
         Path
             The path to the written raster dataset.
         """
-        no_ext, ext = splitext(path)
+        ext = Path(path).suffix
         write_kwargs = write_kwargs or {}
         # set filepath if incompat
         if ext not in self.SUPPORTED_EXTENSIONS:
-            logger.warning(
-                f"Unknown extension for RasterioDriver: {ext}, switching to .tif"
-            )
-            path = no_ext + _TIFF_EXT
-            ext = _TIFF_EXT
+            raise ValueError(f"Unknown extension for RasterioDriver: {ext}")
 
         gdal_driver = GDAL_DRIVER_CODE_MAP.get(ext.lstrip(".").lower())
 
@@ -281,12 +275,12 @@ class RasterioDriver(RasterDatasetDriver):
                 raise ValueError(
                     "Writing multiple files with wildcard requires at least 3 dimensions in data array"
                 )
-            file_dir = path.parent / source_name
+            file_dir = Path(path).parent
             file_dir.mkdir(parents=True, exist_ok=True)
             dim0 = data.dims[0]
             for i in data[dim0]:
                 ds_sel = data.sel({dim0: i})
-                file_path = file_dir / f"{source_name}_{i.values}{ext}"
+                file_path = file_dir / f"{file_dir.stem}_{i.values}{ext}"
                 ds_sel.raster.to_raster(
                     file_path,
                     driver=gdal_driver,
@@ -295,7 +289,7 @@ class RasterioDriver(RasterDatasetDriver):
             return file_path if len(data[dim0]) == 1 else file_dir / f"*{ext}"
 
         if isinstance(data, xr.Dataset):
-            file_dir = Path(path).parent / source_name
+            file_dir = Path(path).parent
             file_dir.mkdir(parents=True, exist_ok=True)
             for var in data.data_vars:
                 file_path = file_dir / f"{var}{ext}"

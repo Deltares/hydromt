@@ -1142,8 +1142,14 @@ class DataCatalog(object):
                             basename: str = source._get_uri_basename(
                                 handle_nodata, **source_kwargs
                             )
+                            if "*" in basename:
+                                p = Path(new_root) / source.name / basename
+                                p.parent.mkdir(parents=True, exist_ok=True)
+                            elif query_kwargs.get("variables", None):
+                                p = Path(new_root) / source.name / basename
+                            else:
+                                p = Path(new_root) / basename
 
-                            p = cast(Path, Path(new_root) / basename)
                             if not force_overwrite and isfile(p):
                                 logger.warning(
                                     f"File {p} already exists and not in forced overwrite mode. skipping..."

@@ -147,7 +147,9 @@ class RasterDatasetSource(DataSource):
         file_path = Path(file_path)
 
         dest_path = driver.write(
-            file_path, ds, write_kwargs=write_kwargs, source_name=self.name
+            file_path,
+            ds,
+            write_kwargs=write_kwargs,
         )
 
         # update driver based on local path
