@@ -36,3 +36,14 @@ class TestDataFrameSource:
         df: pd.DataFrame,
     ):
         pd.testing.assert_frame_equal(df, MockDataFrameSource.read_data())
+
+    def test_to_file_nodata(
+        self, MockDataFrameSource: DataFrameSource, managed_tmp_path: Path, mocker
+    ):
+        output_path = managed_tmp_path / "output.csv"
+        mocker.patch(
+            "hydromt.data_catalog.sources.dataframe.DataFrameSource.read_data",
+            return_value=None,
+        )
+        p = MockDataFrameSource.to_file(output_path)
+        assert p is None
