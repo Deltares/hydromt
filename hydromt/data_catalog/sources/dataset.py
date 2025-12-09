@@ -16,7 +16,7 @@ from pystac import MediaType
 from hydromt.data_catalog.adapters.dataset import DatasetAdapter
 from hydromt.data_catalog.drivers import DatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
-from hydromt.error import NoDataStrategy, exec_nodata_strat
+from hydromt.error import NoDataStrategy
 from hydromt.typing import (
     TimeRange,
 )
@@ -85,6 +85,7 @@ class DatasetSource(DataSource):
             variables=variables,
             time_range=time_range,
             single_var_as_array=single_var_as_array,
+            handle_nodata=handle_nodata,
         )
 
     def to_file(
@@ -119,11 +120,7 @@ class DatasetSource(DataSource):
         ds: Optional[xr.Dataset] = self.read_data(
             time_range=time_range, handle_nodata=handle_nodata
         )
-        if ds is None:
-            exec_nodata_strat(
-                handle_nodata,
-                f"Reading file(s) for {self.name} returned no data.",
-            )
+        if ds is None:  # handle_nodata == ignore
             return None
 
         # driver can return different path if file ext changes

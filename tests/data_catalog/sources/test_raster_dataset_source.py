@@ -1,4 +1,3 @@
-import re
 from pathlib import Path
 from typing import Type
 
@@ -10,7 +9,6 @@ from hydromt.data_catalog.adapters import RasterDatasetAdapter
 from hydromt.data_catalog.drivers import RasterDatasetDriver
 from hydromt.data_catalog.sources import RasterDatasetSource
 from hydromt.data_catalog.uri_resolvers import URIResolver
-from hydromt.error import NoDataException, NoDataStrategy
 from hydromt.gis.gis_utils import _to_geographic_bbox
 from hydromt.typing import SourceMetadata
 
@@ -66,11 +64,3 @@ class TestRasterDatasetSource:
     )
     def test_infer_default_driver(self, uri, expected_driver):
         assert RasterDatasetSource._infer_default_driver(uri) == expected_driver
-
-    def test_to_file_nodata(self, writable_source: RasterDatasetSource, mocker):
-        mocker.patch.object(RasterDatasetSource, "read_data", return_value=None)
-        with pytest.raises(
-            NoDataException,
-            match=re.escape("Reading file(s) for test returned no data."),
-        ):
-            writable_source.to_file("output.zarr", handle_nodata=NoDataStrategy.RAISE)

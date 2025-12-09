@@ -595,8 +595,11 @@ def test_export_data_bulk(tmp_path: Path, caplog: pytest.LogCaptureFixture):
     data_catalog_reread_path = tmp_path / "bulk_exported"
     data_catalog_reread_path.mkdir(exist_ok=True)
     bbox = [11.989, 46.02, 12.253, 46.166]  # Small bounding box in Piave basin
-    caplog.set_level(WARNING)
-    data_catalog.export_data(data_catalog_reread_path, bbox=bbox, force_overwrite=True)
+    data_catalog.export_data(
+        data_catalog_reread_path,
+        bbox=bbox,
+        force_overwrite=True,
+    )
     # test if data catalog can be read
     new_data_catalog = DataCatalog(
         data_libs=[str(data_catalog_reread_path / "data_catalog.yml")]

@@ -1,4 +1,3 @@
-import re
 from pathlib import Path
 from typing import Type
 
@@ -9,7 +8,6 @@ from hydromt.data_catalog.adapters import DataFrameAdapter
 from hydromt.data_catalog.drivers import DataFrameDriver
 from hydromt.data_catalog.sources import DataFrameSource
 from hydromt.data_catalog.uri_resolvers import URIResolver
-from hydromt.error import NoDataException
 
 
 class TestDataFrameSource:
@@ -38,15 +36,3 @@ class TestDataFrameSource:
         df: pd.DataFrame,
     ):
         pd.testing.assert_frame_equal(df, MockDataFrameSource.read_data())
-
-    def test_to_file_nodata(self, mocker, MockDataFrameSource: DataFrameSource):
-        mocker.patch.object(
-            DataFrameSource,
-            "read_data",
-            return_value=None,
-        )
-        with pytest.raises(
-            NoDataException,
-            match=re.escape("Reading file(s) for example_source returned no data."),
-        ):
-            MockDataFrameSource.to_file("file.csv")

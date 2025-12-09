@@ -17,7 +17,7 @@ from pystac import MediaType
 from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog.drivers import GeoDataFrameDriver
 from hydromt.data_catalog.sources.data_source import DataSource
-from hydromt.error import NoDataStrategy, exec_nodata_strat
+from hydromt.error import NoDataStrategy
 from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
 from hydromt.typing import (
     Bbox,
@@ -127,10 +127,6 @@ class GeoDataFrameSource(DataSource):
             handle_nodata=handle_nodata,
         )
         if gdf is None:  # handle_nodata == ignore
-            exec_nodata_strat(
-                handle_nodata,
-                f"Reading file(s) for {self.name} returned no data.",
-            )
             return None
 
         dest_path = driver.write(file_path, gdf, write_kwargs=write_kwargs)

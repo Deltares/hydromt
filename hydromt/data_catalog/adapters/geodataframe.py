@@ -75,9 +75,12 @@ class GeoDataFrameAdapter(DataAdapterBase):
             )
             # uniformize
             if gdf is not None:
+                if gdf.empty:
+                    raise NoDataException()
                 gdf = self._apply_unit_conversions(gdf)
                 gdf = self._set_metadata(gdf, metadata)
-            return gdf
+                return gdf
+            raise NoDataException()
         except NoDataException:
             exec_nodata_strat(
                 "No data was read from source",

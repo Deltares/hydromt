@@ -17,7 +17,7 @@ from pystac import MediaType
 from hydromt.data_catalog.adapters.rasterdataset import RasterDatasetAdapter
 from hydromt.data_catalog.drivers import RasterDatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
-from hydromt.error import NoDataStrategy, exec_nodata_strat
+from hydromt.error import NoDataStrategy
 from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
 from hydromt.typing import (
     Bbox,
@@ -96,6 +96,7 @@ class RasterDatasetSource(DataSource):
             time_range=time_range,
             single_var_as_array=single_var_as_array,
             buffer=buffer,
+            handle_nodata=handle_nodata,
         )
 
     def to_file(
@@ -139,11 +140,7 @@ class RasterDatasetSource(DataSource):
             zoom=zoom,
             handle_nodata=handle_nodata,
         )
-        if ds is None:
-            exec_nodata_strat(
-                f"Reading file(s) for {self.name} returned no data.",
-                handle_nodata,
-            )
+        if ds is None:  # handle_nodata == ignore
             return None
 
         dest_path = driver.write(file_path, ds, write_kwargs=write_kwargs)
