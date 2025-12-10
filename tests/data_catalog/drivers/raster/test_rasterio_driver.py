@@ -100,21 +100,26 @@ class TestRasterioDriver:
         # expand dims to have at least 3 dimensions
         rioda_expanded = rioda.expand_dims("time").assign_coords(time=[0])
         p = RasterioDriver().write(uri, rioda_expanded)
-        assert p == tmp_path / "test_write_wildcard0_0.tif"
-        assert (tmp_path / "test_write_wildcard0_0.tif").is_file()
+        written = list(uri.parent.glob(uri.name))
+        assert len(written) == 1
+        assert p == uri
 
     def test_write_dataset(self, rioda: xr.DataArray, tmp_path: Path):
         ds = rioda.to_dataset(name="var1")
-        uri: str = tmp_path / "test_write_dataset.tif"
+        test_dir = tmp_path / "test_dataset"
+        test_dir.mkdir(parents=True, exist_ok=True)
+        uri: str = test_dir / "test_write_dataset.tif"
         p = RasterioDriver().write(uri, ds)
-        assert p == tmp_path / "var1.tif"
+        assert p == uri
 
         # Test with two variables
         ds["var2"] = rioda + 10
-        uri: str = tmp_path / "test_write_dataset2.tif"
+        test_dir2 = tmp_path / "test_dataset2"
+        test_dir2.mkdir(parents=True, exist_ok=True)
+        uri: str = test_dir2 / "test_write_dataset2.tif"
         p = RasterioDriver().write(uri, ds)
-        assert p == tmp_path / "*.tif"
-        tif_files = list((tmp_path).glob("*.tif"))
+        assert p == uri.parent / "*.tif"
+        tif_files = list((uri.parent).glob("*.tif"))
         assert len(tif_files) == 2
 
 

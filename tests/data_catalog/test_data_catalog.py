@@ -32,7 +32,6 @@ from hydromt.data_catalog.adapters import (
 )
 from hydromt.data_catalog.data_catalog import (
     DataCatalog,
-    _create_export_data_file_path,
     _denormalise_data_dict,
     _parse_data_source_dict,
     _yml_from_uri_or_path,
@@ -1809,16 +1808,3 @@ def test_get_rasterdataset_with_unit_add(data_catalog: DataCatalog):
     # assert that the ds goes from 2010-02-02 to 2010-02-10, because of unit_add time (+1 day) in the data catalog
     assert ds["time"].values[0] == np.datetime64("2010-02-02T00:00:00")
     assert ds["time"].values[-1] == np.datetime64("2010-02-10T00:00:00")
-
-
-def test_create_export_data_file_path(tmp_path: Path):
-    dc = DataCatalog(data_libs=["artifact_data"])
-    source = dc.get_source("chelsa")
-    p = _create_export_data_file_path(tmp_path, source, {}, NoDataStrategy.IGNORE)
-    assert p == tmp_path / "chelsa.tif"
-
-    source = dc.get_source("merit_hydro")
-    p = _create_export_data_file_path(
-        tmp_path, source, {"variables": ["elevtn"]}, NoDataStrategy.IGNORE
-    )
-    assert p == tmp_path / "merit_hydro" / "elevtn.tif"

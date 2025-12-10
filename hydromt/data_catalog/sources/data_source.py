@@ -160,7 +160,8 @@ class DataSource(BaseModel, ABC):
 
         return res
 
-    def _get_uri_basename(self, handle_nodata: NoDataStrategy, **query_kwargs) -> str:
+    def _get_relative_uri(self, handle_nodata: NoDataStrategy, **query_kwargs) -> Path:
+        uri = PurePath(self.uri)
         if "{" in self.uri:
             # first resolve any placeholders
             uris: List[str] = self.uri_resolver.resolve(
@@ -171,17 +172,13 @@ class DataSource(BaseModel, ABC):
 
             # if multiple_uris, use the first one:
             if len(uris) > 0:
-                uri: str = uris[0]
+                uri = PurePath(uris[0])
             else:
                 raise NoDataException("!")
-        else:
-            uri: str = self.uri
+        if self.root and uri.is_absolute():
+            uri = uri.relative_to(self.root)
 
-        basename: Optional[str] = PurePath(uri).name
-        if basename is None:
-            raise ValueError(f"Failed to get basename of uri: {self.uri}")
-        else:
-            return basename
+        return uri
 
     def get_time_range(
         self, detect: bool = True, strict: bool = False
