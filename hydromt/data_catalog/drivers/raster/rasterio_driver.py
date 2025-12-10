@@ -262,45 +262,65 @@ class RasterioDriver(RasterDatasetDriver):
         Path
             The path to the written raster dataset.
         """
-        ext = Path(path).suffix
+        path = Path(path)
         write_kwargs = write_kwargs or {}
         # set filepath if incompat
-        if ext not in self.SUPPORTED_EXTENSIONS:
-            raise ValueError(f"Unknown extension for RasterioDriver: {ext}")
+        if path.suffix not in self.SUPPORTED_EXTENSIONS:
+            raise ValueError(f"Unknown extension for RasterioDriver: {path.suffix}")
 
-        gdal_driver = GDAL_DRIVER_CODE_MAP.get(ext.lstrip(".").lower())
+        gdal_driver = GDAL_DRIVER_CODE_MAP.get(path.suffix.lstrip(".").lower())
 
         if "*" in str(path) and isinstance(data, xr.DataArray):
             if len(data.dims) < 3:
                 raise ValueError(
                     "Writing multiple files with wildcard requires at least 3 dimensions in data array"
                 )
-            file_dir = Path(path).parent
-            file_dir.mkdir(parents=True, exist_ok=True)
+
+            if path.name.count("*") != 1:
+                raise ValueError(
+                    "There must be exactly one wildcard `*` in the filename when multiple outputs required"
+                )
+            path.parent.mkdir(parents=True, exist_ok=True)
+
+            written = []
             dim0 = data.dims[0]
-            for i in data[dim0]:
-                ds_sel = data.sel({dim0: i})
-                file_path = file_dir / f"{file_dir.stem}_{i.values}{ext}"
+            for label in data[dim0].values:
+                file_name = path.name.replace("*", f"{label}")
+                file_path = path.with_name(file_name)
+                if file_path in written:
+                    raise ValueError(
+                        f"Duplicate output file_path generated: {file_path}"
+                    )
+                written.append(file_path)
+                ds_sel = data.sel({dim0: label})
                 ds_sel.raster.to_raster(
                     file_path,
                     driver=gdal_driver,
                     **write_kwargs,
                 )
-            return file_path if len(data[dim0]) == 1 else file_dir / f"*{ext}"
+
+            return path  # return path with the wildcard still there
 
         if isinstance(data, xr.Dataset):
-            file_dir = Path(path).parent
-            file_dir.mkdir(parents=True, exist_ok=True)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            written = []
             for var in data.data_vars:
-                file_path = file_dir / f"{var}{ext}"
+                file_name = path.name.replace("*", f"{var}")
+                file_path = path.with_name(file_name)
+                if file_path in written:
+                    raise ValueError(
+                        f"Duplicate output file_path generated: {file_path}"
+                    )
+                written.append(file_path)
                 data_raster = data[var]
                 data_raster.raster.to_raster(
                     file_path, driver=gdal_driver, **write_kwargs
                 )
-            return file_path if len(data.data_vars) == 1 else file_dir / f"*{ext}"
+            # return with wildcard if multiple vars, else return the only written file path
+            return file_path if len(data.data_vars) == 1 else path
 
         data.raster.to_raster(path, driver=gdal_driver, **write_kwargs)
-        return Path(path)
+        return path
 
     @staticmethod
     def _get_zoom_levels_and_crs(uri: str) -> tuple[dict[int, float], int]:

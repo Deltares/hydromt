@@ -998,7 +998,8 @@ class DataCatalog(object):
 
     def export_data(
         self,
-        new_root: Union[Path, str],
+        new_root: Path | str,
+        old_root: Path | str | None = None,
         bbox: Optional[Bbox] = None,
         time_range: TimeRange | tuple | dict | None = None,
         source_names: Optional[List[str]] = None,
@@ -1014,6 +1015,9 @@ class DataCatalog(object):
         ----------
         new_root : str, Path
             Path to output folder
+        old_root: str, Path, optional
+            Path to current root folder, by default None. Required if `self.root` is not
+            set or doesnt exist
         bbox : array-like of floats
             (xmin, ymin, xmax, ymax) bounding box of area of interest.
         time_range : TimeRange | tuple | dict | None, optional
@@ -1042,10 +1046,17 @@ class DataCatalog(object):
         # Create new root
         source_names = source_names or []
         metadata = metadata or {}
-        if not isinstance(new_root, Path):
-            new_root = Path(new_root)
 
-        new_root = new_root.absolute()
+        if old_root is None:
+            if self.root is None or not Path(self.root).exists():
+                raise ValueError(
+                    f"No valid data catalog root specified, it must exist: {self.root} or {old_root}"
+                )
+            old_root = Path(self.root).resolve()
+        else:
+            old_root = Path(old_root).resolve()
+
+        new_root = Path(new_root).resolve()
         new_root.mkdir(exist_ok=True)
 
         # create copy of data with selected source names
@@ -1139,9 +1150,8 @@ class DataCatalog(object):
                             source_kwargs.pop("bbox", None)
                             source_kwargs["mask"] = mask
 
-                            p = _create_export_data_file_path(
-                                new_root, source, source_kwargs, handle_nodata
-                            )
+                            rel_path = Path(source.full_uri).relative_to(old_root)
+                            p = Path(new_root, rel_path)
 
                             if not force_overwrite and isfile(p):
                                 logger.warning(
@@ -1882,22 +1892,3 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
             data_list.extend(_denormalise_data_dict(item))
 
     return data_list
-
-
-def _create_export_data_file_path(
-    new_root: Path,
-    source: DataSource,
-    source_kwargs: Dict,
-    handle_nodata: NoDataStrategy,
-) -> Path:
-    """Create export data file path based on source and query kwargs."""
-    basename: str = source._get_uri_basename(handle_nodata, **source_kwargs)
-    if "*" in basename or (
-        source_kwargs.get("variables", None)
-        and isinstance(source.driver, RasterioDriver)
-    ):
-        p = Path(new_root) / source.name / basename
-        p.parent.mkdir(parents=True, exist_ok=True)
-    else:
-        p = Path(new_root) / basename
-    return p

@@ -32,7 +32,6 @@ from hydromt.data_catalog.adapters import (
 )
 from hydromt.data_catalog.data_catalog import (
     DataCatalog,
-    _create_export_data_file_path,
     _denormalise_data_dict,
     _parse_data_source_dict,
     _yml_from_uri_or_path,
@@ -596,19 +595,24 @@ def test_export_tiff_files_wild_card(tmp_path: Path, rioda: xr.DataArray):
     da = data_catalog.get_rasterdataset("modis_lai")
 
     # Write one GeoTIFF per time step
-    files_dir = tmp_path / "tiff_files"
-    files_dir.mkdir(exist_ok=True)
+    catalog_root = tmp_path / "old_root"
+    catalog_root.mkdir(exist_ok=True)
+    rel_path_rioda = Path("rioda", "lai_*.tif")
+    full_path_rioda = catalog_root / rel_path_rioda
+    full_path_rioda.parent.mkdir(parents=True, exist_ok=True)
+
     for i in da.time.values:
         # Select a single time step and keep time as a length-1 dimension
         da_sel = da.sel(time=i).expand_dims("time")
         # Write each time slice to its own GeoTIFF file
-        da_sel.raster.to_raster(str(files_dir / f"lai_{i}.tif"))
+        file_name = full_path_rioda.name.replace("*", str(i))
+        da_sel.raster.to_raster(str(full_path_rioda.with_name(file_name)))
 
     # Build a catalog entry that uses a wildcard to match all written TIFFs
     # `concat=True` instructs the rasterio reader to concatenate matched files along the band/time axis
     data_dict = {
         "modis": {
-            "uri": str(files_dir / "*.tif"),
+            "uri": str(rel_path_rioda),
             "driver": {
                 "name": "rasterio",
                 "options": {"chunks": {"x": "auto", "y": "auto"}, "concat": True},
@@ -619,7 +623,7 @@ def test_export_tiff_files_wild_card(tmp_path: Path, rioda: xr.DataArray):
 
     # Load the wildcard source into a fresh DataCatalog
     data_catalog = DataCatalog()
-    data_catalog.from_dict(data_dict)
+    data_catalog.from_dict(data_dict, root=str(catalog_root))
 
     # Export the concatenated dataset and re-open it from the exported catalog
     data_catalog_reread_path = tmp_path / "tiff_files_exported"
@@ -1809,16 +1813,3 @@ def test_get_rasterdataset_with_unit_add(data_catalog: DataCatalog):
     # assert that the ds goes from 2010-02-02 to 2010-02-10, because of unit_add time (+1 day) in the data catalog
     assert ds["time"].values[0] == np.datetime64("2010-02-02T00:00:00")
     assert ds["time"].values[-1] == np.datetime64("2010-02-10T00:00:00")
-
-
-def test_create_export_data_file_path(tmp_path: Path):
-    dc = DataCatalog(data_libs=["artifact_data"])
-    source = dc.get_source("chelsa")
-    p = _create_export_data_file_path(tmp_path, source, {}, NoDataStrategy.IGNORE)
-    assert p == tmp_path / "chelsa.tif"
-
-    source = dc.get_source("merit_hydro")
-    p = _create_export_data_file_path(
-        tmp_path, source, {"variables": ["elevtn"]}, NoDataStrategy.IGNORE
-    )
-    assert p == tmp_path / "merit_hydro" / "elevtn.tif"

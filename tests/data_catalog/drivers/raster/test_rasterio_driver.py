@@ -100,8 +100,9 @@ class TestRasterioDriver:
         # expand dims to have at least 3 dimensions
         rioda_expanded = rioda.expand_dims("time").assign_coords(time=[0])
         p = RasterioDriver().write(uri, rioda_expanded)
-        assert p == tmp_path / "test_write_wildcard0_0.tif"
-        assert (tmp_path / "test_write_wildcard0_0.tif").is_file()
+        written = list(uri.parent.glob(uri.name))
+        assert len(written) == 1
+        assert p == uri
 
     def test_write_dataset(self, rioda: xr.DataArray, tmp_path: Path):
         ds = rioda.to_dataset(name="var1")
