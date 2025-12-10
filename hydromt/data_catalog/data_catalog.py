@@ -1139,16 +1139,9 @@ class DataCatalog(object):
                             source_kwargs.pop("bbox", None)
                             source_kwargs["mask"] = mask
 
-                            basename: str = source._get_uri_basename(
-                                handle_nodata, **source_kwargs
+                            p = _create_export_data_file_path(
+                                new_root, source, source_kwargs, handle_nodata
                             )
-                            if "*" in basename:
-                                p = Path(new_root) / source.name / basename
-                                p.parent.mkdir(parents=True, exist_ok=True)
-                            elif query_kwargs.get("variables", None):
-                                p = Path(new_root) / source.name / basename
-                            else:
-                                p = Path(new_root) / basename
 
                             if not force_overwrite and isfile(p):
                                 logger.warning(
@@ -1889,3 +1882,22 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
             data_list.extend(_denormalise_data_dict(item))
 
     return data_list
+
+
+def _create_export_data_file_path(
+    new_root: Path,
+    source: DataSource,
+    source_kwargs: Dict,
+    handle_nodata: NoDataStrategy,
+) -> Path:
+    """Create export data file path based on source and query kwargs."""
+    basename: str = source._get_uri_basename(handle_nodata, **source_kwargs)
+    if "*" in basename or (
+        source_kwargs.get("variables", None)
+        and isinstance(source.driver, RasterioDriver)
+    ):
+        p = Path(new_root) / source.name / basename
+        p.parent.mkdir(parents=True, exist_ok=True)
+    else:
+        p = Path(new_root) / basename
+    return p
