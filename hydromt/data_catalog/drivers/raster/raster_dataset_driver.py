@@ -88,8 +88,6 @@ class RasterDatasetDriver(BaseDriver, ABC):
         write_kwargs : dict[str, Any] | None, optional
             Additional keyword arguments to pass to the underlying write function.
             Default is None.
-        source_name : str | None, optional
-            Optional name of the source dataset, used for naming conventions if needed.
 
         Returns
         -------

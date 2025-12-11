@@ -254,8 +254,6 @@ class RasterioDriver(RasterDatasetDriver):
             The xarray DataArray or Dataset to write.
         write_kwargs : dict[str, Any] | None, optional
             Additional keyword arguments for writing. Default is None.
-        source_name : str
-            Name of the RasterDataSource, used when writing multiple variables.
 
         Returns
         -------
@@ -264,7 +262,6 @@ class RasterioDriver(RasterDatasetDriver):
         """
         path = Path(path)
         write_kwargs = write_kwargs or {}
-        # set filepath if incompat
         if path.suffix not in self.SUPPORTED_EXTENSIONS:
             raise ValueError(f"Unknown extension for RasterioDriver: {path.suffix}")
 
