@@ -30,6 +30,7 @@ New
 - `hydromt check` accepts a `--format` flag to check either v1 or v0 data catalogs (#1265)
 - `hydromt check` accepts a `--upgrade` flag to upgrade v0 datacatalogs to the new v1 format (#1265)
 - `Model` can now be used as a context manager. This ensures that all open files are closed when exiting the context. (#1272)
+- `RasterioDriver` now supports writing tif files. (#1332)
 
 Changed
 -------
@@ -64,6 +65,7 @@ Fixed
 - Build and update functions call `ModelComponent.cleanup` and `ModelComponent.finish_write`. Stabilizing the write functionality and making sure that netCDF files can be overwritten when the source and destination are the same. (#778)
 - `hydromt check` has been updated to validate v1 data catalogs (#1265)
 - All handling of log files is now done with the context manager `hydromt._utils.log.to_file`. This means that they are always closed by the the function that opened them. (#1272)
+- `DataCatalog.export_data` now correctly handles rasterdata that have been written with paths containing wildcards. (#1323)
 
 Deprecated
 ----------

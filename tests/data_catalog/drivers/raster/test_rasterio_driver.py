@@ -78,6 +78,50 @@ class TestRasterioDriver:
             uris, mosaic=False, mosaic_kwargs=mosaic_kwargs
         )
 
+    def test_write(self, rioda: xr.DataArray, tmp_path: Path):
+        uri: str = tmp_path / "test_write.tif"
+        p = RasterioDriver().write(uri, rioda)
+        assert isinstance(p, Path)
+        assert uri.is_file()
+        uri_unknown_extension = tmp_path / "test_write.raster"
+        with pytest.raises(
+            ValueError, match="Unknown extension for RasterioDriver: .raster"
+        ):
+            RasterioDriver().write(uri_unknown_extension, rioda)
+
+    def test_write_wildcard(self, rioda: xr.DataArray, tmp_path: Path):
+        uri: str = tmp_path / "test_write_*.tif"
+        with pytest.raises(
+            ValueError,
+            match="Writing multiple files with wildcard requires at least 3 dimensions in data array",
+        ):
+            RasterioDriver().write(uri, rioda)
+
+        # expand dims to have at least 3 dimensions
+        rioda_expanded = rioda.expand_dims("time").assign_coords(time=[0])
+        p = RasterioDriver().write(uri, rioda_expanded)
+        written = list(uri.parent.glob(uri.name))
+        assert len(written) == 1
+        assert p == uri
+
+    def test_write_dataset(self, rioda: xr.DataArray, tmp_path: Path):
+        ds = rioda.to_dataset(name="var1")
+        test_dir = tmp_path / "test_dataset"
+        test_dir.mkdir(parents=True, exist_ok=True)
+        uri: str = test_dir / "test_write_dataset.tif"
+        p = RasterioDriver().write(uri, ds)
+        assert p == uri
+
+        # Test with two variables
+        ds["var2"] = rioda + 10
+        test_dir2 = tmp_path / "test_dataset2"
+        test_dir2.mkdir(parents=True, exist_ok=True)
+        uri: str = test_dir2 / "test_write_dataset2.tif"
+        p = RasterioDriver().write(uri, ds)
+        assert p == uri.parent / "*.tif"
+        tif_files = list((uri.parent).glob("*.tif"))
+        assert len(tif_files) == 2
+
 
 class TestOpenMFRaster:
     @pytest.fixture

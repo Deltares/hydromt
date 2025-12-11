@@ -589,6 +589,75 @@ def test_export_dataframe(tmp_path: Path, df, df_time):
         assert isinstance(obj, dtypes), key
 
 
+@pytest.mark.integration
+def test_export_tiff_files_wild_card(tmp_path: Path, rioda: xr.DataArray):
+    data_catalog = DataCatalog(data_libs=["artifact_data"])
+    da = data_catalog.get_rasterdataset("modis_lai")
+
+    # Write one GeoTIFF per time step
+    files_dir = tmp_path / "tiff_files"
+    files_dir.mkdir(exist_ok=True)
+    for i in da.time.values:
+        # Select a single time step and keep time as a length-1 dimension
+        da_sel = da.sel(time=i).expand_dims("time")
+        # Write each time slice to its own GeoTIFF file
+        da_sel.raster.to_raster(str(files_dir / f"lai_{i}.tif"))
+
+    # Build a catalog entry that uses a wildcard to match all written TIFFs
+    # `concat=True` instructs the rasterio reader to concatenate matched files along the band/time axis
+    data_dict = {
+        "modis": {
+            "uri": str(files_dir / "lai_*.tif"),
+            "driver": {
+                "name": "rasterio",
+                "options": {"chunks": {"x": "auto", "y": "auto"}, "concat": True},
+            },
+            "data_type": "RasterDataset",
+        }
+    }
+
+    data_catalog = DataCatalog()
+    data_catalog.from_dict(data_dict)
+
+    with pytest.raises(
+        ValueError, match="Cannot write source modis with wildcard to root"
+    ):
+        data_catalog.export_data(
+            new_root=str(tmp_path / "tiff_files_exported"), source_names=["modis"]
+        )
+
+    data_catalog = DataCatalog()
+    data_catalog.from_dict(data_dict, root=tmp_path)
+
+    # Export the concatenated dataset and re-open it from the exported catalog
+    data_catalog_reread_path = tmp_path / "tiff_files_exported"
+    data_catalog.export_data(
+        new_root=str(data_catalog_reread_path), source_names=["modis"]
+    )
+    new_datacatalog = DataCatalog(str(data_catalog_reread_path / "data_catalog.yml"))
+
+    # Read back the dataset and assert it matches the original concatenated dataset
+    da_reread = new_datacatalog.get_rasterdataset("modis")
+    xr.testing.assert_equal(da_reread, data_catalog.get_rasterdataset("modis"))
+
+
+def test_export_dataset_rasterio(tmp_path: Path):
+    dc = DataCatalog(data_libs=["artifact_data=v1.0.0"])
+    new_root = tmp_path / "exported_vrt"
+    bbox = [12.0, 46.0, 13.0, 46.5]
+    dc.export_data(
+        new_root=new_root,
+        bbox=bbox,
+        source_names=["merit_hydro[elevtn,flwdir]"],
+        time_range=("2010-02-02", "2010-02-15"),
+        metadata={"version": "1"},
+    )
+    tif_files = os.listdir(new_root / "merit_hydro")
+    assert len(tif_files) == 2
+    assert "elevtn.tif" in tif_files
+    assert "flwdir.tif" in tif_files
+
+
 @pytest.mark.skip("flakey test due to external http issues")
 @pytest.mark.integration
 def test_http_data():

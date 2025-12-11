@@ -1139,11 +1139,20 @@ class DataCatalog(object):
                             source_kwargs.pop("bbox", None)
                             source_kwargs["mask"] = mask
 
-                            basename: str = source._get_uri_basename(
+                            relative_uri: Path = source._get_relative_uri(
                                 handle_nodata, **source_kwargs
                             )
 
-                            p = cast(Path, Path(new_root) / basename)
+                            if (
+                                len(relative_uri.parts) == 1
+                                and "*" in relative_uri.name
+                            ):
+                                raise ValueError(
+                                    f"Cannot write source {source.name} with wildcard to root"
+                                )
+
+                            p = new_root / relative_uri
+                            p.parent.mkdir(parents=True, exist_ok=True)
                             if not force_overwrite and isfile(p):
                                 logger.warning(
                                     f"File {p} already exists and not in forced overwrite mode. skipping..."

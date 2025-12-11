@@ -16,6 +16,7 @@ from hydromt.config import SETTINGS
 from hydromt.data_catalog.drivers.base_driver import DriverOptions
 from hydromt.data_catalog.drivers.raster import RasterDatasetDriver
 from hydromt.error import NoDataStrategy, exec_nodata_strat
+from hydromt.gis._gdal_drivers import GDAL_DRIVER_CODE_MAP
 from hydromt.gis.gis_utils import zoom_to_overview_level
 from hydromt.readers import open_mfraster
 from hydromt.typing import (
@@ -26,6 +27,8 @@ from hydromt.typing import (
 )
 
 logger = logging.getLogger(__name__)
+
+_TIFF_EXT = ".tif"
 
 
 class RasterioOptions(DriverOptions):
@@ -92,11 +95,10 @@ class RasterioDriver(RasterDatasetDriver):
     """
 
     name = "rasterio"
+    supports_writing = True
     SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {
-        "." + extension
-        for extension in rasterio.drivers.raster_driver_extensions()
-        if extension != "nc"
-    }  # Exclude netcdf as a supported file type
+        "." + extension for extension in GDAL_DRIVER_CODE_MAP.keys()
+    }
     options: RasterioOptions = Field(default_factory=RasterioOptions)
 
     def read(
@@ -234,7 +236,7 @@ class RasterioDriver(RasterDatasetDriver):
     def write(
         self,
         path: Path | str,
-        data: xr.Dataset,
+        data: xr.Dataset | xr.DataArray,
         *,
         write_kwargs: dict[str, Any] | None = None,
     ) -> Path:
@@ -248,17 +250,68 @@ class RasterioDriver(RasterDatasetDriver):
         ----------
         path : Path | str
             Destination path for the raster dataset.
-        data : xr.Dataset
-            The xarray Dataset to write.
+        data : xr.DataArray | xr.Dataset
+            The xarray DataArray or Dataset to write.
         write_kwargs : dict[str, Any] | None, optional
             Additional keyword arguments for writing. Default is None.
 
-        Raises
-        ------
-        NotImplementedError
-            Always raised because writing is not supported in this driver.
+        Returns
+        -------
+        Path
+            The path to the written raster dataset.
         """
-        raise NotImplementedError()
+        path = Path(path)
+        write_kwargs = write_kwargs or {}
+        if path.suffix not in self.SUPPORTED_EXTENSIONS:
+            raise ValueError(f"Unknown extension for RasterioDriver: {path.suffix}")
+
+        gdal_driver = GDAL_DRIVER_CODE_MAP.get(path.suffix.lstrip(".").lower())
+
+        if "*" in str(path) and isinstance(data, xr.DataArray):
+            if len(data.dims) < 3:
+                raise ValueError(
+                    "Writing multiple files with wildcard requires at least 3 dimensions in data array"
+                )
+
+            path = Path(path)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            if path.name.count("*") != 1:
+                raise ValueError(
+                    "There must be exactly one wildcard `*` in the filename when multiple outputs required"
+                )
+
+            dim0 = data.dims[0]
+
+            for label in data[dim0]:
+                ds_sel = data.sel({dim0: label})
+                file_name = path.name.replace("*", f"{label.values}")
+
+                ds_sel.raster.to_raster(
+                    path.with_name(file_name),
+                    driver=gdal_driver,
+                    **write_kwargs,
+                )
+
+            return path
+        if isinstance(data, xr.Dataset):
+            if len(data.data_vars) == 1:
+                data = data[list(data.data_vars.keys())[0]]
+            else:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                for var in data.data_vars:
+                    if "*" in path.name:
+                        file_name = path.name.replace("*", var)
+                        file_path = path.with_name(file_name)
+                    else:
+                        file_path = path.parent / f"{var}{path.suffix}"
+                    data_raster = data[var]
+                    data_raster.raster.to_raster(
+                        file_path, driver=gdal_driver, **write_kwargs
+                    )
+                return path if "*" in path.name else path.parent / f"*{path.suffix}"
+
+        data.raster.to_raster(path, driver=gdal_driver, **write_kwargs)
+        return path
 
     @staticmethod
     def _get_zoom_levels_and_crs(uri: str) -> tuple[dict[int, float], int]:
