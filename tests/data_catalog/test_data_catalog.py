@@ -595,6 +595,7 @@ def test_export_data_bulk(tmp_path: Path, caplog: pytest.LogCaptureFixture):
     data_catalog_reread_path = tmp_path / "bulk_exported"
     data_catalog_reread_path.mkdir(exist_ok=True)
     bbox = [11.989, 46.02, 12.253, 46.166]  # Small bounding box in Piave basin
+
     data_catalog.export_data(
         data_catalog_reread_path,
         bbox=bbox,
@@ -604,9 +605,23 @@ def test_export_data_bulk(tmp_path: Path, caplog: pytest.LogCaptureFixture):
     new_data_catalog = DataCatalog(
         data_libs=[str(data_catalog_reread_path / "data_catalog.yml")]
     )
-    assert (
-        len(new_data_catalog) == 45
-    )  # Number of exported sources, not all exported due to nodat for this bbox
+
+    data_catalog_export_path = tmp_path / "bulk_exported_2"
+
+    new_data_catalog.export_data(
+        data_catalog_export_path,
+    )
+
+    new_data_catalog_reread = DataCatalog(
+        data_libs=[str(data_catalog_export_path / "data_catalog.yml")]
+    )
+    assert len(new_data_catalog_reread.sources) == len(new_data_catalog.sources)
+
+    for name in new_data_catalog_reread.sources:
+        assert name in new_data_catalog.sources
+        source = new_data_catalog_reread.get_source(name)
+        assert source.metadata == new_data_catalog.get_source(name).metadata
+        assert source.driver == new_data_catalog.get_source(name).driver
 
     with pytest.raises(NoDataException):
         data_catalog.export_data(

@@ -14,7 +14,7 @@ from hydromt.error import NoDataStrategy
 
 class TestDatasetSource:
     @pytest.fixture
-    def MockDatasetSource(
+    def mock_dataset_source(
         self,
         MockDatasetDriver: Type[DatasetDriver],
         mock_ds_adapter: DatasetAdapter,
@@ -35,9 +35,9 @@ class TestDatasetSource:
     def test_read_data(
         self,
         timeseries_ds: xr.Dataset,
-        MockDatasetSource: DatasetSource,
+        mock_dataset_source: DatasetSource,
     ):
-        xr.testing.assert_equal(timeseries_ds, MockDatasetSource.read_data())
+        xr.testing.assert_equal(timeseries_ds, mock_dataset_source.read_data())
 
     def test_to_stac_catalog(self, tmp_path: Path, timeseries_ds: xr.Dataset):
         path = tmp_path / "test.nc"
@@ -92,12 +92,12 @@ class TestDatasetSource:
         assert catalog is None
 
     def test_to_file_nodate(
-        self, MockDatasetSource: DatasetSource, managed_tmp_path: Path, mocker
+        self, mock_dataset_source: DatasetSource, managed_tmp_path: Path, mocker
     ):
         output_path = managed_tmp_path / "output.nc"
         mocker.patch(
             "hydromt.data_catalog.sources.dataset.DatasetSource.read_data",
             return_value=None,
         )
-        p = MockDatasetSource.to_file(output_path)
+        p = mock_dataset_source.to_file(output_path)
         assert p is None
