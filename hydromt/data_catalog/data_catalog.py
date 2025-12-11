@@ -1152,6 +1152,7 @@ class DataCatalog(object):
                                 )
 
                             p = new_root / relative_uri
+                            p.parent.mkdir(parents=True, exist_ok=True)
                             if not force_overwrite and isfile(p):
                                 logger.warning(
                                     f"File {p} already exists and not in forced overwrite mode. skipping..."
