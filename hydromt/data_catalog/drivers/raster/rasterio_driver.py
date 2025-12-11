@@ -308,7 +308,7 @@ class RasterioDriver(RasterDatasetDriver):
                     data_raster.raster.to_raster(
                         file_path, driver=gdal_driver, **write_kwargs
                     )
-                return path.parent / f"*{path.suffix}"
+                return path if "*" in path.name else path.parent / f"*{path.suffix}"
 
         data.raster.to_raster(path, driver=gdal_driver, **write_kwargs)
         return path
