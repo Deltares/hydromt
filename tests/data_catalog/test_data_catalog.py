@@ -589,6 +589,46 @@ def test_export_dataframe(tmp_path: Path, df, df_time):
         assert isinstance(obj, dtypes), key
 
 
+@pytest.mark.integration
+def test_export_data_bulk(tmp_path: Path, caplog: pytest.LogCaptureFixture):
+    data_catalog = DataCatalog(data_libs=["artifact_data"])
+    data_catalog_reread_path = tmp_path / "bulk_exported"
+    data_catalog_reread_path.mkdir(exist_ok=True)
+    bbox = [11.989, 46.02, 12.253, 46.166]  # Small bounding box in Piave basin
+
+    data_catalog.export_data(
+        data_catalog_reread_path,
+        bbox=bbox,
+        force_overwrite=True,
+    )
+    # test if data catalog can be read
+    new_data_catalog = DataCatalog(
+        data_libs=[str(data_catalog_reread_path / "data_catalog.yml")]
+    )
+
+    data_catalog_export_path = tmp_path / "bulk_exported_2"
+
+    new_data_catalog.export_data(
+        data_catalog_export_path,
+    )
+
+    new_data_catalog_reread = DataCatalog(
+        data_libs=[str(data_catalog_export_path / "data_catalog.yml")]
+    )
+    assert len(new_data_catalog_reread.sources) == len(new_data_catalog.sources)
+
+    for name in new_data_catalog_reread.sources:
+        assert name in new_data_catalog.sources
+        source = new_data_catalog_reread.get_source(name)
+        assert source.metadata == new_data_catalog.get_source(name).metadata
+        assert source.driver == new_data_catalog.get_source(name).driver
+
+    with pytest.raises(NoDataException):
+        data_catalog.export_data(
+            data_catalog_reread_path, bbox=bbox, handle_nodata=NoDataStrategy.RAISE
+        )
+
+
 @pytest.mark.skip("flakey test due to external http issues")
 @pytest.mark.integration
 def test_http_data():

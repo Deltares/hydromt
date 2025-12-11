@@ -96,6 +96,7 @@ class RasterDatasetSource(DataSource):
             time_range=time_range,
             single_var_as_array=single_var_as_array,
             buffer=buffer,
+            handle_nodata=handle_nodata,
         )
 
     def to_file(

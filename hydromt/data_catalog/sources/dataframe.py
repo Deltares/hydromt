@@ -96,7 +96,7 @@ class DataFrameSource(DataSource):
         df = self.read_data(
             variables=variables, time_range=time_range, handle_nodata=handle_nodata
         )
-        if df is None:
+        if df is None:  # handle_nodata == ignore
             return None
 
         # driver can return different path if file ext changes

@@ -85,6 +85,7 @@ class DatasetSource(DataSource):
             variables=variables,
             time_range=time_range,
             single_var_as_array=single_var_as_array,
+            handle_nodata=handle_nodata,
         )
 
     def to_file(
@@ -119,7 +120,7 @@ class DatasetSource(DataSource):
         ds: Optional[xr.Dataset] = self.read_data(
             time_range=time_range, handle_nodata=handle_nodata
         )
-        if ds is None:
+        if ds is None:  # handle_nodata == ignore
             return None
 
         # driver can return different path if file ext changes
