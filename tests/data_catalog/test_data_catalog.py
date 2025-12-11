@@ -607,7 +607,7 @@ def test_export_tiff_files_wild_card(tmp_path: Path, rioda: xr.DataArray):
     # `concat=True` instructs the rasterio reader to concatenate matched files along the band/time axis
     data_dict = {
         "modis": {
-            "uri": str(files_dir / "*.tif"),
+            "uri": str(files_dir / "lai_*.tif"),
             "driver": {
                 "name": "rasterio",
                 "options": {"chunks": {"x": "auto", "y": "auto"}, "concat": True},
@@ -616,9 +616,18 @@ def test_export_tiff_files_wild_card(tmp_path: Path, rioda: xr.DataArray):
         }
     }
 
-    # Load the wildcard source into a fresh DataCatalog
     data_catalog = DataCatalog()
     data_catalog.from_dict(data_dict)
+
+    with pytest.raises(
+        ValueError, match="Cannot write source modis with wildcard to root"
+    ):
+        data_catalog.export_data(
+            new_root=str(tmp_path / "tiff_files_exported"), source_names=["modis"]
+        )
+
+    data_catalog = DataCatalog()
+    data_catalog.from_dict(data_dict, root=tmp_path)
 
     # Export the concatenated dataset and re-open it from the exported catalog
     data_catalog_reread_path = tmp_path / "tiff_files_exported"

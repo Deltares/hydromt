@@ -177,6 +177,9 @@ class DataSource(BaseModel, ABC):
                 raise NoDataException("!")
         if self.root and uri.is_absolute():
             uri = uri.relative_to(self.root)
+        elif not self.root and uri.is_absolute():
+            # Edge case when creating a DataCatalog from a dictionary without specifying a root
+            uri = PurePath(uri.name)
 
         return uri
 
