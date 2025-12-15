@@ -50,6 +50,6 @@ jobs:
       - name: Test
         run: pixi run --locked test-cov
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v6
+        uses: SonarSource/sonarqube-scan-action@v7
         env:
           SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN_2025 }}
