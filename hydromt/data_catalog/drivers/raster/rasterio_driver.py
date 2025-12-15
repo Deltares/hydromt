@@ -286,10 +286,8 @@ class RasterioDriver(RasterDatasetDriver):
                 ds_sel = data.sel({dim0: label})
                 file_name = path.name.replace("*", f"{label.values}")
 
-                ds_sel.raster.to_raster(
-                    path.with_name(file_name),
-                    driver=gdal_driver,
-                    **write_kwargs,
+                self._write_raster(
+                    ds_sel, gdal_driver, path.with_name(file_name), **write_kwargs
                 )
 
             return path
@@ -305,12 +303,11 @@ class RasterioDriver(RasterDatasetDriver):
                     else:
                         file_path = path.parent / f"{var}{path.suffix}"
                     data_raster = data[var]
-                    data_raster.raster.to_raster(
-                        file_path, driver=gdal_driver, **write_kwargs
+                    self._write_raster(
+                        data_raster, gdal_driver, file_path, **write_kwargs
                     )
                 return path if "*" in path.name else path.parent / f"*{path.suffix}"
-
-        data.raster.to_raster(path, driver=gdal_driver, **write_kwargs)
+        self._write_raster(data, gdal_driver, path, **write_kwargs)
         return path
 
     @staticmethod
@@ -333,3 +330,21 @@ class RasterioDriver(RasterDatasetDriver):
         except rasterio.RasterioIOError as e:
             logger.warning(f"IO error while detecting zoom levels: {e}")
         return zoom_levels, crs
+
+    def _write_raster(
+        self, data: xr.DataArray, driver: str, path: Path, **write_kwargs: Any
+    ) -> None:
+        """Write raster data to file using rasterio."""
+        y_coords = data[data.raster.y_dim]
+        x_coords = data[data.raster.x_dim]
+        if (
+            y_coords.size < 2
+            or (y_coords.ndim == 2 and y_coords.shape[0] < 2)
+            or x_coords.size < 2
+            or (x_coords.ndim == 2 and x_coords.shape[1] < 2)
+        ):
+            exec_nodata_strat(
+                f"Cannot write raster data with insufficient spatial dimensions: {data.raster.y_dim} size {y_coords.size}, {data.raster.x_dim} size {x_coords.size}",
+                strategy=NoDataStrategy.RAISE,
+            )
+        data.raster.to_raster(path, driver=driver, **write_kwargs)
