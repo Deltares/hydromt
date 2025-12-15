@@ -9,6 +9,7 @@ from hydromt._compat import HAS_OPENPYXL
 from hydromt.data_catalog.drivers.geodataframe.table_driver import (
     GeoDataFrameTableDriver,
 )
+from hydromt.error import NoDataException
 
 
 class TestGeoDataFrameTableDriver:
@@ -79,3 +80,14 @@ class TestGeoDataFrameTableDriver:
         driver = GeoDataFrameTableDriver()
         gdf = driver.read(uris=[uri])
         pd.testing.assert_frame_equal(gdf, geodf)
+
+    def test_read_no_data(self, mocker):
+        mocker.patch(
+            "hydromt.data_catalog.drivers.geodataframe.table_driver.open_vector_from_table",
+            return_value=gpd.GeoDataFrame(),
+        )
+        with pytest.raises(
+            NoDataException,
+            match="No data from geodataframe_table driver for file uris: some_path.csv.",
+        ):
+            GeoDataFrameTableDriver().read(uris=["some_path.csv"])

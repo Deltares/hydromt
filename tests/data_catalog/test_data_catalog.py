@@ -658,6 +658,47 @@ def test_export_dataset_rasterio(tmp_path: Path):
     assert "flwdir.tif" in tif_files
 
 
+def test_export_data_bulk(tmp_path: Path, caplog: pytest.LogCaptureFixture):
+    data_catalog = DataCatalog(data_libs=["artifact_data"])
+    data_catalog_reread_path = tmp_path / "bulk_exported"
+    data_catalog_reread_path.mkdir(exist_ok=True)
+    bbox = [11.989, 46.02, 12.253, 46.166]  # Small bounding box in Piave basin
+
+    data_catalog.export_data(
+        data_catalog_reread_path,
+        bbox=bbox,
+        force_overwrite=True,
+    )
+    # test if data catalog can be read
+    new_data_catalog = DataCatalog(
+        data_libs=[str(data_catalog_reread_path / "data_catalog.yml")]
+    )
+
+    data_catalog_export_path = tmp_path / "bulk_exported_2"
+
+    new_data_catalog.export_data(
+        data_catalog_export_path,
+    )
+
+    new_data_catalog_reread = DataCatalog(
+        data_libs=[str(data_catalog_export_path / "data_catalog.yml")]
+    )
+    assert len(new_data_catalog_reread) == len(new_data_catalog)
+
+    sources = new_data_catalog.list_sources()
+    sources_reread = new_data_catalog_reread.list_sources()
+
+    for source, source_reread in zip(sources, sources_reread, strict=True):
+        assert source[0] == source_reread[0]
+        assert source[1].driver == source_reread[1].driver
+        assert source[1].metadata == source_reread[1].metadata
+
+    with pytest.raises(NoDataException):
+        data_catalog.export_data(
+            data_catalog_reread_path, bbox=bbox, handle_nodata=NoDataStrategy.RAISE
+        )
+
+
 @pytest.mark.skip("flakey test due to external http issues")
 @pytest.mark.integration
 def test_http_data():
