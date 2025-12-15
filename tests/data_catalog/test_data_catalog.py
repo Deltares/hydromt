@@ -617,11 +617,13 @@ def test_export_data_bulk(tmp_path: Path, caplog: pytest.LogCaptureFixture):
     )
     assert len(new_data_catalog_reread) == len(new_data_catalog)
 
-    for name in new_data_catalog_reread.get_source_names():
-        assert name in new_data_catalog.get_source_names()
-        source = new_data_catalog_reread.get_source(name)
-        assert source.metadata == new_data_catalog.get_source(name).metadata
-        assert source.driver == new_data_catalog.get_source(name).driver
+    sources = new_data_catalog.list_sources()
+    sources_reread = new_data_catalog_reread.list_sources()
+
+    for source, source_reread in zip(sources, sources_reread, strict=True):
+        assert source[0] == source_reread[0]
+        assert source[1].driver == source_reread[1].driver
+        assert source[1].metadata == source_reread[1].metadata
 
     with pytest.raises(NoDataException):
         data_catalog.export_data(
