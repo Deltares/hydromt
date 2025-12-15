@@ -511,12 +511,12 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-12-02 09:13:48,049 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data v1.0.0
-2025-12-02 09:13:48,049 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
-{&#39;artifact_data&#39;: &lt;hydromt.data_catalog.predefined_catalog.ArtifactDataCatalog object at 0x7f02a272a690&gt;,
- &#39;aws_data&#39;: &lt;hydromt.data_catalog.predefined_catalog.AWSDataCatalog object at 0x7f02a2729a90&gt;,
- &#39;deltares_data&#39;: &lt;hydromt.data_catalog.predefined_catalog.DeltaresDataCatalog object at 0x7f02a815bc50&gt;,
- &#39;gcs_cmip6_data&#39;: &lt;hydromt.data_catalog.predefined_catalog.GCSCMIP6DataCatalog object at 0x7f02a815dad0&gt;}
+2025-12-15 10:04:37,524 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data v1.0.0
+2025-12-15 10:04:37,524 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
+{&#39;artifact_data&#39;: &lt;hydromt.data_catalog.predefined_catalog.ArtifactDataCatalog object at 0x7f9f3630b950&gt;,
+ &#39;aws_data&#39;: &lt;hydromt.data_catalog.predefined_catalog.AWSDataCatalog object at 0x7f9f30732310&gt;,
+ &#39;deltares_data&#39;: &lt;hydromt.data_catalog.predefined_catalog.DeltaresDataCatalog object at 0x7f9f31231190&gt;,
+ &#39;gcs_cmip6_data&#39;: &lt;hydromt.data_catalog.predefined_catalog.GCSCMIP6DataCatalog object at 0x7f9f30732c50&gt;}
 </pre></div></div>
 </div>
 <p>In this notebook, we will see how we can create a data catalog for several type of input data. For this we have prepared several type of data that we will catalogue, let’s see which data we have available:</p>
@@ -595,7 +595,7 @@ CRS: GEOGCS[&#34;WGS 84&#34;,DATUM[&#34;WGS_1984&#34;,SPHEROID[&#34;WGS 84&#34;,
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f03205e8e10&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f9f3057d7d0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -645,8 +645,8 @@ CRS: GEOGCS[&#34;WGS 84&#34;,DATUM[&#34;WGS_1984&#34;,SPHEROID[&#34;WGS 84&#34;,
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-12-02 09:13:50,433 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from tmpdir/vito.yml
-2025-12-02 09:13:50,435 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading vito RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/vito.tif
+2025-12-15 10:04:39,909 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from tmpdir/vito.yml
+2025-12-15 10:04:39,911 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading vito RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/vito.tif
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1141,7 +1141,7 @@ Coordinates:
 Attributes:
     AREA_OR_POINT:  Area
     _FillValue:     255
-    source_file:    vito.tif</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-obj-name'>&#x27;vito&#x27;</div><ul class='xr-dim-list'><li><span class='xr-has-index'>y</span>: 1613</li><li><span class='xr-has-index'>x</span>: 1412</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-494df43e-068f-420a-a51a-d2b42898fceb' class='xr-array-in' type='checkbox' checked><label for='section-494df43e-068f-420a-a51a-d2b42898fceb' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>dask.array&lt;chunksize=(1613, 1412), meta=np.ndarray&gt;</span></div><div class='xr-array-data'><table>
+    source_file:    vito.tif</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-obj-name'>&#x27;vito&#x27;</div><ul class='xr-dim-list'><li><span class='xr-has-index'>y</span>: 1613</li><li><span class='xr-has-index'>x</span>: 1412</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-ddca1b6a-731b-43b7-af82-3659238bc7f1' class='xr-array-in' type='checkbox' checked><label for='section-ddca1b6a-731b-43b7-af82-3659238bc7f1' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>dask.array&lt;chunksize=(1613, 1412), meta=np.ndarray&gt;</span></div><div class='xr-array-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1196,9 +1196,9 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></div></li><li class='xr-section-item'><input id='section-7f166095-3411-456b-8e5e-89712f72e52c' class='xr-section-summary-in' type='checkbox'  checked><label for='section-7f166095-3411-456b-8e5e-89712f72e52c' class='xr-section-summary' >Coordinates: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>y</span></div><div class='xr-var-dims'>(y)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>46.8 46.8 46.8 ... 45.2 45.2 45.2</div><input id='attrs-fd9b9d63-05f0-471c-8c72-5a1d05bc94c2' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-fd9b9d63-05f0-471c-8c72-5a1d05bc94c2' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-2581249a-7395-4125-9941-227bfefb8652' class='xr-var-data-in' type='checkbox'><label for='data-2581249a-7395-4125-9941-227bfefb8652' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([46.799603, 46.798611, 46.797619, ..., 45.202381, 45.201389, 45.200397],
-      shape=(1613,))</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>x</span></div><div class='xr-var-dims'>(x)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>11.6 11.6 11.6 ... 13.0 13.0 13.0</div><input id='attrs-71a3b1af-07fe-42c5-9477-babd622db0ee' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-71a3b1af-07fe-42c5-9477-babd622db0ee' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-7638c471-e701-4e0a-876f-be692e35bd88' class='xr-var-data-in' type='checkbox'><label for='data-7638c471-e701-4e0a-876f-be692e35bd88' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([11.600198, 11.60119 , 11.602183, ..., 12.998016, 12.999008, 13.      ],
-      shape=(1412,))</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0</div><input id='attrs-50c0a652-d29c-4b05-9059-fe748039f862' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-50c0a652-d29c-4b05-9059-fe748039f862' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-fdfdd5f6-ca46-40ef-a26c-5d871aed51df' class='xr-var-data-in' type='checkbox'><label for='data-fdfdd5f6-ca46-40ef-a26c-5d871aed51df' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>crs_wkt :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314245179</dd><dt><span>inverse_flattening :</span></dt><dd>298.257223563</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>WGS 84</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>WGS 84</dd><dt><span>horizontal_datum_name :</span></dt><dd>World Geodetic System 1984</dd><dt><span>grid_mapping_name :</span></dt><dd>latitude_longitude</dd><dt><span>spatial_ref :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>GeoTransform :</span></dt><dd>11.599702380951747 0.000992063492063498 0.0 46.80009920634932 0.0 -0.0009920634920634868</dd><dt><span>x_dim :</span></dt><dd>x</dd><dt><span>y_dim :</span></dt><dd>y</dd></dl></div><div class='xr-var-data'><pre>array(0)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-ecdd715a-f62f-4cb3-bbb4-93059becaaeb' class='xr-section-summary-in' type='checkbox'  checked><label for='section-ecdd715a-f62f-4cb3-bbb4-93059becaaeb' class='xr-section-summary' >Attributes: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>_FillValue :</span></dt><dd>255</dd><dt><span>source_file :</span></dt><dd>vito.tif</dd></dl></div></li></ul></div></div></div>
+</table></div></div></li><li class='xr-section-item'><input id='section-f6cce66f-91ad-4a4a-92e0-7cf6ce1083cd' class='xr-section-summary-in' type='checkbox'  checked><label for='section-f6cce66f-91ad-4a4a-92e0-7cf6ce1083cd' class='xr-section-summary' >Coordinates: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>y</span></div><div class='xr-var-dims'>(y)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>46.8 46.8 46.8 ... 45.2 45.2 45.2</div><input id='attrs-3aa8cc39-e844-4b81-ae7f-a8b10cc337cf' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-3aa8cc39-e844-4b81-ae7f-a8b10cc337cf' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-a827f847-069a-4e02-9f72-aea8ac1e8943' class='xr-var-data-in' type='checkbox'><label for='data-a827f847-069a-4e02-9f72-aea8ac1e8943' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([46.799603, 46.798611, 46.797619, ..., 45.202381, 45.201389, 45.200397],
+      shape=(1613,))</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>x</span></div><div class='xr-var-dims'>(x)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>11.6 11.6 11.6 ... 13.0 13.0 13.0</div><input id='attrs-345fd978-a15e-4296-8b8a-22a5b9dd617d' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-345fd978-a15e-4296-8b8a-22a5b9dd617d' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-18b76fd0-35c0-40f0-828d-132e1f57c04e' class='xr-var-data-in' type='checkbox'><label for='data-18b76fd0-35c0-40f0-828d-132e1f57c04e' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([11.600198, 11.60119 , 11.602183, ..., 12.998016, 12.999008, 13.      ],
+      shape=(1412,))</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0</div><input id='attrs-9255a899-3d8d-4801-8c32-73955cf4bdde' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-9255a899-3d8d-4801-8c32-73955cf4bdde' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-26d50fef-26e9-4708-a4f2-8c4c14c2ed41' class='xr-var-data-in' type='checkbox'><label for='data-26d50fef-26e9-4708-a4f2-8c4c14c2ed41' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>crs_wkt :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314245179</dd><dt><span>inverse_flattening :</span></dt><dd>298.257223563</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>WGS 84</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>WGS 84</dd><dt><span>horizontal_datum_name :</span></dt><dd>World Geodetic System 1984</dd><dt><span>grid_mapping_name :</span></dt><dd>latitude_longitude</dd><dt><span>spatial_ref :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>GeoTransform :</span></dt><dd>11.599702380951747 0.000992063492063498 0.0 46.80009920634932 0.0 -0.0009920634920634868</dd><dt><span>x_dim :</span></dt><dd>x</dd><dt><span>y_dim :</span></dt><dd>y</dd></dl></div><div class='xr-var-data'><pre>array(0)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-7ddcd29a-c1a0-4421-8f02-d1661f622beb' class='xr-section-summary-in' type='checkbox'  checked><label for='section-7ddcd29a-c1a0-4421-8f02-d1661f622beb' class='xr-section-summary' >Attributes: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>_FillValue :</span></dt><dd>255</dd><dt><span>source_file :</span></dt><dd>vito.tif</dd></dl></div></li></ul></div></div></div>
 </div>
 </section>
 <section id="RasterDataset-from-several-raster-files">
@@ -1282,9 +1282,9 @@ in the data catalog.</p>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-12-02 09:13:50,476 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from tmpdir/merit_hydro.yml
+2025-12-15 10:04:39,952 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from tmpdir/merit_hydro.yml
 dict_keys([&#39;vito&#39;, &#39;merit_hydro&#39;])
-2025-12-02 09:13:50,478 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/merit_hydro/*.tif
+2025-12-15 10:04:39,954 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/merit_hydro/*.tif
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1777,17 +1777,17 @@ Coordinates:
   * y                           (y) float64 15kB 46.8 46.8 46.8 ... 45.2 45.2
     spatial_ref                 int64 8B 0
 Data variables:
+    elevtn                      (y, x) float32 13MB dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;
+    upgrid                      (y, x) int32 13MB dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;
+    basins                      (y, x) uint32 13MB dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;
     height_above_nearest_drain  (y, x) float32 13MB dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;
     rivwth                      (y, x) float32 13MB dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;
     lndslp                      (y, x) float32 13MB dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;
-    elevtn                      (y, x) float32 13MB dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;
-    strord                      (y, x) uint8 3MB dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;
     uparea                      (y, x) float32 13MB dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;
     flwdir                      (y, x) uint8 3MB dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;
-    basins                      (y, x) uint32 13MB dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;
-    upgrid                      (y, x) int32 13MB dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-df58ea32-fd04-4078-9b3b-1ae8f56c0e07' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-df58ea32-fd04-4078-9b3b-1ae8f56c0e07' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>x</span>: 1680</li><li><span class='xr-has-index'>y</span>: 1920</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-af20cc12-2038-49bf-806b-69f296f5f771' class='xr-section-summary-in' type='checkbox'  checked><label for='section-af20cc12-2038-49bf-806b-69f296f5f771' class='xr-section-summary' >Coordinates: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>x</span></div><div class='xr-var-dims'>(x)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>11.6 11.6 11.6 ... 13.0 13.0 13.0</div><input id='attrs-cbff7d9e-b6a1-4cd6-8a9d-fb0bb5e1472e' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-cbff7d9e-b6a1-4cd6-8a9d-fb0bb5e1472e' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-cf509412-cb2b-428a-a5f2-e019f7adef96' class='xr-var-data-in' type='checkbox'><label for='data-cf509412-cb2b-428a-a5f2-e019f7adef96' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([11.600417, 11.60125 , 11.602083, ..., 12.997917, 12.99875 , 12.999583],
-      shape=(1680,))</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>y</span></div><div class='xr-var-dims'>(y)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>46.8 46.8 46.8 ... 45.2 45.2 45.2</div><input id='attrs-c1aa8bb5-0a45-4dc6-affb-67679fb27a4c' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-c1aa8bb5-0a45-4dc6-affb-67679fb27a4c' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-e9a1cf1c-9da6-4e93-bd8c-2eca5b5018d9' class='xr-var-data-in' type='checkbox'><label for='data-e9a1cf1c-9da6-4e93-bd8c-2eca5b5018d9' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([46.799583, 46.79875 , 46.797917, ..., 45.202083, 45.20125 , 45.200417],
-      shape=(1920,))</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0</div><input id='attrs-75307600-52e1-4a2d-a62f-592244540626' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-75307600-52e1-4a2d-a62f-592244540626' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-68f36dbb-3b76-4931-a00f-2c28b926a57b' class='xr-var-data-in' type='checkbox'><label for='data-68f36dbb-3b76-4931-a00f-2c28b926a57b' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>crs_wkt :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314245179</dd><dt><span>inverse_flattening :</span></dt><dd>298.257223563</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>WGS 84</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>WGS 84</dd><dt><span>horizontal_datum_name :</span></dt><dd>World Geodetic System 1984</dd><dt><span>grid_mapping_name :</span></dt><dd>latitude_longitude</dd><dt><span>spatial_ref :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>GeoTransform :</span></dt><dd>11.600000000000023 0.0008333333333333203 0.0 46.8 0.0 -0.0008333333333333345</dd><dt><span>x_dim :</span></dt><dd>x</dd><dt><span>y_dim :</span></dt><dd>y</dd></dl></div><div class='xr-var-data'><pre>array(0)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-15a4bf2f-4b85-4a13-98fd-cbbe0f87ca5b' class='xr-section-summary-in' type='checkbox'  checked><label for='section-15a4bf2f-4b85-4a13-98fd-cbbe0f87ca5b' class='xr-section-summary' >Data variables: <span>(9)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>height_above_nearest_drain</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</div><input id='attrs-8e0d0af5-1998-4505-a9a6-6271d6d3269f' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-8e0d0af5-1998-4505-a9a6-6271d6d3269f' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-898ae7a1-1185-4db4-acbe-e47a2ac08914' class='xr-var-data-in' type='checkbox'><label for='data-898ae7a1-1185-4db4-acbe-e47a2ac08914' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>_FillValue :</span></dt><dd>-9999.0</dd><dt><span>source_file :</span></dt><dd>hnd.tif</dd></dl></div><div class='xr-var-data'><table>
+    strord                      (y, x) uint8 3MB dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-2929cfd3-1ae1-4f15-bf69-fa80e8164bdd' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-2929cfd3-1ae1-4f15-bf69-fa80e8164bdd' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>x</span>: 1680</li><li><span class='xr-has-index'>y</span>: 1920</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-0389814d-cd9e-4d04-b614-3311044716cd' class='xr-section-summary-in' type='checkbox'  checked><label for='section-0389814d-cd9e-4d04-b614-3311044716cd' class='xr-section-summary' >Coordinates: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>x</span></div><div class='xr-var-dims'>(x)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>11.6 11.6 11.6 ... 13.0 13.0 13.0</div><input id='attrs-ebc57f11-aff2-4dfc-a177-d728e341091c' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-ebc57f11-aff2-4dfc-a177-d728e341091c' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-bcbb3a5d-6267-460d-9d48-09bc2391719b' class='xr-var-data-in' type='checkbox'><label for='data-bcbb3a5d-6267-460d-9d48-09bc2391719b' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([11.600417, 11.60125 , 11.602083, ..., 12.997917, 12.99875 , 12.999583],
+      shape=(1680,))</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>y</span></div><div class='xr-var-dims'>(y)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>46.8 46.8 46.8 ... 45.2 45.2 45.2</div><input id='attrs-5f191b95-f907-421d-8817-5be646e4c542' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-5f191b95-f907-421d-8817-5be646e4c542' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-949e82ab-69cd-40c7-9b92-c6494b7c4b71' class='xr-var-data-in' type='checkbox'><label for='data-949e82ab-69cd-40c7-9b92-c6494b7c4b71' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([46.799583, 46.79875 , 46.797917, ..., 45.202083, 45.20125 , 45.200417],
+      shape=(1920,))</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0</div><input id='attrs-ccfdbda2-8779-49af-ae41-7b6ff1031d52' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-ccfdbda2-8779-49af-ae41-7b6ff1031d52' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-ee762cf2-d3e4-40ef-b4fa-e8dcb8347e5d' class='xr-var-data-in' type='checkbox'><label for='data-ee762cf2-d3e4-40ef-b4fa-e8dcb8347e5d' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>crs_wkt :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314245179</dd><dt><span>inverse_flattening :</span></dt><dd>298.257223563</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>WGS 84</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>WGS 84</dd><dt><span>horizontal_datum_name :</span></dt><dd>World Geodetic System 1984</dd><dt><span>grid_mapping_name :</span></dt><dd>latitude_longitude</dd><dt><span>spatial_ref :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>GeoTransform :</span></dt><dd>11.600000000000023 0.0008333333333333203 0.0 46.8 0.0 -0.0008333333333333345</dd><dt><span>x_dim :</span></dt><dd>x</dd><dt><span>y_dim :</span></dt><dd>y</dd></dl></div><div class='xr-var-data'><pre>array(0)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-ef8e91dc-849d-4a1c-94a6-3bb787c657fa' class='xr-section-summary-in' type='checkbox'  checked><label for='section-ef8e91dc-849d-4a1c-94a6-3bb787c657fa' class='xr-section-summary' >Data variables: <span>(9)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>elevtn</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</div><input id='attrs-18b75b12-f8d4-4ca1-842c-5e96fc67fffb' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-18b75b12-f8d4-4ca1-842c-5e96fc67fffb' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-7867dee8-3f01-453f-8707-d2c8262f45b5' class='xr-var-data-in' type='checkbox'><label for='data-7867dee8-3f01-453f-8707-d2c8262f45b5' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>_FillValue :</span></dt><dd>-9999.0</dd><dt><span>source_file :</span></dt><dd>elevtn.tif</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1842,7 +1842,7 @@ Data variables:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>rivwth</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</div><input id='attrs-1b91fef2-eada-46f7-89cb-893a4a9b9567' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-1b91fef2-eada-46f7-89cb-893a4a9b9567' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-5e205150-d9bb-4878-ba88-f80a22be5853' class='xr-var-data-in' type='checkbox'><label for='data-5e205150-d9bb-4878-ba88-f80a22be5853' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>_FillValue :</span></dt><dd>-9999.0</dd><dt><span>source_file :</span></dt><dd>rivwth.tif</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>upgrid</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</div><input id='attrs-650db75a-efa5-4df5-afdc-cfc89ed15d71' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-650db75a-efa5-4df5-afdc-cfc89ed15d71' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-0839effc-e106-43f4-befd-5914e4761b56' class='xr-var-data-in' type='checkbox'><label for='data-0839effc-e106-43f4-befd-5914e4761b56' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>_FillValue :</span></dt><dd>-9999</dd><dt><span>source_file :</span></dt><dd>upgrid.tif</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1872,7 +1872,7 @@ Data variables:
                     </tr>
                     <tr>
                         <th> Data type </th>
-                        <td colspan="2"> float32 numpy.ndarray </td>
+                        <td colspan="2"> int32 numpy.ndarray </td>
                     </tr>
                 </tbody>
             </table>
@@ -1897,282 +1897,7 @@ Data variables:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>lndslp</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</div><input id='attrs-0c06de60-ac0d-4016-bf35-eabd726393a9' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-0c06de60-ac0d-4016-bf35-eabd726393a9' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-0b316f3f-d13f-489a-86d5-cb6d6922bd8a' class='xr-var-data-in' type='checkbox'><label for='data-0b316f3f-d13f-489a-86d5-cb6d6922bd8a' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>_FillValue :</span></dt><dd>-9999.0</dd><dt><span>source_file :</span></dt><dd>lndslp.tif</dd></dl></div><div class='xr-var-data'><table>
-    <tr>
-        <td>
-            <table style="border-collapse: collapse;">
-                <thead>
-                    <tr>
-                        <td> </td>
-                        <th> Array </th>
-                        <th> Chunk </th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    <tr>
-                        <th> Bytes </th>
-                        <td> 12.30 MiB </td>
-                        <td> 12.30 MiB </td>
-                    </tr>
-
-                    <tr>
-                        <th> Shape </th>
-                        <td> (1920, 1680) </td>
-                        <td> (1920, 1680) </td>
-                    </tr>
-                    <tr>
-                        <th> Dask graph </th>
-                        <td colspan="2"> 1 chunks in 3 graph layers </td>
-                    </tr>
-                    <tr>
-                        <th> Data type </th>
-                        <td colspan="2"> float32 numpy.ndarray </td>
-                    </tr>
-                </tbody>
-            </table>
-        </td>
-        <td>
-        <svg width="155" height="170" style="stroke:rgb(0,0,0);stroke-width:1" >
-
-  <!-- Horizontal lines -->
-  <line x1="0" y1="0" x2="105" y2="0" style="stroke-width:2" />
-  <line x1="0" y1="120" x2="105" y2="120" style="stroke-width:2" />
-
-  <!-- Vertical lines -->
-  <line x1="0" y1="0" x2="0" y2="120" style="stroke-width:2" />
-  <line x1="105" y1="0" x2="105" y2="120" style="stroke-width:2" />
-
-  <!-- Colored Rectangle -->
-  <polygon points="0.0,0.0 105.0,0.0 105.0,120.0 0.0,120.0" style="fill:#ECB172A0;stroke-width:0"/>
-
-  <!-- Text -->
-  <text x="52.500000" y="140.000000" font-size="1.0rem" font-weight="100" text-anchor="middle" >1680</text>
-  <text x="125.000000" y="60.000000" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(-90,125.000000,60.000000)">1920</text>
-</svg>
-        </td>
-    </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>elevtn</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</div><input id='attrs-2811a962-737c-4395-9b94-9e44f00841c1' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-2811a962-737c-4395-9b94-9e44f00841c1' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-0c91b289-c3e7-42d3-98dd-a46323225d75' class='xr-var-data-in' type='checkbox'><label for='data-0c91b289-c3e7-42d3-98dd-a46323225d75' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>_FillValue :</span></dt><dd>-9999.0</dd><dt><span>source_file :</span></dt><dd>elevtn.tif</dd></dl></div><div class='xr-var-data'><table>
-    <tr>
-        <td>
-            <table style="border-collapse: collapse;">
-                <thead>
-                    <tr>
-                        <td> </td>
-                        <th> Array </th>
-                        <th> Chunk </th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    <tr>
-                        <th> Bytes </th>
-                        <td> 12.30 MiB </td>
-                        <td> 12.30 MiB </td>
-                    </tr>
-
-                    <tr>
-                        <th> Shape </th>
-                        <td> (1920, 1680) </td>
-                        <td> (1920, 1680) </td>
-                    </tr>
-                    <tr>
-                        <th> Dask graph </th>
-                        <td colspan="2"> 1 chunks in 3 graph layers </td>
-                    </tr>
-                    <tr>
-                        <th> Data type </th>
-                        <td colspan="2"> float32 numpy.ndarray </td>
-                    </tr>
-                </tbody>
-            </table>
-        </td>
-        <td>
-        <svg width="155" height="170" style="stroke:rgb(0,0,0);stroke-width:1" >
-
-  <!-- Horizontal lines -->
-  <line x1="0" y1="0" x2="105" y2="0" style="stroke-width:2" />
-  <line x1="0" y1="120" x2="105" y2="120" style="stroke-width:2" />
-
-  <!-- Vertical lines -->
-  <line x1="0" y1="0" x2="0" y2="120" style="stroke-width:2" />
-  <line x1="105" y1="0" x2="105" y2="120" style="stroke-width:2" />
-
-  <!-- Colored Rectangle -->
-  <polygon points="0.0,0.0 105.0,0.0 105.0,120.0 0.0,120.0" style="fill:#ECB172A0;stroke-width:0"/>
-
-  <!-- Text -->
-  <text x="52.500000" y="140.000000" font-size="1.0rem" font-weight="100" text-anchor="middle" >1680</text>
-  <text x="125.000000" y="60.000000" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(-90,125.000000,60.000000)">1920</text>
-</svg>
-        </td>
-    </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>strord</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>uint8</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</div><input id='attrs-e84d7f4b-42bf-45ab-ba51-d55d2acb1b07' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-e84d7f4b-42bf-45ab-ba51-d55d2acb1b07' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-5a3e4889-a5ea-4ccc-9c5e-9c24f066175a' class='xr-var-data-in' type='checkbox'><label for='data-5a3e4889-a5ea-4ccc-9c5e-9c24f066175a' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>_FillValue :</span></dt><dd>255</dd><dt><span>source_file :</span></dt><dd>strord.tif</dd></dl></div><div class='xr-var-data'><table>
-    <tr>
-        <td>
-            <table style="border-collapse: collapse;">
-                <thead>
-                    <tr>
-                        <td> </td>
-                        <th> Array </th>
-                        <th> Chunk </th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    <tr>
-                        <th> Bytes </th>
-                        <td> 3.08 MiB </td>
-                        <td> 3.08 MiB </td>
-                    </tr>
-
-                    <tr>
-                        <th> Shape </th>
-                        <td> (1920, 1680) </td>
-                        <td> (1920, 1680) </td>
-                    </tr>
-                    <tr>
-                        <th> Dask graph </th>
-                        <td colspan="2"> 1 chunks in 3 graph layers </td>
-                    </tr>
-                    <tr>
-                        <th> Data type </th>
-                        <td colspan="2"> uint8 numpy.ndarray </td>
-                    </tr>
-                </tbody>
-            </table>
-        </td>
-        <td>
-        <svg width="155" height="170" style="stroke:rgb(0,0,0);stroke-width:1" >
-
-  <!-- Horizontal lines -->
-  <line x1="0" y1="0" x2="105" y2="0" style="stroke-width:2" />
-  <line x1="0" y1="120" x2="105" y2="120" style="stroke-width:2" />
-
-  <!-- Vertical lines -->
-  <line x1="0" y1="0" x2="0" y2="120" style="stroke-width:2" />
-  <line x1="105" y1="0" x2="105" y2="120" style="stroke-width:2" />
-
-  <!-- Colored Rectangle -->
-  <polygon points="0.0,0.0 105.0,0.0 105.0,120.0 0.0,120.0" style="fill:#ECB172A0;stroke-width:0"/>
-
-  <!-- Text -->
-  <text x="52.500000" y="140.000000" font-size="1.0rem" font-weight="100" text-anchor="middle" >1680</text>
-  <text x="125.000000" y="60.000000" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(-90,125.000000,60.000000)">1920</text>
-</svg>
-        </td>
-    </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>uparea</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</div><input id='attrs-48c33112-6a7c-4588-8979-433319403880' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-48c33112-6a7c-4588-8979-433319403880' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-06d8d43c-604a-4f18-9c19-3f29b971aa85' class='xr-var-data-in' type='checkbox'><label for='data-06d8d43c-604a-4f18-9c19-3f29b971aa85' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>_FillValue :</span></dt><dd>-9999.0</dd><dt><span>source_file :</span></dt><dd>uparea.tif</dd></dl></div><div class='xr-var-data'><table>
-    <tr>
-        <td>
-            <table style="border-collapse: collapse;">
-                <thead>
-                    <tr>
-                        <td> </td>
-                        <th> Array </th>
-                        <th> Chunk </th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    <tr>
-                        <th> Bytes </th>
-                        <td> 12.30 MiB </td>
-                        <td> 12.30 MiB </td>
-                    </tr>
-
-                    <tr>
-                        <th> Shape </th>
-                        <td> (1920, 1680) </td>
-                        <td> (1920, 1680) </td>
-                    </tr>
-                    <tr>
-                        <th> Dask graph </th>
-                        <td colspan="2"> 1 chunks in 3 graph layers </td>
-                    </tr>
-                    <tr>
-                        <th> Data type </th>
-                        <td colspan="2"> float32 numpy.ndarray </td>
-                    </tr>
-                </tbody>
-            </table>
-        </td>
-        <td>
-        <svg width="155" height="170" style="stroke:rgb(0,0,0);stroke-width:1" >
-
-  <!-- Horizontal lines -->
-  <line x1="0" y1="0" x2="105" y2="0" style="stroke-width:2" />
-  <line x1="0" y1="120" x2="105" y2="120" style="stroke-width:2" />
-
-  <!-- Vertical lines -->
-  <line x1="0" y1="0" x2="0" y2="120" style="stroke-width:2" />
-  <line x1="105" y1="0" x2="105" y2="120" style="stroke-width:2" />
-
-  <!-- Colored Rectangle -->
-  <polygon points="0.0,0.0 105.0,0.0 105.0,120.0 0.0,120.0" style="fill:#ECB172A0;stroke-width:0"/>
-
-  <!-- Text -->
-  <text x="52.500000" y="140.000000" font-size="1.0rem" font-weight="100" text-anchor="middle" >1680</text>
-  <text x="125.000000" y="60.000000" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(-90,125.000000,60.000000)">1920</text>
-</svg>
-        </td>
-    </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>flwdir</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>uint8</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</div><input id='attrs-2a05a241-39a0-455a-910d-9c9c45c41658' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-2a05a241-39a0-455a-910d-9c9c45c41658' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-5c70eefe-630a-49a2-a423-4bae940f90de' class='xr-var-data-in' type='checkbox'><label for='data-5c70eefe-630a-49a2-a423-4bae940f90de' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>_FillValue :</span></dt><dd>247</dd><dt><span>source_file :</span></dt><dd>flwdir.tif</dd></dl></div><div class='xr-var-data'><table>
-    <tr>
-        <td>
-            <table style="border-collapse: collapse;">
-                <thead>
-                    <tr>
-                        <td> </td>
-                        <th> Array </th>
-                        <th> Chunk </th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    <tr>
-                        <th> Bytes </th>
-                        <td> 3.08 MiB </td>
-                        <td> 3.08 MiB </td>
-                    </tr>
-
-                    <tr>
-                        <th> Shape </th>
-                        <td> (1920, 1680) </td>
-                        <td> (1920, 1680) </td>
-                    </tr>
-                    <tr>
-                        <th> Dask graph </th>
-                        <td colspan="2"> 1 chunks in 3 graph layers </td>
-                    </tr>
-                    <tr>
-                        <th> Data type </th>
-                        <td colspan="2"> uint8 numpy.ndarray </td>
-                    </tr>
-                </tbody>
-            </table>
-        </td>
-        <td>
-        <svg width="155" height="170" style="stroke:rgb(0,0,0);stroke-width:1" >
-
-  <!-- Horizontal lines -->
-  <line x1="0" y1="0" x2="105" y2="0" style="stroke-width:2" />
-  <line x1="0" y1="120" x2="105" y2="120" style="stroke-width:2" />
-
-  <!-- Vertical lines -->
-  <line x1="0" y1="0" x2="0" y2="120" style="stroke-width:2" />
-  <line x1="105" y1="0" x2="105" y2="120" style="stroke-width:2" />
-
-  <!-- Colored Rectangle -->
-  <polygon points="0.0,0.0 105.0,0.0 105.0,120.0 0.0,120.0" style="fill:#ECB172A0;stroke-width:0"/>
-
-  <!-- Text -->
-  <text x="52.500000" y="140.000000" font-size="1.0rem" font-weight="100" text-anchor="middle" >1680</text>
-  <text x="125.000000" y="60.000000" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(-90,125.000000,60.000000)">1920</text>
-</svg>
-        </td>
-    </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>basins</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>uint32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</div><input id='attrs-4a6ef00b-9c16-4b95-9fbd-4b0ac8997b80' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-4a6ef00b-9c16-4b95-9fbd-4b0ac8997b80' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-7d9d32db-e407-4ebb-8501-2f21f6452490' class='xr-var-data-in' type='checkbox'><label for='data-7d9d32db-e407-4ebb-8501-2f21f6452490' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>_FillValue :</span></dt><dd>0</dd><dt><span>source_file :</span></dt><dd>basins.tif</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>basins</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>uint32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</div><input id='attrs-0c60f4a3-a1cb-4def-9580-1773bca98a9f' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-0c60f4a3-a1cb-4def-9580-1773bca98a9f' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-febb513c-389e-419c-a03e-56fe1ae8bf56' class='xr-var-data-in' type='checkbox'><label for='data-febb513c-389e-419c-a03e-56fe1ae8bf56' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>_FillValue :</span></dt><dd>0</dd><dt><span>source_file :</span></dt><dd>basins.tif</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -2227,7 +1952,7 @@ Data variables:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>upgrid</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</div><input id='attrs-7a1cc832-0318-403e-b93b-108ce4a878d3' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-7a1cc832-0318-403e-b93b-108ce4a878d3' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-07e00a7e-0b1e-4585-a706-6fb4d51f4c67' class='xr-var-data-in' type='checkbox'><label for='data-07e00a7e-0b1e-4585-a706-6fb4d51f4c67' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>_FillValue :</span></dt><dd>-9999</dd><dt><span>source_file :</span></dt><dd>upgrid.tif</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>height_above_nearest_drain</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</div><input id='attrs-973c0100-5466-448b-a914-0f675cf8a69f' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-973c0100-5466-448b-a914-0f675cf8a69f' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-8ab0c8c3-d054-4752-bae9-60f7f4d459a1' class='xr-var-data-in' type='checkbox'><label for='data-8ab0c8c3-d054-4752-bae9-60f7f4d459a1' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>_FillValue :</span></dt><dd>-9999.0</dd><dt><span>source_file :</span></dt><dd>hnd.tif</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -2257,7 +1982,282 @@ Data variables:
                     </tr>
                     <tr>
                         <th> Data type </th>
-                        <td colspan="2"> int32 numpy.ndarray </td>
+                        <td colspan="2"> float32 numpy.ndarray </td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+        <td>
+        <svg width="155" height="170" style="stroke:rgb(0,0,0);stroke-width:1" >
+
+  <!-- Horizontal lines -->
+  <line x1="0" y1="0" x2="105" y2="0" style="stroke-width:2" />
+  <line x1="0" y1="120" x2="105" y2="120" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="0" y1="0" x2="0" y2="120" style="stroke-width:2" />
+  <line x1="105" y1="0" x2="105" y2="120" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="0.0,0.0 105.0,0.0 105.0,120.0 0.0,120.0" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Text -->
+  <text x="52.500000" y="140.000000" font-size="1.0rem" font-weight="100" text-anchor="middle" >1680</text>
+  <text x="125.000000" y="60.000000" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(-90,125.000000,60.000000)">1920</text>
+</svg>
+        </td>
+    </tr>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>rivwth</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</div><input id='attrs-c8331d97-20c0-4998-b648-a360882618af' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-c8331d97-20c0-4998-b648-a360882618af' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-b9304380-c7f7-4e25-b155-b304b2ecb652' class='xr-var-data-in' type='checkbox'><label for='data-b9304380-c7f7-4e25-b155-b304b2ecb652' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>_FillValue :</span></dt><dd>-9999.0</dd><dt><span>source_file :</span></dt><dd>rivwth.tif</dd></dl></div><div class='xr-var-data'><table>
+    <tr>
+        <td>
+            <table style="border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <td> </td>
+                        <th> Array </th>
+                        <th> Chunk </th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <th> Bytes </th>
+                        <td> 12.30 MiB </td>
+                        <td> 12.30 MiB </td>
+                    </tr>
+
+                    <tr>
+                        <th> Shape </th>
+                        <td> (1920, 1680) </td>
+                        <td> (1920, 1680) </td>
+                    </tr>
+                    <tr>
+                        <th> Dask graph </th>
+                        <td colspan="2"> 1 chunks in 3 graph layers </td>
+                    </tr>
+                    <tr>
+                        <th> Data type </th>
+                        <td colspan="2"> float32 numpy.ndarray </td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+        <td>
+        <svg width="155" height="170" style="stroke:rgb(0,0,0);stroke-width:1" >
+
+  <!-- Horizontal lines -->
+  <line x1="0" y1="0" x2="105" y2="0" style="stroke-width:2" />
+  <line x1="0" y1="120" x2="105" y2="120" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="0" y1="0" x2="0" y2="120" style="stroke-width:2" />
+  <line x1="105" y1="0" x2="105" y2="120" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="0.0,0.0 105.0,0.0 105.0,120.0 0.0,120.0" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Text -->
+  <text x="52.500000" y="140.000000" font-size="1.0rem" font-weight="100" text-anchor="middle" >1680</text>
+  <text x="125.000000" y="60.000000" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(-90,125.000000,60.000000)">1920</text>
+</svg>
+        </td>
+    </tr>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>lndslp</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</div><input id='attrs-5f0a9f72-9674-4650-adea-47f456426dea' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-5f0a9f72-9674-4650-adea-47f456426dea' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-ac6ee69d-c6b3-444b-894b-df005382d0e7' class='xr-var-data-in' type='checkbox'><label for='data-ac6ee69d-c6b3-444b-894b-df005382d0e7' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>_FillValue :</span></dt><dd>-9999.0</dd><dt><span>source_file :</span></dt><dd>lndslp.tif</dd></dl></div><div class='xr-var-data'><table>
+    <tr>
+        <td>
+            <table style="border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <td> </td>
+                        <th> Array </th>
+                        <th> Chunk </th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <th> Bytes </th>
+                        <td> 12.30 MiB </td>
+                        <td> 12.30 MiB </td>
+                    </tr>
+
+                    <tr>
+                        <th> Shape </th>
+                        <td> (1920, 1680) </td>
+                        <td> (1920, 1680) </td>
+                    </tr>
+                    <tr>
+                        <th> Dask graph </th>
+                        <td colspan="2"> 1 chunks in 3 graph layers </td>
+                    </tr>
+                    <tr>
+                        <th> Data type </th>
+                        <td colspan="2"> float32 numpy.ndarray </td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+        <td>
+        <svg width="155" height="170" style="stroke:rgb(0,0,0);stroke-width:1" >
+
+  <!-- Horizontal lines -->
+  <line x1="0" y1="0" x2="105" y2="0" style="stroke-width:2" />
+  <line x1="0" y1="120" x2="105" y2="120" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="0" y1="0" x2="0" y2="120" style="stroke-width:2" />
+  <line x1="105" y1="0" x2="105" y2="120" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="0.0,0.0 105.0,0.0 105.0,120.0 0.0,120.0" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Text -->
+  <text x="52.500000" y="140.000000" font-size="1.0rem" font-weight="100" text-anchor="middle" >1680</text>
+  <text x="125.000000" y="60.000000" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(-90,125.000000,60.000000)">1920</text>
+</svg>
+        </td>
+    </tr>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>uparea</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</div><input id='attrs-11d7461c-14b5-4119-b6ca-236bc8d5d025' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-11d7461c-14b5-4119-b6ca-236bc8d5d025' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-3a2a5176-f3d3-4013-8ebf-14efd015c07c' class='xr-var-data-in' type='checkbox'><label for='data-3a2a5176-f3d3-4013-8ebf-14efd015c07c' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>_FillValue :</span></dt><dd>-9999.0</dd><dt><span>source_file :</span></dt><dd>uparea.tif</dd></dl></div><div class='xr-var-data'><table>
+    <tr>
+        <td>
+            <table style="border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <td> </td>
+                        <th> Array </th>
+                        <th> Chunk </th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <th> Bytes </th>
+                        <td> 12.30 MiB </td>
+                        <td> 12.30 MiB </td>
+                    </tr>
+
+                    <tr>
+                        <th> Shape </th>
+                        <td> (1920, 1680) </td>
+                        <td> (1920, 1680) </td>
+                    </tr>
+                    <tr>
+                        <th> Dask graph </th>
+                        <td colspan="2"> 1 chunks in 3 graph layers </td>
+                    </tr>
+                    <tr>
+                        <th> Data type </th>
+                        <td colspan="2"> float32 numpy.ndarray </td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+        <td>
+        <svg width="155" height="170" style="stroke:rgb(0,0,0);stroke-width:1" >
+
+  <!-- Horizontal lines -->
+  <line x1="0" y1="0" x2="105" y2="0" style="stroke-width:2" />
+  <line x1="0" y1="120" x2="105" y2="120" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="0" y1="0" x2="0" y2="120" style="stroke-width:2" />
+  <line x1="105" y1="0" x2="105" y2="120" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="0.0,0.0 105.0,0.0 105.0,120.0 0.0,120.0" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Text -->
+  <text x="52.500000" y="140.000000" font-size="1.0rem" font-weight="100" text-anchor="middle" >1680</text>
+  <text x="125.000000" y="60.000000" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(-90,125.000000,60.000000)">1920</text>
+</svg>
+        </td>
+    </tr>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>flwdir</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>uint8</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</div><input id='attrs-35d26d93-ca19-403e-8e41-b9e6e90f7da8' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-35d26d93-ca19-403e-8e41-b9e6e90f7da8' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-34e9202c-194d-47eb-bad1-2c79c8ac61fc' class='xr-var-data-in' type='checkbox'><label for='data-34e9202c-194d-47eb-bad1-2c79c8ac61fc' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>_FillValue :</span></dt><dd>247</dd><dt><span>source_file :</span></dt><dd>flwdir.tif</dd></dl></div><div class='xr-var-data'><table>
+    <tr>
+        <td>
+            <table style="border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <td> </td>
+                        <th> Array </th>
+                        <th> Chunk </th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <th> Bytes </th>
+                        <td> 3.08 MiB </td>
+                        <td> 3.08 MiB </td>
+                    </tr>
+
+                    <tr>
+                        <th> Shape </th>
+                        <td> (1920, 1680) </td>
+                        <td> (1920, 1680) </td>
+                    </tr>
+                    <tr>
+                        <th> Dask graph </th>
+                        <td colspan="2"> 1 chunks in 3 graph layers </td>
+                    </tr>
+                    <tr>
+                        <th> Data type </th>
+                        <td colspan="2"> uint8 numpy.ndarray </td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+        <td>
+        <svg width="155" height="170" style="stroke:rgb(0,0,0);stroke-width:1" >
+
+  <!-- Horizontal lines -->
+  <line x1="0" y1="0" x2="105" y2="0" style="stroke-width:2" />
+  <line x1="0" y1="120" x2="105" y2="120" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="0" y1="0" x2="0" y2="120" style="stroke-width:2" />
+  <line x1="105" y1="0" x2="105" y2="120" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="0.0,0.0 105.0,0.0 105.0,120.0 0.0,120.0" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Text -->
+  <text x="52.500000" y="140.000000" font-size="1.0rem" font-weight="100" text-anchor="middle" >1680</text>
+  <text x="125.000000" y="60.000000" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(-90,125.000000,60.000000)">1920</text>
+</svg>
+        </td>
+    </tr>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>strord</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>uint8</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</div><input id='attrs-da6f49cf-60b3-4057-ad5a-43f1386ae648' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-da6f49cf-60b3-4057-ad5a-43f1386ae648' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-7d75e566-c8f5-4340-b5d1-ccaba3e4d2bb' class='xr-var-data-in' type='checkbox'><label for='data-7d75e566-c8f5-4340-b5d1-ccaba3e4d2bb' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>_FillValue :</span></dt><dd>255</dd><dt><span>source_file :</span></dt><dd>strord.tif</dd></dl></div><div class='xr-var-data'><table>
+    <tr>
+        <td>
+            <table style="border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <td> </td>
+                        <th> Array </th>
+                        <th> Chunk </th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <th> Bytes </th>
+                        <td> 3.08 MiB </td>
+                        <td> 3.08 MiB </td>
+                    </tr>
+
+                    <tr>
+                        <th> Shape </th>
+                        <td> (1920, 1680) </td>
+                        <td> (1920, 1680) </td>
+                    </tr>
+                    <tr>
+                        <th> Dask graph </th>
+                        <td colspan="2"> 1 chunks in 3 graph layers </td>
+                    </tr>
+                    <tr>
+                        <th> Data type </th>
+                        <td colspan="2"> uint8 numpy.ndarray </td>
                     </tr>
                 </tbody>
             </table>
@@ -2334,10 +2334,10 @@ Data variables:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-12-02 09:13:50,574 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from tmpdir/merit_hydro.yml
-2025-12-02 09:13:50,577 - hydromt.data_catalog.data_catalog - data_catalog - WARNING - overwriting data source &#39;merit_hydro&#39; with provider file and version _UNSPECIFIED_.
+2025-12-15 10:04:40,050 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from tmpdir/merit_hydro.yml
+2025-12-15 10:04:40,052 - hydromt.data_catalog.data_catalog - data_catalog - WARNING - overwriting data source &#39;merit_hydro&#39; with provider file and version _UNSPECIFIED_.
 dict_keys([&#39;vito&#39;, &#39;merit_hydro&#39;])
-2025-12-02 09:13:50,577 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/merit_hydro/{variable}.tif
+2025-12-15 10:04:40,053 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/merit_hydro/{variable}.tif
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -2831,9 +2831,9 @@ Coordinates:
     spatial_ref                 int64 8B 0
 Data variables:
     height_above_nearest_drain  (y, x) float32 13MB dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;
-    elevtn                      (y, x) float32 13MB dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-487c731b-888f-4109-a543-0ceb777264df' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-487c731b-888f-4109-a543-0ceb777264df' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>y</span>: 1920</li><li><span class='xr-has-index'>x</span>: 1680</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-ba2822d9-8a94-4e84-ae24-5bc1404531d2' class='xr-section-summary-in' type='checkbox'  checked><label for='section-ba2822d9-8a94-4e84-ae24-5bc1404531d2' class='xr-section-summary' >Coordinates: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>y</span></div><div class='xr-var-dims'>(y)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>46.8 46.8 46.8 ... 45.2 45.2 45.2</div><input id='attrs-092cc929-ab07-4d41-8bac-932ef996c0b3' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-092cc929-ab07-4d41-8bac-932ef996c0b3' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-8256ccd3-3651-48ed-81fe-de27251566bd' class='xr-var-data-in' type='checkbox'><label for='data-8256ccd3-3651-48ed-81fe-de27251566bd' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([46.799583, 46.79875 , 46.797917, ..., 45.202083, 45.20125 , 45.200417],
-      shape=(1920,))</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>x</span></div><div class='xr-var-dims'>(x)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>11.6 11.6 11.6 ... 13.0 13.0 13.0</div><input id='attrs-a6dc3636-dda5-45b1-a449-771d4549b0d3' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-a6dc3636-dda5-45b1-a449-771d4549b0d3' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-8307641a-fdfb-4fa4-b5b9-1288c000b70d' class='xr-var-data-in' type='checkbox'><label for='data-8307641a-fdfb-4fa4-b5b9-1288c000b70d' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([11.600417, 11.60125 , 11.602083, ..., 12.997917, 12.99875 , 12.999583],
-      shape=(1680,))</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0</div><input id='attrs-a3f4dce8-b20a-49be-8e70-dc515037de1e' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-a3f4dce8-b20a-49be-8e70-dc515037de1e' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-de489054-97ff-434a-959f-fa37fffe4f21' class='xr-var-data-in' type='checkbox'><label for='data-de489054-97ff-434a-959f-fa37fffe4f21' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>crs_wkt :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314245179</dd><dt><span>inverse_flattening :</span></dt><dd>298.257223563</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>WGS 84</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>WGS 84</dd><dt><span>horizontal_datum_name :</span></dt><dd>World Geodetic System 1984</dd><dt><span>grid_mapping_name :</span></dt><dd>latitude_longitude</dd><dt><span>spatial_ref :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>GeoTransform :</span></dt><dd>11.600000000000023 0.0008333333333333203 0.0 46.8 0.0 -0.0008333333333333345</dd><dt><span>x_dim :</span></dt><dd>x</dd><dt><span>y_dim :</span></dt><dd>y</dd></dl></div><div class='xr-var-data'><pre>array(0)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-f29c2dfa-0ea2-4e94-8ca7-be8187ed15a9' class='xr-section-summary-in' type='checkbox'  checked><label for='section-f29c2dfa-0ea2-4e94-8ca7-be8187ed15a9' class='xr-section-summary' >Data variables: <span>(2)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>height_above_nearest_drain</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</div><input id='attrs-6284d919-dc66-448a-b891-6d74f48e9d77' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-6284d919-dc66-448a-b891-6d74f48e9d77' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-8bcf778d-e99f-43e8-8e7d-d00ab13791b2' class='xr-var-data-in' type='checkbox'><label for='data-8bcf778d-e99f-43e8-8e7d-d00ab13791b2' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>_FillValue :</span></dt><dd>-9999.0</dd><dt><span>source_file :</span></dt><dd>hnd.tif</dd></dl></div><div class='xr-var-data'><table>
+    elevtn                      (y, x) float32 13MB dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-47195f8b-33fc-47bc-ad6f-ef7b9589a6a1' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-47195f8b-33fc-47bc-ad6f-ef7b9589a6a1' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>y</span>: 1920</li><li><span class='xr-has-index'>x</span>: 1680</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-c4eb5f81-bfeb-42e0-a4bf-c1d6a2e996fe' class='xr-section-summary-in' type='checkbox'  checked><label for='section-c4eb5f81-bfeb-42e0-a4bf-c1d6a2e996fe' class='xr-section-summary' >Coordinates: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>y</span></div><div class='xr-var-dims'>(y)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>46.8 46.8 46.8 ... 45.2 45.2 45.2</div><input id='attrs-ead4abf9-9e71-4d96-aec3-aa8c73950300' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-ead4abf9-9e71-4d96-aec3-aa8c73950300' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-e12219f7-5386-41f1-8a72-c7317cb0794f' class='xr-var-data-in' type='checkbox'><label for='data-e12219f7-5386-41f1-8a72-c7317cb0794f' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([46.799583, 46.79875 , 46.797917, ..., 45.202083, 45.20125 , 45.200417],
+      shape=(1920,))</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>x</span></div><div class='xr-var-dims'>(x)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>11.6 11.6 11.6 ... 13.0 13.0 13.0</div><input id='attrs-1daad733-895f-43e5-975d-eeebdffb869e' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-1daad733-895f-43e5-975d-eeebdffb869e' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-b9fc4aa9-3204-4370-8158-47c0c230dd54' class='xr-var-data-in' type='checkbox'><label for='data-b9fc4aa9-3204-4370-8158-47c0c230dd54' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([11.600417, 11.60125 , 11.602083, ..., 12.997917, 12.99875 , 12.999583],
+      shape=(1680,))</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0</div><input id='attrs-39317e09-c59a-4d6e-9dfe-76b9203f4796' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-39317e09-c59a-4d6e-9dfe-76b9203f4796' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-50cd5cb1-cfe1-4d70-a78d-dd4d1504eef4' class='xr-var-data-in' type='checkbox'><label for='data-50cd5cb1-cfe1-4d70-a78d-dd4d1504eef4' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>crs_wkt :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314245179</dd><dt><span>inverse_flattening :</span></dt><dd>298.257223563</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>WGS 84</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>WGS 84</dd><dt><span>horizontal_datum_name :</span></dt><dd>World Geodetic System 1984</dd><dt><span>grid_mapping_name :</span></dt><dd>latitude_longitude</dd><dt><span>spatial_ref :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>GeoTransform :</span></dt><dd>11.600000000000023 0.0008333333333333203 0.0 46.8 0.0 -0.0008333333333333345</dd><dt><span>x_dim :</span></dt><dd>x</dd><dt><span>y_dim :</span></dt><dd>y</dd></dl></div><div class='xr-var-data'><pre>array(0)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-7559650c-67cf-4645-9313-167a306ff81a' class='xr-section-summary-in' type='checkbox'  checked><label for='section-7559650c-67cf-4645-9313-167a306ff81a' class='xr-section-summary' >Data variables: <span>(2)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>height_above_nearest_drain</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</div><input id='attrs-bd3fa3c0-4e7e-4132-a343-cf42d379c14a' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-bd3fa3c0-4e7e-4132-a343-cf42d379c14a' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-1b9dd438-8c9d-4e37-aa3c-49ffc04c3057' class='xr-var-data-in' type='checkbox'><label for='data-1b9dd438-8c9d-4e37-aa3c-49ffc04c3057' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>_FillValue :</span></dt><dd>-9999.0</dd><dt><span>source_file :</span></dt><dd>hnd.tif</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -2888,7 +2888,7 @@ Data variables:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>elevtn</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</div><input id='attrs-a4a28b27-44c4-4553-a8c3-69095095db0f' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-a4a28b27-44c4-4553-a8c3-69095095db0f' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-8461aa9c-0a94-44d3-9743-d1e5b3546074' class='xr-var-data-in' type='checkbox'><label for='data-8461aa9c-0a94-44d3-9743-d1e5b3546074' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>_FillValue :</span></dt><dd>-9999.0</dd><dt><span>source_file :</span></dt><dd>elevtn.tif</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>elevtn</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(1920, 1680), meta=np.ndarray&gt;</div><input id='attrs-f49b21ca-bff2-4a67-8d4a-e7e54efd3005' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-f49b21ca-bff2-4a67-8d4a-e7e54efd3005' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-87ee60e6-7774-4cf7-9c2f-50715d124186' class='xr-var-data-in' type='checkbox'><label for='data-87ee60e6-7774-4cf7-9c2f-50715d124186' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>_FillValue :</span></dt><dd>-9999.0</dd><dt><span>source_file :</span></dt><dd>elevtn.tif</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -3094,9 +3094,9 @@ Text(0.5, 1.0, &#39;press_msl&#39;)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-12-02 09:13:51,170 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from tmpdir/era5.yml
+2025-12-15 10:04:40,636 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from tmpdir/era5.yml
 dict_keys([&#39;vito&#39;, &#39;merit_hydro&#39;, &#39;era5&#39;])
-2025-12-02 09:13:51,173 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading era5 RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/era5.nc
+2025-12-15 10:04:40,639 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading era5 RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/era5.nc
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -3605,14 +3605,14 @@ Attributes:
     source_license:  https://cds.climate.copernicus.eu/cdsapp/#!/terms/licenc...
     source_url:      https://doi.org/10.24381/cds.bd0915c6
     source_version:  ERA5 daily data on pressure levels
-    crs:             4326</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-4d43b26b-9a43-46c4-bb49-18793e3ffb40' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-4d43b26b-9a43-46c4-bb49-18793e3ffb40' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 14</li><li><span class='xr-has-index'>latitude</span>: 7</li><li><span class='xr-has-index'>longitude</span>: 6</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-bdab96ec-71da-4f68-ae38-87e91b176cbc' class='xr-section-summary-in' type='checkbox'  checked><label for='section-bdab96ec-71da-4f68-ae38-87e91b176cbc' class='xr-section-summary' >Coordinates: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2010-02-02 ... 2010-02-15</div><input id='attrs-62441996-8507-4c52-8d71-0ce17a14b4ce' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-62441996-8507-4c52-8d71-0ce17a14b4ce' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-24393fa3-7df6-4c3a-bd61-cc096f909850' class='xr-var-data-in' type='checkbox'><label for='data-24393fa3-7df6-4c3a-bd61-cc096f909850' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;2010-02-02T00:00:00.000000000&#x27;, &#x27;2010-02-03T00:00:00.000000000&#x27;,
+    crs:             4326</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-8ee75960-2472-43b1-bc76-a675433e699e' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-8ee75960-2472-43b1-bc76-a675433e699e' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 14</li><li><span class='xr-has-index'>latitude</span>: 7</li><li><span class='xr-has-index'>longitude</span>: 6</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-5231ee7f-7a69-4d24-8af1-a24f1a109390' class='xr-section-summary-in' type='checkbox'  checked><label for='section-5231ee7f-7a69-4d24-8af1-a24f1a109390' class='xr-section-summary' >Coordinates: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2010-02-02 ... 2010-02-15</div><input id='attrs-d95d444c-00ea-4880-af55-f553667e6c75' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-d95d444c-00ea-4880-af55-f553667e6c75' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-c07a94dd-05ef-46b6-8872-0ff6872d8092' class='xr-var-data-in' type='checkbox'><label for='data-c07a94dd-05ef-46b6-8872-0ff6872d8092' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;2010-02-02T00:00:00.000000000&#x27;, &#x27;2010-02-03T00:00:00.000000000&#x27;,
        &#x27;2010-02-04T00:00:00.000000000&#x27;, &#x27;2010-02-05T00:00:00.000000000&#x27;,
        &#x27;2010-02-06T00:00:00.000000000&#x27;, &#x27;2010-02-07T00:00:00.000000000&#x27;,
        &#x27;2010-02-08T00:00:00.000000000&#x27;, &#x27;2010-02-09T00:00:00.000000000&#x27;,
        &#x27;2010-02-10T00:00:00.000000000&#x27;, &#x27;2010-02-11T00:00:00.000000000&#x27;,
        &#x27;2010-02-12T00:00:00.000000000&#x27;, &#x27;2010-02-13T00:00:00.000000000&#x27;,
        &#x27;2010-02-14T00:00:00.000000000&#x27;, &#x27;2010-02-15T00:00:00.000000000&#x27;],
-      dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>latitude</span></div><div class='xr-var-dims'>(latitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>46.75 46.5 46.25 ... 45.5 45.25</div><input id='attrs-9f8226c0-5729-4662-b60a-e205f10206bc' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-9f8226c0-5729-4662-b60a-e205f10206bc' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-d6a7914d-e318-43f0-a6d5-92477dc7b898' class='xr-var-data-in' type='checkbox'><label for='data-d6a7914d-e318-43f0-a6d5-92477dc7b898' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([46.75, 46.5 , 46.25, 46.  , 45.75, 45.5 , 45.25], dtype=float32)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>longitude</span></div><div class='xr-var-dims'>(longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>11.75 12.0 12.25 12.5 12.75 13.0</div><input id='attrs-9e58d7b0-9a74-4837-87b9-bda366ead9c2' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-9e58d7b0-9a74-4837-87b9-bda366ead9c2' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-224d22e9-5c9f-4a9b-bec7-3883dc730bf8' class='xr-var-data-in' type='checkbox'><label for='data-224d22e9-5c9f-4a9b-bec7-3883dc730bf8' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([11.75, 12.  , 12.25, 12.5 , 12.75, 13.  ], dtype=float32)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>...</div><input id='attrs-77f01233-b62e-4c39-aeda-3ccc8c2fc9fb' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-77f01233-b62e-4c39-aeda-3ccc8c2fc9fb' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-d545968a-a6df-4829-9661-8049cffc1bcd' class='xr-var-data-in' type='checkbox'><label for='data-d545968a-a6df-4829-9661-8049cffc1bcd' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>crs_wkt :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>x_dim :</span></dt><dd>longitude</dd><dt><span>y_dim :</span></dt><dd>latitude</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314245179</dd><dt><span>inverse_flattening :</span></dt><dd>298.257223563</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>WGS 84</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>WGS 84</dd><dt><span>horizontal_datum_name :</span></dt><dd>World Geodetic System 1984</dd><dt><span>grid_mapping_name :</span></dt><dd>latitude_longitude</dd><dt><span>spatial_ref :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd></dl></div><div class='xr-var-data'><pre>[1 values with dtype=int32]</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-1ea29c36-261d-4926-98b2-fdfde9d80b18' class='xr-section-summary-in' type='checkbox'  checked><label for='section-1ea29c36-261d-4926-98b2-fdfde9d80b18' class='xr-section-summary' >Data variables: <span>(7)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>precip</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-ba86d5ee-f7e4-488e-99d6-0f7248d0373d' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-ba86d5ee-f7e4-488e-99d6-0f7248d0373d' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-dee6a641-0cf1-4ab4-972e-1b80d5d41222' class='xr-var-data-in' type='checkbox'><label for='data-dee6a641-0cf1-4ab4-972e-1b80d5d41222' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
+      dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>latitude</span></div><div class='xr-var-dims'>(latitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>46.75 46.5 46.25 ... 45.5 45.25</div><input id='attrs-b7f0a275-4d18-40c9-aee3-fcdfa14807fe' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-b7f0a275-4d18-40c9-aee3-fcdfa14807fe' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-f8f228ce-15d1-48ac-a734-12d63cd3ce8f' class='xr-var-data-in' type='checkbox'><label for='data-f8f228ce-15d1-48ac-a734-12d63cd3ce8f' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>units :</span></dt><dd>degrees_north</dd><dt><span>long_name :</span></dt><dd>latitude</dd></dl></div><div class='xr-var-data'><pre>array([46.75, 46.5 , 46.25, 46.  , 45.75, 45.5 , 45.25], dtype=float32)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>longitude</span></div><div class='xr-var-dims'>(longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>11.75 12.0 12.25 12.5 12.75 13.0</div><input id='attrs-ba2c51c4-bf5e-4ab9-b31f-5ef5d8db6f18' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-ba2c51c4-bf5e-4ab9-b31f-5ef5d8db6f18' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-f3499f5e-0823-4a40-bca9-6a903b638bad' class='xr-var-data-in' type='checkbox'><label for='data-f3499f5e-0823-4a40-bca9-6a903b638bad' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([11.75, 12.  , 12.25, 12.5 , 12.75, 13.  ], dtype=float32)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>...</div><input id='attrs-fee311eb-ceb0-437a-ae67-9286ee3929be' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-fee311eb-ceb0-437a-ae67-9286ee3929be' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-b8285b55-0630-49a5-b2e4-1a8c1e674cf6' class='xr-var-data-in' type='checkbox'><label for='data-b8285b55-0630-49a5-b2e4-1a8c1e674cf6' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>crs_wkt :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>x_dim :</span></dt><dd>longitude</dd><dt><span>y_dim :</span></dt><dd>latitude</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314245179</dd><dt><span>inverse_flattening :</span></dt><dd>298.257223563</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>WGS 84</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>WGS 84</dd><dt><span>horizontal_datum_name :</span></dt><dd>World Geodetic System 1984</dd><dt><span>grid_mapping_name :</span></dt><dd>latitude_longitude</dd><dt><span>spatial_ref :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd></dl></div><div class='xr-var-data'><pre>[1 values with dtype=int32]</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-d37bf03e-280f-4921-b572-bfeee56dab70' class='xr-section-summary-in' type='checkbox'  checked><label for='section-d37bf03e-280f-4921-b572-bfeee56dab70' class='xr-section-summary' >Data variables: <span>(7)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>precip</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-d8912767-cc30-4c06-8556-f27b31e139a5' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-d8912767-cc30-4c06-8556-f27b31e139a5' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-faa296fd-8079-4fe9-a421-03c306f170c5' class='xr-var-data-in' type='checkbox'><label for='data-faa296fd-8079-4fe9-a421-03c306f170c5' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -3690,7 +3690,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>temp</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-0aa16b1d-afa1-40a5-86a9-2ae23f273aad' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-0aa16b1d-afa1-40a5-86a9-2ae23f273aad' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-49f5b0c9-bb73-4879-9d55-0e30eea4298b' class='xr-var-data-in' type='checkbox'><label for='data-49f5b0c9-bb73-4879-9d55-0e30eea4298b' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>temp</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-163a2add-1358-45ae-8c33-1c48fd5d2cd5' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-163a2add-1358-45ae-8c33-1c48fd5d2cd5' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-b1411534-36a8-4ed3-8b1b-ac8a72842277' class='xr-var-data-in' type='checkbox'><label for='data-b1411534-36a8-4ed3-8b1b-ac8a72842277' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -3768,7 +3768,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>press_msl</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-f41cf898-c58f-4a4c-b6d9-14c65eaa5a93' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-f41cf898-c58f-4a4c-b6d9-14c65eaa5a93' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-913475d3-c4d9-4911-9aba-fe0e6ee93971' class='xr-var-data-in' type='checkbox'><label for='data-913475d3-c4d9-4911-9aba-fe0e6ee93971' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>press_msl</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-5bbbf9bb-e733-4d28-ab32-42d272d38597' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-5bbbf9bb-e733-4d28-ab32-42d272d38597' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-e8e713f6-ff54-4bfb-88f8-8fb1fec003bc' class='xr-var-data-in' type='checkbox'><label for='data-e8e713f6-ff54-4bfb-88f8-8fb1fec003bc' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -3846,7 +3846,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>kin</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-5c95cf90-732a-4078-a54c-3b5f97cce339' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-5c95cf90-732a-4078-a54c-3b5f97cce339' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-a04ce00c-3fc7-41e4-8731-2a4f4bae044d' class='xr-var-data-in' type='checkbox'><label for='data-a04ce00c-3fc7-41e4-8731-2a4f4bae044d' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>kin</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-1d3cb5be-ae6a-4f15-8a46-7ee89c1319fa' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-1d3cb5be-ae6a-4f15-8a46-7ee89c1319fa' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-d805f079-2bc1-41e5-81ca-03dd25e63b68' class='xr-var-data-in' type='checkbox'><label for='data-d805f079-2bc1-41e5-81ca-03dd25e63b68' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -3924,7 +3924,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>kout</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-153b85ae-3eb6-4c18-beb3-d83d2068ba1c' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-153b85ae-3eb6-4c18-beb3-d83d2068ba1c' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-848bc899-b24e-4edf-836d-54946a0d0900' class='xr-var-data-in' type='checkbox'><label for='data-848bc899-b24e-4edf-836d-54946a0d0900' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>kout</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-3a6c47b2-d9de-4787-9af2-08c07cb69203' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-3a6c47b2-d9de-4787-9af2-08c07cb69203' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-98e4299c-dcb9-410f-9e1e-ab682f28afbb' class='xr-var-data-in' type='checkbox'><label for='data-98e4299c-dcb9-410f-9e1e-ab682f28afbb' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -4002,7 +4002,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>temp_min</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-ff1b4697-4e4e-4219-9547-a367a0ae58d9' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-ff1b4697-4e4e-4219-9547-a367a0ae58d9' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-c116d0f9-3dde-4dd7-8b09-417d0d32d22b' class='xr-var-data-in' type='checkbox'><label for='data-c116d0f9-3dde-4dd7-8b09-417d0d32d22b' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>temp_min</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-e12f0f09-957c-476c-b2ac-464a62d7455e' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-e12f0f09-957c-476c-b2ac-464a62d7455e' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-8f3977a4-a025-4561-8f2a-f8a00bf30aa4' class='xr-var-data-in' type='checkbox'><label for='data-8f3977a4-a025-4561-8f2a-f8a00bf30aa4' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -4080,7 +4080,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>temp_max</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-099f31f5-7801-4d0b-bb89-17ba99c1f3b7' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-099f31f5-7801-4d0b-bb89-17ba99c1f3b7' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-9a13abf7-d36b-4312-8883-353ba113181c' class='xr-var-data-in' type='checkbox'><label for='data-9a13abf7-d36b-4312-8883-353ba113181c' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>temp_max</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-3ec87057-ffa9-42f0-af16-37ff0e048b3a' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-3ec87057-ffa9-42f0-af16-37ff0e048b3a' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-603df149-2c20-4059-a3a3-58770b626df8' class='xr-var-data-in' type='checkbox'><label for='data-603df149-2c20-4059-a3a3-58770b626df8' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -4158,7 +4158,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li></ul></div></li><li class='xr-section-item'><input id='section-4acfc033-5298-407b-8569-8d7199f8d509' class='xr-section-summary-in' type='checkbox'  checked><label for='section-4acfc033-5298-407b-8569-8d7199f8d509' class='xr-section-summary' >Attributes: <span>(8)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>category :</span></dt><dd>meteo</dd><dt><span>history :</span></dt><dd>Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency</dd><dt><span>paper_doi :</span></dt><dd>10.1002/qj.3803</dd><dt><span>paper_ref :</span></dt><dd>Hersbach et al. (2019)</dd><dt><span>source_license :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products</dd><dt><span>source_url :</span></dt><dd>https://doi.org/10.24381/cds.bd0915c6</dd><dt><span>source_version :</span></dt><dd>ERA5 daily data on pressure levels</dd><dt><span>crs :</span></dt><dd>4326</dd></dl></div></li></ul></div></div></div>
+</table></div></li></ul></div></li><li class='xr-section-item'><input id='section-31ffb99e-e088-418e-9b62-a1bc290ff75b' class='xr-section-summary-in' type='checkbox'  checked><label for='section-31ffb99e-e088-418e-9b62-a1bc290ff75b' class='xr-section-summary' >Attributes: <span>(8)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>category :</span></dt><dd>meteo</dd><dt><span>history :</span></dt><dd>Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency</dd><dt><span>paper_doi :</span></dt><dd>10.1002/qj.3803</dd><dt><span>paper_ref :</span></dt><dd>Hersbach et al. (2019)</dd><dt><span>source_license :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products</dd><dt><span>source_url :</span></dt><dd>https://doi.org/10.24381/cds.bd0915c6</dd><dt><span>source_version :</span></dt><dd>ERA5 daily data on pressure levels</dd><dt><span>crs :</span></dt><dd>4326</dd></dl></div></li></ul></div></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
@@ -4315,9 +4315,9 @@ CRS: EPSG:4326
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-12-02 09:13:51,887 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from tmpdir/rivers.yml
+2025-12-15 10:04:41,360 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from tmpdir/rivers.yml
 dict_keys([&#39;vito&#39;, &#39;merit_hydro&#39;, &#39;era5&#39;, &#39;rivers_lin&#39;])
-2025-12-02 09:13:51,889 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading rivers_lin GeoDataFrame data from /home/runner/.hydromt/artifact_data/v1.0.0/rivers_lin2019_v1.gpkg
+2025-12-15 10:04:41,361 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading rivers_lin GeoDataFrame data from /home/runner/.hydromt/artifact_data/v1.0.0/rivers_lin2019_v1.gpkg
 </pre></div></div>
 </div>
 </section>
@@ -4826,12 +4826,12 @@ Coordinates:
     lat          (stations) float64 152B ...
     spatial_ref  int32 4B ...
 Data variables:
-    waterlevel   (time, stations) float64 306kB ...</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-1d348aa2-e716-441c-97f8-8560c3fc7c4a' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-1d348aa2-e716-441c-97f8-8560c3fc7c4a' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 2016</li><li><span class='xr-has-index'>stations</span>: 19</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-fe3f7992-4c05-4675-90b5-2a9aa76463f9' class='xr-section-summary-in' type='checkbox'  checked><label for='section-fe3f7992-4c05-4675-90b5-2a9aa76463f9' class='xr-section-summary' >Coordinates: <span>(5)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2010-02-01 ... 2010-02-14T23:50:00</div><input id='attrs-3e24170b-b0a5-46b1-9b59-c5882b4b5ba8' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-3e24170b-b0a5-46b1-9b59-c5882b4b5ba8' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-463ce9b3-41b4-425c-8dce-1ca92291fdf4' class='xr-var-data-in' type='checkbox'><label for='data-463ce9b3-41b4-425c-8dce-1ca92291fdf4' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>T</dd><dt><span>long_name :</span></dt><dd>time</dd><dt><span>short_name :</span></dt><dd>time</dd></dl></div><div class='xr-var-data'><pre>array([&#x27;2010-02-01T00:00:00.000000000&#x27;, &#x27;2010-02-01T00:10:00.000000000&#x27;,
+    waterlevel   (time, stations) float64 306kB ...</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-194c5752-d34a-4769-b686-181ecf604712' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-194c5752-d34a-4769-b686-181ecf604712' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 2016</li><li><span class='xr-has-index'>stations</span>: 19</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-58d103da-2c32-40cc-b49a-7b308ef65a28' class='xr-section-summary-in' type='checkbox'  checked><label for='section-58d103da-2c32-40cc-b49a-7b308ef65a28' class='xr-section-summary' >Coordinates: <span>(5)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2010-02-01 ... 2010-02-14T23:50:00</div><input id='attrs-c906be09-dd6d-4aec-9db0-fe10bd7957f1' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-c906be09-dd6d-4aec-9db0-fe10bd7957f1' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-0eabdbec-ac41-4696-ab24-83d2b01ad456' class='xr-var-data-in' type='checkbox'><label for='data-0eabdbec-ac41-4696-ab24-83d2b01ad456' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>T</dd><dt><span>long_name :</span></dt><dd>time</dd><dt><span>short_name :</span></dt><dd>time</dd></dl></div><div class='xr-var-data'><pre>array([&#x27;2010-02-01T00:00:00.000000000&#x27;, &#x27;2010-02-01T00:10:00.000000000&#x27;,
        &#x27;2010-02-01T00:20:00.000000000&#x27;, ..., &#x27;2010-02-14T23:30:00.000000000&#x27;,
        &#x27;2010-02-14T23:40:00.000000000&#x27;, &#x27;2010-02-14T23:50:00.000000000&#x27;],
-      shape=(2016,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>stations</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>13670 2798 2799 ... 2791 2790 2789</div><input id='attrs-bc09af24-87d9-42be-b5b9-de11fe4747b2' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-bc09af24-87d9-42be-b5b9-de11fe4747b2' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-e4d938f5-cdd2-4328-8771-05c52a69f1e6' class='xr-var-data-in' type='checkbox'><label for='data-e4d938f5-cdd2-4328-8771-05c52a69f1e6' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([13670,  2798,  2799, 13775, 13723,  2797, 13822,  2796, 23305, 22721,
+      shape=(2016,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>stations</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>13670 2798 2799 ... 2791 2790 2789</div><input id='attrs-6e9ce7c1-c139-492a-a221-fe20cbcbd5b9' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-6e9ce7c1-c139-492a-a221-fe20cbcbd5b9' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-07c142a2-6f3d-45f2-83dc-04b21315a05c' class='xr-var-data-in' type='checkbox'><label for='data-07c142a2-6f3d-45f2-83dc-04b21315a05c' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([13670,  2798,  2799, 13775, 13723,  2797, 13822,  2796, 23305, 22721,
         2795,  2794,  2793, 13774, 13722,  2792,  2791,  2790,  2789],
-      dtype=int32)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>lon</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>...</div><input id='attrs-a902bf14-0340-4457-b1ad-4c9af4b777ab' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-a902bf14-0340-4457-b1ad-4c9af4b777ab' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-36629ab5-acd3-433f-af8c-67c9d0c80493' class='xr-var-data-in' type='checkbox'><label for='data-36629ab5-acd3-433f-af8c-67c9d0c80493' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>[19 values with dtype=float64]</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>lat</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>...</div><input id='attrs-455b8b3f-6557-44ca-9f68-347e0f8a199b' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-455b8b3f-6557-44ca-9f68-347e0f8a199b' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-a56039d0-0d13-4b7e-82b6-63d1f65781f1' class='xr-var-data-in' type='checkbox'><label for='data-a56039d0-0d13-4b7e-82b6-63d1f65781f1' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>units :</span></dt><dd>degrees_north</dd><dt><span>long_name :</span></dt><dd>latitude</dd><dt><span>short_name :</span></dt><dd>latitude</dd></dl></div><div class='xr-var-data'><pre>[19 values with dtype=float64]</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>...</div><input id='attrs-54cc86af-6414-4726-8f1e-2ad2e2ee186d' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-54cc86af-6414-4726-8f1e-2ad2e2ee186d' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-502aafdc-d94d-41b5-956b-a4c2f22e43a6' class='xr-var-data-in' type='checkbox'><label for='data-502aafdc-d94d-41b5-956b-a4c2f22e43a6' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>index_dim :</span></dt><dd>stations</dd><dt><span>x_dim :</span></dt><dd>lon</dd><dt><span>y_dim :</span></dt><dd>lat</dd><dt><span>crs_wkt :</span></dt><dd>GEOGCS[&quot;WGS 84&quot;,DATUM[&quot;WGS_1984&quot;,SPHEROID[&quot;WGS 84&quot;,6378137,298.257223563,AUTHORITY[&quot;EPSG&quot;,&quot;7030&quot;]],AUTHORITY[&quot;EPSG&quot;,&quot;6326&quot;]],PRIMEM[&quot;Greenwich&quot;,0,AUTHORITY[&quot;EPSG&quot;,&quot;8901&quot;]],UNIT[&quot;degree&quot;,0.0174532925199433,AUTHORITY[&quot;EPSG&quot;,&quot;9122&quot;]],AXIS[&quot;Latitude&quot;,NORTH],AXIS[&quot;Longitude&quot;,EAST],AUTHORITY[&quot;EPSG&quot;,&quot;4326&quot;]]</dd></dl></div><div class='xr-var-data'><pre>[1 values with dtype=int32]</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-c30c73c9-2c9c-4d78-a897-3235bf7410bf' class='xr-section-summary-in' type='checkbox'  checked><label for='section-c30c73c9-2c9c-4d78-a897-3235bf7410bf' class='xr-section-summary' >Data variables: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>waterlevel</span></div><div class='xr-var-dims'>(time, stations)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>...</div><input id='attrs-51ca0866-5b96-41de-87ce-4d2392b8eb98' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-51ca0866-5b96-41de-87ce-4d2392b8eb98' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-e7f7055a-3bbf-4c16-bef4-f2f03d340629' class='xr-var-data-in' type='checkbox'><label for='data-e7f7055a-3bbf-4c16-bef4-f2f03d340629' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>sea_surface_height_above_mean_sea_level</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>CDI_grid_type :</span></dt><dd>unstructured</dd><dt><span>short_name :</span></dt><dd>waterlevel</dd><dt><span>description :</span></dt><dd>Total water level resulting from the combination of barotropic tides and surges and mean sea-level</dd><dt><span>category :</span></dt><dd>ocean</dd><dt><span>paper_doi :</span></dt><dd>10.24381/cds.8c59054f</dd><dt><span>paper_ref :</span></dt><dd>Copernicus Climate Change Service 2019</dd><dt><span>source_license :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products</dd><dt><span>source_url :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp#!/dataset/10.24381/cds.8c59054f?tab=overview</dd><dt><span>source_version :</span></dt><dd>GTSM v3.0</dd></dl></div><div class='xr-var-data'><pre>[38304 values with dtype=float64]</pre></div></li></ul></div></li></ul></div></div></div>
+      dtype=int32)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>lon</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>...</div><input id='attrs-7adaefd1-362e-4202-86c5-6296207bf833' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-7adaefd1-362e-4202-86c5-6296207bf833' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-6ae6f543-97b0-4da8-b4b4-bedcb797c3ef' class='xr-var-data-in' type='checkbox'><label for='data-6ae6f543-97b0-4da8-b4b4-bedcb797c3ef' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>[19 values with dtype=float64]</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>lat</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>...</div><input id='attrs-4652037f-9f2a-4363-8696-0153d078a9ea' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-4652037f-9f2a-4363-8696-0153d078a9ea' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-f777189b-4ecd-4174-a135-7bfc52b2c524' class='xr-var-data-in' type='checkbox'><label for='data-f777189b-4ecd-4174-a135-7bfc52b2c524' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>units :</span></dt><dd>degrees_north</dd><dt><span>long_name :</span></dt><dd>latitude</dd><dt><span>short_name :</span></dt><dd>latitude</dd></dl></div><div class='xr-var-data'><pre>[19 values with dtype=float64]</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>...</div><input id='attrs-9e05c14f-85f2-407a-ba96-ccda09ddba56' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-9e05c14f-85f2-407a-ba96-ccda09ddba56' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-1e05cad7-2123-4c25-9e4f-e98c68b10fb8' class='xr-var-data-in' type='checkbox'><label for='data-1e05cad7-2123-4c25-9e4f-e98c68b10fb8' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>index_dim :</span></dt><dd>stations</dd><dt><span>x_dim :</span></dt><dd>lon</dd><dt><span>y_dim :</span></dt><dd>lat</dd><dt><span>crs_wkt :</span></dt><dd>GEOGCS[&quot;WGS 84&quot;,DATUM[&quot;WGS_1984&quot;,SPHEROID[&quot;WGS 84&quot;,6378137,298.257223563,AUTHORITY[&quot;EPSG&quot;,&quot;7030&quot;]],AUTHORITY[&quot;EPSG&quot;,&quot;6326&quot;]],PRIMEM[&quot;Greenwich&quot;,0,AUTHORITY[&quot;EPSG&quot;,&quot;8901&quot;]],UNIT[&quot;degree&quot;,0.0174532925199433,AUTHORITY[&quot;EPSG&quot;,&quot;9122&quot;]],AXIS[&quot;Latitude&quot;,NORTH],AXIS[&quot;Longitude&quot;,EAST],AUTHORITY[&quot;EPSG&quot;,&quot;4326&quot;]]</dd></dl></div><div class='xr-var-data'><pre>[1 values with dtype=int32]</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-df87c450-5812-48e2-85f2-437782e2b115' class='xr-section-summary-in' type='checkbox'  checked><label for='section-df87c450-5812-48e2-85f2-437782e2b115' class='xr-section-summary' >Data variables: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>waterlevel</span></div><div class='xr-var-dims'>(time, stations)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>...</div><input id='attrs-d7e1e657-3af8-44b1-b3c7-7259a2112342' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-d7e1e657-3af8-44b1-b3c7-7259a2112342' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-89eeb4af-d6ca-4888-9017-6ea418b4ad28' class='xr-var-data-in' type='checkbox'><label for='data-89eeb4af-d6ca-4888-9017-6ea418b4ad28' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>sea_surface_height_above_mean_sea_level</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>CDI_grid_type :</span></dt><dd>unstructured</dd><dt><span>short_name :</span></dt><dd>waterlevel</dd><dt><span>description :</span></dt><dd>Total water level resulting from the combination of barotropic tides and surges and mean sea-level</dd><dt><span>category :</span></dt><dd>ocean</dd><dt><span>paper_doi :</span></dt><dd>10.24381/cds.8c59054f</dd><dt><span>paper_ref :</span></dt><dd>Copernicus Climate Change Service 2019</dd><dt><span>source_license :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products</dd><dt><span>source_url :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp#!/dataset/10.24381/cds.8c59054f?tab=overview</dd><dt><span>source_version :</span></dt><dd>GTSM v3.0</dd></dl></div><div class='xr-var-data'><pre>[38304 values with dtype=float64]</pre></div></li></ul></div></li></ul></div></div></div>
 </div>
 <p>This is quite a classic file, so the data catalog entry is quite straightforward:</p>
 <div class="nbinput nblast docutils container">
@@ -4876,9 +4876,9 @@ Data variables:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-12-02 09:13:51,922 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from tmpdir/gtsm.yml
+2025-12-15 10:04:41,394 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from tmpdir/gtsm.yml
 dict_keys([&#39;vito&#39;, &#39;merit_hydro&#39;, &#39;era5&#39;, &#39;rivers_lin&#39;, &#39;gtsm&#39;])
-2025-12-02 09:13:51,924 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading gtsm GeoDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/gtsmv3_eu_era5.nc
+2025-12-15 10:04:41,396 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading gtsm GeoDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/gtsmv3_eu_era5.nc
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -5383,7 +5383,7 @@ Attributes:
     paper_ref:       Copernicus Climate Change Service 2019
     source_license:  https://cds.climate.copernicus.eu/cdsapp/#!/terms/licenc...
     source_url:      https://cds.climate.copernicus.eu/cdsapp#!/dataset/10.24...
-    source_version:  GTSM v3.0</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-obj-name'>&#x27;waterlevel&#x27;</div><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 2016</li><li><span class='xr-has-index'>stations</span>: 19</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-d1d89b81-590e-46c3-9273-6e173173019d' class='xr-array-in' type='checkbox' checked><label for='section-d1d89b81-590e-46c3-9273-6e173173019d' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>dask.array&lt;chunksize=(2016, 19), meta=np.ndarray&gt;</span></div><div class='xr-array-data'><table>
+    source_version:  GTSM v3.0</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-obj-name'>&#x27;waterlevel&#x27;</div><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 2016</li><li><span class='xr-has-index'>stations</span>: 19</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-49906610-5342-44c6-a1a1-f88c96af74d6' class='xr-array-in' type='checkbox' checked><label for='section-49906610-5342-44c6-a1a1-f88c96af74d6' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>dask.array&lt;chunksize=(2016, 19), meta=np.ndarray&gt;</span></div><div class='xr-array-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -5438,12 +5438,12 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></div></li><li class='xr-section-item'><input id='section-ebe9df7c-6f3d-40d7-a300-e0a9bd81f3ab' class='xr-section-summary-in' type='checkbox'  checked><label for='section-ebe9df7c-6f3d-40d7-a300-e0a9bd81f3ab' class='xr-section-summary' >Coordinates: <span>(5)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2010-02-01 ... 2010-02-14T23:50:00</div><input id='attrs-08d9b3e1-e45c-4b70-bddf-6ba3b4c270eb' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-08d9b3e1-e45c-4b70-bddf-6ba3b4c270eb' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-749b567d-1fa5-4efb-b469-bac2d1b4713b' class='xr-var-data-in' type='checkbox'><label for='data-749b567d-1fa5-4efb-b469-bac2d1b4713b' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>T</dd><dt><span>long_name :</span></dt><dd>time</dd><dt><span>short_name :</span></dt><dd>time</dd></dl></div><div class='xr-var-data'><pre>array([&#x27;2010-02-01T00:00:00.000000000&#x27;, &#x27;2010-02-01T00:10:00.000000000&#x27;,
+</table></div></div></li><li class='xr-section-item'><input id='section-35ea98cc-611b-4290-8eeb-76f0ab4da968' class='xr-section-summary-in' type='checkbox'  checked><label for='section-35ea98cc-611b-4290-8eeb-76f0ab4da968' class='xr-section-summary' >Coordinates: <span>(5)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2010-02-01 ... 2010-02-14T23:50:00</div><input id='attrs-54797571-4857-48e6-b21f-c6679a06b559' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-54797571-4857-48e6-b21f-c6679a06b559' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-3f6c3004-60ae-4a74-a51c-f2c3176c350d' class='xr-var-data-in' type='checkbox'><label for='data-3f6c3004-60ae-4a74-a51c-f2c3176c350d' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>T</dd><dt><span>long_name :</span></dt><dd>time</dd><dt><span>short_name :</span></dt><dd>time</dd></dl></div><div class='xr-var-data'><pre>array([&#x27;2010-02-01T00:00:00.000000000&#x27;, &#x27;2010-02-01T00:10:00.000000000&#x27;,
        &#x27;2010-02-01T00:20:00.000000000&#x27;, ..., &#x27;2010-02-14T23:30:00.000000000&#x27;,
        &#x27;2010-02-14T23:40:00.000000000&#x27;, &#x27;2010-02-14T23:50:00.000000000&#x27;],
-      shape=(2016,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>stations</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>13670 2798 2799 ... 2791 2790 2789</div><input id='attrs-083d960d-0309-4f95-9a91-124c66425fcc' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-083d960d-0309-4f95-9a91-124c66425fcc' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-4bdc857d-0011-4388-9406-80e861b80f88' class='xr-var-data-in' type='checkbox'><label for='data-4bdc857d-0011-4388-9406-80e861b80f88' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([13670,  2798,  2799, 13775, 13723,  2797, 13822,  2796, 23305, 22721,
+      shape=(2016,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>stations</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>13670 2798 2799 ... 2791 2790 2789</div><input id='attrs-31912d52-502f-4d9b-9533-568655bbe57d' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-31912d52-502f-4d9b-9533-568655bbe57d' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-b26224de-7b7e-4daf-88e9-189fad293e64' class='xr-var-data-in' type='checkbox'><label for='data-b26224de-7b7e-4daf-88e9-189fad293e64' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([13670,  2798,  2799, 13775, 13723,  2797, 13822,  2796, 23305, 22721,
         2795,  2794,  2793, 13774, 13722,  2792,  2791,  2790,  2789],
-      dtype=int32)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>lon</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19,), meta=np.ndarray&gt;</div><input id='attrs-ae2e51ce-0ae2-4fe9-9723-bbb474a3887d' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-ae2e51ce-0ae2-4fe9-9723-bbb474a3887d' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-44d9aaef-25bd-412c-8962-63620f2a46ee' class='xr-var-data-in' type='checkbox'><label for='data-44d9aaef-25bd-412c-8962-63620f2a46ee' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><table>
+      dtype=int32)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>lon</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19,), meta=np.ndarray&gt;</div><input id='attrs-73314b45-8dc7-44ed-9c4c-b4b42896b627' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-73314b45-8dc7-44ed-9c4c-b4b42896b627' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-48f7c127-c101-4b82-af06-39a63a79e4e0' class='xr-var-data-in' type='checkbox'><label for='data-48f7c127-c101-4b82-af06-39a63a79e4e0' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -5498,7 +5498,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>lat</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19,), meta=np.ndarray&gt;</div><input id='attrs-fbeb78d0-a594-4d66-b643-15f40ff58a0b' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-fbeb78d0-a594-4d66-b643-15f40ff58a0b' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-a1f01bc6-130b-447c-aaee-5be5684e597c' class='xr-var-data-in' type='checkbox'><label for='data-a1f01bc6-130b-447c-aaee-5be5684e597c' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>units :</span></dt><dd>degrees_north</dd><dt><span>long_name :</span></dt><dd>latitude</dd><dt><span>short_name :</span></dt><dd>latitude</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>lat</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19,), meta=np.ndarray&gt;</div><input id='attrs-77d59d7c-2691-4cd5-80f8-d105e35ee435' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-77d59d7c-2691-4cd5-80f8-d105e35ee435' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-58e19a6d-3915-4374-a242-f4317fe502b0' class='xr-var-data-in' type='checkbox'><label for='data-58e19a6d-3915-4374-a242-f4317fe502b0' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>units :</span></dt><dd>degrees_north</dd><dt><span>long_name :</span></dt><dd>latitude</dd><dt><span>short_name :</span></dt><dd>latitude</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -5553,7 +5553,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>...</div><input id='attrs-3d0e67e2-026c-41d2-b6a0-82c94679d234' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-3d0e67e2-026c-41d2-b6a0-82c94679d234' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-74493565-1d76-4b1a-b5cf-0525b9579961' class='xr-var-data-in' type='checkbox'><label for='data-74493565-1d76-4b1a-b5cf-0525b9579961' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>x_dim :</span></dt><dd>lon</dd><dt><span>y_dim :</span></dt><dd>lat</dd><dt><span>crs_wkt :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>x_name :</span></dt><dd>lon</dd><dt><span>y_name :</span></dt><dd>lat</dd><dt><span>geom_format :</span></dt><dd>xy</dd><dt><span>index_dim :</span></dt><dd>stations</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314245179</dd><dt><span>inverse_flattening :</span></dt><dd>298.257223563</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>WGS 84</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>WGS 84</dd><dt><span>horizontal_datum_name :</span></dt><dd>World Geodetic System 1984</dd><dt><span>grid_mapping_name :</span></dt><dd>latitude_longitude</dd><dt><span>spatial_ref :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd></dl></div><div class='xr-var-data'><pre>[1 values with dtype=int32]</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-5bbc63df-a6ee-4548-ad4b-f08316c300dc' class='xr-section-summary-in' type='checkbox'  ><label for='section-5bbc63df-a6ee-4548-ad4b-f08316c300dc' class='xr-section-summary' >Attributes: <span>(11)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>sea_surface_height_above_mean_sea_level</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>CDI_grid_type :</span></dt><dd>unstructured</dd><dt><span>short_name :</span></dt><dd>waterlevel</dd><dt><span>description :</span></dt><dd>Total water level resulting from the combination of barotropic tides and surges and mean sea-level</dd><dt><span>category :</span></dt><dd>ocean</dd><dt><span>paper_doi :</span></dt><dd>10.24381/cds.8c59054f</dd><dt><span>paper_ref :</span></dt><dd>Copernicus Climate Change Service 2019</dd><dt><span>source_license :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products</dd><dt><span>source_url :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp#!/dataset/10.24381/cds.8c59054f?tab=overview</dd><dt><span>source_version :</span></dt><dd>GTSM v3.0</dd></dl></div></li></ul></div></div></div>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>...</div><input id='attrs-530d200a-c297-4ae3-95de-4942f6a9a35c' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-530d200a-c297-4ae3-95de-4942f6a9a35c' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-fe0276f9-a789-4a00-9867-fe8c95b3c377' class='xr-var-data-in' type='checkbox'><label for='data-fe0276f9-a789-4a00-9867-fe8c95b3c377' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>x_dim :</span></dt><dd>lon</dd><dt><span>y_dim :</span></dt><dd>lat</dd><dt><span>crs_wkt :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>x_name :</span></dt><dd>lon</dd><dt><span>y_name :</span></dt><dd>lat</dd><dt><span>geom_format :</span></dt><dd>xy</dd><dt><span>index_dim :</span></dt><dd>stations</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314245179</dd><dt><span>inverse_flattening :</span></dt><dd>298.257223563</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>WGS 84</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>WGS 84</dd><dt><span>horizontal_datum_name :</span></dt><dd>World Geodetic System 1984</dd><dt><span>grid_mapping_name :</span></dt><dd>latitude_longitude</dd><dt><span>spatial_ref :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd></dl></div><div class='xr-var-data'><pre>[1 values with dtype=int32]</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-9876cc5f-a89d-4ab9-b51e-c7462a564487' class='xr-section-summary-in' type='checkbox'  ><label for='section-9876cc5f-a89d-4ab9-b51e-c7462a564487' class='xr-section-summary' >Attributes: <span>(11)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>sea_surface_height_above_mean_sea_level</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>CDI_grid_type :</span></dt><dd>unstructured</dd><dt><span>short_name :</span></dt><dd>waterlevel</dd><dt><span>description :</span></dt><dd>Total water level resulting from the combination of barotropic tides and surges and mean sea-level</dd><dt><span>category :</span></dt><dd>ocean</dd><dt><span>paper_doi :</span></dt><dd>10.24381/cds.8c59054f</dd><dt><span>paper_ref :</span></dt><dd>Copernicus Climate Change Service 2019</dd><dt><span>source_license :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products</dd><dt><span>source_url :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp#!/dataset/10.24381/cds.8c59054f?tab=overview</dd><dt><span>source_version :</span></dt><dd>GTSM v3.0</dd></dl></div></li></ul></div></div></div>
 </div>
 </section>
 <section id="GeoDataset-from-vector-files">
@@ -5684,9 +5684,9 @@ tabular_data_catalog.yml
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-12-02 09:13:51,982 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from tmpdir/waterlevel.yml
+2025-12-15 10:04:41,457 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from tmpdir/waterlevel.yml
 dict_keys([&#39;vito&#39;, &#39;merit_hydro&#39;, &#39;era5&#39;, &#39;rivers_lin&#39;, &#39;gtsm&#39;, &#39;waterlevel_csv&#39;])
-2025-12-02 09:13:51,984 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading waterlevel_csv GeoDataset data from /home/runner/work/hydromt/hydromt/docs/_examples/data/stations.csv
+2025-12-15 10:04:41,460 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading waterlevel_csv GeoDataset data from /home/runner/work/hydromt/hydromt/docs/_examples/data/stations.csv
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -6178,7 +6178,7 @@ Coordinates:
   * stations     (stations) int64 16B 1001 1002
   * time         (time) datetime64[ns] 16kB 2016-01-01 2016-01-02 ... 2021-07-08
     geometry     (stations) object 16B dask.array&lt;chunksize=(2,), meta=np.ndarray&gt;
-    spatial_ref  int64 8B 0</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-obj-name'>&#x27;waterlevel&#x27;</div><ul class='xr-dim-list'><li><span class='xr-has-index'>stations</span>: 2</li><li><span class='xr-has-index'>time</span>: 2016</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-0313d89d-b1e1-4331-8de9-1e2082c23b2a' class='xr-array-in' type='checkbox' checked><label for='section-0313d89d-b1e1-4331-8de9-1e2082c23b2a' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>dask.array&lt;chunksize=(2, 2016), meta=np.ndarray&gt;</span></div><div class='xr-array-data'><table>
+    spatial_ref  int64 8B 0</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-obj-name'>&#x27;waterlevel&#x27;</div><ul class='xr-dim-list'><li><span class='xr-has-index'>stations</span>: 2</li><li><span class='xr-has-index'>time</span>: 2016</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-fd1c98b6-0771-40e7-920a-524fcb787cb2' class='xr-array-in' type='checkbox' checked><label for='section-fd1c98b6-0771-40e7-920a-524fcb787cb2' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>dask.array&lt;chunksize=(2, 2016), meta=np.ndarray&gt;</span></div><div class='xr-array-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -6233,10 +6233,10 @@ Coordinates:
 </svg>
         </td>
     </tr>
-</table></div></div></li><li class='xr-section-item'><input id='section-09095aae-719e-4658-b9df-7cd4fc6f353a' class='xr-section-summary-in' type='checkbox'  checked><label for='section-09095aae-719e-4658-b9df-7cd4fc6f353a' class='xr-section-summary' >Coordinates: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>stations</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>1001 1002</div><input id='attrs-e63f3d82-a3cf-4944-91cf-1fcc7b8b6ef7' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-e63f3d82-a3cf-4944-91cf-1fcc7b8b6ef7' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-ec04fdf8-72d8-457b-bbb2-c7beb1229b34' class='xr-var-data-in' type='checkbox'><label for='data-ec04fdf8-72d8-457b-bbb2-c7beb1229b34' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([1001, 1002])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2016-01-01 ... 2021-07-08</div><input id='attrs-c992fe70-21a7-4787-afbd-62afefa2becc' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-c992fe70-21a7-4787-afbd-62afefa2becc' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-15901907-dfbe-48ce-9c30-f9c21344deb5' class='xr-var-data-in' type='checkbox'><label for='data-15901907-dfbe-48ce-9c30-f9c21344deb5' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;2016-01-01T00:00:00.000000000&#x27;, &#x27;2016-01-02T00:00:00.000000000&#x27;,
+</table></div></div></li><li class='xr-section-item'><input id='section-a8959e88-8b6e-48f8-803b-994812b5f998' class='xr-section-summary-in' type='checkbox'  checked><label for='section-a8959e88-8b6e-48f8-803b-994812b5f998' class='xr-section-summary' >Coordinates: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>stations</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>1001 1002</div><input id='attrs-76222f5d-a7a6-40a7-a7a3-4e7116cd6b04' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-76222f5d-a7a6-40a7-a7a3-4e7116cd6b04' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-78c0efdc-13b0-4136-9f42-0b43f63a48ac' class='xr-var-data-in' type='checkbox'><label for='data-78c0efdc-13b0-4136-9f42-0b43f63a48ac' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([1001, 1002])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2016-01-01 ... 2021-07-08</div><input id='attrs-9a7bbc9f-e3e2-45b4-96fa-10926c6c1f3a' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-9a7bbc9f-e3e2-45b4-96fa-10926c6c1f3a' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-1796f7be-74ba-48a8-840a-c1e663b08b73' class='xr-var-data-in' type='checkbox'><label for='data-1796f7be-74ba-48a8-840a-c1e663b08b73' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;2016-01-01T00:00:00.000000000&#x27;, &#x27;2016-01-02T00:00:00.000000000&#x27;,
        &#x27;2016-01-03T00:00:00.000000000&#x27;, ..., &#x27;2021-07-06T00:00:00.000000000&#x27;,
        &#x27;2021-07-07T00:00:00.000000000&#x27;, &#x27;2021-07-08T00:00:00.000000000&#x27;],
-      shape=(2016,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>geometry</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>object</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(2,), meta=np.ndarray&gt;</div><input id='attrs-fc9b2830-cf15-433a-baec-4f75b2e0f901' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-fc9b2830-cf15-433a-baec-4f75b2e0f901' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-12152229-25e0-4ca3-9683-d948d6e15cca' class='xr-var-data-in' type='checkbox'><label for='data-12152229-25e0-4ca3-9683-d948d6e15cca' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><table>
+      shape=(2016,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>geometry</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>object</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(2,), meta=np.ndarray&gt;</div><input id='attrs-c363b8b3-9b0a-45d7-9133-7dd84b4ed06b' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-c363b8b3-9b0a-45d7-9133-7dd84b4ed06b' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-1f05f363-e451-4ca4-8036-59237b5344d0' class='xr-var-data-in' type='checkbox'><label for='data-1f05f363-e451-4ca4-8036-59237b5344d0' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -6291,7 +6291,7 @@ Coordinates:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0</div><input id='attrs-c698ed67-60c6-488a-b6cd-073c779d4cb8' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-c698ed67-60c6-488a-b6cd-073c779d4cb8' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-38bdb635-2d66-4f57-94db-ed85a96919d5' class='xr-var-data-in' type='checkbox'><label for='data-38bdb635-2d66-4f57-94db-ed85a96919d5' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>geom_name :</span></dt><dd>geometry</dd><dt><span>geom_format :</span></dt><dd>geom</dd><dt><span>index_dim :</span></dt><dd>stations</dd><dt><span>crs_wkt :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,ENSEMBLE[&quot;World Geodetic System 1984 ensemble&quot;,MEMBER[&quot;World Geodetic System 1984 (Transit)&quot;],MEMBER[&quot;World Geodetic System 1984 (G730)&quot;],MEMBER[&quot;World Geodetic System 1984 (G873)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1150)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1674)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1762)&quot;],MEMBER[&quot;World Geodetic System 1984 (G2139)&quot;],MEMBER[&quot;World Geodetic System 1984 (G2296)&quot;],ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]],ENSEMBLEACCURACY[2.0]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],USAGE[SCOPE[&quot;Horizontal component of 3D system.&quot;],AREA[&quot;World.&quot;],BBOX[-90,-180,90,180]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314245179</dd><dt><span>inverse_flattening :</span></dt><dd>298.257223563</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>WGS 84</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>WGS 84</dd><dt><span>horizontal_datum_name :</span></dt><dd>World Geodetic System 1984 ensemble</dd><dt><span>grid_mapping_name :</span></dt><dd>latitude_longitude</dd><dt><span>spatial_ref :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,ENSEMBLE[&quot;World Geodetic System 1984 ensemble&quot;,MEMBER[&quot;World Geodetic System 1984 (Transit)&quot;],MEMBER[&quot;World Geodetic System 1984 (G730)&quot;],MEMBER[&quot;World Geodetic System 1984 (G873)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1150)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1674)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1762)&quot;],MEMBER[&quot;World Geodetic System 1984 (G2139)&quot;],MEMBER[&quot;World Geodetic System 1984 (G2296)&quot;],ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]],ENSEMBLEACCURACY[2.0]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],USAGE[SCOPE[&quot;Horizontal component of 3D system.&quot;],AREA[&quot;World.&quot;],BBOX[-90,-180,90,180]],ID[&quot;EPSG&quot;,4326]]</dd></dl></div><div class='xr-var-data'><pre>array(0)</pre></div></li></ul></div></li></ul></div></div></div>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0</div><input id='attrs-c24fcd3a-ab7b-4cac-9bb5-421719f80ac2' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-c24fcd3a-ab7b-4cac-9bb5-421719f80ac2' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-c42538ae-9844-4a54-9617-8f8b62d1a47e' class='xr-var-data-in' type='checkbox'><label for='data-c42538ae-9844-4a54-9617-8f8b62d1a47e' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>geom_name :</span></dt><dd>geometry</dd><dt><span>geom_format :</span></dt><dd>geom</dd><dt><span>index_dim :</span></dt><dd>stations</dd><dt><span>crs_wkt :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,ENSEMBLE[&quot;World Geodetic System 1984 ensemble&quot;,MEMBER[&quot;World Geodetic System 1984 (Transit)&quot;],MEMBER[&quot;World Geodetic System 1984 (G730)&quot;],MEMBER[&quot;World Geodetic System 1984 (G873)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1150)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1674)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1762)&quot;],MEMBER[&quot;World Geodetic System 1984 (G2139)&quot;],MEMBER[&quot;World Geodetic System 1984 (G2296)&quot;],ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]],ENSEMBLEACCURACY[2.0]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],USAGE[SCOPE[&quot;Horizontal component of 3D system.&quot;],AREA[&quot;World.&quot;],BBOX[-90,-180,90,180]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314245179</dd><dt><span>inverse_flattening :</span></dt><dd>298.257223563</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>WGS 84</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>WGS 84</dd><dt><span>horizontal_datum_name :</span></dt><dd>World Geodetic System 1984 ensemble</dd><dt><span>grid_mapping_name :</span></dt><dd>latitude_longitude</dd><dt><span>spatial_ref :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,ENSEMBLE[&quot;World Geodetic System 1984 ensemble&quot;,MEMBER[&quot;World Geodetic System 1984 (Transit)&quot;],MEMBER[&quot;World Geodetic System 1984 (G730)&quot;],MEMBER[&quot;World Geodetic System 1984 (G873)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1150)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1674)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1762)&quot;],MEMBER[&quot;World Geodetic System 1984 (G2139)&quot;],MEMBER[&quot;World Geodetic System 1984 (G2296)&quot;],ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]],ENSEMBLEACCURACY[2.0]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],USAGE[SCOPE[&quot;Horizontal component of 3D system.&quot;],AREA[&quot;World.&quot;],BBOX[-90,-180,90,180]],ID[&quot;EPSG&quot;,4326]]</dd></dl></div><div class='xr-var-data'><pre>array(0)</pre></div></li></ul></div></li></ul></div></div></div>
 </div>
 </section>
 </section>
@@ -6406,7 +6406,7 @@ Coordinates:
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
     <br/>
   </p>
 </div>
