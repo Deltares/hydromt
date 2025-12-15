@@ -658,6 +658,7 @@ def test_export_dataset_rasterio(tmp_path: Path):
     assert "flwdir.tif" in tif_files
 
 
+@pytest.mark.integration
 def test_export_data_bulk(tmp_path: Path, caplog: pytest.LogCaptureFixture):
     data_catalog = DataCatalog(data_libs=["artifact_data"])
     data_catalog_reread_path = tmp_path / "bulk_exported"
@@ -697,6 +698,22 @@ def test_export_data_bulk(tmp_path: Path, caplog: pytest.LogCaptureFixture):
         data_catalog.export_data(
             data_catalog_reread_path, bbox=bbox, handle_nodata=NoDataStrategy.RAISE
         )
+
+
+# @pytest.mark.skip("Can only be run locally with access to P drive")
+@pytest.mark.filterwarnings("ignore::UserWarning")
+@pytest.mark.integration
+def test_data_export_deltares_data(tmp_path: Path):
+    dc = DataCatalog(data_libs=["deltares_data"])
+    bounding_box = [11.989, 46.02, 12.253, 46.166]
+
+    export_path = tmp_path / "deltares_exported"
+    dc.export_data(
+        new_root=export_path,
+        bbox=bounding_box,
+        force_overwrite=True,
+        source_names=["grwl_mask"],
+    )
 
 
 @pytest.mark.skip("flakey test due to external http issues")

@@ -265,6 +265,12 @@ class RasterioDriver(RasterDatasetDriver):
         if path.suffix not in self.SUPPORTED_EXTENSIONS:
             raise ValueError(f"Unknown extension for RasterioDriver: {path.suffix}")
 
+        if path.suffix == ".vrt":
+            logger.warning(
+                "Writing to VRT format is not supported by RasterioDriver, will attempt to write as GeoTIFF instead."
+            )
+            path = path.with_suffix(_TIFF_EXT)
+
         gdal_driver = GDAL_DRIVER_CODE_MAP.get(path.suffix.lstrip(".").lower())
 
         if "*" in str(path) and isinstance(data, xr.DataArray):

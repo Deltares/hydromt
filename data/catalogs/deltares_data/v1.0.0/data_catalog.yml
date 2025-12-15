@@ -168,7 +168,7 @@ copdem30_mask:
         South: -90.0
         East: 180.0
         North: 84.0
-    nodata: -1
+    nodata: 255
   data_adapter:
     rename:
       copdem_mask: mask
@@ -324,6 +324,7 @@ eobs:
       combine: by_coords
       parallel: true
       preprocess: round_latlon
+      join: outer
   metadata:
     category: meteo
     paper_doi: 10.1029/2017JD028200

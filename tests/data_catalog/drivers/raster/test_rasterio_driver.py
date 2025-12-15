@@ -47,6 +47,16 @@ class TestRasterioDriver:
         rioda.raster.to_raster(str(path))
         return str(path)
 
+    def test_write_vrt(
+        self, vrt_tiled_raster_ds: str, tmp_path: Path, caplog: pytest.LogCaptureFixture
+    ):
+        uris = [join(vrt_tiled_raster_ds, "tiled_zl0.vrt")]
+        ds: xr.Dataset = RasterioDriver().read(uris=uris)
+        vrt_path = tmp_path / "test_write.vrt"
+        p = RasterioDriver().write(vrt_path, ds)
+        assert "Writing to VRT format is not supported by RasterioDriver" in caplog.text
+        assert p.suffix == ".tif"
+
     def test_reads(self, small_tif: str, rioda: xr.DataArray):
         ds: xr.Dataset = RasterioDriver().read(small_tif)
         xr.testing.assert_equal(rioda, ds["small_tif"])
