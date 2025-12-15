@@ -103,7 +103,10 @@ class PyogrioDriver(GeoDataFrameDriver):
             raise IOError(f"DataFrame from uri: '{_uri}' contains no geometry column.")
 
         if gdf.index.size == 0:
-            exec_nodata_strat(f"No data from driver {self}'.", strategy=handle_nodata)
+            exec_nodata_strat(
+                f"No data from {self.name} driver for file uris: {', '.join(uris)}.",
+                strategy=handle_nodata,
+            )
         return gdf
 
     def write(

@@ -8,6 +8,7 @@ import pytest
 
 from hydromt._compat import HAS_OPENPYXL
 from hydromt.data_catalog.drivers.dataframe import PandasDriver
+from hydromt.error import NoDataException
 
 
 class TestPandasDriver:
@@ -100,6 +101,13 @@ class TestPandasDriver:
         "temp.xlsx",
         marks=pytest.mark.skipif(not HAS_OPENPYXL, reason="openpyxl is not installed"),
     )
+
+    def test_read_no_data(self, driver: PandasDriver, tmp_path):
+        with pytest.raises(
+            NoDataException,
+            match="No data from pandas driver for file uris",
+        ):
+            driver.read([])
 
     @pytest.mark.parametrize(
         "filename", ["temp.csv", "temp.parquet", temp_xls_param, temp_xlsx_param]

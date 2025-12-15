@@ -91,8 +91,11 @@ class PandasDriver(DataFrameDriver):
                 df = pd.read_fwf(uri, **self.options.get_kwargs())
             else:
                 raise IOError(f"DataFrame: extension {extension} unknown.")
-        if df.index.size == 0:
-            exec_nodata_strat(f"No data from driver {self}'.", strategy=handle_nodata)
+        if df.empty:
+            exec_nodata_strat(
+                f"No data from {self.name} driver for file uris: {', '.join(uris)}.",
+                strategy=handle_nodata,
+            )
         return df
 
     def write(
