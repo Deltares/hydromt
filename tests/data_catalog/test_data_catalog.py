@@ -615,10 +615,10 @@ def test_export_data_bulk(tmp_path: Path, caplog: pytest.LogCaptureFixture):
     new_data_catalog_reread = DataCatalog(
         data_libs=[str(data_catalog_export_path / "data_catalog.yml")]
     )
-    assert len(new_data_catalog_reread.sources) == len(new_data_catalog.sources)
+    assert len(new_data_catalog_reread) == len(new_data_catalog)
 
-    for name in new_data_catalog_reread.sources:
-        assert name in new_data_catalog.sources
+    for name in new_data_catalog_reread.get_source_names():
+        assert name in new_data_catalog.get_source_names()
         source = new_data_catalog_reread.get_source(name)
         assert source.metadata == new_data_catalog.get_source(name).metadata
         assert source.driver == new_data_catalog.get_source(name).driver
