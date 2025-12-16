@@ -699,24 +699,39 @@ def test_export_data_bulk(tmp_path: Path, caplog: pytest.LogCaptureFixture):
             data_catalog_reread_path, bbox=bbox, handle_nodata=NoDataStrategy.RAISE
         )
 
+@pytest.fixture
+def deltares_data_catalog():
+    return DataCatalog(data_libs=["deltares_data"])
 
-@pytest.mark.skipif(
-    not Path("P:/").exists(), "Can only be run locally with access to P drive"
-)
+@pytest.fixture
+def bbox():
+    return [11.989, 46.02, 12.253, 46.166]
+
+
+# @pytest.mark.skipif(
+#     not Path("p:/").exists(), reason="Can only be run locally with access to P drive"
+# )
 @pytest.mark.filterwarnings("ignore::UserWarning")
+@pytest.mark.parametrize(
+    "source_name", [s[0] for s in DataCatalog(data_libs=["deltares_data"]).list_sources()]
+)
 @pytest.mark.manual
-def test_data_export_deltares_data(tmp_path: Path):
-    dc = DataCatalog(data_libs=["deltares_data"])
-    bounding_box = [11.989, 46.02, 12.253, 46.166]
-
-    export_path = tmp_path / "deltares_exported"
-    dc.export_data(
-        new_root=export_path,
-        bbox=bounding_box,
+def test_data_export_deltares_data(
+    deltares_data_catalog: DataCatalog,
+    bbox: list[float],
+    tmp_path: Path,
+    source_name: str,
+):
+    write_path = tmp_path / "deltares_exported"
+    deltares_data_catalog.export_data(
+        new_root=write_path,
+        source_names=[source_name],
+        bbox=bbox,
         force_overwrite=True,
-        source_names=["hydro_lake_atlas_pol"],
-        time_range=("2010-02-02", "2010-02-15"),
+        time_range=("2010-02-02", "2010-02-03"),
+        handle_nodata=NoDataStrategy.RAISE,
     )
+    assert (write_path / source_name).exists()
 
 
 @pytest.mark.skip("flakey test due to external http issues")
