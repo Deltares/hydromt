@@ -699,39 +699,60 @@ def test_export_data_bulk(tmp_path: Path, caplog: pytest.LogCaptureFixture):
             data_catalog_reread_path, bbox=bbox, handle_nodata=NoDataStrategy.RAISE
         )
 
+
 @pytest.fixture
 def deltares_data_catalog():
     return DataCatalog(data_libs=["deltares_data"])
+
 
 @pytest.fixture
 def bbox():
     return [11.989, 46.02, 12.253, 46.166]
 
 
-# @pytest.mark.skipif(
-#     not Path("p:/").exists(), reason="Can only be run locally with access to P drive"
-# )
+@pytest.fixture
+def time_range():
+    return ("2010-02-02", "2010-02-04")
+
+
 @pytest.mark.filterwarnings("ignore::UserWarning")
 @pytest.mark.parametrize(
-    "source_name", [s[0] for s in DataCatalog(data_libs=["deltares_data"]).list_sources()]
+    ("source_name", "data_source"),
+    DataCatalog(data_libs=["deltares_data"]).list_sources(),
 )
 @pytest.mark.manual
 def test_data_export_deltares_data(
     deltares_data_catalog: DataCatalog,
     bbox: list[float],
+    time_range: Tuple[str, str],
     tmp_path: Path,
     source_name: str,
+    data_source: DataSource,
 ):
-    write_path = tmp_path / "deltares_exported"
+    write_path = tmp_path / f"deltares_exported_{source_name}"
     deltares_data_catalog.export_data(
         new_root=write_path,
         source_names=[source_name],
         bbox=bbox,
         force_overwrite=True,
-        time_range=("2010-02-02", "2010-02-03"),
+        time_range=time_range,
         handle_nodata=NoDataStrategy.RAISE,
     )
-    assert (write_path / source_name).exists()
+    expected_path = write_path / data_source.uri
+    # Sometimes, drivers dont support writing a specific extension and writes to a a different one.
+    # So we check if the parent directory contains any files.
+    assert list(expected_path.parent.iterdir()), (
+        f"Exported data for source {source_name} not found at the expected location: {expected_path}."
+    )
+
+    # Validate data_catalog.yml
+    assert (write_path / "data_catalog.yml").exists()
+    data_catalog = DataCatalog(
+        data_libs=[(write_path / "data_catalog.yml").as_posix()],
+    )
+
+    source = data_catalog.get_source(source_name)
+    assert source.read_data(handle_nodata=NoDataStrategy.RAISE)
 
 
 @pytest.mark.skip("flakey test due to external http issues")
