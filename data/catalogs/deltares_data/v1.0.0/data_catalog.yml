@@ -1413,9 +1413,6 @@ hydro_lake_atlas_pol:
         East: 180.0
         North: 83.576
     crs: 4326
-  data_adapter:
-    rename:
-      dis_m3_pyr: Dis_avg
 
 mdt_cnes_cls18:
   data_type: RasterDataset
