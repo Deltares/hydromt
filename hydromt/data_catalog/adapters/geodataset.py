@@ -97,6 +97,7 @@ class GeoDatasetAdapter(DataAdapterBase):
             mask=mask,
             predicate=predicate,
             time_range=time_range,
+            handle_nodata=handle_nodata,
         )
         if ds is None:
             return None

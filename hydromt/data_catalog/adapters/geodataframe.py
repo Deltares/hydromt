@@ -71,6 +71,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
             variables=variables,
             mask=mask,
             predicate=predicate,
+            handle_nodata=handle_nodata,
         )
         if gdf is None:
             return None

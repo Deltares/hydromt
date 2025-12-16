@@ -51,7 +51,9 @@ class DatasetAdapter(DataAdapterBase):
         ds = self._set_nodata(ds, metadata)
         ds = self._shift_time(ds)
         # slice
-        ds = DatasetAdapter._slice_data(ds, variables, time_range)
+        ds = DatasetAdapter._slice_data(
+            ds, variables, time_range, handle_nodata=handle_nodata
+        )
         if ds is None:
             return None
         # uniformize
