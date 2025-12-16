@@ -700,9 +700,11 @@ def test_export_data_bulk(tmp_path: Path, caplog: pytest.LogCaptureFixture):
         )
 
 
-# @pytest.mark.skip("Can only be run locally with access to P drive")
+@pytest.mark.skipif(
+    not Path("P:/").exists(), "Can only be run locally with access to P drive"
+)
 @pytest.mark.filterwarnings("ignore::UserWarning")
-@pytest.mark.integration
+@pytest.mark.manual
 def test_data_export_deltares_data(tmp_path: Path):
     dc = DataCatalog(data_libs=["deltares_data"])
     bounding_box = [11.989, 46.02, 12.253, 46.166]
@@ -712,7 +714,8 @@ def test_data_export_deltares_data(tmp_path: Path):
         new_root=export_path,
         bbox=bounding_box,
         force_overwrite=True,
-        source_names=["grwl_mask"],
+        source_names=["hydro_lake_atlas_pol"],
+        time_range=("2010-02-02", "2010-02-15"),
     )
 
 
