@@ -706,7 +706,7 @@ def test_export_data_bulk(tmp_path: Path, caplog: pytest.LogCaptureFixture):
     DataCatalog(data_libs=["deltares_data"]).list_sources(),
 )
 @pytest.mark.manual
-def test_data_export_deltares_data(
+def test_export_deltares_data(
     tmp_path: Path,
     source_name: str,
     data_source: DataSource,

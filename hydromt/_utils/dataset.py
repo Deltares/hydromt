@@ -5,9 +5,8 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from hydromt._utils.nodata import _has_no_data
 from hydromt.typing.metadata import SourceMetadata
-from hydromt.typing.type_def import TimeRange, Variables
+from hydromt.typing.type_def import Variables
 
 if TYPE_CHECKING:
     from pandas._libs.tslibs.timedeltas import TimeDeltaUnitChoices
@@ -18,7 +17,6 @@ logger = logging.getLogger(__name__)
 __all__ = [
     "_set_metadata",
     "_shift_dataset_time",
-    "_slice_temporal_dimension",
     "_rename_vars",
 ]
 
@@ -58,25 +56,6 @@ def _shift_dataset_time(
     elif dt != 0:
         logger.warning("Time shift not applied, time dimension not found.")
     return ds
-
-
-def _slice_temporal_dimension(
-    ds: Optional[xr.Dataset], time_range: TimeRange
-) -> Optional[xr.Dataset]:
-    if ds is None:
-        return None
-    else:
-        if (
-            "time" in ds.dims
-            and ds["time"].size > 1
-            and np.issubdtype(ds["time"].dtype, np.datetime64)
-        ):
-            logger.debug(f"Slicing time dim {time_range}")
-            ds = ds.sel(time=slice(time_range.start, time_range.end))
-        if _has_no_data(ds):
-            return None
-        else:
-            return ds
 
 
 def _set_metadata(

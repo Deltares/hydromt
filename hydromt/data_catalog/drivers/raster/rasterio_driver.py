@@ -231,6 +231,7 @@ class RasterioDriver(RasterDatasetDriver):
                     f"No data from driver: '{self.name}' for variable: '{variable}'",
                     strategy=handle_nodata,
                 )
+                return None  # handle_nodata == ignore
         return ds
 
     def write(
@@ -353,4 +354,5 @@ class RasterioDriver(RasterDatasetDriver):
                 f"Cannot write raster data with insufficient spatial dimensions: {data.raster.y_dim} size {y_coords.size}, {data.raster.x_dim} size {x_coords.size}",
                 strategy=NoDataStrategy.RAISE,
             )
+            return None
         data.raster.to_raster(path, driver=driver, **write_kwargs)

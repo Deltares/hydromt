@@ -170,6 +170,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                     f"No data from driver: '{self.name}' for variable: '{variable}'",
                     strategy=handle_nodata,
                 )
+                return None  # handle_nodata == ignore
         return ds
 
     def write(

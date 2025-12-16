@@ -148,7 +148,7 @@ class DataCatalog(object):
         description: str = "The stac catalog of hydromt",
         used_only: bool = False,
         catalog_type: CatalogType = CatalogType.RELATIVE_PUBLISHED,
-        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.WARN,
     ):
         """Write data catalog to STAC format.
 
@@ -1322,12 +1322,10 @@ class DataCatalog(object):
                 mask=mask,
                 time_range=time_range,
                 buffer=buffer,
+                handle_nodata=handle_nodata,
             )
             if data_like is None:
-                exec_nodata_strat(
-                    _NO_DATA_AFTER_SLICE_MSG,
-                    strategy=handle_nodata,
-                )
+                return None
             return _single_var_as_array(
                 maybe_ds=data_like,
                 single_var_as_array=single_var_as_array,
@@ -1443,18 +1441,13 @@ class DataCatalog(object):
                 )
                 self.add_source(name, source)
         elif isinstance(data_like, gpd.GeoDataFrame):
-            data_like = GeoDataFrameAdapter._slice_data(
+            return GeoDataFrameAdapter._slice_data(
                 data_like,
                 variables=variables,
                 mask=mask,
                 predicate=predicate,
+                handle_nodata=handle_nodata,
             )
-            if data_like is None:
-                exec_nodata_strat(
-                    _NO_DATA_AFTER_SLICE_MSG,
-                    strategy=handle_nodata,
-                )
-            return data_like
         elif isinstance(data_like, GeoDataFrameSource):
             source = data_like
         else:
@@ -1585,12 +1578,10 @@ class DataCatalog(object):
                 mask=mask,
                 predicate=predicate,
                 time_range=time_range,
+                handle_nodata=handle_nodata,
             )
             if data_like is None:
-                exec_nodata_strat(
-                    _NO_DATA_AFTER_SLICE_MSG,
-                    strategy=handle_nodata,
-                )
+                return None
             return _single_var_as_array(data_like, single_var_as_array, variables)
         elif isinstance(data_like, GeoDatasetSource):
             source = data_like
@@ -1691,12 +1682,10 @@ class DataCatalog(object):
                 data_like,
                 variables,
                 time_range,
+                handle_nodata=handle_nodata,
             )
             if data_like is None:
-                exec_nodata_strat(
-                    _NO_DATA_AFTER_SLICE_MSG,
-                    strategy=handle_nodata,
-                )
+                return None
             return _single_var_as_array(data_like, single_var_as_array, variables)
         else:
             raise ValueError(f'Unknown data type "{type(data_like).__name__}"')
@@ -1784,13 +1773,9 @@ class DataCatalog(object):
                 )
                 self.add_source(name, source)
         elif isinstance(data_like, pd.DataFrame):
-            df = DataFrameAdapter._slice_data(data_like, variables, time_range)
-            if df is None:
-                exec_nodata_strat(
-                    _NO_DATA_AFTER_SLICE_MSG,
-                    strategy=handle_nodata,
-                )
-            return df
+            return DataFrameAdapter._slice_data(
+                data_like, variables, time_range, handle_nodata=handle_nodata
+            )
         else:
             raise ValueError(f'Unknown tabular data type "{type(data_like).__name__}"')
 

@@ -63,7 +63,11 @@ class PandasDriver(DataFrameDriver):
                 f"{self.__class__.__name__} driver is not supported."
             )
         elif len(uris) == 0:
-            df = pd.DataFrame()
+            exec_nodata_strat(
+                "No URIs provided to read data from.",
+                strategy=handle_nodata,
+            )
+            return None  # handle_nodata == ignore
         else:
             uri = uris[0]
             extension: str = uri.split(".")[-1]
@@ -91,11 +95,13 @@ class PandasDriver(DataFrameDriver):
                 df = pd.read_fwf(uri, **self.options.get_kwargs())
             else:
                 raise IOError(f"DataFrame: extension {extension} unknown.")
+
         if df.empty:
             exec_nodata_strat(
                 f"No data from {self.name} driver for file uris: {', '.join(uris)}.",
                 strategy=handle_nodata,
             )
+            return None  # handle_nodata == ignore
         return df
 
     def write(

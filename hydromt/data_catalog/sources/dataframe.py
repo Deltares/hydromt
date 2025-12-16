@@ -55,6 +55,8 @@ class DataFrameSource(DataSource):
         df: pd.DataFrame = self.driver.read(
             uris, handle_nodata=handle_nodata, variables=vrs
         )
+        if df is None:  # handle_nodata == ignore
+            return None
 
         return self.data_adapter.transform(
             df,
@@ -113,7 +115,7 @@ class DataFrameSource(DataSource):
 
     def to_stac_catalog(
         self,
-        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.WARN,
     ) -> Optional[StacCatalog]:
         """
         Convert a dataframe into a STAC Catalog representation.

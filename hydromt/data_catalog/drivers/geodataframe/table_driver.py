@@ -99,7 +99,13 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
 
         if not metadata:
             metadata = SourceMetadata()
-        if len(uris) > 1:
+        if len(uris) == 0:
+            exec_nodata_strat(
+                "No URIs provided to read data from.",
+                strategy=handle_nodata,
+            )
+            return None  # handle_nodata == ignore
+        elif len(uris) > 1:
             raise ValueError(
                 "DataFrame: Reading multiple files with the "
                 f"{self.__class__.__name__} driver is not supported."
@@ -118,6 +124,7 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
                 f"No data from {self.name} driver for file uris: {', '.join(uris)}.",
                 strategy=handle_nodata,
             )
+            return None  # handle_nodata == ignore
         return gdf
 
     def write(

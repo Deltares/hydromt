@@ -14,7 +14,6 @@ from hydromt._utils import (
     _has_no_data,
     _shift_dataset_time,
     _single_var_as_array,
-    _slice_temporal_dimension,
 )
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
@@ -83,38 +82,30 @@ class RasterDatasetAdapter(DataAdapterBase):
         NoDataException
             if no data in left after slicing and handle_nodata is NoDataStrategy.RAISE
         """
-        try:
-            if _has_no_data(ds):
-                raise NoDataException()
-            # rename variables and parse data and attrs
-            ds = self._rename_vars(ds)
-            ds = self._validate_spatial_dims(ds)
-            ds = self._set_crs(ds, metadata.crs)
-            ds = self._set_nodata(ds, metadata)
-            ds = _shift_dataset_time(dt=self.unit_add.get("time", 0), ds=ds)
-            # slice data
-            ds = RasterDatasetAdapter._slice_data(
-                ds,
-                variables,
-                mask,
-                align,
-                time_range,
-                buffer=buffer,
-            )
-            if _has_no_data(ds):
-                raise NoDataException()
-
-            # uniformize data
-            ds = self._apply_unit_conversions(ds)
-            ds = self._set_metadata(ds, metadata)
-            # return array if single var and single_var_as_array
-            return _single_var_as_array(ds, single_var_as_array, variables)
-        except NoDataException:
-            exec_nodata_strat(
-                "No data was read from source",
-                strategy=handle_nodata,
-            )
+        # rename variables and parse data and attrs
+        ds = self._rename_vars(ds)
+        ds = self._validate_spatial_dims(ds)
+        ds = self._set_crs(ds, metadata.crs)
+        ds = self._set_nodata(ds, metadata)
+        ds = _shift_dataset_time(dt=self.unit_add.get("time", 0), ds=ds)
+        # slice data
+        ds = RasterDatasetAdapter._slice_data(
+            ds,
+            variables,
+            mask,
+            align,
+            time_range,
+            buffer=buffer,
+            handle_nodata=handle_nodata,
+        )
+        if ds is None:
             return None  # if handle_nodata ignore
+
+        # uniformize data
+        ds = self._apply_unit_conversions(ds)
+        ds = self._set_metadata(ds, metadata)
+        # return array if single var and single_var_as_array
+        return _single_var_as_array(ds, single_var_as_array, variables)
 
     def _rename_vars(self, ds: Data) -> Data:
         rm = {k: v for k, v in self.rename.items() if k in ds}
@@ -157,6 +148,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         align: Optional[float] = None,
         time_range: Optional[TimeRange] = None,
         buffer: int = 0,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> Optional[xr.Dataset]:
         """Filter the RasterDataset.
 
@@ -175,6 +167,8 @@ class RasterDatasetAdapter(DataAdapterBase):
         buffer : int, optional
             Buffer around the `bbox` or `geom` area of interest expressed in resolution multiplicity,
             by default 0
+        handle_nodata : NoDataStrategy, optional
+            how to handle no data being present in the result, by default NoDataStrategy.RAISE
 
         Returns
         -------
@@ -201,17 +195,22 @@ class RasterDatasetAdapter(DataAdapterBase):
                 if any(mvars):
                     raise NoDataException(f"RasterDataset: variables not found {mvars}")
                 ds = ds[variables]
+
         if time_range is not None:
-            ds = _slice_temporal_dimension(ds, time_range)
+            ds = RasterDatasetAdapter._slice_temporal_dimension(
+                ds, time_range, handle_nodata=handle_nodata
+            )
+            if ds is None:
+                return None
+
         if mask is not None:
             ds = RasterDatasetAdapter._slice_spatial_dimensions(
-                ds, mask, buffer=buffer, align=align
+                ds, mask, buffer=buffer, align=align, handle_nodata=handle_nodata
             )
+            if ds is None:
+                return None
 
-        if _has_no_data(ds):
-            return None
-        else:
-            return ds
+        return ds
 
     @staticmethod
     def _slice_spatial_dimensions(
@@ -219,6 +218,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         mask: Optional[Geom] = None,
         align: Optional[float] = None,
         buffer: int = 0,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ):
         # make sure bbox is in data crs
         bbox = None
@@ -250,11 +250,30 @@ class RasterDatasetAdapter(DataAdapterBase):
 
             logger.debug(f"Clip to [{bbox_str}] (epsg:{epsg}))")
             ds = ds.raster.clip_bbox(bbox, align=align, buffer=buffer)
+            if _has_no_data(ds):
+                exec_nodata_strat("No data left after bbox clipping.", handle_nodata)
+                return None
 
+        return ds
+
+    @staticmethod
+    def _slice_temporal_dimension(
+        ds: xr.Dataset,
+        time_range: TimeRange,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+    ) -> Optional[xr.Dataset]:
+        if (
+            "time" in ds.dims
+            and ds["time"].size > 1
+            and np.issubdtype(ds["time"].dtype, np.datetime64)
+        ):
+            logger.debug(f"Slicing time dim {time_range}")
+            ds = ds.sel(time=slice(time_range.start, time_range.end))
         if _has_no_data(ds):
+            exec_nodata_strat("No data left after temporal slicing.", handle_nodata)
             return None
-        else:
-            return ds
+
+        return ds
 
     def _apply_unit_conversions(self, ds: Data):
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())

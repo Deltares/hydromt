@@ -6,7 +6,6 @@ from hydromt._utils.dataset import (
     _set_metadata,
     _shift_dataset_time,
     _single_var_as_array,
-    _slice_temporal_dimension,
 )
 from hydromt._utils.deep_merge import _deep_merge
 from hydromt._utils.dictionaries import _partition_dictionaries
@@ -30,7 +29,6 @@ __all__ = [
     "to_file",
     "_shift_dataset_time",
     "_single_var_as_array",
-    "_slice_temporal_dimension",
     "_partition_dictionaries",
     "_elevation2rgba",
     "_rgba2elevation",
