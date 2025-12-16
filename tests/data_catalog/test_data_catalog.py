@@ -700,21 +700,6 @@ def test_export_data_bulk(tmp_path: Path, caplog: pytest.LogCaptureFixture):
         )
 
 
-@pytest.fixture
-def deltares_data_catalog():
-    return DataCatalog(data_libs=["deltares_data"])
-
-
-@pytest.fixture
-def bbox():
-    return [11.989, 46.02, 12.253, 46.166]
-
-
-@pytest.fixture
-def time_range():
-    return ("2010-02-02", "2010-02-04")
-
-
 @pytest.mark.filterwarnings("ignore::UserWarning")
 @pytest.mark.parametrize(
     ("source_name", "data_source"),
@@ -722,25 +707,23 @@ def time_range():
 )
 @pytest.mark.manual
 def test_data_export_deltares_data(
-    deltares_data_catalog: DataCatalog,
-    bbox: list[float],
-    time_range: Tuple[str, str],
     tmp_path: Path,
     source_name: str,
     data_source: DataSource,
 ):
     write_path = tmp_path / f"deltares_exported_{source_name}"
-    deltares_data_catalog.export_data(
+    dc = DataCatalog(data_libs=["deltares_data"])
+    dc.export_data(
         new_root=write_path,
         source_names=[source_name],
-        bbox=bbox,
+        bbox=[11.989, 46.02, 12.253, 46.166],
         force_overwrite=True,
-        time_range=time_range,
+        time_range=("2010-02-02", "2010-02-04"),
         handle_nodata=NoDataStrategy.RAISE,
     )
     expected_path = write_path / data_source.uri
     # Sometimes, drivers dont support writing a specific extension and writes to a a different one.
-    # So we check if the parent directory contains any files.
+    # So for now, we check if the parent directory contains any files.
     assert list(expected_path.parent.iterdir()), (
         f"Exported data for source {source_name} not found at the expected location: {expected_path}."
     )
@@ -752,7 +735,8 @@ def test_data_export_deltares_data(
     )
 
     source = data_catalog.get_source(source_name)
-    assert source.read_data(handle_nodata=NoDataStrategy.RAISE)
+    data = source.read_data(handle_nodata=NoDataStrategy.RAISE)
+    assert data is not None  # more ?
 
 
 @pytest.mark.skip("flakey test due to external http issues")
