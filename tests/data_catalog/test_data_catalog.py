@@ -700,23 +700,43 @@ def test_export_data_bulk(tmp_path: Path, caplog: pytest.LogCaptureFixture):
         )
 
 
-@pytest.mark.skipif(
-    not Path("P:/").exists(), "Can only be run locally with access to P drive"
-)
 @pytest.mark.filterwarnings("ignore::UserWarning")
+@pytest.mark.parametrize(
+    ("source_name", "data_source"),
+    DataCatalog(data_libs=["deltares_data"]).list_sources(),
+)
 @pytest.mark.manual
-def test_data_export_deltares_data(tmp_path: Path):
+def test_data_export_deltares_data(
+    tmp_path: Path,
+    source_name: str,
+    data_source: DataSource,
+):
+    write_path = tmp_path / f"deltares_exported_{source_name}"
     dc = DataCatalog(data_libs=["deltares_data"])
-    bounding_box = [11.989, 46.02, 12.253, 46.166]
-
-    export_path = tmp_path / "deltares_exported"
     dc.export_data(
-        new_root=export_path,
-        bbox=bounding_box,
+        new_root=write_path,
+        source_names=[source_name],
+        bbox=[11.989, 46.02, 12.253, 46.166],
         force_overwrite=True,
-        source_names=["hydro_lake_atlas_pol"],
-        time_range=("2010-02-02", "2010-02-15"),
+        time_range=("2010-02-02", "2010-02-04"),
+        handle_nodata=NoDataStrategy.RAISE,
     )
+    expected_path = write_path / data_source.uri
+    # Sometimes, drivers dont support writing a specific extension and writes to a a different one.
+    # So for now, we check if the parent directory contains any files.
+    assert list(expected_path.parent.iterdir()), (
+        f"Exported data for source {source_name} not found at the expected location: {expected_path}."
+    )
+
+    # Validate data_catalog.yml
+    assert (write_path / "data_catalog.yml").exists()
+    data_catalog = DataCatalog(
+        data_libs=[(write_path / "data_catalog.yml").as_posix()],
+    )
+
+    source = data_catalog.get_source(source_name)
+    data = source.read_data(handle_nodata=NoDataStrategy.RAISE)
+    assert data is not None  # more ?
 
 
 @pytest.mark.skip("flakey test due to external http issues")
