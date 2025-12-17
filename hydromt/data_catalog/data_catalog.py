@@ -1130,14 +1130,15 @@ class DataCatalog(object):
             source.data_adapter.unit_add = {}
 
         query_kwargs = self._build_query_kwargs(source, source_vars, bbox, time_range)
-        bbox: Optional[Bbox] = query_kwargs.get("bbox")
-        mask = _parse_geom_bbox_buffer(bbox=bbox) if bbox is not None else None
-
         source_kwargs: Dict[str, Any] = copy.deepcopy(query_kwargs)
-        source_kwargs.pop("bbox", None)
-        source_kwargs["mask"] = mask
+        bbox: Optional[Bbox] = query_kwargs.pop("bbox", None)
+        mask = _parse_geom_bbox_buffer(bbox=bbox) if bbox is not None else None
+        if mask is not None:
+            source_kwargs.update({"mask": mask})
 
         relative_uri: Path = source._get_relative_uri(handle_nodata, **source_kwargs)
+        if relative_uri is None:
+            return None  # handle nodata
         if len(relative_uri.parts) == 1 and "*" in relative_uri.name:
             raise ValueError(f"Cannot write source {source.name} with wildcard to root")
 
@@ -1175,7 +1176,7 @@ class DataCatalog(object):
                 **source_kwargs,
             )
         except NoDataException as e:
-            exec_nodata_strat(e, handle_nodata)
+            exec_nodata_strat(e.message, handle_nodata)
             return None
 
     def _build_query_kwargs(

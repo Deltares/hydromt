@@ -217,7 +217,8 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
             path = no_ext + _ZARR_EXT
             ext = _ZARR_EXT
         if ext == _ZARR_EXT:
-            data.to_zarr(path, mode="w", zarr_format=2, **write_kwargs)
+            write_kwargs.setdefault("zarr_format", 2)
+            data.to_zarr(path, mode="w", **write_kwargs)
         else:
             data.to_netcdf(path, **write_kwargs)
 

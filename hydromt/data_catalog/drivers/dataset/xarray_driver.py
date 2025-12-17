@@ -168,7 +168,8 @@ class DatasetXarrayDriver(DatasetDriver):
         ext = path.suffix
         write_kwargs = write_kwargs or {}
         if ext == ".zarr":
-            data.to_zarr(path, zarr_format=2, **write_kwargs)
+            write_kwargs.setdefault("zarr_format", 2)
+            data.to_zarr(path, **write_kwargs)
         elif ext in [".nc", ".netcdf"]:
             data.to_netcdf(path, **write_kwargs)
         else:

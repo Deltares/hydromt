@@ -818,7 +818,9 @@ class TestGetRasterDataset:
         era5_nc = datacatalog.get_rasterdataset("era5_nc")
         assert era5_zarr.equals(era5_nc)
         dest: Path = tmp_path / "era5_copy.zarr"
-        cast(RasterDatasetSource, datacatalog.get_source("era5_zarr")).to_file(dest)
+        cast(RasterDatasetSource, datacatalog.get_source("era5_zarr")).to_file(
+            dest, write_kwargs={"zarr_format": 3}
+        )
         assert dest.exists()
 
     def test_rasterdataset_unit_attrs(self, data_catalog: DataCatalog):
