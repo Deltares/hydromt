@@ -12,7 +12,7 @@ COPY ./hydromt ./hydromt
 COPY ./docs ./docs
 COPY examples ./examples
 
-RUN pixi install --locked -e docs \
+RUN pixi install --locked -e slim-latest \
     && rm -rf .cache \
     && find .pixi -type f -name "*.pyc" -delete
 
