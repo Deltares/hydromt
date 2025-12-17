@@ -1200,7 +1200,7 @@ class DataCatalog(object):
             )
         bbox = bbox if bbox is not None else bbox_from_kwargs
         mask = _parse_geom_bbox_buffer(bbox=bbox) if bbox is not None else None
-        if mask is not None:
+        if mask is not None and "mask" in allowed:
             kwargs.update({"mask": mask})
         return kwargs
 
