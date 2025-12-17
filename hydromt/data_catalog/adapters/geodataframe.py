@@ -190,7 +190,10 @@ class GeoDataFrameAdapter(DataAdapterBase):
         for name in list(set(unit_names)):  # unique
             m = self.unit_mult.get(name, 1)
             a = self.unit_add.get(name, 0)
-            gdf.loc[:, name] = gdf.loc[:, name] * m + a
+            result = gdf.loc[:, name] * m + a
+            if not np.issubdtype(gdf[name].dtype, np.floating):
+                result = result.astype(gdf[name].dtype)  # cast to original dtype
+            gdf.loc[:, name] = result
         return gdf
 
     def _set_metadata(self, gdf: gpd.GeoDataFrame, metadata: "SourceMetadata"):
