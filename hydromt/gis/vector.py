@@ -690,10 +690,10 @@ class GeoBase(raster.XGeoBase):
             Any additional arguments to be passed down to the driver.
         """
         if ogr_compliant:
-            self.ogr_compliant(reducer=reducer).to_zarr(path, **kwargs)
+            self.ogr_compliant(reducer=reducer).to_zarr(path, zarr_format=2, **kwargs)
         else:
             obj = self.update_geometry(geom_format="wkt", geom_name="ogc_wkt")
-            obj.to_zarr(path, **kwargs)
+            obj.to_zarr(path, zarr_format=2, **kwargs)
             del obj
 
 

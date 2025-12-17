@@ -173,7 +173,7 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
         ext = path.suffix
         write_kwargs = write_kwargs or {}
         if ext == _ZARR_EXT:
-            data.vector.to_zarr(path, **write_kwargs)
+            data.vector.to_zarr(path, zarr_format=2, **write_kwargs)
         elif ext in _NETCDF_EXT:
             data.vector.to_netcdf(path, **write_kwargs)
         else:
