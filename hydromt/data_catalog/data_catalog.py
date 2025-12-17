@@ -1167,7 +1167,7 @@ class DataCatalog(object):
         file_path.parent.mkdir(parents=True, exist_ok=True)
 
         if file_path.exists() and not force_overwrite:
-            logger.info(f"File {file_path} exists, skipping export.")
+            logger.warning(f"File {file_path} exists, skipping export.")
             return None
         try:
             return source.to_file(
