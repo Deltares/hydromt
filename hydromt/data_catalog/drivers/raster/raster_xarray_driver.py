@@ -159,6 +159,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                 decode_coords="all",
                 preprocess=preprocessor,
                 **self.options.get_kwargs(),
+                decode_timedelta=True,
             )
         else:
             raise ValueError(

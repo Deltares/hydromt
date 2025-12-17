@@ -116,6 +116,7 @@ class DatasetXarrayDriver(DatasetDriver):
                 decode_coords="all",
                 preprocess=preprocessor,
                 **self.options.get_kwargs(),
+                decode_timedelta=True,
             )
         else:
             raise ValueError(f"Unknown extension for DatasetXarrayDriver: {first_ext} ")

@@ -10,8 +10,6 @@ hydro_basin_atlas_level12:
   uri: hydrography/hydro_atlas/basin_atlas_v10.gpkg
   driver:
     name: pyogrio
-    options:
-      layer: BasinATLAS_v10_lev12
   metadata:
     category: hydrography
     notes: renaming and units might require some revision
