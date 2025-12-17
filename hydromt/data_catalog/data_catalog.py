@@ -1130,23 +1130,17 @@ class DataCatalog(object):
             source.data_adapter.unit_add = {}
 
         query_kwargs = self._build_query_kwargs(source, source_vars, bbox, time_range)
-        source_kwargs: Dict[str, Any] = copy.deepcopy(query_kwargs)
-        bbox: Optional[Bbox] = query_kwargs.pop("bbox", None)
-        mask = _parse_geom_bbox_buffer(bbox=bbox) if bbox is not None else None
-        if mask is not None:
-            source_kwargs.update({"mask": mask})
 
-        relative_uri: Path = source._get_relative_uri(handle_nodata, **source_kwargs)
+        relative_uri: Path = source._get_relative_uri(handle_nodata, **query_kwargs)
         if relative_uri is None:
             return None  # handle nodata
         if len(relative_uri.parts) == 1 and "*" in relative_uri.name:
             raise ValueError(f"Cannot write source {source.name} with wildcard to root")
-
         file_path = new_root / relative_uri
         new_source = self._write_source(
             source=source,
             file_path=file_path,
-            source_kwargs=source_kwargs,
+            source_kwargs=query_kwargs,
             force_overwrite=force_overwrite,
             handle_nodata=handle_nodata,
         )
@@ -1197,7 +1191,18 @@ class DataCatalog(object):
             "bbox": bbox,
             "time_range": time_range,
         }
-        return {k: v for k, v in query.items() if k in allowed and v is not None}
+        kwargs = {k: v for k, v in query.items() if k in allowed and v is not None}
+
+        bbox_from_kwargs = kwargs.pop("bbox", None)
+        if bbox is not None and bbox_from_kwargs is not None:
+            logger.warning(
+                f"Both function argument bbox {bbox} and source bbox {bbox_from_kwargs} are provided, using function argument bbox."
+            )
+        bbox = bbox if bbox is not None else bbox_from_kwargs
+        mask = _parse_geom_bbox_buffer(bbox=bbox) if bbox is not None else None
+        if mask is not None:
+            kwargs.update({"mask": mask})
+        return kwargs
 
     def _register_source(
         self,
