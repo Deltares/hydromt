@@ -1397,8 +1397,6 @@ hydro_lake_atlas_pol:
   uri: hydrography/hydro_atlas/lake_atlas_v10.gpkg
   driver:
     name: pyogrio
-    options:
-      layer: LakeATLAS_v10_pol
   metadata:
     category: hydrography
     notes: renaming and units might require some revision

@@ -703,7 +703,7 @@ def test_export_data_bulk(tmp_path: Path, caplog: pytest.LogCaptureFixture):
 @pytest.mark.filterwarnings("ignore::UserWarning")
 @pytest.mark.parametrize(
     "source_name",
-    [s[0] for s in DataCatalog(data_libs=["deltares_data"]).list_sources()],
+    DataCatalog(data_libs=["deltares_data"]).get_source_names(),
 )
 # @pytest.mark.manual
 def test_export_deltares_data(
