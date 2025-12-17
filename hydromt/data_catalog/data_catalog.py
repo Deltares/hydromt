@@ -60,7 +60,7 @@ from hydromt.data_catalog.sources import (
     RasterDatasetSource,
     create_source,
 )
-from hydromt.error import NoDataStrategy
+from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
 from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
 from hydromt.plugins import PLUGINS
 from hydromt.readers import _yml_from_uri_or_path
@@ -1168,12 +1168,15 @@ class DataCatalog(object):
         if file_path.exists() and not force_overwrite:
             logger.info(f"File {file_path} exists, skipping export.")
             return None
-
-        return source.to_file(
-            file_path=file_path,
-            handle_nodata=handle_nodata,
-            **source_kwargs,
-        )
+        try:
+            return source.to_file(
+                file_path=file_path,
+                handle_nodata=handle_nodata,
+                **source_kwargs,
+            )
+        except NoDataException as e:
+            exec_nodata_strat(e, handle_nodata)
+            return None
 
     def _build_query_kwargs(
         self,
