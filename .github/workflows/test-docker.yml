@@ -29,7 +29,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: false
-          tags: user/app:latest
+          tags: hydromt-binder
       - name:
         id: test-image
         run: |
@@ -37,7 +37,7 @@ jobs:
           set -e
 
           # run the docker image detached, it will start the jupyter server for us
-          docker run -d -p 8888:8888 deltares/hydromt:binder
+          docker run -d -p 8888:8888 hydromt-binder
 
           # give it a second or two to start up
           sleep 10
