@@ -706,7 +706,7 @@ def test_export_data_bulk(tmp_path: Path, caplog: pytest.LogCaptureFixture):
     DataCatalog(data_libs=["deltares_data"]).list_sources(),
 )
 @pytest.mark.manual
-def test_data_export_deltares_data(
+def test_export_deltares_data(
     tmp_path: Path,
     source_name: str,
     data_source: DataSource,
@@ -719,13 +719,7 @@ def test_data_export_deltares_data(
         bbox=[11.989, 46.02, 12.253, 46.166],
         force_overwrite=True,
         time_range=("2010-02-02", "2010-02-04"),
-        handle_nodata=NoDataStrategy.RAISE,
-    )
-    expected_path = write_path / data_source.uri
-    # Sometimes, drivers dont support writing a specific extension and writes to a a different one.
-    # So for now, we check if the parent directory contains any files.
-    assert list(expected_path.parent.iterdir()), (
-        f"Exported data for source {source_name} not found at the expected location: {expected_path}."
+        handle_nodata=NoDataStrategy.IGNORE,
     )
 
     # Validate data_catalog.yml
@@ -734,9 +728,12 @@ def test_data_export_deltares_data(
         data_libs=[(write_path / "data_catalog.yml").as_posix()],
     )
 
-    source = data_catalog.get_source(source_name)
-    data = source.read_data(handle_nodata=NoDataStrategy.RAISE)
-    assert data is not None  # more ?
+    # some sources are not exported due to no data in bbox/time range, skip those
+    if data_catalog.contains_source(source_name):
+        # Validate source can be read again
+        source = data_catalog.get_source(source_name)
+        data = source.read_data(handle_nodata=NoDataStrategy.RAISE)
+        assert data is not None
 
 
 @pytest.mark.skip("flakey test due to external http issues")

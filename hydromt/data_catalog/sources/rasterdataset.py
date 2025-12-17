@@ -17,7 +17,7 @@ from pystac import MediaType
 from hydromt.data_catalog.adapters.rasterdataset import RasterDatasetAdapter
 from hydromt.data_catalog.drivers import RasterDatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
-from hydromt.error import NoDataStrategy
+from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
 from hydromt.typing import (
     Bbox,
@@ -88,6 +88,9 @@ class RasterDatasetSource(DataSource):
             chunks=chunks,
             metadata=self.metadata,
         )
+        if ds is None:
+            return None  # handle_nodata == ignore
+
         return self.data_adapter.transform(
             ds,
             self.metadata,
@@ -235,7 +238,7 @@ class RasterDatasetSource(DataSource):
 
     def to_stac_catalog(
         self,
-        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.WARN,
     ) -> Optional[StacCatalog]:
         """
         Convert a rasterdataset into a STAC Catalog representation.
@@ -246,7 +249,7 @@ class RasterDatasetSource(DataSource):
         Parameters
         ----------
         - handle_nodata (str, optional): The error handling strategy.
-          Options are: "raise" to raise an error on failure, "ignore" to skip the
+          Options are: "raise" to raise an error on failure, "warn" to log a warning, "ignore" to skip the
           dataset on failure
 
         Returns
@@ -272,15 +275,12 @@ class RasterDatasetSource(DataSource):
                 raise RuntimeError(
                     f"Unknown extension: {ext} cannot determine media type"
                 )
-        except (IndexError, KeyError, CRSError) as e:
-            if handle_nodata == NoDataStrategy.IGNORE:
-                logger.warning(
-                    "Skipping {name} during stac conversion because"
-                    "because detecting spacial extent failed."
-                )
-                return
-            else:
-                raise e
+        except (IndexError, KeyError, CRSError):
+            exec_nodata_strat(
+                f"Skipping {self.name} during stac conversion because detecting spacial extent failed.",
+                strategy=handle_nodata,
+            )
+            return None
 
         else:
             # else makes type checkers a bit happier

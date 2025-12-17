@@ -9,7 +9,7 @@ import pyproj
 from pyproj import CRS
 
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
-from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
+from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.gis.vector_utils import _filter_gdf
 from hydromt.typing import (
     Geom,
@@ -62,30 +62,24 @@ class GeoDataFrameAdapter(DataAdapterBase):
             if no data in left after slicing and handle_nodata is NoDataStrategy.RAISE
         """
         # rename variables and parse crs & nodata
-        try:
-            gdf = self._rename_vars(gdf)
-            gdf = self._set_crs(gdf, metadata.crs)
-            gdf = self._set_nodata(gdf, metadata)
-            # slice
-            gdf: Optional[gpd.GeoDataFrame] = GeoDataFrameAdapter._slice_data(
-                gdf,
-                variables=variables,
-                mask=mask,
-                predicate=predicate,
-            )
-            # uniformize
-            if gdf is not None:
-                if gdf.empty:
-                    raise NoDataException()
-                gdf = self._apply_unit_conversions(gdf)
-                gdf = self._set_metadata(gdf, metadata)
-                return gdf
-            raise NoDataException()
-        except NoDataException:
-            exec_nodata_strat(
-                "No data was read from source",
-                strategy=handle_nodata,
-            )
+        gdf = self._rename_vars(gdf)
+        gdf = self._set_crs(gdf, metadata.crs)
+        gdf = self._set_nodata(gdf, metadata)
+        # slice
+        gdf: Optional[gpd.GeoDataFrame] = GeoDataFrameAdapter._slice_data(
+            gdf,
+            variables=variables,
+            mask=mask,
+            predicate=predicate,
+            handle_nodata=handle_nodata,
+        )
+        if gdf is None:
+            return None
+
+        # uniformize
+        gdf = self._apply_unit_conversions(gdf)
+        gdf = self._set_metadata(gdf, metadata)
+        return gdf
 
     def _rename_vars(self, gdf: gpd.GeoDataFrame):
         # rename and select columns
@@ -112,6 +106,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
         variables: Optional[Union[str, List[str]]] = None,
         mask: Optional[Geom] = None,
         predicate: str = "intersects",
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> Optional[gpd.GeoDataFrame]:
         """Filter the GeoDataFrame.
 
@@ -127,6 +122,8 @@ class GeoDataFrameAdapter(DataAdapterBase):
             predicate to use for the geometry filter, by default "intersects"
             should be one of the Shapeley binary predicates
             (https://shapely.readthedocs.io/en/latest/manual.html#binary-predicates)
+        handle_nodata : NoDataStrategy, optional
+            how to handle no data being present in the result, by default NoDataStrategy.RAISE
 
         Returns
         -------
@@ -147,6 +144,11 @@ class GeoDataFrameAdapter(DataAdapterBase):
             if "geometry" not in variables:  # always keep geometry column
                 variables = variables + ["geometry"]
             gdf = gdf.loc[:, variables]
+            if np.all(gdf.is_empty):
+                exec_nodata_strat(
+                    "GeoDataFrame has no data after variable slicing.", handle_nodata
+                )
+                return None
 
         if mask is not None:
             # NOTE if we read with vector driver this is already done ..
@@ -155,9 +157,12 @@ class GeoDataFrameAdapter(DataAdapterBase):
             logger.debug(f"Clip {predicate} [{bbox_str}] (EPSG:{epsg})")
             idxs = _filter_gdf(gdf, geom=mask, predicate=predicate)
             gdf = gdf.iloc[idxs]
+            if np.all(gdf.is_empty):
+                exec_nodata_strat(
+                    "GeoDataFrame has no data after masking.", handle_nodata
+                )
+                return None
 
-        if np.all(gdf.is_empty):
-            gdf = None
         return gdf
 
     def _set_nodata(self, gdf: gpd.GeoDataFrame, metadata: "SourceMetadata"):

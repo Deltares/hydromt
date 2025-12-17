@@ -249,7 +249,7 @@ class DataSource(BaseModel, ABC):
     @abstractmethod
     def to_stac_catalog(
         self,
-        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.WARN,
     ) -> Optional[StacCatalog]:
         """
         Convert source into a STAC Catalog representation.

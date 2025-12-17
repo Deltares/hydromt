@@ -2,7 +2,7 @@ import geopandas as gpd
 import pytest
 
 from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
-from hydromt.error import NoDataException
+from hydromt.error import NoDataException, NoDataStrategy
 from hydromt.typing import SourceMetadata
 
 
@@ -13,13 +13,17 @@ class TestGeodataFrameAdapter:
         empty_gdf = geodf.iloc[0:0]
         mocker.patch.object(
             adapter,
-            "_slice_data",
+            "_set_nodata",
             return_value=empty_gdf,
         )
-        with pytest.raises(NoDataException, match="No data was read from source"):
+        with pytest.raises(
+            NoDataException, match="GeoDataFrame has no data after masking"
+        ):
             adapter.transform(
                 empty_gdf,
+                mask=empty_gdf,
                 metadata=SourceMetadata(),
+                handle_nodata=NoDataStrategy.RAISE,
             )
 
     def test_set_crs(

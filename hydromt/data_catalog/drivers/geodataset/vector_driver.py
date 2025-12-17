@@ -82,7 +82,13 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
         xr.Dataset
             The dataset read from the source.
         """
-        if len(uris) > 1:
+        if len(uris) == 0:
+            exec_nodata_strat(
+                "No URIs provided to read data from.",
+                strategy=handle_nodata,
+            )
+            return None  # handle_nodata == ignore
+        elif len(uris) > 1:
             raise ValueError(
                 "GeodatasetVectorDriver only supports reading from one URI per source"
             )
@@ -106,6 +112,7 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
                     f"No data from {self.name} driver for file uris: {', '.join(uris)}.",
                     strategy=handle_nodata,
                 )
+                return None  # handle_nodata == ignore
             return out.to_dataset()
         else:
             for variable in out.data_vars:
@@ -114,6 +121,7 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
                         f"No data from {self.name} driver for file uris: {', '.join(uris)}.",
                         strategy=handle_nodata,
                     )
+                    return None  # handle_nodata == ignore
             return out
 
     def write(

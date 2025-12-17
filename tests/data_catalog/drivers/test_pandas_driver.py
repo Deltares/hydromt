@@ -105,7 +105,7 @@ class TestPandasDriver:
     def test_read_no_data(self, driver: PandasDriver, tmp_path):
         with pytest.raises(
             NoDataException,
-            match="No data from pandas driver for file uris",
+            match="No URIs provided to read data from",
         ):
             driver.read([])
 
