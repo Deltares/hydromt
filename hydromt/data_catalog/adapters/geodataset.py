@@ -15,6 +15,7 @@ from hydromt._utils import (
     _shift_dataset_time,
     _single_var_as_array,
 )
+from hydromt.data_catalog.adapters.adapter_utils import _slice_temporal_dimension
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.gis.raster import GEO_MAP_COORD
@@ -192,9 +193,7 @@ class GeoDatasetAdapter(DataAdapterBase):
                 ds = ds[variables]
 
         if time_range is not None:
-            ds = GeoDatasetAdapter._slice_temporal_dimension(
-                ds, time_range, handle_nodata=handle_nodata
-            )
+            ds = _slice_temporal_dimension(ds, time_range, handle_nodata=handle_nodata)
             if ds is None:
                 return None
         if mask is not None:
@@ -219,25 +218,6 @@ class GeoDatasetAdapter(DataAdapterBase):
         ds = ds.vector.clip_geom(mask, predicate=predicate)
         if _has_no_data(ds):
             exec_nodata_strat("No data left after spatial slicing.", handle_nodata)
-            return None
-
-        return ds
-
-    @staticmethod
-    def _slice_temporal_dimension(
-        ds: xr.Dataset,
-        time_range: TimeRange,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-    ) -> Optional[xr.Dataset]:
-        if (
-            "time" in ds.dims
-            and ds["time"].size > 1
-            and np.issubdtype(ds["time"].dtype, np.datetime64)
-        ):
-            logger.debug(f"Slicing time dim {time_range}")
-            ds = ds.sel(time=slice(time_range.start, time_range.end))
-        if _has_no_data(ds):
-            exec_nodata_strat("No data left after temporal slicing.", handle_nodata)
             return None
 
         return ds
