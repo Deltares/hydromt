@@ -30,6 +30,7 @@ jobs:
         with:
           push: false
           tags: hydromt-binder
+          file: .binder/Dockerfile
       - name:
         id: test-image
         run: |
