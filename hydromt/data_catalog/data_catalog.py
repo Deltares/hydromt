@@ -1123,6 +1123,40 @@ class DataCatalog(object):
         force_overwrite: bool,
         handle_nodata: NoDataStrategy,
     ) -> DataSource | None:
+        """
+        Export a single data source to disk and register the exported source.
+
+        This method resolves query arguments (variables, spatial and temporal filters),
+        determines the output path, writes the source data to disk, and updates the
+        output registry with the new source definition.
+
+        Parameters
+        ----------
+        source : DataSource
+            The data source to export.
+        unit_conversion : bool
+            Whether unit conversion should be applied when reading the source data.
+        new_root : Path
+            Root directory where exported data will be written.
+        bbox : Bbox, optional
+            Spatial bounding box used to subset the source, if supported.
+        time_range : TimeRange | tuple | dict | None
+            Temporal range used to subset the source, if supported.
+        source_vars : dict[str, list[str]]
+            Mapping of source names to selected variable names.
+        registry : dict
+            Registry used to collect exported sources for the output data catalog.
+        force_overwrite : bool
+            Whether existing output files should be overwritten.
+        handle_nodata : NoDataStrategy
+            Strategy for handling no-data situations during export.
+
+        Returns
+        -------
+        DataSource or None
+            The newly exported source, or None if the source was skipped or contained
+            no data.
+        """
         # read slice of source and write to file
         logger.debug(f"Exporting {source.name}.")
         if not unit_conversion:
@@ -1158,6 +1192,31 @@ class DataCatalog(object):
         force_overwrite: bool,
         handle_nodata: NoDataStrategy,
     ) -> DataSource | None:
+        """
+        Write a single data source to disk using its `to_file` implementation.
+
+        This method ensures the output directory exists, handles overwrite logic,
+        and delegates the actual write operation to the source itself.
+
+        Parameters
+        ----------
+        source : DataSource
+            The data source to write.
+        file_path : Path
+            Destination file path for the exported source.
+        source_kwargs : dict
+            Keyword arguments passed to the source `to_file` method.
+        force_overwrite : bool
+            Whether an existing file should be overwritten.
+        handle_nodata : NoDataStrategy
+            Strategy for handling no-data exceptions raised during writing.
+
+        Returns
+        -------
+        DataSource or None
+            The written source with updated metadata, or None if writing was skipped
+            or no data was available.
+        """
         file_path.parent.mkdir(parents=True, exist_ok=True)
 
         if file_path.exists() and not force_overwrite:
@@ -1180,6 +1239,32 @@ class DataCatalog(object):
         bbox: Bbox | None,
         time_range: TimeRange | None,
     ) -> dict[str, Any]:
+        """
+        Build keyword arguments for querying and exporting a data source.
+
+        This method inspects the signature of the source `to_file` method and
+        constructs a dictionary of supported query arguments, including variable
+        selection, temporal filtering, and spatial masking where applicable.
+
+        Spatial bounding boxes are converted to geometric masks only if the source
+        explicitly supports a `mask` keyword argument.
+
+        Parameters
+        ----------
+        source : DataSource
+            The data source being exported.
+        source_vars : dict[str, list[str]]
+            Mapping of source names to selected variable names.
+        bbox : Bbox, optional
+            Spatial bounding box used to construct a mask if supported.
+        time_range : TimeRange, optional
+            Temporal range used to subset the source if supported.
+
+        Returns
+        -------
+        dict[str, Any]
+            Dictionary of keyword arguments to pass to the source `to_file` method.
+        """
         sig = inspect.signature(source.to_file)
         allowed = {
             name
@@ -1200,7 +1285,7 @@ class DataCatalog(object):
             )
         bbox = bbox if bbox is not None else bbox_from_kwargs
         mask = _parse_geom_bbox_buffer(bbox=bbox) if bbox is not None else None
-        if mask is not None:
+        if mask is not None and "mask" in allowed:
             kwargs.update({"mask": mask})
         return kwargs
 
@@ -1209,6 +1294,19 @@ class DataCatalog(object):
         source: DataSource,
         registry: dict[str, dict[str, dict[str, DataSource]]],
     ):
+        """
+        Register a data source in the given registry structure.
+
+        Sources are organized hierarchically by name, provider, and version.
+        Existing entries with the same keys are overwritten.
+
+        Parameters
+        ----------
+        source : DataSource
+            The data source to register.
+        registry : dict
+            Registry mapping source names to providers, versions, and source objects.
+        """
         registry.setdefault(source.name, {}).setdefault(source.provider, {})
         registry[source.name][source.provider][source.version] = source
 
