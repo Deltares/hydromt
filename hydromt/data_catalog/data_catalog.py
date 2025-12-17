@@ -16,7 +16,6 @@ from typing import (
     Iterator,
     List,
     Optional,
-    Set,
     Tuple,
     Union,
     cast,
@@ -61,7 +60,7 @@ from hydromt.data_catalog.sources import (
     RasterDatasetSource,
     create_source,
 )
-from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
+from hydromt.error import NoDataStrategy
 from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
 from hydromt.plugins import PLUGINS
 from hydromt.readers import _yml_from_uri_or_path
@@ -1052,14 +1051,14 @@ class DataCatalog(object):
         new_root.mkdir(exist_ok=True)
 
         # create copy of data with selected source names
-        source_vars = {}
-        if len(source_names) > 0:
-            sources: Dict[str, Dict[str, Dict[Any, DataSource]]] = {}
+        source_vars: dict[str, list[str]] = {}
+        if source_names:
+            sources: dict[str, dict[str, dict[Any, DataSource]]] = {}
             for source in source_names:
                 # support both strings and SourceSpecDicts here
                 if isinstance(source, str):
                     name = source
-                elif isinstance(source, Dict):
+                elif isinstance(source, dict):
                     name = source["source"]
                 else:
                     raise RuntimeError(
@@ -1072,18 +1071,9 @@ class DataCatalog(object):
                     source_vars[name] = variables
 
                 source = self.get_source(name)
-                provider = source.provider
-                version = source.version
-
-                if name not in sources:
-                    sources[name] = {}
-                if provider not in sources[name]:
-                    sources[name][provider] = {}
-
-                sources[name][provider][version] = copy.deepcopy(source)
-
+                self._register_source(source=copy.deepcopy(source), registry=sources)
         else:
-            sources: Dict[str, Dict[str, Dict[Any, DataSource]]] = copy.deepcopy(
+            sources: dict[str, dict[str, dict[Any, DataSource]]] = copy.deepcopy(
                 self.sources
             )
 
@@ -1096,106 +1086,122 @@ class DataCatalog(object):
             sources_out = {}
 
         # export data and update sources
-        for key, available_variants in sources.items():
-            for provider, available_versions in available_variants.items():
-                for version, source in available_versions.items():
-                    try:
-                        # read slice of source and write to file
-                        logger.debug(f"Exporting {key}.")
-                        if not unit_conversion:
-                            source.data_adapter.unit_mult = {}
-                            source.data_adapter.unit_add = {}
-                        try:
-                            # get keyword only params
-                            kw_only_params: Set[inspect.Parameter] = set(
-                                map(
-                                    lambda x: x[0],  # take param name
-                                    filter(
-                                        lambda t: t[1].kind
-                                        == 3,  # 3 in enum is kw_only
-                                        inspect.signature(
-                                            source.to_file
-                                        ).parameters.items(),
-                                    ),
-                                )
-                            )
-                            # get kwargs that are available for this source
-                            query_kwargs: Dict[str, Any] = {
-                                "variables": source_vars.get(key, None),
-                                "bbox": bbox,
-                                "time_range": time_range,
-                            }
-                            # Then combine with values
-                            query_kwargs: Dict[str, Any] = {
-                                k: v
-                                for k, v in query_kwargs.items()
-                                if k in kw_only_params
-                            }
-
-                            bbox: Optional[Bbox] = query_kwargs.get("bbox")
-                            if bbox is not None:
-                                mask = _parse_geom_bbox_buffer(bbox=bbox)
-                            else:
-                                mask = None
-
-                            source_kwargs: Dict[str, Any] = copy.deepcopy(query_kwargs)
-                            source_kwargs.pop("bbox", None)
-                            source_kwargs["mask"] = mask
-
-                            relative_uri: Path = source._get_relative_uri(
-                                handle_nodata, **source_kwargs
-                            )
-
-                            if (
-                                len(relative_uri.parts) == 1
-                                and "*" in relative_uri.name
-                            ):
-                                raise ValueError(
-                                    f"Cannot write source {source.name} with wildcard to root"
-                                )
-
-                            p = new_root / relative_uri
-                            p.parent.mkdir(parents=True, exist_ok=True)
-                            if not force_overwrite and isfile(p):
-                                logger.warning(
-                                    f"File {p} already exists and not in forced overwrite mode. skipping..."
-                                )
-                                continue
-
-                            new_source: DataSource = source.to_file(
-                                file_path=p,
-                                handle_nodata=NoDataStrategy.RAISE,
-                                **query_kwargs,
-                            )
-                        except NoDataException as e:
-                            exec_nodata_strat(
-                                f"{key} file contains no data: {e}",
-                                handle_nodata,
-                            )
-                            continue
-
-                        if key in sources_out:
-                            logger.warning(
-                                f"{key} already exists in data catalog, overwriting..."
-                            )
-                        if key not in sources_out:
-                            sources_out[key] = {}
-                        if provider not in sources_out[key]:
-                            sources_out[key][provider] = {}
-
-                        sources_out[key][provider][version] = new_source
-                    except FileNotFoundError:
-                        logger.warning(f"{key} file not found at {new_source.uri}")
+        for available_variants in sources.values():
+            for available_versions in available_variants.values():
+                for source in available_versions.values():
+                    self._export_source(
+                        source=source,
+                        unit_conversion=unit_conversion,
+                        new_root=new_root,
+                        bbox=bbox,
+                        time_range=time_range,
+                        source_vars=source_vars,
+                        registry=sources_out,
+                        force_overwrite=force_overwrite,
+                        handle_nodata=handle_nodata,
+                    )
 
         # write data catalog to yml
         data_catalog_out = DataCatalog()
         for key, available_variants in sources_out.items():
-            for _provider, available_versions in available_variants.items():
-                for _version, adapter in available_versions.items():
+            for available_versions in available_variants.values():
+                for adapter in available_versions.values():
                     if adapter is not None:
                         data_catalog_out.add_source(key, adapter)
 
         data_catalog_out.to_yml(path, root="auto", meta=metadata)
+
+    def _export_source(
+        self,
+        source: DataSource,
+        unit_conversion: bool,
+        new_root: Path,
+        bbox: Optional[Bbox],
+        time_range: TimeRange | tuple | dict | None,
+        source_vars: dict[str, list[str]],
+        registry: dict[str, dict[str, dict[str, DataSource]]],
+        force_overwrite: bool,
+        handle_nodata: NoDataStrategy,
+    ) -> DataSource | None:
+        # read slice of source and write to file
+        logger.debug(f"Exporting {source.name}.")
+        if not unit_conversion:
+            source.data_adapter.unit_mult = {}
+            source.data_adapter.unit_add = {}
+
+        query_kwargs = self._build_query_kwargs(source, source_vars, bbox, time_range)
+        bbox: Optional[Bbox] = query_kwargs.get("bbox")
+        mask = _parse_geom_bbox_buffer(bbox=bbox) if bbox is not None else None
+
+        source_kwargs: Dict[str, Any] = copy.deepcopy(query_kwargs)
+        source_kwargs.pop("bbox", None)
+        source_kwargs["mask"] = mask
+
+        relative_uri: Path = source._get_relative_uri(handle_nodata, **source_kwargs)
+        if len(relative_uri.parts) == 1 and "*" in relative_uri.name:
+            raise ValueError(f"Cannot write source {source.name} with wildcard to root")
+
+        file_path = new_root / relative_uri
+        new_source = self._write_source(
+            source=source,
+            file_path=file_path,
+            source_kwargs=source_kwargs,
+            force_overwrite=force_overwrite,
+            handle_nodata=handle_nodata,
+        )
+        if new_source is None:
+            return None
+
+        self._register_source(source=new_source, registry=registry)
+        return new_source
+
+    def _write_source(
+        self,
+        source: DataSource,
+        file_path: Path,
+        source_kwargs: dict[str, Any],
+        force_overwrite: bool,
+        handle_nodata: NoDataStrategy,
+    ) -> DataSource | None:
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+
+        if file_path.exists() and not force_overwrite:
+            logger.info(f"File {file_path} exists, skipping export.")
+            return None
+
+        return source.to_file(
+            file_path=file_path,
+            handle_nodata=handle_nodata,
+            **source_kwargs,
+        )
+
+    def _build_query_kwargs(
+        self,
+        source: DataSource,
+        source_vars: dict[str, list[str]],
+        bbox: Bbox | None,
+        time_range: TimeRange | None,
+    ) -> dict[str, Any]:
+        sig = inspect.signature(source.to_file)
+        allowed = {
+            name
+            for name, param in sig.parameters.items()
+            if param.kind == inspect.Parameter.KEYWORD_ONLY
+        }
+        query = {
+            "variables": source_vars.get(source.name),
+            "bbox": bbox,
+            "time_range": time_range,
+        }
+        return {k: v for k, v in query.items() if k in allowed and v is not None}
+
+    def _register_source(
+        self,
+        source: DataSource,
+        registry: dict[str, dict[str, dict[str, DataSource]]],
+    ):
+        registry.setdefault(source.name, {}).setdefault(source.provider, {})
+        registry[source.name][source.provider][source.version] = source
 
     def get_rasterdataset(
         self,
