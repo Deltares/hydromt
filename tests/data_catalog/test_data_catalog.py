@@ -711,6 +711,16 @@ def test_export_deltares_data(
     source_name: str,
     data_source: DataSource,
 ):
+    """Export all data sources from the deltares_data predefined catalog.
+
+    The `manual` marker is used to exclude this test from regular test runs.
+    However, this also prevents vscode from automatically discovering and running this test.
+
+    To be able to see, and debug this test using the vscode UI, you need to:
+    - open .vscode/settings.json
+    - temporarily add the following setting:
+    ``"python.testing.pytestArgs": ["tests -m manual"]``
+    """
     write_path = tmp_path / f"deltares_exported_{source_name}"
     dc = DataCatalog(data_libs=["deltares_data"])
     dc.export_data(
