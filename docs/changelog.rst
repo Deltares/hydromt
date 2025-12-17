@@ -46,7 +46,7 @@ Changed
 - Function signatures of `DataCatalog` functions `get_rasterdataset`, `get_geodataframe`, `get_geodataset`, `get_dataset` and `get_dataframe` now have: ``source_kwargs`` (passed to `DataSource.__init__`) instead of just ``kwargs``, and ``time_tuple`` was renamed to ``time_range``. (#1291)
 - `DataCatalog` argument fallback_lib has been removed. Users now have to specify the name of the data catalog they want to use, even if it is artifact_data (#1069).
 - `GeomsComponent.region` now returns the geometric union of all polygonal features in the component instead of a bounding box. Only geometries with area (Polygons and MultiPolygons) contribute to the union; Points, LineStrings, and MultiLineStrings are excluded and assumed to lie within the polygon-defined area. (#1334)
-
+- When writing zarr files, by default write with ``zarr_format=2``. Can be overwritten with the ``write_kwargs`` argument.
 
 Fixed
 -----
@@ -66,6 +66,8 @@ Fixed
 - `hydromt check` has been updated to validate v1 data catalogs (#1265)
 - All handling of log files is now done with the context manager `hydromt._utils.log.to_file`. This means that they are always closed by the the function that opened them. (#1272)
 - `DataCatalog.export_data` now correctly handles rasterdata that have been written with paths containing wildcards. (#1323)
+- Standardized the behaviour of DataSources and subcomponents when it comes to handling the case where there is no data.
+
 
 Deprecated
 ----------
