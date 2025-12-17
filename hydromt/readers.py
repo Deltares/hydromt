@@ -214,11 +214,7 @@ def open_raster(
         kwargs.update(mask_and_scale=False)
     if isinstance(uri, IOBase):  # file-like does not handle chunks
         logger.warning("Removing chunks to read and load remote data.")
-        kwargs.pop("chunks")
-
-    for k, v in kwargs.items():
-        if isinstance(v, dict):
-            kwargs[k] = tuple(v)  # dicts are not hashable, so convert to tuple
+        kwargs.pop("chunks", None)
 
     # keep only 2D DataArray
     da: xr.DataArray = rioxarray.open_rasterio(uri, **kwargs).squeeze(drop=True)

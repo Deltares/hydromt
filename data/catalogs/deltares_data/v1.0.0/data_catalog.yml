@@ -1235,7 +1235,8 @@ grwl_mask:
       chunks:
         x: 3000
         y: 3000
-      mosaic_driver_kwargs:
+      mosaic: true
+      mosaic_kwargs:
         method: nearest
   uri_resolver:
     name: raster_tindex
