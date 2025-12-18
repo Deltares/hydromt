@@ -15,7 +15,7 @@ from hydromt._utils import _strip_scheme, cache_vrt_tiles, temp_env
 from hydromt.config import SETTINGS
 from hydromt.data_catalog.drivers.base_driver import DriverOptions
 from hydromt.data_catalog.drivers.raster import RasterDatasetDriver
-from hydromt.error import NoDataStrategy, exec_nodata_strat
+from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
 from hydromt.gis._gdal_drivers import GDAL_DRIVER_CODE_MAP
 from hydromt.gis.gis_utils import zoom_to_overview_level
 from hydromt.readers import open_mfraster
@@ -362,9 +362,7 @@ class RasterioDriver(RasterDatasetDriver):
             or x_coords.size < 2
             or (x_coords.ndim == 2 and x_coords.shape[1] < 2)
         ):
-            exec_nodata_strat(
+            raise NoDataException(
                 f"Cannot write raster data with insufficient spatial dimensions: {data.raster.y_dim} size {y_coords.size}, {data.raster.x_dim} size {x_coords.size}",
-                strategy=NoDataStrategy.RAISE,
             )
-            return None
         data.raster.to_raster(path, driver=driver, **write_kwargs)
