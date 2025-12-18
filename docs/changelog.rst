@@ -8,6 +8,21 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
+Unreleased
+==========
+
+New
+---
+
+Changed
+-------
+
+Fixed
+-----
+
+Deprecated
+----------
+
 v1.3.0 (2025-11-11)
 ===================
 
