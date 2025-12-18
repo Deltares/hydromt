@@ -1,6 +1,20 @@
-FROM deltares/hydromt:slim AS binder
-# Binder hard requires all of these steps when they build the image
-# therefore these steps aren't taken sooner
+FROM ghcr.io/prefix-dev/pixi:0.61.0-focal
+RUN groupadd deltares && useradd deltares --uid 1000 -m -g deltares
+
+USER deltares
+WORKDIR /home/deltares
+
+ENV PATH=/home/deltares/.pixi/bin:$PATH
+ENV HOME=/home/deltares/
+
+COPY pixi.lock pyproject.toml README.rst ./
+COPY ./hydromt ./hydromt
+COPY ./docs ./docs
+COPY examples ./examples
+
+RUN pixi install --locked -e slim-latest \
+    && rm -rf .cache \
+    && find .pixi -type f -name "*.pyc" -delete
 
 ENV HOME=/home/deltares \
     NUMBA_CACHE_DIR=${HOME}/.cache/numba \

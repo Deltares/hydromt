@@ -7,14 +7,12 @@ on:
     paths:
       - .github/workflows/test-docker.yml
       - .binder/**
-      - Dockerfile
       - pyproject.toml
   pull_request:
     branches: [main]
     paths:
       - .github/workflows/test-docker.yml
       - .binder/**
-      - Dockerfile
       - pyproject.toml
 
 jobs:
@@ -27,11 +25,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-      - uses: prefix-dev/setup-pixi@v0.9.3
-      - name: Set up Docker
-        uses: docker/setup-docker-action@v4
-      - name: Build actual binder image
-        run: pixi run docker-build-binder
+      - name: Build the image
+        uses: docker/build-push-action@v6
+        with:
+          push: false
+          tags: hydromt-binder
+          file: .binder/Dockerfile
       - name:
         id: test-image
         run: |
@@ -39,7 +38,7 @@ jobs:
           set -e
 
           # run the docker image detached, it will start the jupyter server for us
-          docker run -d -p 8888:8888 deltares/hydromt:binder
+          docker run -d -p 8888:8888 hydromt-binder
 
           # give it a second or two to start up
           sleep 10
@@ -56,28 +55,3 @@ jobs:
 
           echo "# Logs:"
           docker logs "$(docker container ls -q)"
-
-
-
-
-
-  test-docker:
-    runs-on: ubuntu-latest
-    concurrency:
-      group: test-docker-${{ github.ref }}
-      cancel-in-progress: true
-    timeout-minutes: 30
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-      - name: Build full
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: full
-          tags: deltares/hydromt:full
-          load: true
-          build-args: |
-            PIXIENV=full-latest
-      - name: Run tests
-        run: docker run --env NUMBA_DISABLE_JIT=1 --rm deltares/hydromt:full test
