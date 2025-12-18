@@ -25,7 +25,7 @@ from hydromt._utils.uris import _is_valid_url
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.data_catalog.drivers import BaseDriver
 from hydromt.data_catalog.uri_resolvers import ConventionResolver, URIResolver
-from hydromt.error import NoDataStrategy, exec_nodata_strat
+from hydromt.error import NoDataStrategy
 from hydromt.typing import DataType, SourceMetadata
 from hydromt.typing.type_def import TimeRange, TotalBounds
 
@@ -169,16 +169,12 @@ class DataSource(BaseModel, ABC):
                 handle_nodata=handle_nodata,
                 **query_kwargs,
             )
-
+            if not uris:
+                return None  # handle_nodata == ignore
             # if multiple_uris, use the first one:
             if len(uris) > 0:
                 uri = PurePath(uris[0])
-            else:
-                exec_nodata_strat(
-                    f"No URIs could be resolved from the DataSource: {self.name}.",
-                    handle_nodata,
-                )
-                return None
+
         if self.root and uri.is_absolute():
             uri = uri.relative_to(self.root)
         elif not self.root and uri.is_absolute():

@@ -76,6 +76,8 @@ class DatasetSource(DataSource):
             variables=vrs,
             handle_nodata=handle_nodata,
         )
+        if not uris:
+            return None  # handle_nodata == ignore
 
         ds: xr.Dataset = self.driver.read(uris, handle_nodata=handle_nodata)
         if ds is None:  # handle_nodata == ignore

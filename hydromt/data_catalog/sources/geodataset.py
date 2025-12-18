@@ -69,6 +69,8 @@ class GeoDatasetSource(DataSource):
             metadata=self.metadata,
             handle_nodata=handle_nodata,
         )
+        if not uris:
+            return None  # handle_nodata == ignore
 
         ds: xr.Dataset = self.driver.read(
             uris,
@@ -79,6 +81,7 @@ class GeoDatasetSource(DataSource):
         )
         if ds is None:  # handle_nodata == ignore
             return None
+
         return self.data_adapter.transform(
             ds,
             self.metadata,

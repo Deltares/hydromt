@@ -90,8 +90,6 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
             },
         )
         preprocessor = self.options.get_preprocessor()
-        if len(uris) == 0:
-            return None  # handle_nodata == ignore
         first_ext = splitext(uris[0])[-1]
 
         if first_ext == _ZARR_EXT:

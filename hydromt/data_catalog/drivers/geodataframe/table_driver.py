@@ -99,9 +99,8 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
 
         if not metadata:
             metadata = SourceMetadata()
-        if len(uris) == 0:
-            return None  # handle_nodata == ignore
-        elif len(uris) > 1:
+
+        if len(uris) > 1:
             raise ValueError(
                 "DataFrame: Reading multiple files with the "
                 f"{self.__class__.__name__} driver is not supported."
