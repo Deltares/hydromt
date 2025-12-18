@@ -62,8 +62,6 @@ We also have 3 pre-defined environments. These are more or less just collections
 2. ``slim`` Just the operational bits, what most people will probably want if you're using HydroMT, and it's what the cloud will most likely use
 3. ``full`` absolutely everything, useful for developing.
 
-We also have docker images for each of the flavours available on the deltares dockerhub page.
-
 Adding a dependency
 -------------------
 
