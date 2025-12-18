@@ -76,7 +76,7 @@ class RasterTindexResolver(URIResolver):
             )
         if gdf.index.size == 0:
             exec_nodata_strat(
-                f"resolver '{self.name}' found no intersecting tiles.",
+                f"Resolver '{self.name}' found no intersecting tiles.",
                 strategy=handle_nodata,
             )
             return []  # in case of ignore

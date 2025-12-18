@@ -60,9 +60,10 @@ class DataFrameAdapter(DataAdapterBase):
         df = self._rename_vars(df)
         df = self._set_nodata(df, metadata)
         # slice data
-        df = DataFrameAdapter._slice_data(df, variables, time_range)
+        df = DataFrameAdapter._slice_data(
+            df, variables, time_range, handle_nodata=handle_nodata
+        )
         if df is None:
-            exec_nodata_strat("DataFrame has no data after slicing.", handle_nodata)
             return None
         # uniformize data
         df = self._apply_unit_conversion(df)
@@ -95,6 +96,7 @@ class DataFrameAdapter(DataAdapterBase):
         df: pd.DataFrame,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> Optional[pd.DataFrame]:
         """Filter the DataFrame.
 
@@ -106,6 +108,8 @@ class DataFrameAdapter(DataAdapterBase):
             variables to include, or all if None, by default None
         time_range : Optional[TimeRange], optional
             start and end times to include, or all if None, by default None
+        handle_nodata : NoDataStrategy, optional
+            how to handle no data being present in the result, by default NoDataStrategy.RAISE
 
         Returns
         -------
@@ -127,15 +131,15 @@ class DataFrameAdapter(DataAdapterBase):
 
         if time_range is not None and np.dtype(df.index).type == np.datetime64:
             logger.debug(f"Slicing time dime {time_range}")
-            try:
-                df = df.iloc[df.index.slice_indexer(time_range.start, time_range.end)]
-            except IndexError:
-                df = pd.DataFrame()
+            idx = df.index.slice_indexer(time_range.start, time_range.end)
+            df = df.iloc[idx]
+            if df.empty:
+                exec_nodata_strat(
+                    "DataFrame has no data after time slicing.", handle_nodata
+                )
+                return None
 
-        if len(df) == 0:
-            return None
-        else:
-            return df
+        return df
 
     def _apply_unit_conversion(self, df: pd.DataFrame) -> pd.DataFrame:
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())

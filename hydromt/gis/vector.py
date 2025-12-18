@@ -689,6 +689,7 @@ class GeoBase(raster.XGeoBase):
         kwargs:
             Any additional arguments to be passed down to the driver.
         """
+        kwargs.setdefault("zarr_format", 2)
         if ogr_compliant:
             self.ogr_compliant(reducer=reducer).to_zarr(path, **kwargs)
         else:

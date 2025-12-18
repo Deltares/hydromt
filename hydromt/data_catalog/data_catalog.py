@@ -16,7 +16,6 @@ from typing import (
     Iterator,
     List,
     Optional,
-    Set,
     Tuple,
     Union,
     cast,
@@ -148,7 +147,7 @@ class DataCatalog(object):
         description: str = "The stac catalog of hydromt",
         used_only: bool = False,
         catalog_type: CatalogType = CatalogType.RELATIVE_PUBLISHED,
-        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.WARN,
     ):
         """Write data catalog to STAC format.
 
@@ -1052,14 +1051,14 @@ class DataCatalog(object):
         new_root.mkdir(exist_ok=True)
 
         # create copy of data with selected source names
-        source_vars = {}
-        if len(source_names) > 0:
-            sources: Dict[str, Dict[str, Dict[Any, DataSource]]] = {}
+        source_vars: dict[str, list[str]] = {}
+        if source_names:
+            sources: dict[str, dict[str, dict[Any, DataSource]]] = {}
             for source in source_names:
                 # support both strings and SourceSpecDicts here
                 if isinstance(source, str):
                     name = source
-                elif isinstance(source, Dict):
+                elif isinstance(source, dict):
                     name = source["source"]
                 else:
                     raise RuntimeError(
@@ -1072,18 +1071,9 @@ class DataCatalog(object):
                     source_vars[name] = variables
 
                 source = self.get_source(name)
-                provider = source.provider
-                version = source.version
-
-                if name not in sources:
-                    sources[name] = {}
-                if provider not in sources[name]:
-                    sources[name][provider] = {}
-
-                sources[name][provider][version] = copy.deepcopy(source)
-
+                self._register_source(source=copy.deepcopy(source), registry=sources)
         else:
-            sources: Dict[str, Dict[str, Dict[Any, DataSource]]] = copy.deepcopy(
+            sources: dict[str, dict[str, dict[Any, DataSource]]] = copy.deepcopy(
                 self.sources
             )
 
@@ -1096,97 +1086,229 @@ class DataCatalog(object):
             sources_out = {}
 
         # export data and update sources
-        for key, available_variants in sources.items():
-            for provider, available_versions in available_variants.items():
-                for version, source in available_versions.items():
-                    try:
-                        # read slice of source and write to file
-                        logger.debug(f"Exporting {key}.")
-                        if not unit_conversion:
-                            source.data_adapter.unit_mult = {}
-                            source.data_adapter.unit_add = {}
-                        try:
-                            # get keyword only params
-                            kw_only_params: Set[inspect.Parameter] = set(
-                                map(
-                                    lambda x: x[0],  # take param name
-                                    filter(
-                                        lambda t: t[1].kind
-                                        == 3,  # 3 in enum is kw_only
-                                        inspect.signature(
-                                            source.to_file
-                                        ).parameters.items(),
-                                    ),
-                                )
-                            )
-                            # get kwargs that are available for this source
-                            query_kwargs: Dict[str, Any] = {
-                                "variables": source_vars.get(key, None),
-                                "bbox": bbox,
-                                "time_range": time_range,
-                            }
-                            # Then combine with values
-                            query_kwargs: Dict[str, Any] = {
-                                k: v
-                                for k, v in query_kwargs.items()
-                                if k in kw_only_params
-                            }
-
-                            bbox: Optional[Bbox] = query_kwargs.get("bbox")
-                            if bbox is not None:
-                                mask = _parse_geom_bbox_buffer(bbox=bbox)
-                            else:
-                                mask = None
-
-                            source_kwargs: Dict[str, Any] = copy.deepcopy(query_kwargs)
-                            source_kwargs.pop("bbox", None)
-                            source_kwargs["mask"] = mask
-
-                            basename: str = source._get_uri_basename(
-                                handle_nodata, **source_kwargs
-                            )
-
-                            p = cast(Path, Path(new_root) / basename)
-                            if not force_overwrite and isfile(p):
-                                logger.warning(
-                                    f"File {p} already exists and not in forced overwrite mode. skipping..."
-                                )
-                                continue
-
-                            new_source: DataSource = source.to_file(
-                                file_path=p,
-                                handle_nodata=NoDataStrategy.RAISE,
-                                **query_kwargs,
-                            )
-                        except NoDataException as e:
-                            exec_nodata_strat(
-                                f"{key} file contains no data: {e}",
-                                handle_nodata,
-                            )
-                            continue
-
-                        if key in sources_out:
-                            logger.warning(
-                                f"{key} already exists in data catalog, overwriting..."
-                            )
-                        if key not in sources_out:
-                            sources_out[key] = {}
-                        if provider not in sources_out[key]:
-                            sources_out[key][provider] = {}
-
-                        sources_out[key][provider][version] = new_source
-                    except FileNotFoundError:
-                        logger.warning(f"{key} file not found at {new_source.uri}")
+        for available_variants in sources.values():
+            for available_versions in available_variants.values():
+                for source in available_versions.values():
+                    self._export_source(
+                        source=source,
+                        unit_conversion=unit_conversion,
+                        new_root=new_root,
+                        bbox=bbox,
+                        time_range=time_range,
+                        source_vars=source_vars,
+                        registry=sources_out,
+                        force_overwrite=force_overwrite,
+                        handle_nodata=handle_nodata,
+                    )
 
         # write data catalog to yml
         data_catalog_out = DataCatalog()
         for key, available_variants in sources_out.items():
-            for _provider, available_versions in available_variants.items():
-                for _version, adapter in available_versions.items():
+            for available_versions in available_variants.values():
+                for adapter in available_versions.values():
                     if adapter is not None:
                         data_catalog_out.add_source(key, adapter)
 
         data_catalog_out.to_yml(path, root="auto", meta=metadata)
+
+    def _export_source(
+        self,
+        source: DataSource,
+        unit_conversion: bool,
+        new_root: Path,
+        bbox: Optional[Bbox],
+        time_range: TimeRange | tuple | dict | None,
+        source_vars: dict[str, list[str]],
+        registry: dict[str, dict[str, dict[str, DataSource]]],
+        force_overwrite: bool,
+        handle_nodata: NoDataStrategy,
+    ) -> DataSource | None:
+        """
+        Export a single data source to disk and register the exported source.
+
+        This method resolves query arguments (variables, spatial and temporal filters),
+        determines the output path, writes the source data to disk, and updates the
+        output registry with the new source definition.
+
+        Parameters
+        ----------
+        source : DataSource
+            The data source to export.
+        unit_conversion : bool
+            Whether unit conversion should be applied when reading the source data.
+        new_root : Path
+            Root directory where exported data will be written.
+        bbox : Bbox, optional
+            Spatial bounding box used to subset the source, if supported.
+        time_range : TimeRange | tuple | dict | None
+            Temporal range used to subset the source, if supported.
+        source_vars : dict[str, list[str]]
+            Mapping of source names to selected variable names.
+        registry : dict
+            Registry used to collect exported sources for the output data catalog.
+        force_overwrite : bool
+            Whether existing output files should be overwritten.
+        handle_nodata : NoDataStrategy
+            Strategy for handling no-data situations during export.
+
+        Returns
+        -------
+        DataSource or None
+            The newly exported source, or None if the source was skipped or contained
+            no data.
+        """
+        # read slice of source and write to file
+        logger.debug(f"Exporting {source.name}.")
+        if not unit_conversion:
+            source.data_adapter.unit_mult = {}
+            source.data_adapter.unit_add = {}
+
+        query_kwargs = self._build_query_kwargs(source, source_vars, bbox, time_range)
+
+        relative_uri: Path = source._get_relative_uri(handle_nodata, **query_kwargs)
+        if relative_uri is None:
+            return None  # handle nodata
+        if len(relative_uri.parts) == 1 and "*" in relative_uri.name:
+            raise ValueError(f"Cannot write source {source.name} with wildcard to root")
+        file_path = new_root / relative_uri
+        new_source = self._write_source(
+            source=source,
+            file_path=file_path,
+            source_kwargs=query_kwargs,
+            force_overwrite=force_overwrite,
+            handle_nodata=handle_nodata,
+        )
+        if new_source is None:
+            return None
+
+        self._register_source(source=new_source, registry=registry)
+        return new_source
+
+    def _write_source(
+        self,
+        source: DataSource,
+        file_path: Path,
+        source_kwargs: dict[str, Any],
+        force_overwrite: bool,
+        handle_nodata: NoDataStrategy,
+    ) -> DataSource | None:
+        """
+        Write a single data source to disk using its `to_file` implementation.
+
+        This method ensures the output directory exists, handles overwrite logic,
+        and delegates the actual write operation to the source itself.
+
+        Parameters
+        ----------
+        source : DataSource
+            The data source to write.
+        file_path : Path
+            Destination file path for the exported source.
+        source_kwargs : dict
+            Keyword arguments passed to the source `to_file` method.
+        force_overwrite : bool
+            Whether an existing file should be overwritten.
+        handle_nodata : NoDataStrategy
+            Strategy for handling no-data exceptions raised during writing.
+
+        Returns
+        -------
+        DataSource or None
+            The written source with updated metadata, or None if writing was skipped
+            or no data was available.
+        """
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+
+        if file_path.exists() and not force_overwrite:
+            logger.warning(f"File {file_path} exists, skipping export.")
+            return None
+        try:
+            return source.to_file(
+                file_path=file_path,
+                handle_nodata=handle_nodata,
+                **source_kwargs,
+            )
+        except NoDataException as e:
+            exec_nodata_strat(e.message, handle_nodata)
+            return None
+
+    def _build_query_kwargs(
+        self,
+        source: DataSource,
+        source_vars: dict[str, list[str]],
+        bbox: Bbox | None,
+        time_range: TimeRange | None,
+    ) -> dict[str, Any]:
+        """
+        Build keyword arguments for querying and exporting a data source.
+
+        This method inspects the signature of the source `to_file` method and
+        constructs a dictionary of supported query arguments, including variable
+        selection, temporal filtering, and spatial masking where applicable.
+
+        Spatial bounding boxes are converted to geometric masks only if the source
+        explicitly supports a `mask` keyword argument.
+
+        Parameters
+        ----------
+        source : DataSource
+            The data source being exported.
+        source_vars : dict[str, list[str]]
+            Mapping of source names to selected variable names.
+        bbox : Bbox, optional
+            Spatial bounding box used to construct a mask if supported.
+        time_range : TimeRange, optional
+            Temporal range used to subset the source if supported.
+
+        Returns
+        -------
+        dict[str, Any]
+            Dictionary of keyword arguments to pass to the source `to_file` method.
+        """
+        sig = inspect.signature(source.to_file)
+        allowed = {
+            name
+            for name, param in sig.parameters.items()
+            if param.kind == inspect.Parameter.KEYWORD_ONLY
+        }
+        query = {
+            "variables": source_vars.get(source.name),
+            "bbox": bbox,
+            "time_range": time_range,
+        }
+        kwargs = {k: v for k, v in query.items() if k in allowed and v is not None}
+
+        bbox_from_kwargs = kwargs.pop("bbox", None)
+        if bbox is not None and bbox_from_kwargs is not None:
+            logger.warning(
+                f"Both function argument bbox {bbox} and source bbox {bbox_from_kwargs} are provided, using function argument bbox."
+            )
+        bbox = bbox if bbox is not None else bbox_from_kwargs
+        mask = _parse_geom_bbox_buffer(bbox=bbox) if bbox is not None else None
+        if mask is not None and "mask" in allowed:
+            kwargs.update({"mask": mask})
+        return kwargs
+
+    def _register_source(
+        self,
+        source: DataSource,
+        registry: dict[str, dict[str, dict[str, DataSource]]],
+    ):
+        """
+        Register a data source in the given registry structure.
+
+        Sources are organized hierarchically by name, provider, and version.
+        Existing entries with the same keys are overwritten.
+
+        Parameters
+        ----------
+        source : DataSource
+            The data source to register.
+        registry : dict
+            Registry mapping source names to providers, versions, and source objects.
+        """
+        registry.setdefault(source.name, {}).setdefault(source.provider, {})
+        registry[source.name][source.provider][source.version] = source
 
     def get_rasterdataset(
         self,
@@ -1313,12 +1435,10 @@ class DataCatalog(object):
                 mask=mask,
                 time_range=time_range,
                 buffer=buffer,
+                handle_nodata=handle_nodata,
             )
             if data_like is None:
-                exec_nodata_strat(
-                    _NO_DATA_AFTER_SLICE_MSG,
-                    strategy=handle_nodata,
-                )
+                return None
             return _single_var_as_array(
                 maybe_ds=data_like,
                 single_var_as_array=single_var_as_array,
@@ -1434,18 +1554,13 @@ class DataCatalog(object):
                 )
                 self.add_source(name, source)
         elif isinstance(data_like, gpd.GeoDataFrame):
-            data_like = GeoDataFrameAdapter._slice_data(
+            return GeoDataFrameAdapter._slice_data(
                 data_like,
                 variables=variables,
                 mask=mask,
                 predicate=predicate,
+                handle_nodata=handle_nodata,
             )
-            if data_like is None:
-                exec_nodata_strat(
-                    _NO_DATA_AFTER_SLICE_MSG,
-                    strategy=handle_nodata,
-                )
-            return data_like
         elif isinstance(data_like, GeoDataFrameSource):
             source = data_like
         else:
@@ -1576,12 +1691,10 @@ class DataCatalog(object):
                 mask=mask,
                 predicate=predicate,
                 time_range=time_range,
+                handle_nodata=handle_nodata,
             )
             if data_like is None:
-                exec_nodata_strat(
-                    _NO_DATA_AFTER_SLICE_MSG,
-                    strategy=handle_nodata,
-                )
+                return None
             return _single_var_as_array(data_like, single_var_as_array, variables)
         elif isinstance(data_like, GeoDatasetSource):
             source = data_like
@@ -1682,12 +1795,10 @@ class DataCatalog(object):
                 data_like,
                 variables,
                 time_range,
+                handle_nodata=handle_nodata,
             )
             if data_like is None:
-                exec_nodata_strat(
-                    _NO_DATA_AFTER_SLICE_MSG,
-                    strategy=handle_nodata,
-                )
+                return None
             return _single_var_as_array(data_like, single_var_as_array, variables)
         else:
             raise ValueError(f'Unknown data type "{type(data_like).__name__}"')
@@ -1775,13 +1886,9 @@ class DataCatalog(object):
                 )
                 self.add_source(name, source)
         elif isinstance(data_like, pd.DataFrame):
-            df = DataFrameAdapter._slice_data(data_like, variables, time_range)
-            if df is None:
-                exec_nodata_strat(
-                    _NO_DATA_AFTER_SLICE_MSG,
-                    strategy=handle_nodata,
-                )
-            return df
+            return DataFrameAdapter._slice_data(
+                data_like, variables, time_range, handle_nodata=handle_nodata
+            )
         else:
             raise ValueError(f'Unknown tabular data type "{type(data_like).__name__}"')
 

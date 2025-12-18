@@ -514,10 +514,10 @@ grwl_mask:
   driver:
     name: rasterio
     options:
-      mosaic: true
       chunks:
         x: 3000
         y: 3000
+      mosaic: true
       mosaic_kwargs:
         method: nearest
   uri_resolver:

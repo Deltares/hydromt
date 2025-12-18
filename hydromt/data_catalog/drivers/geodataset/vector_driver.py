@@ -106,6 +106,7 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
                     f"No data from {self.name} driver for file uris: {', '.join(uris)}.",
                     strategy=handle_nodata,
                 )
+                return None  # handle_nodata == ignore
             return out.to_dataset()
         else:
             for variable in out.data_vars:
@@ -114,6 +115,7 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
                         f"No data from {self.name} driver for file uris: {', '.join(uris)}.",
                         strategy=handle_nodata,
                     )
+                    return None  # handle_nodata == ignore
             return out
 
     def write(

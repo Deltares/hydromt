@@ -296,7 +296,7 @@ def test_export_cli_no_data_ignore(tmp_path: Path):
 def test_export_skips_overwrite(tmp_path: Path, caplog: pytest.LogCaptureFixture):
     with caplog.at_level(logging.WARNING):
         # export twice
-        for _i in range(2):
+        for _ in range(2):
             _ = CliRunner().invoke(
                 hydromt_cli,
                 [
@@ -309,7 +309,7 @@ def test_export_skips_overwrite(tmp_path: Path, caplog: pytest.LogCaptureFixture
                 ],
                 catch_exceptions=False,
             )
-    assert "already exists and not in forced overwrite mode" in caplog.text
+    assert "skipping export" in caplog.text
 
 
 def test_export_does_not_warn_on_forced_overwrite(
