@@ -86,19 +86,16 @@ class PyogrioDriver(GeoDataFrameDriver):
                 "DataFrame: Reading multiple files with the "
                 f"{self.__class__.__name__} driver is not supported."
             )
-        elif len(uris) == 0:
-            return None  # handle_nodata == ignore
-        else:
-            _uri = uris[0]
-            if mask is not None:
-                bbox = _bbox_from_file_and_mask(
-                    _uri, mask=mask, **self.options.get_kwargs()
-                )
-            else:
-                bbox = None
-            gdf: pd.DataFrame | gpd.GeoDataFrame = read_dataframe(
-                _uri, bbox=bbox, columns=variables, **self.options.get_kwargs()
+        _uri = uris[0]
+        if mask is not None:
+            bbox = _bbox_from_file_and_mask(
+                _uri, mask=mask, **self.options.get_kwargs()
             )
+        else:
+            bbox = None
+        gdf: pd.DataFrame | gpd.GeoDataFrame = read_dataframe(
+            _uri, bbox=bbox, columns=variables, **self.options.get_kwargs()
+        )
         if not isinstance(gdf, gpd.GeoDataFrame):
             raise IOError(f"DataFrame from uri: '{_uri}' contains no geometry column.")
 

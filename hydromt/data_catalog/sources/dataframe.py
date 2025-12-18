@@ -51,6 +51,8 @@ class DataFrameSource(DataSource):
             time_range=src_time_range,
             handle_nodata=handle_nodata,
         )
+        if not uris:
+            return None  # handle_nodata == ignore
 
         df: pd.DataFrame = self.driver.read(
             uris, handle_nodata=handle_nodata, variables=vrs

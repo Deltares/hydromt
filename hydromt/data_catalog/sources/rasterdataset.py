@@ -78,6 +78,8 @@ class RasterDatasetSource(DataSource):
             metadata=self.metadata,
             handle_nodata=handle_nodata,
         )
+        if not uris:
+            return None  # handle_nodata == ignore
 
         ds: xr.Dataset = self.driver.read(
             uris,

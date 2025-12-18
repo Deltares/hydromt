@@ -68,6 +68,8 @@ class GeoDataFrameSource(DataSource):
             metadata=self.metadata,
             handle_nodata=handle_nodata,
         )
+        if not uris:
+            return None  # handle_nodata == ignore
 
         gdf: gpd.GeoDataFrame = self.driver.read(
             uris,
@@ -78,6 +80,7 @@ class GeoDataFrameSource(DataSource):
         )
         if gdf is None:  # handle_nodata == ignore
             return None
+
         return self.data_adapter.transform(
             gdf,
             self.metadata,

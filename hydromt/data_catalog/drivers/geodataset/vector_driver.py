@@ -82,9 +82,7 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
         xr.Dataset
             The dataset read from the source.
         """
-        if len(uris) == 0:
-            return None  # handle_nodata == ignore
-        elif len(uris) > 1:
+        if len(uris) > 1:
             raise ValueError(
                 "GeodatasetVectorDriver only supports reading from one URI per source"
             )
