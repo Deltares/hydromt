@@ -23,7 +23,7 @@ Fixed
 Deprecated
 ----------
 
-v1.3.0 (2025-11-11)
+v1.3.0 (2025-12-18)
 ===================
 
 ModelComponent API now contains functions for `ModelComponent.cleanup` and `ModelComponent.finish_write` that are called by the build and update functions. This stabilizes the write functionality and makes sure that netCDF files can be overwritten when the source and destination are the same. (#778)
