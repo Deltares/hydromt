@@ -116,6 +116,7 @@ class DatasetXarrayDriver(DatasetDriver):
                 decode_coords="all",
                 preprocess=preprocessor,
                 **self.options.get_kwargs(),
+                decode_timedelta=True,
             )
         else:
             raise ValueError(f"Unknown extension for DatasetXarrayDriver: {first_ext} ")
@@ -125,6 +126,7 @@ class DatasetXarrayDriver(DatasetDriver):
                     f"No data from driver: '{self.name}' for variable: '{variable}'",
                     strategy=handle_nodata,
                 )
+                return None  # handle_nodata == ignore
         return ds
 
     def write(
@@ -166,6 +168,7 @@ class DatasetXarrayDriver(DatasetDriver):
         ext = path.suffix
         write_kwargs = write_kwargs or {}
         if ext == ".zarr":
+            write_kwargs.setdefault("zarr_format", 2)
             data.to_zarr(path, **write_kwargs)
         elif ext in [".nc", ".netcdf"]:
             data.to_netcdf(path, **write_kwargs)

@@ -107,6 +107,9 @@ era5:
   metadata:
     category: meteo
     crs: 4326
+    attrs:
+      precip:
+        unit: mm
     history: Extracted from Copernicus Climate Data Store; resampled by Deltares to
       daily frequency
     paper_doi: 10.1002/qj.3803

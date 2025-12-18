@@ -5,14 +5,14 @@ on:
   push:
     branches: [main]
     paths:
-      - .binder/*
-      - Dockerfile
+      - .github/workflows/test-docker.yml
+      - .binder/**
       - pyproject.toml
   pull_request:
     branches: [main]
     paths:
-      - .binder/*
-      - Dockerfile
+      - .github/workflows/test-docker.yml
+      - .binder/**
       - pyproject.toml
 
 jobs:
@@ -24,37 +24,34 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
-      - name: Build slim
+        uses: actions/checkout@v6
+      - name: Build the image
         uses: docker/build-push-action@v6
         with:
-          context: .
-          target: slim
-          tags: deltares/hydromt:slim
-          load: true
-          build-args: |
-            PIXIENV=slim-latest
-      - name: Test Binder integration with repo2docker
+          push: false
+          tags: hydromt-binder
+          file: .binder/Dockerfile
+      - name:
+        id: test-image
         run: |
-          pip install jupyter-repo2docker
-          repo2docker . echo 'success!'
-  test-docker:
-    runs-on: ubuntu-latest
-    concurrency:
-      group: test-docker-${{ github.ref }}
-      cancel-in-progress: true
-    timeout-minutes: 30
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-      - name: Build full
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: full
-          tags: deltares/hydromt:full
-          load: true
-          build-args: |
-            PIXIENV=full-latest
-      - name: Run tests
-        run: docker run --env NUMBA_DISABLE_JIT=1 --rm deltares/hydromt:full test
+          # actually fail when something goes wrong
+          set -e
+
+          # run the docker image detached, it will start the jupyter server for us
+          docker run -d -p 8888:8888 hydromt-binder
+
+          # give it a second or two to start up
+          sleep 10
+
+          # check if we can reach the server
+          curl -f "http://localhost:8888/api/"
+
+      # only show logs if previous step failed
+      - name: show logs
+        if: failure()
+        run: |
+          echo "# Containers:"
+          docker container ls
+
+          echo "# Logs:"
+          docker logs "$(docker container ls -q)"

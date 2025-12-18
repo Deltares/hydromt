@@ -1,6 +1,6 @@
 .. currentmodule:: hydromt.data_catalog.uri_resolvers
 
-.. _uri_resolver:
+.. _uri_resolver_api:
 
 ==============
 URI Resolvers

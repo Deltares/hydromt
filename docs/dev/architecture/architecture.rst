@@ -3,115 +3,219 @@
 Architecture
 ============
 
-HydroMT supports a large variety of models, which all require different types of data.
-It is therefore important that the API that HydroMT exposes is extendable. HydroMT is
-composed of a small set of key classes that support extension. In this section we walk
-through these classes and describe their main responsibilities and where they interact.
+HydroMT provides a modular and extensible framework for building and managing environmental and hydrological models.
+Its architecture is organized around a few core abstractions that define how models, data, and workflows interact.
 
-.. currentmodule:: hydromt.model
+At its core, HydroMT connects model components and data sources through a consistent API.
+This allows flexible model construction, reproducibility, and interoperability across a wide range of models and data systems.
+
+
+The diagram below summarizes the relationships between these components.
+
+.. image:: /_static/hydromt_architecture.jpeg
+    :width: 800
+    :alt: HydroMT main architecture diagram
+
+.. _model_architecture:
 
 Model
 -----
 
-The :Class:`Model` is the main representation of the model that is being built. A
-model is built step by step by adding :Class:`~components.base.ModelComponent` s to the
-Model. :ref:`Plugins` can define steps which act on these components to implement
-complex interactions between different components. The area of interest for the model
-can be defined by the :Class:`~components.spatial.SpatialModelComponent`. The complete
-model building workflow can be encoded in a :ref:`workflow file <model_workflow>` file.
+The :class:`Model` represents the complete model setup and workflow.
+It defines the model domain, manages all :class:`ModelComponent`'s, and coordinates data loading and transformations through the :class:`DataCatalog`.
+
+Models can be created interactively, through Python scripts, or from workflow definitions for full reproducibility.
+
+See also:
+
+- :ref:`model_component_architecture`
+- :ref:`API <model_api>`
+- :ref:`Implement your own <custom_model>`
+
+.. _model_component_architecture:
 
 ModelComponent
 --------------
 
-A :Class:`Model` can be populated with many different
-:Class:`~components.base.ModelComponent` s. A component can represent any type of data
-you have on your area of interest. This component can have many properties, but always
-has a :meth:`~components.base.ModelComponent.read` and
-:meth:`~components.base.ModelComponent.write` component to read in and write out data. A
-:Class:`Model` must have at least one :Class:`~components.base.ModelComponent`.
+A :class:`ModelComponent` represents a modular building block of a model, such as a specific model file or model data (for example, static or forcing data).
+Each component defines how its data are read and written, and can interact with other components during setup.
 
-.. currentmodule:: hydromt.data_catalog
+Components make models composable, flexible, and easy to extend without modifying the HydroMT core.
+The below components are included in HydroMT by default but you can also create your own custom components.
+
++----------------------------------------------------------------+-----------------------------------------------+
+| Model Component                                                | Description                                   |
++================================================================+===============================================+
+| :py:class:`~hydromt.model.components.ConfigComponent`          | Component for managing model configuration    |
++----------------------------------------------------------------+-----------------------------------------------+
+| :py:class:`~hydromt.model.components.GeomsComponent`           | Component for managing 1D vector data         |
++----------------------------------------------------------------+-----------------------------------------------+
+| :py:class:`~hydromt.model.components.TablesComponent`          | Component for managing non-geospatial data    |
++----------------------------------------------------------------+-----------------------------------------------+
+| :py:class:`~hydromt.model.components.DatasetsComponent`        | Component for managing non-geospatial data    |
++----------------------------------------------------------------+-----------------------------------------------+
+| :py:class:`~hydromt.model.components.SpatialDatasetsComponent` | Component for managing geospatial data        |
++----------------------------------------------------------------+-----------------------------------------------+
+| :py:class:`~hydromt.model.components.GridComponent`            | Component for managing regular gridded data   |
++----------------------------------------------------------------+-----------------------------------------------+
+| :py:class:`~hydromt.model.components.MeshComponent`            | Component for managing unstructured grids     |
++----------------------------------------------------------------+-----------------------------------------------+
+| :py:class:`~hydromt.model.components.VectorComponent`          | Component for managing geospatial vector data |
++----------------------------------------------------------------+-----------------------------------------------+
+
+See also:
+
+- :ref:`model_architecture`
+- :ref:`API <model_components_api>`
+- :ref:`Implement your own <custom_component>`
+
+.. _data_catalog_architecture:
 
 DataCatalog
 -----------
 
-:Class:`Model` s need data. Where the data should be found and how it
-should be loaded is defined in the :Class:`~data_Catalog.DataCatalog`. Each item in the
-catalog is a :Class:`~sources.data_source.DataSource`. Users can create their own
-catalogs, using a `yaml` format, or they can share their
-:Class:`~predefined_catalog.PredefinedCatalog` using the :ref:`plugins` system.
+The :class:`DataCatalog` is HydroMT's core data access and management layer.
+It provides a structured way to describe where datasets are located, how they can be accessed, and how they should be represented once loaded into memory.
+
+Within the HydroMT architecture, the :class:`DataCatalog` connects the :class:`Model` and its components to both internal and external data sources.
+It achieves this by maintaining a registry of :class:`DataSource` objects, each of which encapsulates the specific logic for accessing that specific dataset.
+It does not load or process data itself; instead, it delegates those responsibilities to :class:`DataSource` objects.
+
+The :class:`DataCatalog` comes with built-in support for several data catalogs:
+
+* **Predefined catalogs** - distributed with HydroMT or plugins (e.g., ``deltares_data``, ``aws_data``) that provide standardized and ready-to-use datasets.
+* **Custom YAML catalogs** - defined by users to reference their own data sources and file structures.
+
+The :class:`DataCatalog` can be used through the :class:`Model` class but also standalone in your own Python scripts for data access and processing outside of a model context.
+
+See also:
+
+- :ref:`data_source_architecture`
+- :ref:`uri_resolver_architecture`
+- :ref:`driver_architecture`
+- :ref:`data_adapter_architecture`
+- :ref:`API <data_catalog_api>`
+- :ref:`Pre-defined catalogs <existing_catalog>`
+- :ref:`Create your own <custom_data_catalog>`
+
+.. _data_source_architecture:
 
 DataSource
 ----------
 
-The :class:`~sources.data_source.DataSource` is the python representation of a parsed
-entry in the :class:`~DataCatalog`. The source is responsible for
-validating the catalog entry. It also carries the
-:class:`DataAdapter<adapters.data_adapter_base.DataAdapterBase>`,
-:class:`~uri_resolvers.URIResolver` and
-:class:`Driver<drivers.base_driver.BaseDriver>` and serves as an entrypoint to the data.
-Per HydroMT data type (e.g. ``RasterDataset``, ``GeoDataFrame``), HydroMT has one
-:Class:`~sources.data_source.DataSource`, e.g.
-:Class:`~source.rasterdataset.RasterDatasetSource`,
-:Class:`sources.geodataframe.GeoDataFrameSource`. The
-:meth:`~sources.datasource.DataSource.read` method governs the full process of discovery
-with the :Class:`~uri_resolvers.URIResolver`, reading data with the
-:Class:`Driver<drivers.base_driver.BaseDriver>`, and transforming the data to a HydroMT
-standard with a :class:`DataAdapter<adapters.data_adapter_base.DataAdapterBase>`.
+Each entry in the :class:`DataCatalog` is represented by a :class:`DataSource`.
+A DataSource encapsulates all the logic required to retrieve and standardize a specific dataset, based on the catalog's attributes and metadata.
+This abstraction separates data definition (in the catalog) from data access and transformation (in the source).
+
+When a model requests data by one of the DataCatalog's API functions (e.g. :meth:`get_rasterdataset`, :meth:`get_geodataframe` etc.),
+the :class:`DataCatalog` looks up the matching DataSource and - along with some pre-processing of function parameters - calls its :meth:`read_data` method.
+
+From there, the DataSource handles the complete workflow:
+
+1. **Resolve URIs** - Using a :class:`URIResolver`, it determines the actual file paths or URLs for the requested data. This supports flexible backends, such as local directories, cloud storage, or web APIs.
+2. **Load data** - The resolved URIs are passed to a :class:`Driver`, which reads the raw data into a Python object like an :class:`xarray.Dataset` or :class:`geopandas.GeoDataFrame`.
+3. **Transform and standardize** - The loaded data are passed through a :class:`DataAdapter`, which applies consistent transformations (e.g., variable renaming, temporal/spatial slicing, or unit conversion) to produce a uniform HydroMT representation.
+
+This layered design allows the DataCatalog to stay lightweight and declarative — it only stores attributes and metadata (e.g., names, paths, data types, parameters), while the DataSource performs the operational work needed to translate those definitions into usable model inputs.
+
+See also:
+
+- :ref:`data_catalog_architecture`
+- :ref:`uri_resolver_architecture`
+- :ref:`driver_architecture`
+- :ref:`data_adapter_architecture`
+- :ref:`API <data_source_api>`
+- :ref:`Implement your own <custom_data_source>`
+
+.. _uri_resolver_architecture:
 
 URIResolver
 -----------
 
-.. currentmodule:: hydromt.data_catalog.uri_resolvers
+The :class:`URIResolver` locates data by resolving catalog references (URIs) into actual file paths or service endpoints.
+It takes query parameters such as spatial bounds or time ranges and returns one or more resolved URIs that can be read by a :class:`Driver`.
 
-Finding the right address where the requested data is stored is not always
-straightforward. Searching for data differs between finding data in a web-service,
-database, a catalog or when dealing with a certain naming convention. Exploring where
-the right data can be found is implemented in the :Class:`URIResolver`. The
-:Class:`URIResolver` takes a single `uri` from the data catalog, and the query
-parameters from the model, such as the region, or the time range, and returns multiple
-absolute paths, or `uri` s, that can be read into a single python representation (e.g.
-`xarray.Dataset`). The :Class:`URIResolver` is extendable, so :ref:`Plugins` or other
-code can subclass the Abstract :Class:`URIResolver` class to implement their own
-conventions for data discovery.
+Custom resolvers can be added to support specific naming conventions, APIs, or cloud storage systems.
+
+See also:
+
+- :ref:`data_catalog_architecture`
+- :ref:`driver_architecture`
+- :ref:`API <uri_resolver_api>`
+- :ref:`Implement your own <custom_resolver>`
+
+.. _driver_architecture:
+
+.. currentmodule:: hydromt.data_catalog.drivers
 
 Driver
 ------
 
-.. currentmodule:: hydromt.data_catalog
+The :class:`Driver` reads resolved data into memory as Python objects such as :class:`xarray.Dataset` or :class:`geopandas.GeoDataFrame`.
+Each HydroMT data type (e.g., raster, vector) has a dedicated driver interface.
 
-The :Class:`Driver<drivers.base_driver.BaseDriver>` class is responsible for reading a
-set of geospatial data formats, like a ``geojson`` file or ``zarr`` archive, into their
-python in-memory representations: :Class:`geopandas.GeoDataFrame` or
-:Class:`xarray.Dataset` respectively. This class can also be extended using the
-:ref:`plugins`. Because the merging of different files from different
-:Class:`~sources.data_source.DataSource` s can be non-trivial, the driver is responsible
-to merge the different python objects coming from the driver to a single representation.
-This is then returned from the :meth:`read` method. The query parameters vary per
-HydroMT data type, so there is is a different driver interface per type, e.g.
-:Class:`~drivers.raster.raster_dataset_driver.RasterDatasetDriver`,
-:Class:`~drivers.geodataframe.geodataframe_driver.GeoDataFrameDriver`. To help with
-different filesystems, the driver class is handed a :class:`fsspec.Filesystem`.
+Drivers handle the complexity of I/O operations, including merging multiple files and managing filesystem access through `fsspec`.
+New drivers can be added through HydroMT's plugin system to support custom formats.
+
+Existing drivers in HydroMT core include:
+
++------------------------------------------------------------------------------------+---------------+--------------------------------------------------------------------------------+
+| Driver                                                                             | Data type     | File formats                                                                   |
++====================================================================================+===============+================================================================================+
+| :py:class:`rasterio <raster.rasterio_driver.RasterioDriver>`                       | RasterDataset | GeoTIFF, ArcASCII, VRT, tile index, etc.                                       |
++------------------------------------------------------------------------------------+---------------+--------------------------------------------------------------------------------+
+| :py:class:`raster_xarray <raster.raster_xarray_driver.RasterDatasetXarrayDriver>`  | RasterDataset | NetCDF and Zarr                                                                |
++------------------------------------------------------------------------------------+---------------+--------------------------------------------------------------------------------+
+| :py:class:`pyogrio <geodataframe.pyogrio_driver.PyogrioDriver>`                    | GeoDataFrame  | ESRI Shapefile, GeoPackage, GeoJSON, etc.                                      |
++------------------------------------------------------------------------------------+---------------+--------------------------------------------------------------------------------+
+| :py:class:`geodataframe_table <geodataframe.table_driver.GeoDataFrameTableDriver>` | GeoDataFrame  | CSV, XY, PARQUET and EXCEL                                                     |
++------------------------------------------------------------------------------------+---------------+--------------------------------------------------------------------------------+
+| :py:class:`geodataset_vector <geodataset.vector_driver.GeoDatasetVectorDriver>`    | GeoDataset    | Vector location (e.g. CSV or GeoJSON) & text delimited time-series (e.g. CSV). |
++------------------------------------------------------------------------------------+---------------+--------------------------------------------------------------------------------+
+| :py:class:`geodataset_xarray <geodataset.xarray_driver.GeoDatasetXarrayDriver>`    | GeoDataset    | NetCDF and Zarr                                                                |
++------------------------------------------------------------------------------------+---------------+--------------------------------------------------------------------------------+
+| :py:Class:`dataset_xarray <dataset.xarray_driver.DatasetXarrayDriver>`             | Dataset       | NetCDF and Zarr                                                                |
++------------------------------------------------------------------------------------+---------------+--------------------------------------------------------------------------------+
+| :py:class:`pandas <dataframe.pandas_driver.PandasDriver>`                          | DataFrame     | Any file readable by pandas (CSV, EXCEL, PARQUET, etc.)                        |
++------------------------------------------------------------------------------------+---------------+--------------------------------------------------------------------------------+
+
+
+See also:
+
+- :ref:`uri_resolver_architecture`
+- :ref:`data_adapter_architecture`
+- :ref:`API <driver_api>`
+- :ref:`Implement your own <custom_driver>`
+
+.. _data_adapter_architecture:
 
 DataAdapter
 -----------
 
-.. currentmodule:: hydromt.data_catalog
+The :class:`DataAdapter` standardizes and transforms data after it has been read by a :class:`Driver`.
+It performs operations such as variable selection, temporal/spatial slicing, renaming, or unit conversion
+to ensure consistency across datasets and models. Note that in some cases, some of these steps may also be
+performed in the :class:`Driver` itself if the underlying xarray, pandas, or geopandas library supports it
+directly in their read function.
 
-The :Class:`DataAdapter<adapters.data_adapter_base.DataAdapterBase>` homogenizes the
-data coming from the :Class:`Driver<drivers.base_driver.BaseDriver>`. This means slicing
-the data to the right region, renaming variables, changing units, regridding and more.
-The adapter has a :meth:`transform` method that takes a python object and returns the
-same type, e.g. an `xr.Dataset`. This method also accepts query parameters based on the
-data type, so there is a single
-:Class:`DataAdapter<adapters.data_adapter_base.DataAdapterBase>` per HydroMT data type.
+Each data type (raster, vector, etc.) has its own adapter interface responsible for transforming data into HydroMT's standardized representation.
 
-Architecture Diagram
-====================
+See also:
 
-The above is summarized in the following architecture diagram. Only the aforementioned
-methods and properties are used.
+- :ref:`driver_architecture`
+- :ref:`data_catalog_architecture`
+- :ref:`API <data_adapter_api>`
+- :ref:`Implement your own <custom_data_adapter>`
 
-.. image:: ../../drawio/exported/HydroMT-Architecture-OverArching.drawio.png
-    :width: 800
-    :alt: HydroMT main classes
+Extensibility
+-------------
+
+HydroMT's architecture is fully extensible.
+Developers can subclass models, components, drivers, adapters, or resolvers and register them through :ref:`the plugin system <register_plugins>`.
+This is only required if you want to use/support your custom classes through the HydroMT data catalog or model configuration yml files.
+If you are using your custom classes directly in Python code, you can simply instantiate and use them without registering as a plugin.
+This flexibility allows HydroMT to support new model types, data formats, and workflows without changing the core library.
+
+See also:
+
+- :ref:`register_plugins`

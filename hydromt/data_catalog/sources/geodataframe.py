@@ -17,7 +17,7 @@ from pystac import MediaType
 from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog.drivers import GeoDataFrameDriver
 from hydromt.data_catalog.sources.data_source import DataSource
-from hydromt.error import NoDataStrategy
+from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
 from hydromt.typing import (
     Bbox,
@@ -68,6 +68,8 @@ class GeoDataFrameSource(DataSource):
             metadata=self.metadata,
             handle_nodata=handle_nodata,
         )
+        if not uris:
+            return None  # handle_nodata == ignore
 
         gdf: gpd.GeoDataFrame = self.driver.read(
             uris,
@@ -76,6 +78,9 @@ class GeoDataFrameSource(DataSource):
             mask=mask,
             variables=vrs,
         )
+        if gdf is None:  # handle_nodata == ignore
+            return None
+
         return self.data_adapter.transform(
             gdf,
             self.metadata,
@@ -178,7 +183,7 @@ class GeoDataFrameSource(DataSource):
 
     def to_stac_catalog(
         self,
-        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.WARN,
     ) -> Optional[StacCatalog]:
         """
         Convert a geodataframe into a STAC Catalog representation.
@@ -210,15 +215,13 @@ class GeoDataFrameSource(DataSource):
                 raise RuntimeError(
                     f"Unknown extension: {ext}, cannot determine media type"
                 )
-        except (IndexError, KeyError, CRSError, TypeError) as e:
-            if handle_nodata == NoDataStrategy.IGNORE:
-                logger.warning(
-                    "Skipping {name} during stac conversion because"
-                    "because detecting spacial extent failed."
-                )
-                return
-            else:
-                raise e
+        except (IndexError, KeyError, CRSError, TypeError):
+            exec_nodata_strat(
+                f"Skipping {self.name} during stac conversion because detecting spacial extent failed.",
+                strategy=handle_nodata,
+            )
+            return None
+
         else:
             stac_catalog = StacCatalog(
                 self.name,

@@ -25,7 +25,7 @@ from hydromt._utils.uris import _is_valid_url
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.data_catalog.drivers import BaseDriver
 from hydromt.data_catalog.uri_resolvers import ConventionResolver, URIResolver
-from hydromt.error import NoDataException, NoDataStrategy
+from hydromt.error import NoDataStrategy
 from hydromt.typing import DataType, SourceMetadata
 from hydromt.typing.type_def import TimeRange, TotalBounds
 
@@ -160,7 +160,8 @@ class DataSource(BaseModel, ABC):
 
         return res
 
-    def _get_uri_basename(self, handle_nodata: NoDataStrategy, **query_kwargs) -> str:
+    def _get_relative_uri(self, handle_nodata: NoDataStrategy, **query_kwargs) -> Path:
+        uri = PurePath(self.uri)
         if "{" in self.uri:
             # first resolve any placeholders
             uris: List[str] = self.uri_resolver.resolve(
@@ -168,20 +169,19 @@ class DataSource(BaseModel, ABC):
                 handle_nodata=handle_nodata,
                 **query_kwargs,
             )
-
+            if not uris:
+                return None  # handle_nodata == ignore
             # if multiple_uris, use the first one:
             if len(uris) > 0:
-                uri: str = uris[0]
-            else:
-                raise NoDataException("!")
-        else:
-            uri: str = self.uri
+                uri = PurePath(uris[0])
 
-        basename: Optional[str] = PurePath(uri).name
-        if basename is None:
-            raise ValueError(f"Failed to get basename of uri: {self.uri}")
-        else:
-            return basename
+        if self.root and uri.is_absolute():
+            uri = uri.relative_to(self.root)
+        elif not self.root and uri.is_absolute():
+            # Edge case when creating a DataCatalog from a dictionary without specifying a root
+            uri = PurePath(uri.name)
+
+        return uri
 
     def get_time_range(
         self, detect: bool = True, strict: bool = False
@@ -249,7 +249,7 @@ class DataSource(BaseModel, ABC):
     @abstractmethod
     def to_stac_catalog(
         self,
-        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.WARN,
     ) -> Optional[StacCatalog]:
         """
         Convert source into a STAC Catalog representation.

@@ -35,7 +35,7 @@ jobs:
     needs:
       - safeguard
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -61,7 +61,7 @@ jobs:
           verbose: true
           skip-existing: true
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         id: upload-pypi-release-artifacts
         with:
           name: pypi-release-artifacts
@@ -74,7 +74,7 @@ jobs:
     needs:
       - safeguard
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - uses: prefix-dev/setup-pixi@v0.9.3
@@ -84,7 +84,7 @@ jobs:
       - name: Generate docs
         run: pixi run --locked doc
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         id: upload-docs-release-artifacts
         with:
           name: docs-release-artifacts
@@ -97,7 +97,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Add comment to PR
         env:

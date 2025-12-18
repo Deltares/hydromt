@@ -62,37 +62,37 @@ class PandasDriver(DataFrameDriver):
                 "DataFrame: Reading multiple files with the "
                 f"{self.__class__.__name__} driver is not supported."
             )
-        elif len(uris) == 0:
-            df = pd.DataFrame()
-        else:
-            uri = uris[0]
-            extension: str = uri.split(".")[-1]
+        uri = uris[0]
+        extension: str = uri.split(".")[-1]
 
-            if extension == "csv":
-                variables = self._unify_variables_and_pandas_kwargs(
-                    uri, pd.read_csv, variables
-                )
-                df = pd.read_csv(uri, usecols=variables, **self.options.get_kwargs())
-            elif extension == "parquet":
-                df = pd.read_parquet(
-                    uri, columns=variables, **self.options.get_kwargs()
-                )
-            elif extension in ["xls", "xlsx"]:
-                variables = self._unify_variables_and_pandas_kwargs(
-                    uri, pd.read_excel, variables
-                )
-                df = pd.read_excel(
-                    uri,
-                    usecols=variables,
-                    engine="openpyxl",
-                    **self.options.get_kwargs(),
-                )
-            elif extension in ["fwf", "txt"]:
-                df = pd.read_fwf(uri, **self.options.get_kwargs())
-            else:
-                raise IOError(f"DataFrame: extension {extension} unknown.")
-        if df.index.size == 0:
-            exec_nodata_strat(f"No data from driver {self}'.", strategy=handle_nodata)
+        if extension == "csv":
+            variables = self._unify_variables_and_pandas_kwargs(
+                uri, pd.read_csv, variables
+            )
+            df = pd.read_csv(uri, usecols=variables, **self.options.get_kwargs())
+        elif extension == "parquet":
+            df = pd.read_parquet(uri, columns=variables, **self.options.get_kwargs())
+        elif extension in ["xls", "xlsx"]:
+            variables = self._unify_variables_and_pandas_kwargs(
+                uri, pd.read_excel, variables
+            )
+            df = pd.read_excel(
+                uri,
+                usecols=variables,
+                engine="openpyxl",
+                **self.options.get_kwargs(),
+            )
+        elif extension in ["fwf", "txt"]:
+            df = pd.read_fwf(uri, **self.options.get_kwargs())
+        else:
+            raise IOError(f"DataFrame: extension {extension} unknown.")
+
+        if df.empty:
+            exec_nodata_strat(
+                f"No data from {self.name} driver for file uris: {', '.join(uris)}.",
+                strategy=handle_nodata,
+            )
+            return None  # handle_nodata == ignore
         return df
 
     def write(

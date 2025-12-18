@@ -103,16 +103,19 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
         if isinstance(out, xr.DataArray):
             if out.size == 0:
                 exec_nodata_strat(
-                    f"No data from driver {self}'.", strategy=handle_nodata
+                    f"No data from {self.name} driver for file uris: {', '.join(uris)}.",
+                    strategy=handle_nodata,
                 )
+                return None  # handle_nodata == ignore
             return out.to_dataset()
         else:
             for variable in out.data_vars:
                 if out[variable].size == 0:
                     exec_nodata_strat(
-                        f"No data from driver {self}' for variable {variable}.",
+                        f"No data from {self.name} driver for file uris: {', '.join(uris)}.",
                         strategy=handle_nodata,
                     )
+                    return None  # handle_nodata == ignore
             return out
 
     def write(

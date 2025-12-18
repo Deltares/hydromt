@@ -353,14 +353,10 @@ def test_version_catalogs_errors_on_unknown_version(data_catalog):
         _ = data_catalog.from_predefined_catalogs("deltares_data", "v1993.7")
 
 
-def test_data_catalog_lazy_loading():
+def test_empty_data_catalog():
     data_catalog = DataCatalog()
-
     assert len(data_catalog) == 0
-
-    # global data sources from fallback_lib are automatically added
-    _ = data_catalog.sources  # trigger loading
-    assert len(data_catalog) > 0
+    assert data_catalog.sources == {}
 
 
 def test_data_catalog_contains_source_version_permissive(data_catalog):
@@ -593,6 +589,162 @@ def test_export_dataframe(tmp_path: Path, df, df_time):
         assert isinstance(obj, dtypes), key
 
 
+@pytest.mark.integration
+def test_export_tiff_files_wild_card(tmp_path: Path, rioda: xr.DataArray):
+    data_catalog = DataCatalog(data_libs=["artifact_data"])
+    da = data_catalog.get_rasterdataset("modis_lai")
+
+    # Write one GeoTIFF per time step
+    files_dir = tmp_path / "tiff_files"
+    files_dir.mkdir(exist_ok=True)
+    for i in da.time.values:
+        # Select a single time step and keep time as a length-1 dimension
+        da_sel = da.sel(time=i).expand_dims("time")
+        # Write each time slice to its own GeoTIFF file
+        da_sel.raster.to_raster(str(files_dir / f"lai_{i}.tif"))
+
+    # Build a catalog entry that uses a wildcard to match all written TIFFs
+    # `concat=True` instructs the rasterio reader to concatenate matched files along the band/time axis
+    data_dict = {
+        "modis": {
+            "uri": str(files_dir / "lai_*.tif"),
+            "driver": {
+                "name": "rasterio",
+                "options": {"chunks": {"x": "auto", "y": "auto"}, "concat": True},
+            },
+            "data_type": "RasterDataset",
+        }
+    }
+
+    data_catalog = DataCatalog()
+    data_catalog.from_dict(data_dict)
+
+    with pytest.raises(
+        ValueError, match="Cannot write source modis with wildcard to root"
+    ):
+        data_catalog.export_data(
+            new_root=str(tmp_path / "tiff_files_exported"), source_names=["modis"]
+        )
+
+    data_catalog = DataCatalog()
+    data_catalog.from_dict(data_dict, root=tmp_path)
+
+    # Export the concatenated dataset and re-open it from the exported catalog
+    data_catalog_reread_path = tmp_path / "tiff_files_exported"
+    data_catalog.export_data(
+        new_root=str(data_catalog_reread_path), source_names=["modis"]
+    )
+    new_datacatalog = DataCatalog(str(data_catalog_reread_path / "data_catalog.yml"))
+
+    # Read back the dataset and assert it matches the original concatenated dataset
+    da_reread = new_datacatalog.get_rasterdataset("modis")
+    xr.testing.assert_equal(da_reread, data_catalog.get_rasterdataset("modis"))
+
+
+def test_export_dataset_rasterio(tmp_path: Path):
+    dc = DataCatalog(data_libs=["artifact_data=v1.0.0"])
+    new_root = tmp_path / "exported_vrt"
+    bbox = [12.0, 46.0, 13.0, 46.5]
+    dc.export_data(
+        new_root=new_root,
+        bbox=bbox,
+        source_names=["merit_hydro[elevtn,flwdir]"],
+        time_range=("2010-02-02", "2010-02-15"),
+        metadata={"version": "1"},
+    )
+    tif_files = os.listdir(new_root / "merit_hydro")
+    assert len(tif_files) == 2
+    assert "elevtn.tif" in tif_files
+    assert "flwdir.tif" in tif_files
+
+
+@pytest.mark.integration
+def test_export_data_bulk(tmp_path: Path, caplog: pytest.LogCaptureFixture):
+    data_catalog = DataCatalog(data_libs=["artifact_data"])
+    data_catalog_reread_path = tmp_path / "bulk_exported"
+    data_catalog_reread_path.mkdir(exist_ok=True)
+    bbox = [11.989, 46.02, 12.253, 46.166]  # Small bounding box in Piave basin
+
+    data_catalog.export_data(
+        data_catalog_reread_path,
+        bbox=bbox,
+        force_overwrite=True,
+    )
+    # test if data catalog can be read
+    new_data_catalog = DataCatalog(
+        data_libs=[str(data_catalog_reread_path / "data_catalog.yml")]
+    )
+
+    data_catalog_export_path = tmp_path / "bulk_exported_2"
+
+    new_data_catalog.export_data(
+        data_catalog_export_path,
+    )
+
+    new_data_catalog_reread = DataCatalog(
+        data_libs=[str(data_catalog_export_path / "data_catalog.yml")]
+    )
+    assert len(new_data_catalog_reread) == len(new_data_catalog)
+
+    sources = new_data_catalog.list_sources()
+    sources_reread = new_data_catalog_reread.list_sources()
+
+    for source, source_reread in zip(sources, sources_reread, strict=True):
+        assert source[0] == source_reread[0]
+        assert source[1].driver == source_reread[1].driver
+        assert source[1].metadata == source_reread[1].metadata
+
+    with pytest.raises(NoDataException):
+        data_catalog.export_data(
+            data_catalog_reread_path, bbox=bbox, handle_nodata=NoDataStrategy.RAISE
+        )
+
+
+@pytest.mark.filterwarnings("ignore::UserWarning")
+@pytest.mark.parametrize(
+    "source_name",
+    DataCatalog(data_libs=["deltares_data"]).get_source_names(),
+)
+@pytest.mark.manual
+def test_export_deltares_data(
+    tmp_path: Path,
+    source_name: str,
+):
+    """Export all data sources from the deltares_data predefined catalog.
+
+    The `manual` marker is used to exclude this test from regular test runs.
+    However, this also prevents vscode from automatically discovering and running this test.
+
+    To be able to see, and debug this test using the vscode UI, you need to:
+    - open .vscode/settings.json
+    - temporarily add the following setting:
+    ``"python.testing.pytestArgs": ["tests -m manual"]``
+    """
+    write_path = tmp_path / f"deltares_exported_{source_name}"
+    dc = DataCatalog(data_libs=["deltares_data"])
+    dc.export_data(
+        new_root=write_path,
+        source_names=[source_name],
+        bbox=[11.989, 46.02, 12.253, 46.166],
+        force_overwrite=True,
+        time_range=("2010-02-02", "2010-02-04"),
+        handle_nodata=NoDataStrategy.IGNORE,
+    )
+
+    # Validate data_catalog.yml
+    assert (write_path / "data_catalog.yml").exists()
+    data_catalog = DataCatalog(
+        data_libs=[(write_path / "data_catalog.yml").as_posix()],
+    )
+
+    # some sources are not exported due to no data in bbox/time range, skip those
+    if data_catalog.contains_source(source_name):
+        # Validate source can be read again
+        source = data_catalog.get_source(source_name)
+        data = source.read_data(handle_nodata=NoDataStrategy.RAISE)
+        assert data is not None
+
+
 @pytest.mark.skip("flakey test due to external http issues")
 @pytest.mark.integration
 def test_http_data():
@@ -666,7 +818,9 @@ class TestGetRasterDataset:
         era5_nc = datacatalog.get_rasterdataset("era5_nc")
         assert era5_zarr.equals(era5_nc)
         dest: Path = tmp_path / "era5_copy.zarr"
-        cast(RasterDatasetSource, datacatalog.get_source("era5_zarr")).to_file(dest)
+        cast(RasterDatasetSource, datacatalog.get_source("era5_zarr")).to_file(
+            dest, write_kwargs={"zarr_format": 3}
+        )
         assert dest.exists()
 
     def test_rasterdataset_unit_attrs(self, data_catalog: DataCatalog):
@@ -1683,7 +1837,7 @@ def test_detect_extent_geodataset(data_catalog):
 
 
 def test_to_stac_raster_dataset(tmp_path: Path):
-    data_catalog = DataCatalog()
+    data_catalog = DataCatalog(data_libs=["artifact_data"])
     _ = data_catalog.sources  # load artifact data
 
     _ = data_catalog.get_rasterdataset(  # mark as used

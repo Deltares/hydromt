@@ -23,6 +23,7 @@ New
 ---
 - Added ``ExampleModel`` class and ``example_model`` entrypoint for demonstration purposes.
 - Added option for delayed compute in writing netcdf files
+- Added option to specify a 'fill_value' in `gis.raster_utils.full`, `full_from_transform` and `full_like`. (#1321)
 - Set compression in `write_nc`
 - Allow masking in `GridComponent.set`. (#1229)
 - Default driver is now inferred from file extension for RasterDataset, GeoDataFrame, and GeoDataset sources. (#1267)
@@ -32,6 +33,7 @@ New
 - `hydromt check` accepts a `--format` flag to check either v1 or v0 data catalogs (#1265)
 - `hydromt check` accepts a `--upgrade` flag to upgrade v0 datacatalogs to the new v1 format (#1265)
 - `Model` can now be used as a context manager. This ensures that all open files are closed when exiting the context. (#1272)
+- `RasterioDriver` now supports writing tif files. (#1332)
 
 Changed
 -------
@@ -45,9 +47,13 @@ Changed
 - remove ``io`` submodule and move ``readers`` and ``writers`` to the root module (#1308)
 - `write_nc` function no longer accepts kwargs, instead a dict `to_netcdf_kwargs` is used to pass arguments to `xarray.to_netcdf`. The function raises an error when "compute" is one of the arguments.
 - Function signatures of `DataCatalog` functions `get_rasterdataset`, `get_geodataframe`, `get_geodataset`, `get_dataset` and `get_dataframe` now have: ``source_kwargs`` (passed to `DataSource.__init__`) instead of just ``kwargs``, and ``time_tuple`` was renamed to ``time_range``. (#1291)
+- `DataCatalog` argument fallback_lib has been removed. Users now have to specify the name of the data catalog they want to use, even if it is artifact_data (#1069).
+- `GeomsComponent.region` now returns the geometric union of all polygonal features in the component instead of a bounding box. Only geometries with area (Polygons and MultiPolygons) contribute to the union; Points, LineStrings, and MultiLineStrings are excluded and assumed to lie within the polygon-defined area. (#1334)
+- When writing zarr files, by default write with ``zarr_format=2``. Can be overwritten with the ``write_kwargs`` argument.
 
 Fixed
 -----
+- Actually having 'nan' values in a lazy DataArray from `gis.raster_utils.full`. (#1321)
 - CLI update command was not working. (#1244)
 - Allow models to not have a spatial component (allows updating if region is None). (#1244)
 - CF compliant dimensions in netcdf files
@@ -57,10 +63,14 @@ Fixed
 - Passing options to ``geodataframe_table`` driver now works. (#1271)
 - Relative path in the workflow yaml were not correctly resolved. (#1304)
 - Fix pydantic for V1 catalog for nodata and fix the catalog upgrade to convert nodata and extra metadata arguments. (#1304)
+- Fix pydantic for V1 catalog for attrs and fix the catalog upgrade to convert attrs arguments.
 - Do not pass metadata "extent" from catalog in xarray objects to avoid issues when writting to netcdf. (#1304)
 - Build and update functions call `ModelComponent.cleanup` and `ModelComponent.finish_write`. Stabilizing the write functionality and making sure that netCDF files can be overwritten when the source and destination are the same. (#778)
 - `hydromt check` has been updated to validate v1 data catalogs (#1265)
 - All handling of log files is now done with the context manager `hydromt._utils.log.to_file`. This means that they are always closed by the the function that opened them. (#1272)
+- `DataCatalog.export_data` now correctly handles rasterdata that have been written with paths containing wildcards. (#1323)
+- Standardized the behaviour of DataSources and subcomponents when it comes to handling the case where there is no data.
+
 
 Deprecated
 ----------

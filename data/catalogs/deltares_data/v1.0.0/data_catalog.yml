@@ -10,8 +10,6 @@ hydro_basin_atlas_level12:
   uri: hydrography/hydro_atlas/basin_atlas_v10.gpkg
   driver:
     name: pyogrio
-    options:
-      layer: BasinATLAS_v10_lev12
   metadata:
     category: hydrography
     notes: renaming and units might require some revision
@@ -168,7 +166,7 @@ copdem30_mask:
         South: -90.0
         East: 180.0
         North: 84.0
-    nodata: -1
+    nodata: 255
   data_adapter:
     rename:
       copdem_mask: mask
@@ -324,6 +322,7 @@ eobs:
       combine: by_coords
       parallel: true
       preprocess: round_latlon
+      join: outer
   metadata:
     category: meteo
     paper_doi: 10.1029/2017JD028200
@@ -1234,7 +1233,8 @@ grwl_mask:
       chunks:
         x: 3000
         y: 3000
-      mosaic_driver_kwargs:
+      mosaic: true
+      mosaic_kwargs:
         method: nearest
   uri_resolver:
     name: raster_tindex
@@ -1396,8 +1396,6 @@ hydro_lake_atlas_pol:
   uri: hydrography/hydro_atlas/lake_atlas_v10.gpkg
   driver:
     name: pyogrio
-    options:
-      layer: LakeATLAS_v10_pol
   metadata:
     category: hydrography
     notes: renaming and units might require some revision
@@ -1412,9 +1410,6 @@ hydro_lake_atlas_pol:
         East: 180.0
         North: 83.576
     crs: 4326
-  data_adapter:
-    rename:
-      dis_m3_pyr: Dis_avg
 
 mdt_cnes_cls18:
   data_type: RasterDataset

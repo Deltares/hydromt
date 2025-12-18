@@ -11,11 +11,12 @@ import xarray as xr
 from pydantic import Field, field_serializer, model_validator
 from pyproj import CRS
 
-from hydromt._utils import _cache_vrt_tiles, _strip_scheme, temp_env
+from hydromt._utils import _strip_scheme, cache_vrt_tiles, temp_env
 from hydromt.config import SETTINGS
 from hydromt.data_catalog.drivers.base_driver import DriverOptions
 from hydromt.data_catalog.drivers.raster import RasterDatasetDriver
-from hydromt.error import NoDataStrategy, exec_nodata_strat
+from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
+from hydromt.gis._gdal_drivers import GDAL_DRIVER_CODE_MAP
 from hydromt.gis.gis_utils import zoom_to_overview_level
 from hydromt.readers import open_mfraster
 from hydromt.typing import (
@@ -26,6 +27,8 @@ from hydromt.typing import (
 )
 
 logger = logging.getLogger(__name__)
+
+_TIFF_EXT = ".tif"
 
 
 class RasterioOptions(DriverOptions):
@@ -92,11 +95,10 @@ class RasterioDriver(RasterDatasetDriver):
     """
 
     name = "rasterio"
+    supports_writing = True
     SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {
-        "." + extension
-        for extension in rasterio.drivers.raster_driver_extensions()
-        if extension != "nc"
-    }  # Exclude netcdf as a supported file type
+        "." + extension for extension in GDAL_DRIVER_CODE_MAP.keys()
+    }
     options: RasterioOptions = Field(default_factory=RasterioOptions)
 
     def read(
@@ -146,15 +148,18 @@ class RasterioDriver(RasterDatasetDriver):
         rasterio.errors.RasterioIOError
             If an I/O error occurs during reading.
         """
+        if len(uris) == 0:
+            return None  # handle_nodata == ignore
+
         if metadata is None:
             metadata = SourceMetadata()
 
         # Caching portion, only when the flag is True and the file format is vrt
-        if all([uri.endswith(".vrt") for uri in uris]) and self.options.cache:
+        if all(uri.endswith(".vrt") for uri in uris) and self.options.cache:
             cache_dir: Path = self.options.get_cache_path(uris)
             uris_cached = []
             for uri in uris:
-                cached_uri = _cache_vrt_tiles(
+                cached_uri = cache_vrt_tiles(
                     uri, geom=mask, fs=self.filesystem.get_fs(), cache_dir=cache_dir
                 )
                 uris_cached.append(cached_uri)
@@ -186,6 +191,11 @@ class RasterioDriver(RasterDatasetDriver):
             open_kwargs.update({"chunks": chunks})
 
         mosaic: bool = self.options.mosaic and len(uris) > 1
+        mosaic_kwargs = open_kwargs.pop("mosaic_kwargs", {})
+        if mosaic_kwargs and not mosaic:
+            logger.warning(
+                "mosaic_kwargs provided but mosaic is False. Ignoring mosaic_kwargs. To use mosaic_kwargs, set mosaic=True in driver options."
+            )
 
         # If the metadata resolver has already resolved the overview level,
         # trying to open zoom levels here will result in an error.
@@ -193,11 +203,15 @@ class RasterioDriver(RasterDatasetDriver):
         # Then we can implement looking for a overview level in the driver.
         def _open() -> xr.Dataset:
             try:
-                return open_mfraster(uris, mosaic=mosaic, **open_kwargs)
+                return open_mfraster(
+                    uris, mosaic=mosaic, mosaic_kwargs=mosaic_kwargs, **open_kwargs
+                )
             except rasterio.errors.RasterioIOError as e:
                 if "Cannot open overview level" in str(e):
                     open_kwargs.pop("overview_level", None)
-                    return open_mfraster(uris, mosaic=mosaic, **open_kwargs)
+                    return open_mfraster(
+                        uris, mosaic=mosaic, mosaic_kwargs=mosaic_kwargs, **open_kwargs
+                    )
                 else:
                     raise
 
@@ -229,12 +243,13 @@ class RasterioDriver(RasterDatasetDriver):
                     f"No data from driver: '{self.name}' for variable: '{variable}'",
                     strategy=handle_nodata,
                 )
+                return None  # handle_nodata == ignore
         return ds
 
     def write(
         self,
         path: Path | str,
-        data: xr.Dataset,
+        data: xr.Dataset | xr.DataArray,
         *,
         write_kwargs: dict[str, Any] | None = None,
     ) -> Path:
@@ -248,17 +263,71 @@ class RasterioDriver(RasterDatasetDriver):
         ----------
         path : Path | str
             Destination path for the raster dataset.
-        data : xr.Dataset
-            The xarray Dataset to write.
+        data : xr.DataArray | xr.Dataset
+            The xarray DataArray or Dataset to write.
         write_kwargs : dict[str, Any] | None, optional
             Additional keyword arguments for writing. Default is None.
 
-        Raises
-        ------
-        NotImplementedError
-            Always raised because writing is not supported in this driver.
+        Returns
+        -------
+        Path
+            The path to the written raster dataset.
         """
-        raise NotImplementedError()
+        path = Path(path)
+        write_kwargs = write_kwargs or {}
+        if path.suffix not in self.SUPPORTED_EXTENSIONS:
+            raise ValueError(f"Unknown extension for RasterioDriver: {path.suffix}")
+
+        if path.suffix == ".vrt":
+            logger.warning(
+                "Writing to VRT format is not supported by RasterioDriver, will attempt to write as GeoTIFF instead."
+            )
+            path = path.with_suffix(_TIFF_EXT)
+
+        gdal_driver = GDAL_DRIVER_CODE_MAP.get(path.suffix.lstrip(".").lower())
+
+        if "*" in str(path) and isinstance(data, xr.DataArray):
+            if len(data.dims) < 3:
+                raise ValueError(
+                    "Writing multiple files with wildcard requires at least 3 dimensions in data array"
+                )
+
+            path = Path(path)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            if path.name.count("*") != 1:
+                raise ValueError(
+                    "There must be exactly one wildcard `*` in the filename when multiple outputs required"
+                )
+
+            dim0 = data.dims[0]
+
+            for label in data[dim0]:
+                ds_sel = data.sel({dim0: label})
+                file_name = path.name.replace("*", f"{label.values}")
+
+                self._write_raster(
+                    ds_sel, gdal_driver, path.with_name(file_name), **write_kwargs
+                )
+
+            return path
+        if isinstance(data, xr.Dataset):
+            if len(data.data_vars) == 1:
+                data = data[list(data.data_vars.keys())[0]]
+            else:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                for var in data.data_vars:
+                    if "*" in path.name:
+                        file_name = path.name.replace("*", var)
+                        file_path = path.with_name(file_name)
+                    else:
+                        file_path = path.parent / f"{var}{path.suffix}"
+                    data_raster = data[var]
+                    self._write_raster(
+                        data_raster, gdal_driver, file_path, **write_kwargs
+                    )
+                return path if "*" in path.name else path.parent / f"*{path.suffix}"
+        self._write_raster(data, gdal_driver, path, **write_kwargs)
+        return path
 
     @staticmethod
     def _get_zoom_levels_and_crs(uri: str) -> tuple[dict[int, float], int]:
@@ -280,3 +349,20 @@ class RasterioDriver(RasterDatasetDriver):
         except rasterio.RasterioIOError as e:
             logger.warning(f"IO error while detecting zoom levels: {e}")
         return zoom_levels, crs
+
+    def _write_raster(
+        self, data: xr.DataArray, driver: str, path: Path, **write_kwargs: Any
+    ) -> None:
+        """Write raster data to file using rasterio."""
+        y_coords = data[data.raster.y_dim]
+        x_coords = data[data.raster.x_dim]
+        if (
+            y_coords.size < 2
+            or (y_coords.ndim == 2 and y_coords.shape[0] < 2)
+            or x_coords.size < 2
+            or (x_coords.ndim == 2 and x_coords.shape[1] < 2)
+        ):
+            raise NoDataException(
+                f"Cannot write raster data with insufficient spatial dimensions: {data.raster.y_dim} size {y_coords.size}, {data.raster.x_dim} size {x_coords.size}",
+            )
+        data.raster.to_raster(path, driver=driver, **write_kwargs)

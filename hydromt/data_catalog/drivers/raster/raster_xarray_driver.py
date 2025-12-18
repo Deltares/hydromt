@@ -131,6 +131,9 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
             },
         )
 
+        if len(uris) == 0:
+            return None  # handle_nodata == ignore
+
         preprocessor = self.options.get_preprocessor()
         first_ext = self.options.get_ext_override(uris)
 
@@ -159,6 +162,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                 decode_coords="all",
                 preprocess=preprocessor,
                 **self.options.get_kwargs(),
+                decode_timedelta=True,
             )
         else:
             raise ValueError(
@@ -170,6 +174,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                     f"No data from driver: '{self.name}' for variable: '{variable}'",
                     strategy=handle_nodata,
                 )
+                return None  # handle_nodata == ignore
         return ds
 
     def write(
@@ -215,6 +220,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
             path = no_ext + _ZARR_EXT
             ext = _ZARR_EXT
         if ext == _ZARR_EXT:
+            write_kwargs.setdefault("zarr_format", 2)
             data.to_zarr(path, mode="w", **write_kwargs)
         else:
             data.to_netcdf(path, **write_kwargs)

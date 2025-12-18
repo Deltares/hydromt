@@ -16,7 +16,7 @@ from pystac import MediaType
 from hydromt.data_catalog.adapters.dataset import DatasetAdapter
 from hydromt.data_catalog.drivers import DatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
-from hydromt.error import NoDataStrategy
+from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.typing import (
     TimeRange,
 )
@@ -76,8 +76,12 @@ class DatasetSource(DataSource):
             variables=vrs,
             handle_nodata=handle_nodata,
         )
+        if not uris:
+            return None  # handle_nodata == ignore
 
         ds: xr.Dataset = self.driver.read(uris, handle_nodata=handle_nodata)
+        if ds is None:  # handle_nodata == ignore
+            return None
 
         return self.data_adapter.transform(
             ds,
@@ -85,6 +89,7 @@ class DatasetSource(DataSource):
             variables=variables,
             time_range=time_range,
             single_var_as_array=single_var_as_array,
+            handle_nodata=handle_nodata,
         )
 
     def to_file(
@@ -119,7 +124,7 @@ class DatasetSource(DataSource):
         ds: Optional[xr.Dataset] = self.read_data(
             time_range=time_range, handle_nodata=handle_nodata
         )
-        if ds is None:
+        if ds is None:  # handle_nodata == ignore
             return None
 
         # driver can return different path if file ext changes
@@ -172,7 +177,7 @@ class DatasetSource(DataSource):
 
     def to_stac_catalog(
         self,
-        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.WARN,
     ) -> Optional[StacCatalog]:
         """
         Convert a dataset into a STAC Catalog representation.
@@ -203,15 +208,12 @@ class DatasetSource(DataSource):
                 raise ValueError(
                     f"Unknown extension: {ext} cannot determine media type"
                 )
-        except (IndexError, KeyError, CRSError) as e:
-            if handle_nodata == NoDataStrategy.IGNORE:
-                logger.warning(
-                    "Skipping {name} during stac conversion because"
-                    "because detecting spacial extent failed."
-                )
-                return
-            else:
-                raise e
+        except (IndexError, KeyError, CRSError):
+            exec_nodata_strat(
+                f"Skipping {self.name} during stac conversion because detecting spacial extent failed.",
+                handle_nodata,
+            )
+            return None
 
         stac_catalog = StacCatalog(
             self.name,

@@ -14,8 +14,8 @@ from hydromt._utils import (
     _set_vector_nodata,
     _shift_dataset_time,
     _single_var_as_array,
-    _slice_temporal_dimension,
 )
+from hydromt.data_catalog.adapters.adapter_utils import _slice_temporal_dimension
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.gis.raster import GEO_MAP_COORD
@@ -98,22 +98,17 @@ class GeoDatasetAdapter(DataAdapterBase):
             mask=mask,
             predicate=predicate,
             time_range=time_range,
+            handle_nodata=handle_nodata,
         )
+        if ds is None:
+            return None
 
-        if _has_no_data(ds):
-            exec_nodata_strat(
-                "No data was read from source",
-                strategy=handle_nodata,
-            )
-            return None  # if handle_nodata ignore
         return _single_var_as_array(ds, single_var_as_array, variables)
 
     @staticmethod
     def _validate_spatial_coords(
         ds: Optional[xr.Dataset],
     ) -> Optional[xr.Dataset]:
-        if ds is None:
-            return None
         if GEO_MAP_COORD in ds.data_vars:
             ds = ds.set_coords(GEO_MAP_COORD)
         try:
@@ -130,11 +125,9 @@ class GeoDatasetAdapter(DataAdapterBase):
 
     @staticmethod
     def _set_crs(
-        ds: Optional[xr.Dataset],
+        ds: xr.Dataset,
         crs: Union[str, int, None] = None,
     ) -> Optional[xr.Dataset]:
-        if ds is None:
-            return None
         # set crs
         if ds.vector.crs is None and crs is not None:
             ds.vector.set_crs(crs)
@@ -149,11 +142,12 @@ class GeoDatasetAdapter(DataAdapterBase):
 
     @staticmethod
     def _slice_data(
-        ds: Optional[Union[xr.Dataset, xr.DataArray]],
+        ds: Union[xr.Dataset, xr.DataArray],
         variables: Optional[Variables] = None,
         mask: Optional[Geom] = None,
         predicate: Predicate = "intersects",
         time_range: Optional[TimeRange] = None,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> Optional[xr.Dataset]:
         """Filter the GeoDataset.
 
@@ -197,37 +191,36 @@ class GeoDatasetAdapter(DataAdapterBase):
                 if any(mvars):
                     raise ValueError(f"GeoDataset: variables not found {mvars}")
                 ds = ds[variables]
-        maybe_ds: Optional[xr.Dataset] = ds
+
         if time_range is not None:
-            maybe_ds = _slice_temporal_dimension(ds, time_range)
+            ds = _slice_temporal_dimension(ds, time_range, handle_nodata=handle_nodata)
+            if ds is None:
+                return None
         if mask is not None:
-            maybe_ds = GeoDatasetAdapter._slice_spatial_dimension(
-                maybe_ds,
-                mask=mask,
-                predicate=predicate,
+            ds = GeoDatasetAdapter._slice_spatial_dimension(
+                ds, mask=mask, predicate=predicate, handle_nodata=handle_nodata
             )
-        if _has_no_data(maybe_ds):
-            return None
-        else:
-            return maybe_ds
+            if ds is None:
+                return None
+
+        return ds
 
     @staticmethod
     def _slice_spatial_dimension(
-        ds: Optional[xr.Dataset],
+        ds: xr.Dataset,
         mask: Geom,
         predicate: Predicate,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> Optional[xr.Dataset]:
-        if ds is None:
+        bbox_str = ", ".join([f"{c:.3f}" for c in mask.total_bounds])
+        epsg = mask.crs.to_epsg()
+        logger.debug(f"Clip {predicate} [{bbox_str}] (EPSG:{epsg})")
+        ds = ds.vector.clip_geom(mask, predicate=predicate)
+        if _has_no_data(ds):
+            exec_nodata_strat("No data left after spatial slicing.", handle_nodata)
             return None
-        else:
-            bbox_str = ", ".join([f"{c:.3f}" for c in mask.total_bounds])
-            epsg = mask.crs.to_epsg()
-            logger.debug(f"Clip {predicate} [{bbox_str}] (EPSG:{epsg})")
-            ds = ds.vector.clip_geom(mask, predicate=predicate)
-            if _has_no_data(ds):
-                return None
-            else:
-                return ds
+
+        return ds
 
     @staticmethod
     def _apply_unit_conversion(

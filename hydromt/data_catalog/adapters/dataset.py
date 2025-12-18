@@ -15,7 +15,7 @@ from hydromt._utils import (
     _single_var_as_array,
 )
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
-from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
+from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.typing import (
     Data,
     SourceMetadata,
@@ -46,26 +46,22 @@ class DatasetAdapter(DataAdapterBase):
         For a detailed description see:
         :py:func:`~hydromt.data_catalog.DataCatalog.get_dataset`
         """
-        try:
-            if ds is None:
-                raise NoDataException()
-            # rename variables and parse data and attrs
-            ds = self._rename_vars(ds)
-            ds = self._set_nodata(ds, metadata)
-            ds = self._shift_time(ds)
-            # slice
-            ds = DatasetAdapter._slice_data(ds, variables, time_range)
-            if ds is None:
-                raise NoDataException()
-            # uniformize
-            ds = self._apply_unit_conversion(ds)
-            ds = _set_metadata(ds, metadata)
-            # return array if single var and single_var_as_array
-            ds = _single_var_as_array(ds, single_var_as_array, variable_name=variables)
-            return ds
-        except NoDataException:
-            exec_nodata_strat("No data to export", strategy=handle_nodata)
+        # rename variables and parse data and attrs
+        ds = self._rename_vars(ds)
+        ds = self._set_nodata(ds, metadata)
+        ds = self._shift_time(ds)
+        # slice
+        ds = DatasetAdapter._slice_data(
+            ds, variables, time_range, handle_nodata=handle_nodata
+        )
+        if ds is None:
             return None
+        # uniformize
+        ds = self._apply_unit_conversion(ds)
+        ds = _set_metadata(ds, metadata)
+        # return array if single var and single_var_as_array
+        ds = _single_var_as_array(ds, single_var_as_array, variable_name=variables)
+        return ds
 
     def _rename_vars(self, ds: Data) -> Data:
         rm = {k: v for k, v in self.rename.items() if k in ds}
@@ -113,6 +109,7 @@ class DatasetAdapter(DataAdapterBase):
         ds: Data,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> Optional[Data]:
         """Slice the dataset in space and time.
 
@@ -125,6 +122,8 @@ class DatasetAdapter(DataAdapterBase):
         time_range: tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
+        handle_nodata : NoDataStrategy, optional
+            how to handle no data being present in the result, by default NoDataStrategy.RAISE
 
         Returns
         -------
@@ -142,18 +141,21 @@ class DatasetAdapter(DataAdapterBase):
                 if any(mvars):
                     raise ValueError(f"Dataset: variables not found {mvars}")
                 ds = ds[variables]
-        if time_range is not None:
-            ds = DatasetAdapter._slice_temporal_dimension(ds, time_range)
 
-        if _has_no_data(ds):
-            return None
-        else:
-            return ds
+        if time_range is not None:
+            ds = DatasetAdapter._slice_temporal_dimension(
+                ds, time_range, handle_nodata=handle_nodata
+            )
+            if ds is None:
+                return None
+
+        return ds
 
     @staticmethod
     def _slice_temporal_dimension(
         ds: Data,
         time_range: TimeRange,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> Optional[Data]:
         if (
             "time" in ds.dims
@@ -162,7 +164,7 @@ class DatasetAdapter(DataAdapterBase):
         ):
             logger.debug(f"Slicing time dim {time_range}")
             ds = ds.sel(time=slice(time_range.start, time_range.end))
-        if _has_no_data(ds):
-            return None
-        else:
-            return ds
+            if _has_no_data(ds):
+                exec_nodata_strat("No data left after time slicing.", handle_nodata)
+                return None
+        return ds
