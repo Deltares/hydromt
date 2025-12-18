@@ -492,8 +492,8 @@
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Model plugins:
-        - model (hydromt 1.3.0)
-        - example_model (hydromt 1.3.0)
+        - model (hydromt 1.3.0rc5)
+        - example_model (hydromt 1.3.0rc5)
 </pre></div></div>
 </div>
 <section id="Build-a-model-from-CLI">
@@ -590,26 +590,26 @@ Writing tmp_build_example_model_min.yml
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-12-18 12:11:12,418 - hydromt - log - INFO - HydroMT version: 1.3.0
-2025-12-18 12:11:12,444 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data latest
-2025-12-18 12:11:12,444 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
-2025-12-18 12:11:13,122 - hydromt.model.model - model - INFO - Initializing example_model model from hydromt (v1.3.0).
-2025-12-18 12:11:13,122 - hydromt - log - INFO - HydroMT version: 1.3.0
-2025-12-18 12:11:13,123 - hydromt.model.model - model - INFO - build: grid.create_from_region
-2025-12-18 12:11:13,123 - hydromt.model.model - model - INFO - grid.create_from_region.res=0.05
-2025-12-18 12:11:13,123 - hydromt.model.model - model - INFO - grid.create_from_region.crs=4326
-2025-12-18 12:11:13,123 - hydromt.model.model - model - INFO - grid.create_from_region.region_crs=4326
-2025-12-18 12:11:13,123 - hydromt.model.model - model - INFO - grid.create_from_region.rotated=False
-2025-12-18 12:11:13,123 - hydromt.model.model - model - INFO - grid.create_from_region.hydrography_path=None
-2025-12-18 12:11:13,123 - hydromt.model.model - model - INFO - grid.create_from_region.basin_index_path=None
-2025-12-18 12:11:13,123 - hydromt.model.model - model - INFO - grid.create_from_region.add_mask=True
-2025-12-18 12:11:13,123 - hydromt.model.model - model - INFO - grid.create_from_region.align=True
-2025-12-18 12:11:13,123 - hydromt.model.model - model - INFO - grid.create_from_region.dec_origin=0
-2025-12-18 12:11:13,123 - hydromt.model.model - model - INFO - grid.create_from_region.dec_rotation=3
-2025-12-18 12:11:13,123 - hydromt.model.model - model - INFO - grid.create_from_region.region={&#39;bbox&#39;: [11.7, 45.35, 12.95, 46.7]}
-2025-12-18 12:11:13,123 - hydromt.hydromt.model.example.example_grid_component - example_grid_component - INFO - Preparing 2D grid.
-2025-12-18 12:11:13,137 - hydromt.model.components.config - config - INFO - example_model.config: No config data found, skip writing.
-2025-12-18 12:11:13,137 - hydromt.model.components.grid - grid - INFO - example_model.grid: Writing grid data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_example_model_min/grid.nc.
+2025-12-18 10:05:16,283 - hydromt - log - INFO - HydroMT version: 1.3.0
+2025-12-18 10:05:16,310 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data latest
+2025-12-18 10:05:16,310 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
+2025-12-18 10:05:16,984 - hydromt.model.model - model - INFO - Initializing example_model model from hydromt (v1.3.0rc5).
+2025-12-18 10:05:16,985 - hydromt - log - INFO - HydroMT version: 1.3.0
+2025-12-18 10:05:16,985 - hydromt.model.model - model - INFO - build: grid.create_from_region
+2025-12-18 10:05:16,985 - hydromt.model.model - model - INFO - grid.create_from_region.res=0.05
+2025-12-18 10:05:16,985 - hydromt.model.model - model - INFO - grid.create_from_region.crs=4326
+2025-12-18 10:05:16,985 - hydromt.model.model - model - INFO - grid.create_from_region.region_crs=4326
+2025-12-18 10:05:16,985 - hydromt.model.model - model - INFO - grid.create_from_region.rotated=False
+2025-12-18 10:05:16,985 - hydromt.model.model - model - INFO - grid.create_from_region.hydrography_path=None
+2025-12-18 10:05:16,985 - hydromt.model.model - model - INFO - grid.create_from_region.basin_index_path=None
+2025-12-18 10:05:16,985 - hydromt.model.model - model - INFO - grid.create_from_region.add_mask=True
+2025-12-18 10:05:16,985 - hydromt.model.model - model - INFO - grid.create_from_region.align=True
+2025-12-18 10:05:16,985 - hydromt.model.model - model - INFO - grid.create_from_region.dec_origin=0
+2025-12-18 10:05:16,985 - hydromt.model.model - model - INFO - grid.create_from_region.dec_rotation=3
+2025-12-18 10:05:16,985 - hydromt.model.model - model - INFO - grid.create_from_region.region={&#39;bbox&#39;: [11.7, 45.35, 12.95, 46.7]}
+2025-12-18 10:05:16,985 - hydromt.hydromt.model.example.example_grid_component - example_grid_component - INFO - Preparing 2D grid.
+2025-12-18 10:05:16,999 - hydromt.model.components.config - config - INFO - example_model.config: No config data found, skip writing.
+2025-12-18 10:05:16,999 - hydromt.model.components.grid - grid - INFO - example_model.grid: Writing grid data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_example_model_min/grid.nc.
 </pre></div></div>
 </div>
 <p>The example above means the following: run <strong>hydromt build</strong> with:</p>
@@ -720,48 +720,48 @@ Writing tmp_build_example_model.yml
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-12-18 12:11:16,264 - hydromt - log - INFO - HydroMT version: 1.3.0
-2025-12-18 12:11:16,292 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data latest
-2025-12-18 12:11:16,292 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
-2025-12-18 12:11:16,968 - hydromt.model.model - model - INFO - Initializing example_model model from hydromt (v1.3.0).
-2025-12-18 12:11:16,968 - hydromt - log - INFO - HydroMT version: 1.3.0
-2025-12-18 12:11:16,968 - hydromt.model.model - model - INFO - build: config.update
-2025-12-18 12:11:16,969 - hydromt.model.model - model - INFO - config.update.data={&#39;header.settings&#39;: &#39;value&#39;, &#39;timers.end&#39;: &#39;2010-02-15&#39;, &#39;timers.start&#39;: &#39;2010-02-05&#39;}
-2025-12-18 12:11:16,969 - hydromt.model.model - model - INFO - build: grid.create_from_region
-2025-12-18 12:11:16,969 - hydromt.model.model - model - INFO - grid.create_from_region.res=0.05
-2025-12-18 12:11:16,969 - hydromt.model.model - model - INFO - grid.create_from_region.crs=4326
-2025-12-18 12:11:16,969 - hydromt.model.model - model - INFO - grid.create_from_region.region_crs=4326
-2025-12-18 12:11:16,969 - hydromt.model.model - model - INFO - grid.create_from_region.rotated=False
-2025-12-18 12:11:16,969 - hydromt.model.model - model - INFO - grid.create_from_region.hydrography_path=None
-2025-12-18 12:11:16,969 - hydromt.model.model - model - INFO - grid.create_from_region.basin_index_path=None
-2025-12-18 12:11:16,969 - hydromt.model.model - model - INFO - grid.create_from_region.add_mask=True
-2025-12-18 12:11:16,969 - hydromt.model.model - model - INFO - grid.create_from_region.align=True
-2025-12-18 12:11:16,969 - hydromt.model.model - model - INFO - grid.create_from_region.dec_origin=0
-2025-12-18 12:11:16,969 - hydromt.model.model - model - INFO - grid.create_from_region.dec_rotation=3
-2025-12-18 12:11:16,969 - hydromt.model.model - model - INFO - grid.create_from_region.region={&#39;bbox&#39;: [11.7, 45.35, 12.95, 46.7]}
-2025-12-18 12:11:16,969 - hydromt.hydromt.model.example.example_grid_component - example_grid_component - INFO - Preparing 2D grid.
-2025-12-18 12:11:16,983 - hydromt.model.model - model - INFO - build: grid.add_data_from_rasterdataset
-2025-12-18 12:11:16,983 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.variables=[&#39;elevtn&#39;, &#39;basins&#39;]
-2025-12-18 12:11:16,983 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.fill_method=None
-2025-12-18 12:11:16,984 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.reproject_method=[&#39;average&#39;, &#39;mode&#39;]
-2025-12-18 12:11:16,984 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.mask_name=mask
-2025-12-18 12:11:16,984 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.rename=None
-2025-12-18 12:11:16,984 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.raster_data=merit_hydro_ihu
-2025-12-18 12:11:16,984 - hydromt.hydromt.model.example.example_grid_component - example_grid_component - INFO - Preparing grid data from raster source merit_hydro_ihu
-2025-12-18 12:11:16,986 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro_ihu RasterDataset data from /home/runner/.hydromt/artifact_data/latest/merit_hydro_1k/{variable}.tif
-2025-12-18 12:11:17,101 - hydromt.model.model - model - INFO - build: grid.add_data_from_rasterdataset
-2025-12-18 12:11:17,101 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.variables=None
-2025-12-18 12:11:17,101 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.fill_method=nearest
-2025-12-18 12:11:17,101 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.reproject_method=mode
-2025-12-18 12:11:17,101 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.mask_name=mask
-2025-12-18 12:11:17,101 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.rename={&#39;vito&#39;: &#39;landuse&#39;}
-2025-12-18 12:11:17,101 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.raster_data=vito_2015
-2025-12-18 12:11:17,101 - hydromt.hydromt.model.example.example_grid_component - example_grid_component - INFO - Preparing grid data from raster source vito_2015
-2025-12-18 12:11:17,103 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading vito_2015 RasterDataset data from /home/runner/.hydromt/artifact_data/latest/vito.tif
-2025-12-18 12:11:17,154 - hydromt.model.model - model - INFO - build: write
-2025-12-18 12:11:17,154 - hydromt.model.model - model - INFO - write.components=[&#39;grid&#39;, &#39;config&#39;]
-2025-12-18 12:11:17,154 - hydromt.model.components.grid - grid - INFO - example_model.grid: Writing grid data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_example_model/grid.nc.
-2025-12-18 12:11:17,189 - hydromt.model.components.config - config - INFO - example_model.config: Writing model config to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_example_model/settings.toml.
+2025-12-18 10:05:20,208 - hydromt - log - INFO - HydroMT version: 1.3.0
+2025-12-18 10:05:20,236 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data latest
+2025-12-18 10:05:20,236 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
+2025-12-18 10:05:20,914 - hydromt.model.model - model - INFO - Initializing example_model model from hydromt (v1.3.0rc5).
+2025-12-18 10:05:20,914 - hydromt - log - INFO - HydroMT version: 1.3.0
+2025-12-18 10:05:20,914 - hydromt.model.model - model - INFO - build: config.update
+2025-12-18 10:05:20,915 - hydromt.model.model - model - INFO - config.update.data={&#39;header.settings&#39;: &#39;value&#39;, &#39;timers.end&#39;: &#39;2010-02-15&#39;, &#39;timers.start&#39;: &#39;2010-02-05&#39;}
+2025-12-18 10:05:20,915 - hydromt.model.model - model - INFO - build: grid.create_from_region
+2025-12-18 10:05:20,915 - hydromt.model.model - model - INFO - grid.create_from_region.res=0.05
+2025-12-18 10:05:20,915 - hydromt.model.model - model - INFO - grid.create_from_region.crs=4326
+2025-12-18 10:05:20,915 - hydromt.model.model - model - INFO - grid.create_from_region.region_crs=4326
+2025-12-18 10:05:20,915 - hydromt.model.model - model - INFO - grid.create_from_region.rotated=False
+2025-12-18 10:05:20,915 - hydromt.model.model - model - INFO - grid.create_from_region.hydrography_path=None
+2025-12-18 10:05:20,915 - hydromt.model.model - model - INFO - grid.create_from_region.basin_index_path=None
+2025-12-18 10:05:20,915 - hydromt.model.model - model - INFO - grid.create_from_region.add_mask=True
+2025-12-18 10:05:20,915 - hydromt.model.model - model - INFO - grid.create_from_region.align=True
+2025-12-18 10:05:20,915 - hydromt.model.model - model - INFO - grid.create_from_region.dec_origin=0
+2025-12-18 10:05:20,915 - hydromt.model.model - model - INFO - grid.create_from_region.dec_rotation=3
+2025-12-18 10:05:20,915 - hydromt.model.model - model - INFO - grid.create_from_region.region={&#39;bbox&#39;: [11.7, 45.35, 12.95, 46.7]}
+2025-12-18 10:05:20,915 - hydromt.hydromt.model.example.example_grid_component - example_grid_component - INFO - Preparing 2D grid.
+2025-12-18 10:05:20,929 - hydromt.model.model - model - INFO - build: grid.add_data_from_rasterdataset
+2025-12-18 10:05:20,929 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.variables=[&#39;elevtn&#39;, &#39;basins&#39;]
+2025-12-18 10:05:20,929 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.fill_method=None
+2025-12-18 10:05:20,929 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.reproject_method=[&#39;average&#39;, &#39;mode&#39;]
+2025-12-18 10:05:20,929 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.mask_name=mask
+2025-12-18 10:05:20,929 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.rename=None
+2025-12-18 10:05:20,929 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.raster_data=merit_hydro_ihu
+2025-12-18 10:05:20,929 - hydromt.hydromt.model.example.example_grid_component - example_grid_component - INFO - Preparing grid data from raster source merit_hydro_ihu
+2025-12-18 10:05:20,932 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro_ihu RasterDataset data from /home/runner/.hydromt/artifact_data/latest/merit_hydro_1k/{variable}.tif
+2025-12-18 10:05:21,049 - hydromt.model.model - model - INFO - build: grid.add_data_from_rasterdataset
+2025-12-18 10:05:21,049 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.variables=None
+2025-12-18 10:05:21,049 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.fill_method=nearest
+2025-12-18 10:05:21,049 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.reproject_method=mode
+2025-12-18 10:05:21,049 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.mask_name=mask
+2025-12-18 10:05:21,049 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.rename={&#39;vito&#39;: &#39;landuse&#39;}
+2025-12-18 10:05:21,049 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.raster_data=vito_2015
+2025-12-18 10:05:21,049 - hydromt.hydromt.model.example.example_grid_component - example_grid_component - INFO - Preparing grid data from raster source vito_2015
+2025-12-18 10:05:21,051 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading vito_2015 RasterDataset data from /home/runner/.hydromt/artifact_data/latest/vito.tif
+2025-12-18 10:05:21,103 - hydromt.model.model - model - INFO - build: write
+2025-12-18 10:05:21,104 - hydromt.model.model - model - INFO - write.components=[&#39;grid&#39;, &#39;config&#39;]
+2025-12-18 10:05:21,104 - hydromt.model.components.grid - grid - INFO - example_model.grid: Writing grid data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_example_model/grid.nc.
+2025-12-18 10:05:21,140 - hydromt.model.components.config - config - INFO - example_model.config: Writing model config to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_example_model/settings.toml.
 </pre></div></div>
 </div>
 <p>The example above means the following: run <strong>hydromt build</strong> with:</p>
@@ -838,7 +838,7 @@ start = &#34;2010-02-05&#34;
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-12-18 12:11:20,188 - hydromt.model.model - model - INFO - Initializing example_model model from hydromt (v1.3.0).
+2025-12-18 10:05:24,190 - hydromt.model.model - model - INFO - Initializing example_model model from hydromt (v1.3.0rc5).
 Variables available in grid.nc: [&#39;mask&#39;, &#39;elevtn&#39;, &#39;basins&#39;, &#39;landuse&#39;]
 </pre></div></div>
 </div>
@@ -858,7 +858,7 @@ Variables available in grid.nc: [&#39;mask&#39;, &#39;elevtn&#39;, &#39;basins&#
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7fd0428429d0&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f3eae844990&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -954,30 +954,30 @@ Writing tmp_update_example_model.yml
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-12-18 12:11:26,399 - hydromt - log - INFO - HydroMT version: 1.3.0
-2025-12-18 12:11:26,426 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data latest
-2025-12-18 12:11:26,426 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
-2025-12-18 12:11:27,101 - hydromt.model.model - model - INFO - Initializing example_model model from hydromt (v1.3.0).
-2025-12-18 12:11:27,101 - hydromt - log - INFO - HydroMT version: 1.3.0
-2025-12-18 12:11:27,102 - hydromt.model.model - model - INFO - Reading model data from /home/runner/work/hydromt/hydromt/docs/_examples/tmp_example_model
-2025-12-18 12:11:27,102 - hydromt.model.components.config - config - INFO - Reading model config file from /home/runner/work/hydromt/hydromt/docs/_examples/tmp_example_model/settings.toml.
-2025-12-18 12:11:27,120 - hydromt - log - INFO - HydroMT version: 1.3.0
-2025-12-18 12:11:27,123 - hydromt.model.model - model - INFO - update: grid.add_data_from_rasterdataset
-2025-12-18 12:11:27,123 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.variables=[&#39;uparea&#39;]
-2025-12-18 12:11:27,123 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.fill_method=None
-2025-12-18 12:11:27,123 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.reproject_method=[&#39;max&#39;]
-2025-12-18 12:11:27,124 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.mask_name=mask
-2025-12-18 12:11:27,124 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.rename=None
-2025-12-18 12:11:27,124 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.raster_data=merit_hydro_ihu
-2025-12-18 12:11:27,124 - hydromt.hydromt.model.example.example_grid_component - example_grid_component - INFO - Preparing grid data from raster source merit_hydro_ihu
-2025-12-18 12:11:27,125 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro_ihu RasterDataset data from /home/runner/.hydromt/artifact_data/latest/merit_hydro_1k/{variable}.tif
-2025-12-18 12:11:27,201 - hydromt.model.model - model - INFO - update: grid.write
-2025-12-18 12:11:27,201 - hydromt.model.model - model - INFO - grid.write.filename=None
-2025-12-18 12:11:27,201 - hydromt.model.model - model - INFO - grid.write.gdal_compliant=False
-2025-12-18 12:11:27,201 - hydromt.model.model - model - INFO - grid.write.rename_dims=False
-2025-12-18 12:11:27,201 - hydromt.model.model - model - INFO - grid.write.force_sn=False
-2025-12-18 12:11:27,201 - hydromt.model.model - model - INFO - grid.write.to_netcdf_kwargs=None
-2025-12-18 12:11:27,201 - hydromt.model.components.grid - grid - INFO - example_model.grid: Writing grid data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_example_model_update/grid.nc.
+2025-12-18 10:05:30,624 - hydromt - log - INFO - HydroMT version: 1.3.0
+2025-12-18 10:05:30,652 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data latest
+2025-12-18 10:05:30,652 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
+2025-12-18 10:05:31,329 - hydromt.model.model - model - INFO - Initializing example_model model from hydromt (v1.3.0rc5).
+2025-12-18 10:05:31,330 - hydromt - log - INFO - HydroMT version: 1.3.0
+2025-12-18 10:05:31,330 - hydromt.model.model - model - INFO - Reading model data from /home/runner/work/hydromt/hydromt/docs/_examples/tmp_example_model
+2025-12-18 10:05:31,330 - hydromt.model.components.config - config - INFO - Reading model config file from /home/runner/work/hydromt/hydromt/docs/_examples/tmp_example_model/settings.toml.
+2025-12-18 10:05:31,349 - hydromt - log - INFO - HydroMT version: 1.3.0
+2025-12-18 10:05:31,353 - hydromt.model.model - model - INFO - update: grid.add_data_from_rasterdataset
+2025-12-18 10:05:31,353 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.variables=[&#39;uparea&#39;]
+2025-12-18 10:05:31,353 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.fill_method=None
+2025-12-18 10:05:31,353 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.reproject_method=[&#39;max&#39;]
+2025-12-18 10:05:31,353 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.mask_name=mask
+2025-12-18 10:05:31,353 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.rename=None
+2025-12-18 10:05:31,353 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.raster_data=merit_hydro_ihu
+2025-12-18 10:05:31,353 - hydromt.hydromt.model.example.example_grid_component - example_grid_component - INFO - Preparing grid data from raster source merit_hydro_ihu
+2025-12-18 10:05:31,355 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro_ihu RasterDataset data from /home/runner/.hydromt/artifact_data/latest/merit_hydro_1k/{variable}.tif
+2025-12-18 10:05:31,433 - hydromt.model.model - model - INFO - update: grid.write
+2025-12-18 10:05:31,433 - hydromt.model.model - model - INFO - grid.write.filename=None
+2025-12-18 10:05:31,433 - hydromt.model.model - model - INFO - grid.write.gdal_compliant=False
+2025-12-18 10:05:31,433 - hydromt.model.model - model - INFO - grid.write.rename_dims=False
+2025-12-18 10:05:31,433 - hydromt.model.model - model - INFO - grid.write.force_sn=False
+2025-12-18 10:05:31,433 - hydromt.model.model - model - INFO - grid.write.to_netcdf_kwargs=None
+2025-12-18 10:05:31,433 - hydromt.model.components.grid - grid - INFO - example_model.grid: Writing grid data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_example_model_update/grid.nc.
 </pre></div></div>
 </div>
 <p>The example above means the following: run <strong>hydromt update</strong> with:</p>
@@ -1028,7 +1028,7 @@ tmp_example_model_update
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-12-18 12:11:27,743 - hydromt.model.model - model - INFO - Initializing example_model model from hydromt (v1.3.0).
+2025-12-18 10:05:32,032 - hydromt.model.model - model - INFO - Initializing example_model model from hydromt (v1.3.0rc5).
 Variables available in grid.nc: [&#39;mask&#39;, &#39;elevtn&#39;, &#39;basins&#39;, &#39;landuse&#39;, &#39;uparea&#39;]
 </pre></div></div>
 </div>
