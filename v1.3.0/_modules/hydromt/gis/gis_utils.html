@@ -1,0 +1,853 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hydromt.gis.gis_utils &#8212; HydroMT  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/theme-deltares.css?v=d7afb10b" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/hydromt/gis/gis_utils';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.3';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../../_static/hydromt-icon.svg"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="1.3.0" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../../../_static/hydromt-icon.svg" class="logo__image only-light" alt=""/>
+    <img src="../../../_static/hydromt-icon.svg" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">HydroMT Core</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../about/intro.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../overview/intro.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/intro.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../dev/intro.html">
+    Developer guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/api.html">
+    API
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    What's new
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../about/intro.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../overview/intro.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/intro.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../dev/intro.html">
+    Developer guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/api.html">
+    API
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    What's new
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">hydromt.gis.gis_utils</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for hydromt.gis.gis_utils</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">&quot;&quot;&quot;GIS related convenience functions.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyogrio</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_info</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyproj.transformer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Transformer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">box</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseGeometry</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.gis.raster_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">cellres</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Bbox</span><span class="p">,</span> <span class="n">Geom</span><span class="p">,</span> <span class="n">GpdShapeGeom</span><span class="p">,</span> <span class="n">Zoom</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;_axes_attrs&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;_bbox_from_file_and_filters&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;_parse_geom_bbox_buffer&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;_to_geographic_bbox&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;parse_crs&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;utm_crs&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;zoom_to_overview_level&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="c1"># REPROJ</span>
+<div class="viewcode-block" id="utm_crs">
+<a class="viewcode-back" href="../../../_generated/hydromt.gis.gis_utils.utm_crs.html#hydromt.gis.gis_utils.utm_crs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">utm_crs</span><span class="p">(</span><span class="n">bbox</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return wkt string of nearest UTM projects.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bbox : array-like of floats</span>
+<span class="sd">        (xmin, ymin, xmax, ymax) bounding box in latlon WGS84 (EPSG:4326) coordinates</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    crs: pyproj.CRS</span>
+<span class="sd">        CRS of UTM projection</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="n">bbox</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">left</span> <span class="o">+</span> <span class="n">right</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">top</span> <span class="o">+</span> <span class="n">bottom</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">zone</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">x</span> <span class="o">+</span> <span class="mi">180</span><span class="p">)</span> <span class="o">/</span> <span class="mi">6</span><span class="p">)))</span>
+    <span class="c1"># BUGFIX hydroMT v0.3.5: south=False doesn&#39;t work only add south=True if y&lt;0</span>
+    <span class="k">if</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">south</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># BUGFIX hydroMT v0.4.6: add datum</span>
+    <span class="n">epsg</span> <span class="o">=</span> <span class="n">CRS</span><span class="p">(</span><span class="n">proj</span><span class="o">=</span><span class="s2">&quot;utm&quot;</span><span class="p">,</span> <span class="n">datum</span><span class="o">=</span><span class="s2">&quot;WGS84&quot;</span><span class="p">,</span> <span class="n">ellps</span><span class="o">=</span><span class="s2">&quot;WGS84&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="n">epsg</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="parse_crs">
+<a class="viewcode-back" href="../../../_generated/hydromt.gis.gis_utils.parse_crs.html#hydromt.gis.gis_utils.parse_crs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">bbox</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CRS</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse crs string to pyproj.CRS.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    crs: Any</span>
+<span class="sd">        crs int, wkt string, or pyproj.CRS object</span>
+<span class="sd">        if crs is &#39;utm&#39; the best utm zone is calculated based on the bbox</span>
+<span class="sd">    bbox: List[float], optional</span>
+<span class="sd">        bounding box of the data, required for &#39;utm&#39; crs</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    crs: pyproj.CRS</span>
+<span class="sd">        coordinate reference system</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">crs</span> <span class="o">==</span> <span class="s2">&quot;utm&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">crs</span> <span class="o">=</span> <span class="n">utm_crs</span><span class="p">(</span><span class="n">bbox</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;CRS &quot;utm&quot; requires bbox&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">crs</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_axes_attrs</span><span class="p">(</span><span class="n">crs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Provide CF-compliant variable names and metadata for axes.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    crs: pyproj.CRS</span>
+<span class="sd">        coordinate reference system</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    x_dim: str - variable name of x dimension (e.g. &#39;x&#39;)</span>
+<span class="sd">    y_dim: str - variable name of y dimension (e.g. &#39;lat&#39;)</span>
+<span class="sd">    x_attr: dict - attributes of variable x</span>
+<span class="sd">    y_attr: dict - attributes of variable y</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># # check for type of crs</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="n">CRS</span><span class="p">):</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">crs</span><span class="o">.</span><span class="n">is_geographic</span><span class="p">:</span>
+        <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span> <span class="o">=</span> <span class="s2">&quot;longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;latitude&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span>
+    <span class="n">cf_coords</span> <span class="o">=</span> <span class="n">crs</span><span class="o">.</span><span class="n">cs_to_cf</span><span class="p">()</span>
+    <span class="n">x_attrs</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cf_coords</span> <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="s2">&quot;axis&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;X&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">y_attrs</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cf_coords</span> <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="s2">&quot;axis&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Y&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="p">,</span> <span class="n">x_attrs</span><span class="p">,</span> <span class="n">y_attrs</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_geom_bbox_buffer</span><span class="p">(</span>
+    <span class="n">geom</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Geom</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">bbox</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Bbox</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">buffer</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CRS</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Geom</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse geom or bbox to a (buffered) geometry.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    geom : geopandas.GeoDataFrame/Series, optional</span>
+<span class="sd">        A geometry defining the area of interest.</span>
+<span class="sd">    bbox : array-like of floats, optional</span>
+<span class="sd">        (xmin, ymin, xmax, ymax) bounding box of area of interest</span>
+<span class="sd">        (in WGS84 coordinates).</span>
+<span class="sd">    buffer : float, optional</span>
+<span class="sd">        Buffer around the `bbox` or `geom` area of interest in meters. By default 0.</span>
+<span class="sd">    crs: pyproj.CRS, optional</span>
+<span class="sd">        projection of the bbox or geometry. If the geometry already has a crs, this</span>
+<span class="sd">        argument is ignored. Defaults to EPSG:4236.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    geom: geometry</span>
+<span class="sd">        the actual geometry</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="p">(</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">geom</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># convert bbox to geom with crs EPGS:4326 to apply buffer later</span>
+        <span class="n">geom</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="p">[</span><span class="n">box</span><span class="p">(</span><span class="o">*</span><span class="n">bbox</span><span class="p">)],</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">geom</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No geom or bbox provided.&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">geom</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">geom</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">buffer</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># make sure geom is projected &gt; buffer in meters!</span>
+        <span class="k">if</span> <span class="n">geom</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">is_geographic</span><span class="p">:</span>
+            <span class="n">geom</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="mi">3857</span><span class="p">)</span>
+        <span class="n">geom</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">geom</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_to_geographic_bbox</span><span class="p">(</span>
+    <span class="n">bbox</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">source_crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CRS</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a bbox to geographic coordinates (EPSG:4326).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bbox: List[float]</span>
+<span class="sd">        (xmin, ymin, xmax, ymax) bounding box in the source crs.</span>
+<span class="sd">    source_crs: pyproj.CRS, optional</span>
+<span class="sd">        coordinate reference system of the bounding box. If not provided, the</span>
+<span class="sd">        bounding box is assumed to be in WGS84 (EPSG:4326).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bbox: List[float]</span>
+<span class="sd">        (xmin, ymin, xmax, ymax) bounding box in geographic coordinates (EPSG:4326).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">target_crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="mi">4326</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">source_crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No CRS was set. Skipping CRS conversion&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">source_crs</span> <span class="o">!=</span> <span class="n">target_crs</span><span class="p">:</span>
+        <span class="n">bbox</span> <span class="o">=</span> <span class="n">Transformer</span><span class="o">.</span><span class="n">from_crs</span><span class="p">(</span><span class="n">source_crs</span><span class="p">,</span> <span class="n">target_crs</span><span class="p">)</span><span class="o">.</span><span class="n">transform_bounds</span><span class="p">(</span><span class="o">*</span><span class="n">bbox</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">bbox</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_bbox_from_file_and_filters</span><span class="p">(</span>
+    <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">bbox</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">GpdShapeGeom</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">GpdShapeGeom</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CRS</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Bbox</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a bbox from the file metadata and filter options.</span>
+
+<span class="sd">    Pyogrio does not accept a mask, and requires a bbox in the same CRS as the data.</span>
+<span class="sd">    This function takes the possible bbox filter, mask filter and crs of the input data</span>
+<span class="sd">    and returns a bbox in the same crs as the data based on the input filters.</span>
+<span class="sd">    As pyogrio currently does not support filtering using a mask, the mask is converted</span>
+<span class="sd">    to a bbox and the bbox is returned so that the data has some geospatial filtering.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    path: IOBase,</span>
+<span class="sd">        path to the opened file.</span>
+<span class="sd">    bbox: GeoDataFrame | GeoSeries | BaseGeometry</span>
+<span class="sd">        bounding box to filter the data while reading.</span>
+<span class="sd">    mask: GeoDataFrame | GeoSeries | BaseGeometry</span>
+<span class="sd">        mask to filter the data while reading.</span>
+<span class="sd">    crs: pyproj.CRS</span>
+<span class="sd">        coordinate reference system of the bounding box or geometry. If already set,</span>
+<span class="sd">        this argument is ignored.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Both &#39;bbox&#39; and &#39;mask&#39; are provided. Please provide only one.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">source_crs_str</span> <span class="o">:=</span> <span class="n">read_info</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;crs&quot;</span><span class="p">):</span>
+        <span class="n">source_crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="p">(</span><span class="n">source_crs_str</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">crs</span><span class="p">:</span>
+        <span class="n">source_crs</span> <span class="o">=</span> <span class="n">crs</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># assume WGS84</span>
+        <span class="n">source_crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="p">(</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">bbox</span> <span class="o">=</span> <span class="n">mask</span>
+
+    <span class="c1"># convert bbox to geom with input crs (assume WGS84 if not provided)</span>
+    <span class="n">crs</span> <span class="o">=</span> <span class="n">crs</span> <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="mi">4326</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">bbox</span><span class="p">),</span> <span class="n">BaseGeometry</span><span class="p">):</span>
+        <span class="n">bbox</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">(</span><span class="n">bbox</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
+    <span class="n">bbox</span> <span class="o">=</span> <span class="n">bbox</span> <span class="k">if</span> <span class="n">bbox</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">bbox</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">bbox</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">source_crs</span><span class="p">)</span><span class="o">.</span><span class="n">total_bounds</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="zoom_to_overview_level">
+<a class="viewcode-back" href="../../../_generated/hydromt.gis.gis_utils.zoom_to_overview_level.html#hydromt.gis.gis_utils.zoom_to_overview_level">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">zoom_to_overview_level</span><span class="p">(</span>
+    <span class="n">zoom</span><span class="p">:</span> <span class="n">Zoom</span><span class="p">,</span>
+    <span class="n">mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Geom</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">zls_dict</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">source_crs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">CRS</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return overview level of data corresponding to zoom level.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    zoom: Zoom</span>
+<span class="sd">        Overview level or tuple with resolution and unit</span>
+<span class="sd">    mask: gpd.GeoSeries, optional</span>
+<span class="sd">        Geometry to determine res if zoom_level or source in degree</span>
+<span class="sd">    zls_dict: Dict[int, float], optional</span>
+<span class="sd">        Dictionary translating overview level to resolution.</span>
+<span class="sd">    source_crs: pyproj.CRS, optional</span>
+<span class="sd">        Source crs to determine res if zoom_level tuple is provided</span>
+<span class="sd">        with different unit than source_crs</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    overview_level: int or None</span>
+<span class="sd">        Overview level of the data to be used. If no overview levels are defined,</span>
+<span class="sd">        None is returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># check zoom level</span>
+    <span class="k">if</span> <span class="n">zls_dict</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">zls_dict</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">zoom</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">overview_level</span> <span class="o">=</span> <span class="n">zoom</span>
+        <span class="k">if</span> <span class="n">overview_level</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">zls_dict</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Overview level </span><span class="si">{</span><span class="n">overview_level</span><span class="si">}</span><span class="s2"> not defined.Select from </span><span class="si">{</span><span class="n">zls_dict</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">dst_res</span> <span class="o">=</span> <span class="n">zls_dict</span><span class="p">[</span><span class="n">overview_level</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="p">(</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">zoom</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">zoom</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
+        <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">zoom</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">zoom</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+        <span class="ow">and</span> <span class="n">source_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="n">src_res</span><span class="p">,</span> <span class="n">src_res_unit</span> <span class="o">=</span> <span class="n">zoom</span>
+        <span class="c1"># convert res if different unit than crs</span>
+        <span class="n">source_crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">source_crs</span><span class="p">)</span>
+        <span class="n">dst_crs_unit</span> <span class="o">=</span> <span class="n">source_crs</span><span class="o">.</span><span class="n">axis_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">unit_name</span>
+        <span class="n">dst_res</span> <span class="o">=</span> <span class="n">src_res</span>
+        <span class="k">if</span> <span class="n">dst_crs_unit</span> <span class="o">!=</span> <span class="n">src_res_unit</span><span class="p">:</span>
+            <span class="n">known_units</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;degree&quot;</span><span class="p">,</span> <span class="s2">&quot;metre&quot;</span><span class="p">,</span> <span class="s2">&quot;US survey foot&quot;</span><span class="p">,</span> <span class="s2">&quot;meter&quot;</span><span class="p">,</span> <span class="s2">&quot;foot&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">src_res_unit</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">known_units</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;zoom_level unit </span><span class="si">{</span><span class="n">src_res_unit</span><span class="si">}</span><span class="s2"> not understood;&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; should be one of </span><span class="si">{</span><span class="n">known_units</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">dst_crs_unit</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">known_units</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;no conversion available for </span><span class="si">{</span><span class="n">src_res_unit</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">dst_crs_unit</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="n">conversions</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;foot&quot;</span><span class="p">:</span> <span class="mf">0.3048</span><span class="p">,</span>
+                <span class="s2">&quot;metre&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># official pyproj units</span>
+                <span class="s2">&quot;US survey foot&quot;</span><span class="p">:</span> <span class="mf">0.3048</span><span class="p">,</span>  <span class="c1"># official pyproj units</span>
+            <span class="p">}</span>  <span class="c1"># to meter</span>
+            <span class="k">if</span> <span class="n">src_res_unit</span> <span class="o">==</span> <span class="s2">&quot;degree&quot;</span> <span class="ow">or</span> <span class="n">dst_crs_unit</span> <span class="o">==</span> <span class="s2">&quot;degree&quot;</span><span class="p">:</span>
+                <span class="n">lat</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">lat</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="mi">4326</span><span class="p">)</span><span class="o">.</span><span class="n">centroid</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+                <span class="n">conversions</span><span class="p">[</span><span class="s2">&quot;degree&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cellres</span><span class="p">(</span><span class="n">lat</span><span class="o">=</span><span class="n">lat</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">fsrc</span> <span class="o">=</span> <span class="n">conversions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">src_res_unit</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">fdst</span> <span class="o">=</span> <span class="n">conversions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">dst_crs_unit</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">dst_res</span> <span class="o">=</span> <span class="n">src_res</span> <span class="o">*</span> <span class="n">fsrc</span> <span class="o">/</span> <span class="n">fdst</span>
+        <span class="c1"># find nearest zoom level</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">zls_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">zls</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">zls_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">smaller</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">dst_res</span> <span class="o">+</span> <span class="n">res</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">zls_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="n">overview_level</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">zls</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">smaller</span><span class="p">)</span> <span class="k">else</span> <span class="n">zls</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">smaller</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">source_crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No CRS defined, hence no zoom level can be determined.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;zoom_level not understood: </span><span class="si">{</span><span class="n">zoom</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using overview level </span><span class="si">{</span><span class="n">overview_level</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">dst_res</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">overview_level</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright Deltares.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

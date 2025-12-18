@@ -1,0 +1,829 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Updates for python users &#8212; HydroMT  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/theme-deltares.css?v=d7afb10b" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/migration_guide/python_updates';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.3';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../_static/hydromt-icon.svg"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Terminology" href="../terminology.html" />
+    <link rel="prev" title="Migrating the model workflow file" href="model_workflow.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="1.3.0" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../../_static/hydromt-icon.svg" class="logo__image only-light" alt=""/>
+    <img src="../../_static/hydromt-icon.svg" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">HydroMT Core</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/intro.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../overview/intro.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../intro.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../dev/intro.html">
+    Developer guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api/api.html">
+    API
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../changelog.html">
+    What's new
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/intro.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../overview/intro.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../intro.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../dev/intro.html">
+    Developer guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api/api.html">
+    API
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../changelog.html">
+    What's new
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../overview/index.html">Overview</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../overview/hydromt_intro.html">Introduction to HydroMT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../overview/hydromt_cli.html">HydroMT CLI interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../overview/hydromt_python.html">HydroMT Python API</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../models/model_overview.html">Working with models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../models/model_build.html">Building a model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../models/model_update.html">Updating a model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../models/model_workflow.html">Model workflow file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../models/model_region.html">Defining a region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../models/model_components.html">Model components (advanced)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../models/model_processes.html">Model processes (advanced)</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../data_catalog/data_overview.html">Data Catalog</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../data_catalog/data_existing_cat.html">Pre-defined data catalogs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../data_catalog/data_prepare_cat.html">Preparing a data catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../data_catalog/data_types.html">Supported data types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../data_catalog/data_conventions.html">Data conventions</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../supporting_functions/methods_main.html">Supporting functionalities</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Migration guide</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="data_catalog.html">Migrating the Data Catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_workflow.html">Migrating the model workflow file</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Updates for python users</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../terminology.html">Terminology</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../intro.html" class="nav-link">User guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Migration Guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Updates for python users</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="updates-for-python-users">
+<span id="python-updates-v1"></span><h1>Updates for python users<a class="headerlink" href="#updates-for-python-users" title="Link to this heading">#</a></h1>
+<p>In HydroMT v1, the internal data structure and API were redesigned to improve consistency and maintainability.
+Most changes affect how model components (such as <code class="docutils literal notranslate"><span class="pre">config</span></code> and <code class="docutils literal notranslate"><span class="pre">grid</span></code>) are accessed and how model data is read and written.</p>
+<section id="component-class">
+<h2>Component Class<a class="headerlink" href="#component-class" title="Link to this heading">#</a></h2>
+<section id="rationale">
+<h3>Rationale<a class="headerlink" href="#rationale" title="Link to this heading">#</a></h3>
+<p>Prior to v1, the <code class="docutils literal notranslate"><span class="pre">Model</span></code> class was the only real place where developers could
+modify the behavior of Core. All parts of a model were implemented as class properties
+forcing every model to use the same terminology. While this was enough for
+some users, it was too restrictive for others. For example, the SFINCS
+plugin uses multiple grids for its computation, which was not possible in
+the setup pre-v1. There was also a lot of code duplication for the use of
+several parts of a model such as <code class="docutils literal notranslate"><span class="pre">maps</span></code>, <code class="docutils literal notranslate"><span class="pre">forcing</span></code> and <code class="docutils literal notranslate"><span class="pre">states</span></code>. To offer
+users more modularity and flexibility, as well as improve maintainability, we
+have decided to move the core to a component based architecture rather than
+an inheritance based one.</p>
+<p>The model components are now <strong>dedicated classes</strong> rather than raw data objects (e.g., <code class="docutils literal notranslate"><span class="pre">xarray</span></code>, <code class="docutils literal notranslate"><span class="pre">dict</span></code>, or <code class="docutils literal notranslate"><span class="pre">geopandas</span></code>).
+Each component can be accessed via the <code class="docutils literal notranslate"><span class="pre">Model</span></code> instance and exposes its underlying data through the <code class="docutils literal notranslate"><span class="pre">.data</span></code> property.</p>
+<p>For users of HydroMT, the main change is that the <code class="docutils literal notranslate"><span class="pre">Model</span></code> class is now a composition of
+<code class="docutils literal notranslate"><span class="pre">ModelComponent</span></code> classes. The core <code class="docutils literal notranslate"><span class="pre">Model</span></code> class does not contain any components by default,
+but these can be added by the user upon instantiation or through the yaml configuration file.
+Plugins will define their implementation of the <code class="docutils literal notranslate"><span class="pre">Model</span></code> class with the components they need.</p>
+<p>For a model which is instantiated with a <code class="docutils literal notranslate"><span class="pre">GridComponent</span></code> component called <code class="docutils literal notranslate"><span class="pre">grid</span></code>, where previously you
+would call <code class="docutils literal notranslate"><span class="pre">model.setup_grid(...)</span></code>, you now call <code class="docutils literal notranslate"><span class="pre">model.grid.create(...)</span></code>.
+To access the grid component data you call <code class="docutils literal notranslate"><span class="pre">model.grid.data</span></code> instead of <code class="docutils literal notranslate"><span class="pre">model.grid</span></code>.</p>
+<p>In the core of HydroMT, the available components are:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>v0.x</p></th>
+<th class="head"><p>v1.x</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Model.config</p></td>
+<td><p><a class="reference internal" href="../../_generated/hydromt.model.components.ConfigComponent.html#hydromt.model.components.ConfigComponent" title="hydromt.model.components.ConfigComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConfigComponent</span></code></a></p></td>
+<td><p>Component for managing model configuration</p></td>
+</tr>
+<tr class="row-odd"><td><p>Model.geoms</p></td>
+<td><p><a class="reference internal" href="../../_generated/hydromt.model.components.GeomsComponent.html#hydromt.model.components.GeomsComponent" title="hydromt.model.components.GeomsComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">GeomsComponent</span></code></a></p></td>
+<td><p>Component for managing 1D vector data</p></td>
+</tr>
+<tr class="row-even"><td><p>Model.tables</p></td>
+<td><p><a class="reference internal" href="../../_generated/hydromt.model.components.TablesComponent.html#hydromt.model.components.TablesComponent" title="hydromt.model.components.TablesComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">TablesComponent</span></code></a></p></td>
+<td><p>Component for managing non-geospatial data</p></td>
+</tr>
+<tr class="row-odd"><td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p><a class="reference internal" href="../../_generated/hydromt.model.components.DatasetsComponent.html#hydromt.model.components.DatasetsComponent" title="hydromt.model.components.DatasetsComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatasetsComponent</span></code></a></p></td>
+<td><p>Component for managing non-geospatial data</p></td>
+</tr>
+<tr class="row-even"><td><p>Model.maps / Model.forcing / Model.results / Model.states</p></td>
+<td><p><a class="reference internal" href="../../_generated/hydromt.model.components.SpatialDatasetsComponent.html#hydromt.model.components.SpatialDatasetsComponent" title="hydromt.model.components.SpatialDatasetsComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialDatasetsComponent</span></code></a></p></td>
+<td><p>Component for managing geospatial data</p></td>
+</tr>
+<tr class="row-odd"><td><p>GridModel.grid</p></td>
+<td><p><a class="reference internal" href="../../_generated/hydromt.model.components.GridComponent.html#hydromt.model.components.GridComponent" title="hydromt.model.components.GridComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">GridComponent</span></code></a></p></td>
+<td><p>Component for managing regular gridded data</p></td>
+</tr>
+<tr class="row-even"><td><p>MeshModel.mesh</p></td>
+<td><p><a class="reference internal" href="../../_generated/hydromt.model.components.MeshComponent.html#hydromt.model.components.MeshComponent" title="hydromt.model.components.MeshComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">MeshComponent</span></code></a></p></td>
+<td><p>Component for managing unstructured grids</p></td>
+</tr>
+<tr class="row-odd"><td><p>VectorModel.vector</p></td>
+<td><p><a class="reference internal" href="../../_generated/hydromt.model.components.VectorComponent.html#hydromt.model.components.VectorComponent" title="hydromt.model.components.VectorComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">VectorComponent</span></code></a></p></td>
+<td><p>Component for managing geospatial vector data</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="example-accessing-component-data">
+<h3>Example: Accessing Component Data<a class="headerlink" href="#example-accessing-component-data" title="Link to this heading">#</a></h3>
+<p>Each component provides structured access to its data via the <code class="docutils literal notranslate"><span class="pre">.data</span></code> property.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleModel</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">ExampleModel</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s2">&quot;path/to/model&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>
+
+<span class="c1"># Access xarray.Dataset of static grid</span>
+<span class="n">grid</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">data</span>
+
+<span class="c1"># Access configuration dictionary</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">data</span>
+</pre></div>
+</div>
+</section>
+<section id="example-writing-components">
+<h3>Example: Writing Components<a class="headerlink" href="#example-writing-components" title="Link to this heading">#</a></h3>
+<p>Read and write operations are now handled at the <strong>component level</strong>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Write configuration file</span>
+<span class="n">model</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+
+<span class="c1"># Write updated grid to disk</span>
+<span class="n">model</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>These changes provide a clearer and more modular interface, making it easier to manipulate model components independently.</p>
+</section>
+</section>
+<section id="datacatalog">
+<h2>DataCatalog<a class="headerlink" href="#datacatalog" title="Link to this heading">#</a></h2>
+<section id="id1">
+<h3>Rationale<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
+<p>The data catalog structure has been refactored to introduce a more modular design and
+clearer separation of responsibilities across several new classes (<code class="docutils literal notranslate"><span class="pre">DataSource</span></code>, <code class="docutils literal notranslate"><span class="pre">Driver</span></code>, <code class="docutils literal notranslate"><span class="pre">URIResolver</span></code>, and <code class="docutils literal notranslate"><span class="pre">DataAdapter</span></code>):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">URIResolver</span></code> is in charge of parsing the path or URI of the file (e.g if you are using some keywords like
+<code class="docutils literal notranslate"><span class="pre">{year}</span></code> or <code class="docutils literal notranslate"><span class="pre">{month}</span></code> in your paths or if you want to read tiled raster)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Driver</span></code> is in charge of reading the data from the source (e.g reading a netcdf file from a local disk or from cloud)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DataAdapter</span></code> is in charge of harmonizing the data to standard HydroMT data structures (e.g. renaming variables, setting attributes, units conversion, etc.)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DataSource</span></code> is the main class that ties everything together and is used by the <code class="docutils literal notranslate"><span class="pre">DataCatalog</span></code> to load data.</p></li>
+</ul>
+<p>Additionally, to be able to support different version of the same data set (for example, data sets
+that get re-released frequently with updated data) or to be able to take the same data
+set from multiple data sources (e.g. local if you have it but AWS if you don’t) the
+data catalog has undergone some changes. Now since a catalog entry no longer uniquely
+identifies one source, (since it can refer to any of the variants mentioned above) it
+becomes insufficient to request a data source by string only. Since the dictionary
+interface in python makes it impossible to add additional arguments when requesting a
+data source, we created a more extensive API for this. In order to make sure users’
+code remains working consistently and have a clear upgrade path when adding new
+variants we have decided to remove the old dictionary like interface.
+Dictionary like features such as <cite>catalog[‘source’]</cite>, <cite>catalog[‘source’] = data</cite>,
+<cite>source in catalog</cite> etc. should be removed for v1. Equivalent interfaces have been
+provided for each operation, so it should be fairly simple. Below is a small table
+with their equivalent functions.</p>
+</section>
+<section id="how-to-upgrade">
+<h3>How to upgrade<a class="headerlink" href="#how-to-upgrade" title="Link to this heading">#</a></h3>
+<p>The high levels functions of <code class="docutils literal notranslate"><span class="pre">DataCatalog</span></code> and the different <code class="docutils literal notranslate"><span class="pre">get_data</span></code> methods have not changed
+apart that the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> and <code class="docutils literal notranslate"><span class="pre">DataAdapter</span></code> options have to be specified differently in the catalog yaml file or
+explicitly under <code class="docutils literal notranslate"><span class="pre">source_kwargs</span></code> when calling the <code class="docutils literal notranslate"><span class="pre">get_data</span></code> methods.
+However, the dictionary-like interface has been removed.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">hydromt</span>
+<span class="n">catalog</span> <span class="o">=</span> <span class="n">hydromt</span><span class="o">.</span><span class="n">DataCatalog</span><span class="p">(</span><span class="s1">&#39;path_to_your_catalog.yml&#39;</span><span class="p">)</span>
+
+<span class="c1"># Old v0.x way (removed)</span>
+<span class="n">gdf</span> <span class="o">=</span> <span class="n">catalog</span><span class="o">.</span><span class="n">get_geodataframe</span><span class="p">(</span><span class="s1">&#39;path/to/locations.csv&#39;</span><span class="p">,</span> <span class="n">driver_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;sep&#39;</span><span class="p">:</span> <span class="s1">&#39;;&#39;</span><span class="p">})</span>
+
+<span class="c1"># New v1.x way</span>
+<span class="n">gdf</span> <span class="o">=</span> <span class="n">catalog</span><span class="o">.</span><span class="n">get_geodataframe</span><span class="p">(</span>
+    <span class="s1">&#39;path/to/locations.csv&#39;</span><span class="p">,</span>
+    <span class="n">source_kwargs</span><span class="o">=</span><span class="p">{</span>
+      <span class="s1">&#39;driver&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;pandas&#39;</span><span class="p">,</span> <span class="s1">&#39;options&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;sep&#39;</span><span class="p">:</span> <span class="s1">&#39;;&#39;</span><span class="p">}}</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Below is a table with the equivalent functions for the removed dictionary-like interface:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>v0.x</p></th>
+<th class="head"><p>v1</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>if ‘name’ in catalog:</p></td>
+<td><p>if catalog.contains_source(‘name’):</p></td>
+</tr>
+<tr class="row-odd"><td><p>catalog[‘name’]</p></td>
+<td><p>catalog.get_source(‘name’)</p></td>
+</tr>
+<tr class="row-even"><td><p>for x in catalog.keys():</p></td>
+<td><p>for x in catalog.get_source_names():</p></td>
+</tr>
+<tr class="row-odd"><td><p>catalog[‘name’] = data</p></td>
+<td><p>catalog.set_source(‘name’,data)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<section id="api-and-supporting-functions">
+<h2>API and supporting functions<a class="headerlink" href="#api-and-supporting-functions" title="Link to this heading">#</a></h2>
+<p>HydroMT provides a series of supporting functions either for GIS operations, statistical methods,
+or file specific I/O operations. These functions have been moved and/or grouped under specific submodules
+to improve discoverability and maintainability.</p>
+<p>Main changes includes:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>v0.x</p></th>
+<th class="head"><p>v1</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>hydromt.config</p></td>
+<td><p>Removed</p></td>
+</tr>
+<tr class="row-odd"><td><p>hydromt.log</p></td>
+<td><p>Removed (private: hydromt._utils.log)</p></td>
+</tr>
+<tr class="row-even"><td><p>hydromt.flw</p></td>
+<td><p>hydromt.gis.flw</p></td>
+</tr>
+<tr class="row-odd"><td><p>hydromt.gis_utils</p></td>
+<td><p>hydromt.gis.utils</p></td>
+</tr>
+<tr class="row-even"><td><p>hydromt.raster</p></td>
+<td><p>hydromt.gis.raster</p></td>
+</tr>
+<tr class="row-odd"><td><p>hydromt.vector</p></td>
+<td><p>hydromt.gis.vector</p></td>
+</tr>
+<tr class="row-even"><td><p>hydromt.gis_utils</p></td>
+<td><p>hydromt.gis.utils</p></td>
+</tr>
+<tr class="row-odd"><td><p>hydromt.io</p></td>
+<td><p>hydromt.readers and hydromt.writers</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="model_workflow.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Migrating the model workflow file</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../terminology.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Terminology</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#component-class">Component Class</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rationale">Rationale</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#example-accessing-component-data">Example: Accessing Component Data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#example-writing-components">Example: Writing Components</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#datacatalog">DataCatalog</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Rationale</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-upgrade">How to upgrade</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api-and-supporting-functions">API and supporting functions</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright Deltares.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
