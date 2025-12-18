@@ -1,7 +1,5 @@
 .. _changelog:
 
- Changelog
-
 ==========
 What's new
 ==========
@@ -10,9 +8,8 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
-
-Unreleased
-==========
+v1.3.0 (2025-11-11)
+===================
 
 ModelComponent API now contains functions for `ModelComponent.cleanup` and `ModelComponent.finish_write` that are called by the build and update functions. This stabilizes the write functionality and makes sure that netCDF files can be overwritten when the source and destination are the same. (#778)
 
@@ -67,7 +64,7 @@ Fixed
 - All handling of log files is now done with the context manager `hydromt._utils.log.to_file`. This means that they are always closed by the the function that opened them. (#1272)
 - `DataCatalog.export_data` now correctly handles rasterdata that have been written with paths containing wildcards. (#1323)
 - Standardized the behaviour of DataSources and subcomponents when it comes to handling the case where there is no data.
-
+- Logging of warnings when unused kwargs are passed.
 
 Deprecated
 ----------

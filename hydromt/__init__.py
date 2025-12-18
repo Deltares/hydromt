@@ -1,7 +1,7 @@
 """HydroMT: Automated and reproducible model building and analysis."""
 
 # version number without 'v' at start
-__version__ = "1.2.0.dev0"
+__version__ = "1.3.0"
 
 # This is only here to suppress the bug described in
 # https://github.com/pydata/xarray/issues/7259
@@ -9,6 +9,9 @@ __version__ = "1.2.0.dev0"
 # numpy is imported for the first time, e.g. also via
 # importing xarray
 
+import warnings  # noqa: F401
+
+import netCDF4  # noqa: F401
 
 # submodules
 from hydromt import data_catalog, gis, model, stats
