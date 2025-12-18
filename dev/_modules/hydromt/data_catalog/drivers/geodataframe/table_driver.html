@@ -529,6 +529,7 @@
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">metadata</span><span class="p">:</span>
             <span class="n">metadata</span> <span class="o">=</span> <span class="n">SourceMetadata</span><span class="p">()</span>
+
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;DataFrame: Reading multiple files with the &quot;</span>
@@ -548,6 +549,7 @@
                 <span class="sa">f</span><span class="s2">&quot;No data from </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> driver for file uris: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">,</span>
                 <span class="n">strategy</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
             <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># handle_nodata == ignore</span>
         <span class="k">return</span> <span class="n">gdf</span></div>
 
 

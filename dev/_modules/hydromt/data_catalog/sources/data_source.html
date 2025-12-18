@@ -448,7 +448,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.adapters.data_adapter_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataAdapterBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.drivers</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseDriver</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.uri_resolvers</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConventionResolver</span><span class="p">,</span> <span class="n">URIResolver</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDataException</span><span class="p">,</span> <span class="n">NoDataStrategy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDataStrategy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataType</span><span class="p">,</span> <span class="n">SourceMetadata</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.typing.type_def</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeRange</span><span class="p">,</span> <span class="n">TotalBounds</span>
 
@@ -588,7 +588,8 @@
 
         <span class="k">return</span> <span class="n">res</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_get_uri_basename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="o">**</span><span class="n">query_kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_relative_uri</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="o">**</span><span class="n">query_kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+        <span class="n">uri</span> <span class="o">=</span> <span class="n">PurePath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uri</span><span class="p">)</span>
         <span class="k">if</span> <span class="s2">&quot;{&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">uri</span><span class="p">:</span>
             <span class="c1"># first resolve any placeholders</span>
             <span class="n">uris</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uri_resolver</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span>
@@ -596,20 +597,19 @@
                 <span class="n">handle_nodata</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">query_kwargs</span><span class="p">,</span>
             <span class="p">)</span>
-
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">uris</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># handle_nodata == ignore</span>
             <span class="c1"># if multiple_uris, use the first one:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">uris</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">NoDataException</span><span class="p">(</span><span class="s2">&quot;!&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uri</span>
+                <span class="n">uri</span> <span class="o">=</span> <span class="n">PurePath</span><span class="p">(</span><span class="n">uris</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-        <span class="n">basename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">PurePath</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
-        <span class="k">if</span> <span class="n">basename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to get basename of uri: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">uri</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">basename</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="ow">and</span> <span class="n">uri</span><span class="o">.</span><span class="n">is_absolute</span><span class="p">():</span>
+            <span class="n">uri</span> <span class="o">=</span> <span class="n">uri</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="ow">and</span> <span class="n">uri</span><span class="o">.</span><span class="n">is_absolute</span><span class="p">():</span>
+            <span class="c1"># Edge case when creating a DataCatalog from a dictionary without specifying a root</span>
+            <span class="n">uri</span> <span class="o">=</span> <span class="n">PurePath</span><span class="p">(</span><span class="n">uri</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">uri</span>
 
 <div class="viewcode-block" id="DataSource.get_time_range">
 <a class="viewcode-back" href="../../../../_generated/hydromt.data_catalog.sources.DataSource.html#hydromt.data_catalog.sources.DataSource.get_time_range">[docs]</a>
@@ -688,7 +688,7 @@
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_stac_catalog</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">IGNORE</span><span class="p">,</span>
+        <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">WARN</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StacCatalog</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert source into a STAC Catalog representation.</span>

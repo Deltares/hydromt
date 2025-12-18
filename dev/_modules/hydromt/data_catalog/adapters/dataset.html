@@ -438,7 +438,7 @@
     <span class="n">_single_var_as_array</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.adapters.data_adapter_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataAdapterBase</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDataException</span><span class="p">,</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="n">exec_nodata_strat</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="n">exec_nodata_strat</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Data</span><span class="p">,</span>
     <span class="n">SourceMetadata</span><span class="p">,</span>
@@ -473,26 +473,22 @@
 <span class="sd">        For a detailed description see:</span>
 <span class="sd">        :py:func:`~hydromt.data_catalog.DataCatalog.get_dataset`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">ds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">NoDataException</span><span class="p">()</span>
-            <span class="c1"># rename variables and parse data and attrs</span>
-            <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rename_vars</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
-            <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_nodata</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">metadata</span><span class="p">)</span>
-            <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shift_time</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
-            <span class="c1"># slice</span>
-            <span class="n">ds</span> <span class="o">=</span> <span class="n">DatasetAdapter</span><span class="o">.</span><span class="n">_slice_data</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">time_range</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">ds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">NoDataException</span><span class="p">()</span>
-            <span class="c1"># uniformize</span>
-            <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_unit_conversion</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
-            <span class="n">ds</span> <span class="o">=</span> <span class="n">_set_metadata</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">metadata</span><span class="p">)</span>
-            <span class="c1"># return array if single var and single_var_as_array</span>
-            <span class="n">ds</span> <span class="o">=</span> <span class="n">_single_var_as_array</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">single_var_as_array</span><span class="p">,</span> <span class="n">variable_name</span><span class="o">=</span><span class="n">variables</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">ds</span>
-        <span class="k">except</span> <span class="n">NoDataException</span><span class="p">:</span>
-            <span class="n">exec_nodata_strat</span><span class="p">(</span><span class="s2">&quot;No data to export&quot;</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">)</span>
-            <span class="k">return</span> <span class="kc">None</span></div>
+        <span class="c1"># rename variables and parse data and attrs</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rename_vars</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_nodata</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">metadata</span><span class="p">)</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shift_time</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+        <span class="c1"># slice</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">DatasetAdapter</span><span class="o">.</span><span class="n">_slice_data</span><span class="p">(</span>
+            <span class="n">ds</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">time_range</span><span class="p">,</span> <span class="n">handle_nodata</span><span class="o">=</span><span class="n">handle_nodata</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">ds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="c1"># uniformize</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_unit_conversion</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">_set_metadata</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">metadata</span><span class="p">)</span>
+        <span class="c1"># return array if single var and single_var_as_array</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">_single_var_as_array</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">single_var_as_array</span><span class="p">,</span> <span class="n">variable_name</span><span class="o">=</span><span class="n">variables</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ds</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_rename_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">Data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Data</span><span class="p">:</span>
@@ -541,6 +537,7 @@
         <span class="n">ds</span><span class="p">:</span> <span class="n">Data</span><span class="p">,</span>
         <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Variables</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">time_range</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TimeRange</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Data</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Slice the dataset in space and time.</span>
 
@@ -553,6 +550,8 @@
 <span class="sd">        time_range: tuple of str, datetime, optional</span>
 <span class="sd">            Start and end date of period of interest. By default the entire time period</span>
 <span class="sd">            of the dataset is returned.</span>
+<span class="sd">        handle_nodata : NoDataStrategy, optional</span>
+<span class="sd">            how to handle no data being present in the result, by default NoDataStrategy.RAISE</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -570,18 +569,21 @@
                 <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">mvars</span><span class="p">):</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dataset: variables not found </span><span class="si">{</span><span class="n">mvars</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">variables</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">time_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">ds</span> <span class="o">=</span> <span class="n">DatasetAdapter</span><span class="o">.</span><span class="n">_slice_temporal_dimension</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">time_range</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">_has_no_data</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
-            <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">ds</span>
+        <span class="k">if</span> <span class="n">time_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">DatasetAdapter</span><span class="o">.</span><span class="n">_slice_temporal_dimension</span><span class="p">(</span>
+                <span class="n">ds</span><span class="p">,</span> <span class="n">time_range</span><span class="p">,</span> <span class="n">handle_nodata</span><span class="o">=</span><span class="n">handle_nodata</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">ds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">ds</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_slice_temporal_dimension</span><span class="p">(</span>
         <span class="n">ds</span><span class="p">:</span> <span class="n">Data</span><span class="p">,</span>
         <span class="n">time_range</span><span class="p">:</span> <span class="n">TimeRange</span><span class="p">,</span>
+        <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Data</span><span class="p">]:</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="s2">&quot;time&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">dims</span>
@@ -590,10 +592,10 @@
         <span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Slicing time dim </span><span class="si">{</span><span class="n">time_range</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="n">time_range</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">time_range</span><span class="o">.</span><span class="n">end</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">_has_no_data</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
-            <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">ds</span></div>
+            <span class="k">if</span> <span class="n">_has_no_data</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+                <span class="n">exec_nodata_strat</span><span class="p">(</span><span class="s2">&quot;No data left after time slicing.&quot;</span><span class="p">,</span> <span class="n">handle_nodata</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">ds</span></div>
 
 </pre></div>
 

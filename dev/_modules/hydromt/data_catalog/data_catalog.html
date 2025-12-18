@@ -439,7 +439,6 @@
     <span class="n">Iterator</span><span class="p">,</span>
     <span class="n">List</span><span class="p">,</span>
     <span class="n">Optional</span><span class="p">,</span>
-    <span class="n">Set</span><span class="p">,</span>
     <span class="n">Tuple</span><span class="p">,</span>
     <span class="n">Union</span><span class="p">,</span>
     <span class="n">cast</span><span class="p">,</span>
@@ -578,7 +577,7 @@
         <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;The stac catalog of hydromt&quot;</span><span class="p">,</span>
         <span class="n">used_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">catalog_type</span><span class="p">:</span> <span class="n">CatalogType</span> <span class="o">=</span> <span class="n">CatalogType</span><span class="o">.</span><span class="n">RELATIVE_PUBLISHED</span><span class="p">,</span>
-        <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">IGNORE</span><span class="p">,</span>
+        <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">WARN</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write data catalog to STAC format.</span>
 
@@ -1518,14 +1517,14 @@
         <span class="n">new_root</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="c1"># create copy of data with selected source names</span>
-        <span class="n">source_vars</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">source_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">sources</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">DataSource</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">source_vars</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">source_names</span><span class="p">:</span>
+            <span class="n">sources</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">DataSource</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">source_names</span><span class="p">:</span>
                 <span class="c1"># support both strings and SourceSpecDicts here</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                     <span class="n">name</span> <span class="o">=</span> <span class="n">source</span>
-                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">Dict</span><span class="p">):</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
                     <span class="n">name</span> <span class="o">=</span> <span class="n">source</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
@@ -1538,18 +1537,9 @@
                     <span class="n">source_vars</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">variables</span>
 
                 <span class="n">source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_source</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-                <span class="n">provider</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">provider</span>
-                <span class="n">version</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">version</span>
-
-                <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sources</span><span class="p">:</span>
-                    <span class="n">sources</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-                <span class="k">if</span> <span class="n">provider</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sources</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
-                    <span class="n">sources</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">provider</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-
-                <span class="n">sources</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">provider</span><span class="p">][</span><span class="n">version</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
-
+                <span class="bp">self</span><span class="o">.</span><span class="n">_register_source</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">source</span><span class="p">),</span> <span class="n">registry</span><span class="o">=</span><span class="n">sources</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">sources</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">DataSource</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span>
+            <span class="n">sources</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">DataSource</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">sources</span>
             <span class="p">)</span>
 
@@ -1562,98 +1552,230 @@
             <span class="n">sources_out</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># export data and update sources</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">available_variants</span> <span class="ow">in</span> <span class="n">sources</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">for</span> <span class="n">provider</span><span class="p">,</span> <span class="n">available_versions</span> <span class="ow">in</span> <span class="n">available_variants</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">for</span> <span class="n">version</span><span class="p">,</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">available_versions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="c1"># read slice of source and write to file</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Exporting </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="ow">not</span> <span class="n">unit_conversion</span><span class="p">:</span>
-                            <span class="n">source</span><span class="o">.</span><span class="n">data_adapter</span><span class="o">.</span><span class="n">unit_mult</span> <span class="o">=</span> <span class="p">{}</span>
-                            <span class="n">source</span><span class="o">.</span><span class="n">data_adapter</span><span class="o">.</span><span class="n">unit_add</span> <span class="o">=</span> <span class="p">{}</span>
-                        <span class="k">try</span><span class="p">:</span>
-                            <span class="c1"># get keyword only params</span>
-                            <span class="n">kw_only_params</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
-                                <span class="nb">map</span><span class="p">(</span>
-                                    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>  <span class="c1"># take param name</span>
-                                    <span class="nb">filter</span><span class="p">(</span>
-                                        <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">kind</span>
-                                        <span class="o">==</span> <span class="mi">3</span><span class="p">,</span>  <span class="c1"># 3 in enum is kw_only</span>
-                                        <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span>
-                                            <span class="n">source</span><span class="o">.</span><span class="n">to_file</span>
-                                        <span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span>
-                                    <span class="p">),</span>
-                                <span class="p">)</span>
-                            <span class="p">)</span>
-                            <span class="c1"># get kwargs that are available for this source</span>
-                            <span class="n">query_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                                <span class="s2">&quot;variables&quot;</span><span class="p">:</span> <span class="n">source_vars</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-                                <span class="s2">&quot;bbox&quot;</span><span class="p">:</span> <span class="n">bbox</span><span class="p">,</span>
-                                <span class="s2">&quot;time_range&quot;</span><span class="p">:</span> <span class="n">time_range</span><span class="p">,</span>
-                            <span class="p">}</span>
-                            <span class="c1"># Then combine with values</span>
-                            <span class="n">query_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                                <span class="n">k</span><span class="p">:</span> <span class="n">v</span>
-                                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">query_kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-                                <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">kw_only_params</span>
-                            <span class="p">}</span>
-
-                            <span class="n">bbox</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Bbox</span><span class="p">]</span> <span class="o">=</span> <span class="n">query_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;bbox&quot;</span><span class="p">)</span>
-                            <span class="k">if</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                                <span class="n">mask</span> <span class="o">=</span> <span class="n">_parse_geom_bbox_buffer</span><span class="p">(</span><span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">)</span>
-                            <span class="k">else</span><span class="p">:</span>
-                                <span class="n">mask</span> <span class="o">=</span> <span class="kc">None</span>
-
-                            <span class="n">source_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">query_kwargs</span><span class="p">)</span>
-                            <span class="n">source_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;bbox&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-                            <span class="n">source_kwargs</span><span class="p">[</span><span class="s2">&quot;mask&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mask</span>
-
-                            <span class="n">basename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">_get_uri_basename</span><span class="p">(</span>
-                                <span class="n">handle_nodata</span><span class="p">,</span> <span class="o">**</span><span class="n">source_kwargs</span>
-                            <span class="p">)</span>
-
-                            <span class="n">p</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Path</span><span class="p">,</span> <span class="n">Path</span><span class="p">(</span><span class="n">new_root</span><span class="p">)</span> <span class="o">/</span> <span class="n">basename</span><span class="p">)</span>
-                            <span class="k">if</span> <span class="ow">not</span> <span class="n">force_overwrite</span> <span class="ow">and</span> <span class="n">isfile</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                                    <span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2"> already exists and not in forced overwrite mode. skipping...&quot;</span>
-                                <span class="p">)</span>
-                                <span class="k">continue</span>
-
-                            <span class="n">new_source</span><span class="p">:</span> <span class="n">DataSource</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span>
-                                <span class="n">file_path</span><span class="o">=</span><span class="n">p</span><span class="p">,</span>
-                                <span class="n">handle_nodata</span><span class="o">=</span><span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
-                                <span class="o">**</span><span class="n">query_kwargs</span><span class="p">,</span>
-                            <span class="p">)</span>
-                        <span class="k">except</span> <span class="n">NoDataException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                            <span class="n">exec_nodata_strat</span><span class="p">(</span>
-                                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> file contains no data: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                                <span class="n">handle_nodata</span><span class="p">,</span>
-                            <span class="p">)</span>
-                            <span class="k">continue</span>
-
-                        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">sources_out</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> already exists in data catalog, overwriting...&quot;</span>
-                            <span class="p">)</span>
-                        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sources_out</span><span class="p">:</span>
-                            <span class="n">sources_out</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-                        <span class="k">if</span> <span class="n">provider</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sources_out</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
-                            <span class="n">sources_out</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">provider</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-
-                        <span class="n">sources_out</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">provider</span><span class="p">][</span><span class="n">version</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_source</span>
-                    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> file not found at </span><span class="si">{</span><span class="n">new_source</span><span class="o">.</span><span class="n">uri</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">available_variants</span> <span class="ow">in</span> <span class="n">sources</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">available_versions</span> <span class="ow">in</span> <span class="n">available_variants</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">available_versions</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_export_source</span><span class="p">(</span>
+                        <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+                        <span class="n">unit_conversion</span><span class="o">=</span><span class="n">unit_conversion</span><span class="p">,</span>
+                        <span class="n">new_root</span><span class="o">=</span><span class="n">new_root</span><span class="p">,</span>
+                        <span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">,</span>
+                        <span class="n">time_range</span><span class="o">=</span><span class="n">time_range</span><span class="p">,</span>
+                        <span class="n">source_vars</span><span class="o">=</span><span class="n">source_vars</span><span class="p">,</span>
+                        <span class="n">registry</span><span class="o">=</span><span class="n">sources_out</span><span class="p">,</span>
+                        <span class="n">force_overwrite</span><span class="o">=</span><span class="n">force_overwrite</span><span class="p">,</span>
+                        <span class="n">handle_nodata</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
+                    <span class="p">)</span>
 
         <span class="c1"># write data catalog to yml</span>
         <span class="n">data_catalog_out</span> <span class="o">=</span> <span class="n">DataCatalog</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">available_variants</span> <span class="ow">in</span> <span class="n">sources_out</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">for</span> <span class="n">_provider</span><span class="p">,</span> <span class="n">available_versions</span> <span class="ow">in</span> <span class="n">available_variants</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">for</span> <span class="n">_version</span><span class="p">,</span> <span class="n">adapter</span> <span class="ow">in</span> <span class="n">available_versions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">available_versions</span> <span class="ow">in</span> <span class="n">available_variants</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">adapter</span> <span class="ow">in</span> <span class="n">available_versions</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                     <span class="k">if</span> <span class="n">adapter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="n">data_catalog_out</span><span class="o">.</span><span class="n">add_source</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">adapter</span><span class="p">)</span>
 
         <span class="n">data_catalog_out</span><span class="o">.</span><span class="n">to_yml</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">meta</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_export_source</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">source</span><span class="p">:</span> <span class="n">DataSource</span><span class="p">,</span>
+        <span class="n">unit_conversion</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">new_root</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">bbox</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Bbox</span><span class="p">],</span>
+        <span class="n">time_range</span><span class="p">:</span> <span class="n">TimeRange</span> <span class="o">|</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">source_vars</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+        <span class="n">registry</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataSource</span><span class="p">]]],</span>
+        <span class="n">force_overwrite</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataSource</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export a single data source to disk and register the exported source.</span>
+
+<span class="sd">        This method resolves query arguments (variables, spatial and temporal filters),</span>
+<span class="sd">        determines the output path, writes the source data to disk, and updates the</span>
+<span class="sd">        output registry with the new source definition.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        source : DataSource</span>
+<span class="sd">            The data source to export.</span>
+<span class="sd">        unit_conversion : bool</span>
+<span class="sd">            Whether unit conversion should be applied when reading the source data.</span>
+<span class="sd">        new_root : Path</span>
+<span class="sd">            Root directory where exported data will be written.</span>
+<span class="sd">        bbox : Bbox, optional</span>
+<span class="sd">            Spatial bounding box used to subset the source, if supported.</span>
+<span class="sd">        time_range : TimeRange | tuple | dict | None</span>
+<span class="sd">            Temporal range used to subset the source, if supported.</span>
+<span class="sd">        source_vars : dict[str, list[str]]</span>
+<span class="sd">            Mapping of source names to selected variable names.</span>
+<span class="sd">        registry : dict</span>
+<span class="sd">            Registry used to collect exported sources for the output data catalog.</span>
+<span class="sd">        force_overwrite : bool</span>
+<span class="sd">            Whether existing output files should be overwritten.</span>
+<span class="sd">        handle_nodata : NoDataStrategy</span>
+<span class="sd">            Strategy for handling no-data situations during export.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        DataSource or None</span>
+<span class="sd">            The newly exported source, or None if the source was skipped or contained</span>
+<span class="sd">            no data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># read slice of source and write to file</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Exporting </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">unit_conversion</span><span class="p">:</span>
+            <span class="n">source</span><span class="o">.</span><span class="n">data_adapter</span><span class="o">.</span><span class="n">unit_mult</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">source</span><span class="o">.</span><span class="n">data_adapter</span><span class="o">.</span><span class="n">unit_add</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">query_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_query_kwargs</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">source_vars</span><span class="p">,</span> <span class="n">bbox</span><span class="p">,</span> <span class="n">time_range</span><span class="p">)</span>
+
+        <span class="n">relative_uri</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">_get_relative_uri</span><span class="p">(</span><span class="n">handle_nodata</span><span class="p">,</span> <span class="o">**</span><span class="n">query_kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">relative_uri</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># handle nodata</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">relative_uri</span><span class="o">.</span><span class="n">parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="s2">&quot;*&quot;</span> <span class="ow">in</span> <span class="n">relative_uri</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot write source </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> with wildcard to root&quot;</span><span class="p">)</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="n">new_root</span> <span class="o">/</span> <span class="n">relative_uri</span>
+        <span class="n">new_source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_write_source</span><span class="p">(</span>
+            <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+            <span class="n">file_path</span><span class="o">=</span><span class="n">file_path</span><span class="p">,</span>
+            <span class="n">source_kwargs</span><span class="o">=</span><span class="n">query_kwargs</span><span class="p">,</span>
+            <span class="n">force_overwrite</span><span class="o">=</span><span class="n">force_overwrite</span><span class="p">,</span>
+            <span class="n">handle_nodata</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">new_source</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_source</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">new_source</span><span class="p">,</span> <span class="n">registry</span><span class="o">=</span><span class="n">registry</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_source</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_write_source</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">source</span><span class="p">:</span> <span class="n">DataSource</span><span class="p">,</span>
+        <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">source_kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">force_overwrite</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataSource</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write a single data source to disk using its `to_file` implementation.</span>
+
+<span class="sd">        This method ensures the output directory exists, handles overwrite logic,</span>
+<span class="sd">        and delegates the actual write operation to the source itself.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        source : DataSource</span>
+<span class="sd">            The data source to write.</span>
+<span class="sd">        file_path : Path</span>
+<span class="sd">            Destination file path for the exported source.</span>
+<span class="sd">        source_kwargs : dict</span>
+<span class="sd">            Keyword arguments passed to the source `to_file` method.</span>
+<span class="sd">        force_overwrite : bool</span>
+<span class="sd">            Whether an existing file should be overwritten.</span>
+<span class="sd">        handle_nodata : NoDataStrategy</span>
+<span class="sd">            Strategy for handling no-data exceptions raised during writing.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        DataSource or None</span>
+<span class="sd">            The written source with updated metadata, or None if writing was skipped</span>
+<span class="sd">            or no data was available.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">file_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">file_path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force_overwrite</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2"> exists, skipping export.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">source</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span>
+                <span class="n">file_path</span><span class="o">=</span><span class="n">file_path</span><span class="p">,</span>
+                <span class="n">handle_nodata</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">source_kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">NoDataException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">exec_nodata_strat</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">handle_nodata</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_build_query_kwargs</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">source</span><span class="p">:</span> <span class="n">DataSource</span><span class="p">,</span>
+        <span class="n">source_vars</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+        <span class="n">bbox</span><span class="p">:</span> <span class="n">Bbox</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">time_range</span><span class="p">:</span> <span class="n">TimeRange</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build keyword arguments for querying and exporting a data source.</span>
+
+<span class="sd">        This method inspects the signature of the source `to_file` method and</span>
+<span class="sd">        constructs a dictionary of supported query arguments, including variable</span>
+<span class="sd">        selection, temporal filtering, and spatial masking where applicable.</span>
+
+<span class="sd">        Spatial bounding boxes are converted to geometric masks only if the source</span>
+<span class="sd">        explicitly supports a `mask` keyword argument.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        source : DataSource</span>
+<span class="sd">            The data source being exported.</span>
+<span class="sd">        source_vars : dict[str, list[str]]</span>
+<span class="sd">            Mapping of source names to selected variable names.</span>
+<span class="sd">        bbox : Bbox, optional</span>
+<span class="sd">            Spatial bounding box used to construct a mask if supported.</span>
+<span class="sd">        time_range : TimeRange, optional</span>
+<span class="sd">            Temporal range used to subset the source if supported.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict[str, Any]</span>
+<span class="sd">            Dictionary of keyword arguments to pass to the source `to_file` method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">to_file</span><span class="p">)</span>
+        <span class="n">allowed</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">name</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">KEYWORD_ONLY</span>
+        <span class="p">}</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;variables&quot;</span><span class="p">:</span> <span class="n">source_vars</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
+            <span class="s2">&quot;bbox&quot;</span><span class="p">:</span> <span class="n">bbox</span><span class="p">,</span>
+            <span class="s2">&quot;time_range&quot;</span><span class="p">:</span> <span class="n">time_range</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">query</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">allowed</span> <span class="ow">and</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+
+        <span class="n">bbox_from_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;bbox&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">bbox_from_kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Both function argument bbox </span><span class="si">{</span><span class="n">bbox</span><span class="si">}</span><span class="s2"> and source bbox </span><span class="si">{</span><span class="n">bbox_from_kwargs</span><span class="si">}</span><span class="s2"> are provided, using function argument bbox.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">bbox</span> <span class="o">=</span> <span class="n">bbox</span> <span class="k">if</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">bbox_from_kwargs</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">_parse_geom_bbox_buffer</span><span class="p">(</span><span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">)</span> <span class="k">if</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;mask&quot;</span> <span class="ow">in</span> <span class="n">allowed</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;mask&quot;</span><span class="p">:</span> <span class="n">mask</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">kwargs</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_register_source</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">source</span><span class="p">:</span> <span class="n">DataSource</span><span class="p">,</span>
+        <span class="n">registry</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataSource</span><span class="p">]]],</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Register a data source in the given registry structure.</span>
+
+<span class="sd">        Sources are organized hierarchically by name, provider, and version.</span>
+<span class="sd">        Existing entries with the same keys are overwritten.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        source : DataSource</span>
+<span class="sd">            The data source to register.</span>
+<span class="sd">        registry : dict</span>
+<span class="sd">            Registry mapping source names to providers, versions, and source objects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">registry</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">provider</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">registry</span><span class="p">[</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="n">source</span><span class="o">.</span><span class="n">provider</span><span class="p">][</span><span class="n">source</span><span class="o">.</span><span class="n">version</span><span class="p">]</span> <span class="o">=</span> <span class="n">source</span>
 
 <div class="viewcode-block" id="DataCatalog.get_rasterdataset">
 <a class="viewcode-back" href="../../../_generated/hydromt.data_catalog.DataCatalog.get_rasterdataset.html#hydromt.data_catalog.DataCatalog.get_rasterdataset">[docs]</a>
@@ -1782,12 +1904,10 @@
                 <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
                 <span class="n">time_range</span><span class="o">=</span><span class="n">time_range</span><span class="p">,</span>
                 <span class="n">buffer</span><span class="o">=</span><span class="n">buffer</span><span class="p">,</span>
+                <span class="n">handle_nodata</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">data_like</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">exec_nodata_strat</span><span class="p">(</span>
-                    <span class="n">_NO_DATA_AFTER_SLICE_MSG</span><span class="p">,</span>
-                    <span class="n">strategy</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
-                <span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
             <span class="k">return</span> <span class="n">_single_var_as_array</span><span class="p">(</span>
                 <span class="n">maybe_ds</span><span class="o">=</span><span class="n">data_like</span><span class="p">,</span>
                 <span class="n">single_var_as_array</span><span class="o">=</span><span class="n">single_var_as_array</span><span class="p">,</span>
@@ -1906,18 +2026,13 @@
                 <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">add_source</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_like</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">):</span>
-            <span class="n">data_like</span> <span class="o">=</span> <span class="n">GeoDataFrameAdapter</span><span class="o">.</span><span class="n">_slice_data</span><span class="p">(</span>
+            <span class="k">return</span> <span class="n">GeoDataFrameAdapter</span><span class="o">.</span><span class="n">_slice_data</span><span class="p">(</span>
                 <span class="n">data_like</span><span class="p">,</span>
                 <span class="n">variables</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span>
                 <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
                 <span class="n">predicate</span><span class="o">=</span><span class="n">predicate</span><span class="p">,</span>
+                <span class="n">handle_nodata</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="n">data_like</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">exec_nodata_strat</span><span class="p">(</span>
-                    <span class="n">_NO_DATA_AFTER_SLICE_MSG</span><span class="p">,</span>
-                    <span class="n">strategy</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
-                <span class="p">)</span>
-            <span class="k">return</span> <span class="n">data_like</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_like</span><span class="p">,</span> <span class="n">GeoDataFrameSource</span><span class="p">):</span>
             <span class="n">source</span> <span class="o">=</span> <span class="n">data_like</span>
         <span class="k">else</span><span class="p">:</span>
@@ -2051,12 +2166,10 @@
                 <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
                 <span class="n">predicate</span><span class="o">=</span><span class="n">predicate</span><span class="p">,</span>
                 <span class="n">time_range</span><span class="o">=</span><span class="n">time_range</span><span class="p">,</span>
+                <span class="n">handle_nodata</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">data_like</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">exec_nodata_strat</span><span class="p">(</span>
-                    <span class="n">_NO_DATA_AFTER_SLICE_MSG</span><span class="p">,</span>
-                    <span class="n">strategy</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
-                <span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
             <span class="k">return</span> <span class="n">_single_var_as_array</span><span class="p">(</span><span class="n">data_like</span><span class="p">,</span> <span class="n">single_var_as_array</span><span class="p">,</span> <span class="n">variables</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_like</span><span class="p">,</span> <span class="n">GeoDatasetSource</span><span class="p">):</span>
             <span class="n">source</span> <span class="o">=</span> <span class="n">data_like</span>
@@ -2160,12 +2273,10 @@
                 <span class="n">data_like</span><span class="p">,</span>
                 <span class="n">variables</span><span class="p">,</span>
                 <span class="n">time_range</span><span class="p">,</span>
+                <span class="n">handle_nodata</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">data_like</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">exec_nodata_strat</span><span class="p">(</span>
-                    <span class="n">_NO_DATA_AFTER_SLICE_MSG</span><span class="p">,</span>
-                    <span class="n">strategy</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
-                <span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
             <span class="k">return</span> <span class="n">_single_var_as_array</span><span class="p">(</span><span class="n">data_like</span><span class="p">,</span> <span class="n">single_var_as_array</span><span class="p">,</span> <span class="n">variables</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown data type &quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data_like</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
@@ -2256,13 +2367,9 @@
                 <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">add_source</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_like</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-            <span class="n">df</span> <span class="o">=</span> <span class="n">DataFrameAdapter</span><span class="o">.</span><span class="n">_slice_data</span><span class="p">(</span><span class="n">data_like</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">time_range</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">exec_nodata_strat</span><span class="p">(</span>
-                    <span class="n">_NO_DATA_AFTER_SLICE_MSG</span><span class="p">,</span>
-                    <span class="n">strategy</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
-                <span class="p">)</span>
-            <span class="k">return</span> <span class="n">df</span>
+            <span class="k">return</span> <span class="n">DataFrameAdapter</span><span class="o">.</span><span class="n">_slice_data</span><span class="p">(</span>
+                <span class="n">data_like</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">time_range</span><span class="p">,</span> <span class="n">handle_nodata</span><span class="o">=</span><span class="n">handle_nodata</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown tabular data type &quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data_like</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
 

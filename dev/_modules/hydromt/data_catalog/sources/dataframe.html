@@ -478,10 +478,14 @@
             <span class="n">time_range</span><span class="o">=</span><span class="n">src_time_range</span><span class="p">,</span>
             <span class="n">handle_nodata</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">uris</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># handle_nodata == ignore</span>
 
         <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
             <span class="n">uris</span><span class="p">,</span> <span class="n">handle_nodata</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span> <span class="n">variables</span><span class="o">=</span><span class="n">vrs</span>
         <span class="p">)</span>
+        <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># handle_nodata == ignore</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_adapter</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
             <span class="n">df</span><span class="p">,</span>
@@ -546,7 +550,7 @@
 <a class="viewcode-back" href="../../../../_generated/hydromt.data_catalog.sources.DataFrameSource.html#hydromt.data_catalog.sources.DataFrameSource.to_stac_catalog">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_stac_catalog</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">IGNORE</span><span class="p">,</span>
+        <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">WARN</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StacCatalog</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert a dataframe into a STAC Catalog representation.</span>

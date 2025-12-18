@@ -452,6 +452,7 @@
 <li><p><cite>hydromt check</cite> accepts a <cite>–format</cite> flag to check either v1 or v0 data catalogs (#1265)</p></li>
 <li><p><cite>hydromt check</cite> accepts a <cite>–upgrade</cite> flag to upgrade v0 datacatalogs to the new v1 format (#1265)</p></li>
 <li><p><cite>Model</cite> can now be used as a context manager. This ensures that all open files are closed when exiting the context. (#1272)</p></li>
+<li><p><cite>RasterioDriver</cite> now supports writing tif files. (#1332)</p></li>
 </ul>
 </section>
 <section id="changed">
@@ -469,6 +470,7 @@
 <li><p>Function signatures of <cite>DataCatalog</cite> functions <cite>get_rasterdataset</cite>, <cite>get_geodataframe</cite>, <cite>get_geodataset</cite>, <cite>get_dataset</cite> and <cite>get_dataframe</cite> now have: <code class="docutils literal notranslate"><span class="pre">source_kwargs</span></code> (passed to <cite>DataSource.__init__</cite>) instead of just <code class="docutils literal notranslate"><span class="pre">kwargs</span></code>, and <code class="docutils literal notranslate"><span class="pre">time_tuple</span></code> was renamed to <code class="docutils literal notranslate"><span class="pre">time_range</span></code>. (#1291)</p></li>
 <li><p><cite>DataCatalog</cite> argument fallback_lib has been removed. Users now have to specify the name of the data catalog they want to use, even if it is artifact_data (#1069).</p></li>
 <li><p><cite>GeomsComponent.region</cite> now returns the geometric union of all polygonal features in the component instead of a bounding box. Only geometries with area (Polygons and MultiPolygons) contribute to the union; Points, LineStrings, and MultiLineStrings are excluded and assumed to lie within the polygon-defined area. (#1334)</p></li>
+<li><p>When writing zarr files, by default write with <code class="docutils literal notranslate"><span class="pre">zarr_format=2</span></code>. Can be overwritten with the <code class="docutils literal notranslate"><span class="pre">write_kwargs</span></code> argument.</p></li>
 </ul>
 </section>
 <section id="fixed">
@@ -489,6 +491,8 @@
 <li><p>Build and update functions call <cite>ModelComponent.cleanup</cite> and <cite>ModelComponent.finish_write</cite>. Stabilizing the write functionality and making sure that netCDF files can be overwritten when the source and destination are the same. (#778)</p></li>
 <li><p><cite>hydromt check</cite> has been updated to validate v1 data catalogs (#1265)</p></li>
 <li><p>All handling of log files is now done with the context manager <cite>hydromt._utils.log.to_file</cite>. This means that they are always closed by the the function that opened them. (#1272)</p></li>
+<li><p><cite>DataCatalog.export_data</cite> now correctly handles rasterdata that have been written with paths containing wildcards. (#1323)</p></li>
+<li><p>Standardized the behaviour of DataSources and subcomponents when it comes to handling the case where there is no data.</p></li>
 </ul>
 </section>
 <section id="deprecated">
