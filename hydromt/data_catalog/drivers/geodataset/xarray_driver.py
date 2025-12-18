@@ -91,10 +91,6 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
         )
         preprocessor = self.options.get_preprocessor()
         if len(uris) == 0:
-            exec_nodata_strat(
-                "No URIs provided to read data from.",
-                strategy=handle_nodata,
-            )
             return None  # handle_nodata == ignore
         first_ext = splitext(uris[0])[-1]
 

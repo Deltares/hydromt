@@ -148,6 +148,9 @@ class RasterioDriver(RasterDatasetDriver):
         rasterio.errors.RasterioIOError
             If an I/O error occurs during reading.
         """
+        if len(uris) == 0:
+            return None  # handle_nodata == ignore
+
         if metadata is None:
             metadata = SourceMetadata()
 

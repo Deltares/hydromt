@@ -100,10 +100,6 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
         if not metadata:
             metadata = SourceMetadata()
         if len(uris) == 0:
-            exec_nodata_strat(
-                "No URIs provided to read data from.",
-                strategy=handle_nodata,
-            )
             return None  # handle_nodata == ignore
         elif len(uris) > 1:
             raise ValueError(

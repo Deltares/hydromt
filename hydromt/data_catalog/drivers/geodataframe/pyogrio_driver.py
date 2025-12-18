@@ -87,10 +87,6 @@ class PyogrioDriver(GeoDataFrameDriver):
                 f"{self.__class__.__name__} driver is not supported."
             )
         elif len(uris) == 0:
-            exec_nodata_strat(
-                "No URIs provided to read data from.",
-                strategy=handle_nodata,
-            )
             return None  # handle_nodata == ignore
         else:
             _uri = uris[0]

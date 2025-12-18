@@ -131,6 +131,9 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
             },
         )
 
+        if len(uris) == 0:
+            return None  # handle_nodata == ignore
+
         preprocessor = self.options.get_preprocessor()
         first_ext = self.options.get_ext_override(uris)
 
