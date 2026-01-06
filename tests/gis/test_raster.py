@@ -14,6 +14,7 @@ import pytest
 import rasterio
 import xarray as xr
 from affine import Affine
+from pyproj import Transformer
 from shapely.geometry import LineString, Point, Polygon, box
 
 from hydromt.gis import parse_crs, raster, raster_utils
@@ -25,13 +26,16 @@ from hydromt.readers import open_raster
 
 
 @pytest.fixture
-def sample_stats_da():
-    transform, shape = [1.0, 0.0, 0.0, 0.0, -1.0, 10.0], (10, 10)
-    da = raster_utils.full_from_transform(
-        transform, shape, name="test", crs=4326, nodata=-9999
-    )
-    da.data = np.arange(da.raster.size).reshape(da.raster.shape).astype(float)
-    return da
+def sample_points_da():
+    def _create_da(crs: int = 3857):
+        transform, shape = [1.0, 0.0, 0.0, 0.0, -1.0, 10.0], (10, 10)
+        da = raster_utils.full_from_transform(
+            transform, shape, name="test", crs=crs, nodata=-9999
+        )
+        da.data = np.arange(da.raster.size).reshape(da.raster.shape).astype(float)
+        return da
+
+    return _create_da
 
 
 # origin, rotation, res, shape, internal_bounds
@@ -589,8 +593,8 @@ def test_rotated(transform, shape, tmp_path: Path):
     assert np.all(da2.raster.box.intersects(da2_reproj.raster.box.to_crs(4326)))
 
 
-def test_sample_stats_mean_over_time(sample_stats_da):
-    da = sample_stats_da
+def test_sample_points_mean_over_time(sample_points_da):
+    da = sample_points_da()
     if "time" not in da.dims:
         times = np.arange(5)  # 5 time steps
         da_multi = da.expand_dims({"time": times})
@@ -603,7 +607,7 @@ def test_sample_stats_mean_over_time(sample_stats_da):
     gdf = gpd.GeoDataFrame(geometry=[centroid], crs=da_multi.raster.crs)
 
     # Sample raster with 'mean' stat
-    ds_sampled = da_multi.raster.sample_stats(
+    ds_sampled = da_multi.raster.sample_points(
         gdf, stats=["mean"], sampling_strategy="centroid"
     )
 
@@ -623,8 +627,8 @@ def test_sample_stats_mean_over_time(sample_stats_da):
     np.testing.assert_allclose(ds_sampled[var_name].values[0], expected_mean)
 
 
-def test_sample_stats(sample_stats_da):
-    da = sample_stats_da
+def test_sample_points(sample_points_da):
+    da = sample_points_da()
     ds = xr.merge(
         [
             da,
@@ -642,7 +646,7 @@ def test_sample_stats(sample_stats_da):
     ]
     gdf = gpd.GeoDataFrame(geometry=geoms, crs=ds.raster.crs)
 
-    ds0 = ds.raster.sample_stats(
+    ds0 = ds.raster.sample_points(
         gdf, stats=["mean"], sampling_strategy="representative_point"
     )
 
@@ -663,76 +667,67 @@ def test_sample_stats(sample_stats_da):
     assert np.all(ds0["test"].values == np.array(vals))
 
 
-def test_sample_stats_crs_reprojection(sample_stats_da):
-    da = sample_stats_da
-    w, s, e, n = da.raster.bounds
-    p = Point((w + (e - w) / 2, s + (n - s) / 2))  # center point
-    gdf_4326 = gpd.GeoDataFrame(geometry=[p], crs=4326)
+def test_sample_points_crs_reprojection(sample_points_da):
+    da_3857 = sample_points_da(crs=3857)
+    w, s, e, n = da_3857.raster.bounds
+    x_center = w + (e - w) / 2
+    y_center = s + (n - s) / 2
+    transformer = Transformer.from_crs(3857, 4326, always_xy=True)
+    lon, lat = transformer.transform(x_center, y_center)
+    gdf_4326 = gpd.GeoDataFrame(geometry=[Point(lon, lat)], crs=4326)
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=DeprecationWarning)
-        gdf_3857 = gdf_4326.to_crs(epsg=3857)
-        ds_sampled = da.raster.sample_stats(
-            gdf_3857, stats=["mean"], sampling_strategy="centroid"
+        ds_sampled = da_3857.raster.sample_points(
+            gdf_4326, stats=["mean"], sampling_strategy="centroid"
         )
 
     assert "index" in ds_sampled.dims
-    assert ds_sampled["index"].values[0] == gdf_3857.index[0]
-    for var in (da.name,):
+    assert ds_sampled["index"].values[0] == gdf_4326.index[0]
+    for var in (da_3857.name,):
         assert var in ds_sampled.data_vars
 
     sampled_x = ds_sampled["x"].values[0]
     sampled_y = ds_sampled["y"].values[0]
-    assert 0 <= sampled_x < da.raster.width
-    assert 0 <= sampled_y < da.raster.height
+    assert 0 <= sampled_x < da_3857.raster.width
+    assert 0 <= sampled_y < da_3857.raster.height
 
 
-def test_sample_stats_warn_centroid_outside(sample_stats_da, caplog):
-    da = sample_stats_da
+def test_sample_points_raise_centroid_geographic_crs(sample_points_da):
+    da = sample_points_da(crs=4326)
     # define a concave polygon so centroid is outside
     # "U" shape: a tall rectangle with a missing middle bottom
     geom = Polygon(
         [(0, 0), (4, 0), (4, 4), (3, 4), (3, 1), (1, 1), (1, 4), (0, 4), (0, 0)]
     )
-    gdf = gpd.GeoDataFrame(geometry=[geom], crs=4326)
+    gdf_4326 = gpd.GeoDataFrame(geometry=[geom], crs=4326)
 
     # sanity check
     assert not geom.contains(geom.centroid)
 
-    with caplog.at_level(logging.WARNING):
-        da.raster.sample_stats(
-            gdf,
-            stats=["mean"],
-            sampling_strategy="centroid",
-        )
-
-    assert "Centroid sample point for geometry 0 is not within geometry" in caplog.text
+    with pytest.raises(
+        ValueError, match="Centroid sampling is not supported for geographic CRS"
+    ):
+        da.raster.sample_points(gdf_4326, sampling_strategy="centroid", stats=["mean"])
 
 
-def test_sample_stats_nodata_warn(sample_stats_da, caplog):
-    da = sample_stats_da
+def test_sample_points_nodata_warn(sample_points_da, caplog):
+    da = sample_points_da(crs=3857)
     da.data[3, 3] = -9999
-    gdf = gpd.GeoDataFrame(
-        geometry=[Point((3.1, 6.9))],
-        crs=4326,
-    )
+    gdf = gpd.GeoDataFrame(geometry=[Point((3.1, 6.9))], crs=3857)
 
     with caplog.at_level(logging.WARNING):
-        da.raster.sample_stats(gdf, stats=["mean"], sampling_strategy="centroid")
+        da.raster.sample_points(gdf, stats=["mean"], sampling_strategy="centroid")
 
     assert "nodata" in caplog.text
 
 
-def test_sample_stats_all_outside(sample_stats_da):
-    gdf = gpd.GeoDataFrame(
-        geometry=[Point((100, 100))],
-        crs=4326,
-    )
+def test_sample_points_all_outside(sample_points_da):
+    da = sample_points_da(crs=3857)
+    gdf = gpd.GeoDataFrame(geometry=[Point((100, 100))], crs=3857)
 
     with pytest.raises(ValueError, match="outside raster"):
-        sample_stats_da.raster.sample_stats(
-            gdf, stats=["mean"], sampling_strategy="centroid"
-        )
+        da.raster.sample_points(gdf, stats=["mean"], sampling_strategy="centroid")
 
 
 def test_create_rotated_grid_from_geom_axis_aligned():

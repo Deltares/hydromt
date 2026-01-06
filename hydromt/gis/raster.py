@@ -45,7 +45,7 @@ logger = logging.getLogger(__name__)
 XDIMS = ("x", "longitude", "lon", "long")
 YDIMS = ("y", "latitude", "lat")
 GEO_MAP_COORD = "spatial_ref"
-
+_STAT_REDUCERS = ["count", "min", "max", "sum", "mean", "std", "median"]
 __all__ = [
     "RasterDataArray",
     "RasterDataset",
@@ -921,7 +921,6 @@ class XRasterBase(XGeoBase):
             Output dataset with a variable for each combination of input variable
             and statistic.
         """
-        _ST = ["count", "min", "max", "sum", "mean", "std", "median"]
 
         def rmd(ds, stat):
             return {var: f"{var}_{stat}" for var in ds.raster.vars}
@@ -945,7 +944,7 @@ class XRasterBase(XGeoBase):
                 ds1 = ds1.where(mask == 1)
                 dss = []
                 for stat in stats:
-                    if stat in _ST:
+                    if stat in _STAT_REDUCERS:
                         ds1_stat = getattr(ds1, stat)(dims)
                         dss.append(ds1_stat.rename(rmd(ds1, stat)))
                     elif isinstance(stat, str) and stat.startswith("q"):
@@ -986,15 +985,15 @@ class XRasterBase(XGeoBase):
 
         return ds_out
 
-    def sample_stats(
+    def sample_points(
         self,
         gdf: gpd.GeoDataFrame,
         sampling_strategy: Literal["centroid", "representative_point"],
-        stats: list[str] | Callable | None = None,
+        stats: str | list[str] | Callable = "mean",
         variables: list[str] | None = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.WARN,
     ):
-        """For each geometry, sample one raster cell and compute stats across bands.
+        """For each geometry, compute one sample point in the raster and compute stats across bands.
 
         Fast sampling of raster values at geometry centroids (or representative points).
         Intended for cases where raster resolution >> geometry size.
@@ -1004,7 +1003,7 @@ class XRasterBase(XGeoBase):
         ----------
         gdf : geopandas.GeoDataFrame
             GeoDataFrame with geometries
-        stats : list of str, callable, optional
+        stats : str, list of str, callable, optional
             Statistics to compute from raster values, options include
             {'mean', 'min', 'max', 'sum', 'std', 'median'}.
             Multiple statistics can be calculated by providing a list.
@@ -1037,138 +1036,88 @@ class XRasterBase(XGeoBase):
         if gdf.crs is not None and self.crs is not None and gdf.crs != self.crs:
             gdf = gdf.to_crs(self.crs)
 
-        ds = self._obj
-        if isinstance(ds, xr.DataArray):
-            ds = ds.to_dataset(name=ds.name or "values")
-
-        # compute sample indices
-        rows = []
-        cols = []
-        indices = []
-        for i, geom in zip(gdf.index, gdf.geometry, strict=False):
-            if geom is None or geom.is_empty:
-                continue
-
-            if sampling_strategy == "centroid":
-                p = geom.centroid
-                if not geom.contains(p):
-                    msg = f"Centroid sample point for geometry {i} is not within geometry."
-                    if geom.geom_type.startswith("Multi"):
-                        msg += " Consider using 'representative_point' sampling strategy when working with multi-part geometries."
-                    logger.warning(msg)
-            else:
-                p = geom.representative_point()
-
-            col, row = ~ds.raster.transform * (p.x, p.y)
-
-            col = int(np.floor(col))
-            row = int(np.floor(row))
-
-            if row < 0 or row >= ds.raster.height or col < 0 or col >= ds.raster.width:
-                logger.warning(
-                    f"Geometry at index {i} with {p} outside raster domain. Skipping."
+        if sampling_strategy == "centroid":
+            if gdf.crs.is_geographic:
+                raise ValueError(
+                    "Centroid sampling is not supported for geographic CRS, use 'sampling_strategy=representative_point' instead."
                 )
-                continue
+            points = gdf.geometry.centroid
+        elif sampling_strategy == "representative_point":
+            points = gdf.geometry.representative_point()
+        else:
+            raise ValueError(f"Invalid sampling_strategy: {sampling_strategy}")
 
-            rows.append(row)
-            cols.append(col)
-            indices.append(i)
-
-        if not indices:
+        # determine which geometries fall inside raster bounds
+        gdf_points = gdf.copy()
+        gdf_points["geometry"] = points
+        w, s, e, n = self.bounds
+        valid_mask = (
+            (gdf_points.geometry.x >= w)
+            & (gdf_points.geometry.x <= e)
+            & (gdf_points.geometry.y >= s)
+            & (gdf_points.geometry.y <= n)
+        )
+        if not valid_mask.any():
             raise ValueError("All geometries outside raster domain")
 
-        # get sampled values
-        rows = np.asarray(rows)
-        cols = np.asarray(cols)
+        gdf_points = gdf_points[valid_mask]
+        valid_indices = gdf_points.index.values
 
-        out = {}
-        bad_mask = np.zeros(len(indices), dtype=bool)
+        sampled = self.sample(gdf_points)
+        if isinstance(sampled, xr.DataArray):
+            sampled = sampled.to_dataset(name=sampled.name or "values")
 
-        if variables is None:
-            variables = ds.data_vars.keys()
+        if variables is not None:
+            sampled = sampled[variables]
 
-        def _to_index_1d(_in: np.ndarray) -> tuple[str, np.ndarray]:
-            arr = np.squeeze(np.asarray(_in))  # shape (n_features, n_geoms)
-            if arr.ndim == 0:
-                arr = np.array([arr])  # ensure 1D
-            return ("index", arr)
+        out_vars = {}
+        for var in sampled.data_vars:
+            da = sampled[var]
+            dims_to_reduce = [d for d in da.dims if d != "index"]
 
-        # sample variables directly
-        for var in variables:
-            da = ds[var]
-            data = da.data
+            # single-band or single-point: no reduction
+            if not dims_to_reduce:
+                out_vars[var] = da
+                continue
 
-            # Create array of sampled values (n_geoms, n_features)
-            sampled_vals = np.stack(
-                [
-                    data[..., r, c].compute()  # edge case for dask arrays
-                    if hasattr(data, "compute")
-                    else data[..., r, c]
-                    for r, c in zip(rows, cols, strict=True)
-                ],
-                axis=-1,
-            )
-            # Ensure shape is (n_features, n_geoms)
-            if sampled_vals.ndim == 1:
-                sampled_vals = sampled_vals[np.newaxis, :]
+            # multiple dims: apply stats
+            for stat in stats:
+                if stat in _STAT_REDUCERS:
+                    res = getattr(da, stat)(dim=dims_to_reduce)
+                    name = var if not dims_to_reduce else f"{var}_{stat}"
+                elif isinstance(stat, str) and stat.startswith("q"):
+                    qs = np.array([float(q) for q in stat.strip("q").split(",")])
+                    res = da.quantile(qs / 100, dim=dims_to_reduce)
+                    name = f"{var}_quantile"
+                elif callable(stat):
+                    res = da.reduce(stat, dim=dims_to_reduce)
+                    name = f"{var}_{stat.__name__}"
+                else:
+                    raise ValueError(f"Stat {stat} not valid for point sampling")
+                out_vars[name] = res
 
-            # check for nodata / nan values
-            nodata = da.raster.nodata
-            if nodata is not None:
-                bad_mask |= np.any(sampled_vals == nodata, axis=0)
-            bad_mask |= np.any(np.isnan(sampled_vals), axis=0)
-            if bad_mask.any():
-                exec_nodata_strat(
-                    f"{int(bad_mask.sum())} out of {len(indices)} geometries sampled nodata values for variable '{var}'.",
-                    handle_nodata,
-                )
-
-            # Determine stats
-            x_dim = ds.raster.x_dim
-            y_dim = ds.raster.y_dim
-            reduce_dims = [d for d in da.dims if d not in (x_dim, y_dim)]
-
-            if not reduce_dims:  # single band raster, no stats needed
-                if stats is not None:  # no stats requested
-                    logger.warning(
-                        "Statistics requested for single-band raster; returning sampled value."
-                    )
-                out[var] = _to_index_1d(sampled_vals)
-            else:  # compute stats
-                stats_to_apply = stats or ["mean"]
-                for stat in stats_to_apply:
-                    if stat == "mean":
-                        vals = np.nanmean(sampled_vals, axis=0)
-                    elif stat == "min":
-                        vals = np.nanmin(sampled_vals, axis=0)
-                    elif stat == "max":
-                        vals = np.nanmax(sampled_vals, axis=0)
-                    elif stat == "sum":
-                        vals = np.nansum(sampled_vals, axis=0)
-                    elif stat == "std":
-                        vals = np.nanstd(sampled_vals, axis=0)
-                    elif stat == "median":
-                        vals = np.nanmedian(sampled_vals, axis=0)
-                    elif callable(stat):
-                        vals = np.apply_along_axis(stat, 0, sampled_vals)
-                    else:
-                        raise ValueError(f"Stat {stat} not valid for point sampling")
-
-                    stat_str = stat if isinstance(stat, str) else stat.__name__
-                    out[f"{var}_{stat_str}"] = _to_index_1d(vals)
-
-        xcoord = ds.coords[ds.raster.x_dim].values
-        ycoord = ds.coords[ds.raster.y_dim].values
-        return xr.Dataset(
-            out,
-            coords=dict(
-                index=("index", indices),
-                **{
-                    x_dim: ("index", xcoord[cols]),
-                    y_dim: ("index", ycoord[rows]),
-                },
-            ),
+        ds_out = xr.Dataset(out_vars)
+        ds_out = ds_out.assign_coords(
+            index=("index", valid_indices),
+            x=("index", gdf_points.geometry.x.values),
+            y=("index", gdf_points.geometry.y.values),
         )
+
+        arr = sampled.to_array()
+        reduce_dims = [d for d in arr.dims if d != "index"]
+        bad_mask = arr.isnull().any(dim=reduce_dims).values
+        nodata = da.raster.nodata
+        if nodata is not None:
+            bad_mask |= (arr == nodata).any(dim=reduce_dims).values
+
+        if np.any(bad_mask):
+            exec_nodata_strat(
+                f"{int(np.sum(bad_mask))} out of {len(valid_indices)} geometries sampled nodata values.",
+                handle_nodata,
+            )
+            ds_out = ds_out.isel(index=~bad_mask)
+
+        return ds_out
 
     def reclassify(self, reclass_table: pd.DataFrame, method: str = "exact"):
         """Reclass columns in df from raster map (DataArray).
