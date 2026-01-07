@@ -2,6 +2,7 @@
 
 import glob
 import os
+import warnings
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from logging import WARNING
@@ -17,6 +18,7 @@ import pandas as pd
 import pytest
 import requests
 import xarray as xr
+import zarr
 from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
@@ -1906,3 +1908,14 @@ def test_get_rasterdataset_with_unit_add(data_catalog: DataCatalog):
     # assert that the ds goes from 2010-02-02 to 2010-02-10, because of unit_add time (+1 day) in the data catalog
     assert ds["time"].values[0] == np.datetime64("2010-02-02T00:00:00")
     assert ds["time"].values[-1] == np.datetime64("2010-02-10T00:00:00")
+
+
+def test_ARCO_link_datasources():
+    warnings.filterwarnings("ignore", category=zarr.errors.ZarrUserWarning)
+    datacatalog = DataCatalog(
+        data_libs=[_CATALOG_DIR + "/deltares_data/v1.2.0/data_catalog.yml"]
+    )
+    bbox = [4.2715461044, 52.0537179493, 4.3550421814, 52.1043572932]
+    time_range = ("2010-02-01T00:00:00", "2010-02-10T00:00:00")
+    era5 = datacatalog.get_rasterdataset("era5", bbox=bbox, time_range=time_range)
+    assert isinstance(era5, xr.Dataset)

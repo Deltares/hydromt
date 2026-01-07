@@ -1,5 +1,6 @@
 """URIResolvers obtain multiple URIs before being passed to Drivers."""
 
+from hydromt.data_catalog.uri_resolvers.ARCO_mirror_resolver import ArcoMirrorResolver
 from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
 from hydromt.data_catalog.uri_resolvers.raster_tindex_resolver import (
     RasterTindexResolver,
@@ -10,6 +11,7 @@ __all__ = [
     "ConventionResolver",
     "URIResolver",
     "RasterTindexResolver",
+    "ArcoMirrorResolver",
 ]
 
 # define hydromt uri resolver entry points
@@ -17,4 +19,5 @@ __all__ = [
 __hydromt_eps__ = [
     "ConventionResolver",
     "RasterTindexResolver",
+    "ArcoMirrorResolver",
 ]
