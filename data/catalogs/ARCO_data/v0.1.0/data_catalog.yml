@@ -5,15 +5,9 @@ meta:
 
 era5:
   data_type: RasterDataset
-  uri: "https://edh:{password}@data.earthdatahub.destine.eu/era5/era5-land-daily-utc-v1.zarr"
-  # uri_resolver:
-  #   name: ARCO_mirror
-  #   options:
-  #     authenticator: data.earthdatahub.destine.eu
+  uri: "https://data.earthdatahub.destine.eu/era5/era5-land-daily-utc-v1.zarr"
   driver:
     name: raster_xarray
-    filesystem:
-      protocol: https
     options:
       decode_times: true
       storage_options:
@@ -64,11 +58,7 @@ era5:
 
 era5_hourly:
   data_type: RasterDataset
-  uri: https://edh:{password}@data.earthdatahub.destine.eu/era5/reanalysis-era5-land-no-antartica-v0.zarr
-  uri_resolver:
-    name: ARCO_mirror
-    options:
-      authenticator: data.earthdatahub.destine.eu
+  uri: https://data.earthdatahub.destine.eu/era5/reanalysis-era5-land-no-antartica-v0.zarr
   driver:
     name: raster_xarray
     options:
@@ -116,11 +106,7 @@ era5_hourly:
 
 era5_ocean:
   data_type: RasterDataset
-  uri: https://edh:{password}@data.earthdatahub.destine.eu/era5/reanalysis-era5-single-levels-ocean-v0.zarr
-  uri_resolver:
-    name: ARCO_mirror
-    options:
-      authenticator: data.earthdatahub.destine.eu
+  uri: https://data.earthdatahub.destine.eu/era5/reanalysis-era5-single-levels-ocean-v0.zarr
   driver:
     name: raster_xarray
     options:
@@ -151,7 +137,7 @@ era5_ocean:
 
 esa_worldcover:
   data_type: RasterDataset
-  uri: s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt
+  uri: s3://esa-worldcover/v100/220/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt
   driver:
     name: rasterio
     filesystem:

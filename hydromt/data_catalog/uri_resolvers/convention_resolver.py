@@ -125,6 +125,11 @@ class ConventionResolver(URIResolver):
             time_range=time_range,
             variables=variables,
         )
+
+        if not any(char in uri_expanded for char in ["*", "?", "{", "}"]):
+            # no wildcards or placeholders
+            return [uri_expanded]
+
         if time_range:
             dates = self._get_dates(keys, time_range)
         else:

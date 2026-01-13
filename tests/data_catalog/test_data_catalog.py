@@ -1910,9 +1910,8 @@ def test_get_rasterdataset_with_unit_add(data_catalog: DataCatalog):
     assert ds["time"].values[-1] == np.datetime64("2010-02-10T00:00:00")
 
 
-@pytest.mark.integration
-@pytest.mark.parametrize("datasource", ["era5", "era5_hourly", "era5_ocean"])
-def test_era5_ARCO_destine_datasources(datasource: str):
+@pytest.fixture(scope="module")
+def require_arco_credentials():
     import netrc
 
     try:
@@ -1921,11 +1920,16 @@ def test_era5_ARCO_destine_datasources(datasource: str):
             pytest.skip("No ARCO credentials found in .netrc file.")
     except FileNotFoundError:
         pytest.skip("No .netrc file found for ARCO mirror authentication.")
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("datasource", ["era5", "era5_hourly", "era5_ocean"])
+def test_era5_ARCO_destine_datasources(datasource: str, require_arco_credentials):
     warnings.filterwarnings("ignore", category=zarr.errors.ZarrUserWarning)
     datacatalog = DataCatalog(
         data_libs=[_CATALOG_DIR + "/ARCO_data/v0.1.0/data_catalog.yml"]
     )
-    if datasource == "era5_ocean":
+    if datasource == "era5_ocean":  # Dataset only covers oceans
         bbox = [-4.49901, 46.750592, -3.999132, 47.034009]
     else:
         bbox = [4.2715461044, 52.0537179493, 4.3550421814, 52.1043572932]
@@ -1934,3 +1938,15 @@ def test_era5_ARCO_destine_datasources(datasource: str):
     assert isinstance(data, xr.Dataset)
     assert data["time"].values[0] == np.datetime64("2010-02-02T00:00:00")
     assert data["time"].values[-1] == np.datetime64("2010-02-10T00:00:00")
+
+
+@pytest.mark.integration
+def test_esa_world_cover_aws(require_arco_credentials, tmp_path: Path):
+    datacatalog = DataCatalog(_CATALOG_DIR + "/ARCO_data/v0.1.0/data_catalog.yml")
+    bbox = [4.2715461044, 52.0537179493, 4.3550421814, 52.1043572932]
+    data = datacatalog.get_rasterdataset("esa_worldcover", bbox=bbox)
+    assert isinstance(data, xr.DataArray)
+    output_path = tmp_path / "esa_worldcover_export"
+    # data.raster.to_raster(output_path)
+    # assert output_path.exists()
+    datacatalog.export_data(output_path, bbox=bbox, sources=["esa_worldcover"])
