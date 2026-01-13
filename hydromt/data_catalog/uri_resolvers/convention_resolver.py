@@ -46,6 +46,9 @@ class ConventionResolver(URIResolver):
 
         def split_and_glob(uri: str) -> tuple[Optional[str], list[str]]:
             protocol, _ = split_protocol(uri)
+            if protocol == "https" or protocol == "http":
+                # fsspec https filesystem does not support globbing
+                return (protocol, [uri])
             return (protocol, self.filesystem.get_fs().glob(uri))
 
         def maybe_unstrip_protocol(
@@ -125,11 +128,6 @@ class ConventionResolver(URIResolver):
             time_range=time_range,
             variables=variables,
         )
-
-        if not any(char in uri_expanded for char in ["*", "?", "{", "}"]):
-            # no wildcards or placeholders
-            return [uri_expanded]
-
         if time_range:
             dates = self._get_dates(keys, time_range)
         else:
