@@ -8,6 +8,8 @@ era5:
   uri: "https://data.earthdatahub.destine.eu/era5/era5-land-daily-utc-v1.zarr"
   driver:
     name: raster_xarray
+    filesystem:
+      protocol: https
     options:
       decode_times: true
       storage_options:
@@ -61,6 +63,8 @@ era5_hourly:
   uri: https://data.earthdatahub.destine.eu/era5/reanalysis-era5-land-no-antartica-v0.zarr
   driver:
     name: raster_xarray
+    filesystem:
+      protocol: https
     options:
       decode_times: true
       storage_options:
@@ -109,6 +113,8 @@ era5_ocean:
   uri: https://data.earthdatahub.destine.eu/era5/reanalysis-era5-single-levels-ocean-v0.zarr
   driver:
     name: raster_xarray
+    filesystem:
+      protocol: https
     options:
       decode_times: true
       storage_options:

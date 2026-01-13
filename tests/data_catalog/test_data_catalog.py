@@ -1941,7 +1941,7 @@ def test_era5_ARCO_destine_datasources(datasource: str, require_arco_credentials
 
 
 @pytest.mark.integration
-def test_esa_world_cover_aws(require_arco_credentials, tmp_path: Path):
+def test_esa_world_cover_aws(tmp_path: Path):
     datacatalog = DataCatalog(_CATALOG_DIR + "/ARCO_data/v0.1.0/data_catalog.yml")
     bbox = [4.2715461044, 52.0537179493, 4.3550421814, 52.1043572932]
     data = datacatalog.get_rasterdataset("esa_worldcover", bbox=bbox)
