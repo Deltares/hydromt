@@ -1,1 +1,1 @@
-v0.1.0/data_catalog.yml e5503ed95adcad71b3dac77817d456e21faae96cf4e2fe04b0dedaf66c737707
+v0.1.0/data_catalog.yml d377b37f6a5f5f267a4bca5cd8d6d95d4a13d3005af3183b0253f6df9800a4b5

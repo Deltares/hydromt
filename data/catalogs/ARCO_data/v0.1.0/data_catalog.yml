@@ -1,3 +1,6 @@
+# The DestinE Earth Data Hub datasets require an authentication token.
+# Please follow the instructions at https://earthdatahub.destine.eu/getting-started#configuring-netrc to set up.
+
 meta:
   version: v0.1.0
   name: ARCO_data
@@ -143,12 +146,16 @@ era5_ocean:
 
 esa_worldcover:
   data_type: RasterDataset
-  uri: s3://esa-worldcover/v100/220/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt
+  uri: s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt
   driver:
     name: rasterio
     filesystem:
       protocol: s3
       anon: true
+    # options:
+    #   chunks:
+    #     'x': 512
+    #     'y': 512
   metadata:
     category: landuse
     source_version: v100
