@@ -7,7 +7,7 @@
 
 """Extension for xarray to provide rasterio capabilities to xarray datasets/arrays."""
 
-from __future__ import annotations
+from __future__ import annotations  # noqa: I001
 
 import datetime
 import itertools
@@ -32,12 +32,11 @@ from pyproj import CRS
 from rasterio import features
 from rasterio.enums import MergeAlg, Resampling
 from rasterio.rio.overview import get_maximum_overview_level
+import rioxarray  # noqa: F401
 from scipy import ndimage
 from scipy.interpolate import griddata
 from scipy.spatial import cKDTree
 from shapely.geometry import LineString, Polygon, box
-
-from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.gis import gis_utils, raster_utils
 from hydromt.gis._gdal_drivers import GDAL_EXT_CODE_MAP
 
@@ -895,7 +894,8 @@ class XRasterBase(XGeoBase):
     def zonal_stats(
         self,
         gdf: gpd.GeoDataFrame,
-        stats: list[str] | Callable,
+        stats: str | list[str] | Callable,
+        variables: list[str] | None = None,
         all_touched: bool = False,
     ):
         """Calculate zonal statistics of raster samples aggregated for geometries.
@@ -904,12 +904,15 @@ class XRasterBase(XGeoBase):
         ---------
         gdf: geopandas.GeoDataFrame
             GeoDataFrame with geometries
-        stats: list of str, callable
+        stats: str | list[str] | Callable
             Statistics to compute from raster values, options include
             {'count', 'min', 'max', 'sum', 'mean', 'std', 'median', 'q##'}.
-            Multiple percentiles can be calculated using comma-seperated values,
+            Multiple percentiles can be calculated using comma-separated values,
             e.g.: 'q10,50,90'. Statistics ignore the nodata value and are applied
-            along the x and y dimension. By default ['mean']
+            along the x and y dimension. By default 'mean'
+        variables: list of str, optional
+            List of variable names to calculate zonal statistics for. If None, all variables
+            are used. By default None
         all_touched : bool, optional
             If True, all pixels touched by geometries will used to define the sample.
             If False, only pixels whose center is within the geometry or that are
@@ -922,10 +925,15 @@ class XRasterBase(XGeoBase):
             and statistic.
         """
 
-        def rmd(ds, stat):
+        def rmd(ds: xr.Dataset, stat: str):
             return {var: f"{var}_{stat}" for var in ds.raster.vars}
 
-        def gen_zonal_stat(ds, geoms, stats, all_touched=False):
+        def gen_zonal_stat(
+            ds: xr.Dataset,
+            geoms: list[gpd.GeoSeries],
+            stats: list[str] | Callable,
+            all_touched: bool = False,
+        ):
             dims = (ds.raster.y_dim, ds.raster.x_dim)
             for i, geom in enumerate(geoms):
                 # add buffer to work with point geometries
@@ -960,16 +968,18 @@ class XRasterBase(XGeoBase):
                         raise ValueError(f"Stat {stat} not valid.")
                 yield xr.merge(dss), i
 
-        if isinstance(stats, str):
-            stats = stats.split()
-        elif callable(stats):
-            stats = list([stats])
+        if not isinstance(stats, list):
+            stats = [stats]
 
         if gdf.crs is not None and self.crs is not None and gdf.crs != self.crs:
             gdf = gdf.to_crs(self.crs)
         geoms = gdf["geometry"].values
 
         ds = self._obj.copy()
+
+        if variables is not None:
+            ds = ds[variables]
+
         if isinstance(ds, xr.DataArray):
             if ds.name is None:
                 ds.name = "values"
@@ -985,13 +995,12 @@ class XRasterBase(XGeoBase):
 
         return ds_out
 
-    def sample_points(
+    def sample_geoms(
         self,
         gdf: gpd.GeoDataFrame,
         sampling_strategy: Literal["centroid", "representative_point"],
         stats: str | list[str] | Callable = "mean",
         variables: list[str] | None = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.WARN,
     ):
         """For each geometry, compute one sample point in the raster and compute stats across bands.
 
@@ -1018,15 +1027,14 @@ class XRasterBase(XGeoBase):
         variables : list of str, optional
             List of variable names to sample from dataset. If None, all variables
             are sampled. By default None
-        handle_nodata : NoDataStrategy, optional
-            Strategy to handle nodata values in sampled points. Options are:
-            IGNORE, WARN and RAISE. By default NoDataStrategy.WARN
 
         Returns
         -------
         obj_out: xr.Dataset
             Output dataset with a variable for each combination of input variable
-            and statistic.
+            and statistic. Note that the output dataset can have nodata values if
+            sampled points fall outside the raster extent. Handling this is the
+            responsibility of the caller.
         """
         if isinstance(stats, str):
             stats = stats.split()
@@ -1037,10 +1045,6 @@ class XRasterBase(XGeoBase):
             gdf = gdf.to_crs(self.crs)
 
         if sampling_strategy == "centroid":
-            if gdf.crs.is_geographic:
-                raise ValueError(
-                    "Centroid sampling is not supported for geographic CRS, use 'sampling_strategy=representative_point' instead."
-                )
             points = gdf.geometry.centroid
         elif sampling_strategy == "representative_point":
             points = gdf.geometry.representative_point()
@@ -1063,12 +1067,13 @@ class XRasterBase(XGeoBase):
         gdf_points = gdf_points[valid_mask]
         valid_indices = gdf_points.index.values
 
-        sampled = self.sample(gdf_points)
+        ds = self._obj.copy()
+        if variables is not None:
+            ds = ds[variables]
+
+        sampled = ds.raster.sample(gdf_points)
         if isinstance(sampled, xr.DataArray):
             sampled = sampled.to_dataset(name=sampled.name or "values")
-
-        if variables is not None:
-            sampled = sampled[variables]
 
         out_vars = {}
         for var in sampled.data_vars:
@@ -1084,7 +1089,7 @@ class XRasterBase(XGeoBase):
             for stat in stats:
                 if stat in _STAT_REDUCERS:
                     res = getattr(da, stat)(dim=dims_to_reduce)
-                    name = var if not dims_to_reduce else f"{var}_{stat}"
+                    name = f"{var}_{stat}"
                 elif isinstance(stat, str) and stat.startswith("q"):
                     qs = np.array([float(q) for q in stat.strip("q").split(",")])
                     res = da.quantile(qs / 100, dim=dims_to_reduce)
@@ -1097,25 +1102,17 @@ class XRasterBase(XGeoBase):
                 out_vars[name] = res
 
         ds_out = xr.Dataset(out_vars)
+        col, row = ~self.transform * (
+            gdf_points.geometry.x.values,
+            gdf_points.geometry.y.values,
+        )
+        cols = np.floor(col).astype(int)
+        rows = np.floor(row).astype(int)
         ds_out = ds_out.assign_coords(
             index=("index", valid_indices),
-            x=("index", gdf_points.geometry.x.values),
-            y=("index", gdf_points.geometry.y.values),
+            x=("index", cols),
+            y=("index", rows),
         )
-
-        arr = sampled.to_array()
-        reduce_dims = [d for d in arr.dims if d != "index"]
-        bad_mask = arr.isnull().any(dim=reduce_dims).values
-        nodata = da.raster.nodata
-        if nodata is not None:
-            bad_mask |= (arr == nodata).any(dim=reduce_dims).values
-
-        if np.any(bad_mask):
-            exec_nodata_strat(
-                f"{int(np.sum(bad_mask))} out of {len(valid_indices)} geometries sampled nodata values.",
-                handle_nodata,
-            )
-            ds_out = ds_out.isel(index=~bad_mask)
 
         return ds_out
 
