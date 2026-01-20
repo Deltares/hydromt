@@ -32,6 +32,7 @@ __all__ = [
     "AWSDataCatalog",
     "GCSCMIP6DataCatalog",
     "create_registry_file",
+    "ARCODataCatalog",
 ]
 
 __hydromt_eps__ = [
@@ -39,6 +40,7 @@ __hydromt_eps__ = [
     "ArtifactDataCatalog",
     "AWSDataCatalog",
     "GCSCMIP6DataCatalog",
+    "ARCODataCatalog",
 ]
 
 
@@ -257,6 +259,13 @@ class GCSCMIP6DataCatalog(PredefinedCatalog):
 
     base_url = f"{CATALOG_ROOT}/gcs_cmip6_data"
     name = "gcs_cmip6_data"
+
+
+class ARCODataCatalog(PredefinedCatalog):
+    """ARCO data catalog."""
+
+    base_url = f"{CATALOG_ROOT}/ARCO_data"
+    name = "ARCO_data"
 
 
 def _replace_line_endings(file_path: Path):

@@ -2,7 +2,7 @@
 # Please follow the instructions at https://earthdatahub.destine.eu/getting-started#configuring-netrc to set up.
 
 meta:
-  version: v0.1.0
+  version: v1.0.0
   name: ARCO_data
   hydromt_version: '>1.0a,<2'
 
