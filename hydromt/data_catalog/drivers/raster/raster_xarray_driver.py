@@ -153,11 +153,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                             raise PermissionError(
                                 f"Unauthorized access to {_uri}. Check your credentials."
                             ) from e
-                        else:
-                            raise ClientResponseError(
-                                f"Something went wrong with accessing the following URI: {_uri}"
-                            ) from e
-
+                        raise
             ds: xr.Dataset = xr.merge(datasets)
         # Normal netcdf file(s)
         elif first_ext in _NETCDF_EXT:
