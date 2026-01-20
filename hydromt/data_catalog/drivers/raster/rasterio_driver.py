@@ -216,12 +216,7 @@ class RasterioDriver(RasterDatasetDriver):
                     raise
 
         # rasterio uses specific environment variable for s3 access.
-        try:
-            anon: str = self.filesystem.get_fs().anon
-        except AttributeError:
-            anon = ""
-
-        if anon:
+        if self.anon_aws_request:
             with temp_env(**{"AWS_NO_SIGN_REQUEST": "true"}):
                 ds = _open()
         else:
@@ -350,6 +345,15 @@ class RasterioDriver(RasterDatasetDriver):
             logger.warning(f"IO error while detecting zoom levels: {e}")
         return zoom_levels, crs
 
+    @property
+    def anon_aws_request(self) -> bool:
+        """Check if the filesystem is set to anonymous AWS requests."""
+        try:
+            anon: bool = self.filesystem.get_fs().anon
+        except AttributeError:
+            anon = False
+        return anon
+
     def _write_raster(
         self, data: xr.DataArray, driver: str, path: Path, **write_kwargs: Any
     ) -> None:
@@ -365,4 +369,9 @@ class RasterioDriver(RasterDatasetDriver):
             raise NoDataException(
                 f"Cannot write raster data with insufficient spatial dimensions: {data.raster.y_dim} size {y_coords.size}, {data.raster.x_dim} size {x_coords.size}",
             )
-        data.raster.to_raster(path, driver=driver, **write_kwargs)
+
+        if self.anon_aws_request:
+            with temp_env(**{"AWS_NO_SIGN_REQUEST": "true"}):
+                data.raster.to_raster(path, driver=driver, **write_kwargs)
+        else:
+            data.raster.to_raster(path, driver=driver, **write_kwargs)

@@ -26,6 +26,7 @@ from shapely import box
 from yaml import dump
 
 from hydromt._compat import HAS_GCSFS, HAS_GDAL, HAS_OPENPYXL, HAS_S3FS
+from hydromt._utils import temp_env
 from hydromt.config import Settings
 from hydromt.data_catalog.adapters import (
     GeoDataFrameAdapter,
@@ -1947,6 +1948,7 @@ def test_esa_world_cover_aws(tmp_path: Path):
     data = datacatalog.get_rasterdataset("esa_worldcover", bbox=bbox)
     assert isinstance(data, xr.DataArray)
     output_path = tmp_path / "esa_worldcover_export"
-    # data.raster.to_raster(output_path)
-    # assert output_path.exists()
-    datacatalog.export_data(output_path, bbox=bbox, sources=["esa_worldcover"])
+
+    with temp_env(**{"AWS_NO_SIGN_REQUEST": "true"}):
+        data.raster.to_raster(output_path)
+    assert output_path.exists()

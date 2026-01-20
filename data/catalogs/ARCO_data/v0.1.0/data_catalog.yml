@@ -152,10 +152,6 @@ esa_worldcover:
     filesystem:
       protocol: s3
       anon: true
-    # options:
-    #   chunks:
-    #     'x': 512
-    #     'y': 512
   metadata:
     category: landuse
     source_version: v100
