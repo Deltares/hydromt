@@ -2,6 +2,7 @@
 """Tests for the hydromt.raster submodule."""
 
 import datetime
+import warnings
 from pathlib import Path
 
 import dask
@@ -12,6 +13,7 @@ import pytest
 import rasterio
 import xarray as xr
 from affine import Affine
+from pyproj import Transformer
 from shapely.geometry import LineString, Point, Polygon, box
 
 from hydromt.gis import parse_crs, raster, raster_utils
@@ -574,6 +576,109 @@ def test_rotated(transform, shape, tmp_path: Path):
     dst_crs = parse_crs("utm", da.raster.bounds)
     da2_reproj = da2.raster.reproject(dst_crs=dst_crs)
     assert np.all(da2.raster.box.intersects(da2_reproj.raster.box.to_crs(4326)))
+
+
+def test_sample_geoms_mean_over_time(raster_ds):
+    # Pick a centroid inside the raster bounds
+    w, s, e, n = raster_ds.raster.bounds
+    centroid = Point((w + (e - w) / 2, s + (n - s) / 2))
+    gdf = gpd.GeoDataFrame(geometry=[centroid], crs=raster_ds.raster.crs)
+
+    # Sample raster with 'mean' stat
+    ds_sampled = raster_ds.raster.sample_geoms(
+        gdf, stats=["mean"], sampling_strategy="centroid"
+    )
+
+    # There should be one index
+    assert ds_sampled.sizes["index"] == 1
+
+    # Variable name should have _mean suffix
+    assert "temperature" in raster_ds.data_vars
+    assert "temperature_mean" in ds_sampled.data_vars
+
+    # Compute expected mean manually
+    row, col = ~raster_ds.raster.transform * (centroid.x, centroid.y)
+    row, col = int(np.floor(row)), int(np.floor(col))
+    da = raster_ds["temperature"]
+    expected_mean = da.isel(x=col, y=row).mean(dim="time").item()
+
+    # Compare sampled value to expected mean
+    np.testing.assert_allclose(ds_sampled["temperature_mean"].values[0], expected_mean)
+
+
+def test_sample_geoms(demda):
+    da = demda
+    da.name = "test"
+    ds = xr.merge(
+        [
+            da,
+            da.expand_dims("time").to_dataset().rename({"test": "test1"}),
+        ]
+    )
+
+    w, s, e, n = da.raster.bounds
+
+    geoms = [
+        box(w, s, w + abs(e - w) / 2.0, n),  # polygon inside
+        box(w - 2, s, w - 0.2, n),  # polygon outside
+        Point((w + 0.1, n - 0.1)),  # point inside
+        LineString([(w, (n + s) / 2), (e, (n + s) / 2)]),  # line crossing raster
+    ]
+    gdf = gpd.GeoDataFrame(geometry=geoms, crs=ds.raster.crs)
+
+    ds0 = ds.raster.sample_geoms(
+        gdf, stats=["mean"], sampling_strategy="representative_point"
+    )
+
+    assert "test" in ds0.data_vars
+    assert "test1_mean" in ds0.data_vars
+    assert "index" in ds0.dims
+
+    # geometry 1 is outside → dropped
+    assert np.all(ds0["index"].values == np.array([0, 2, 3]))
+
+    # sanity: sampled values must match direct raster lookup
+    vals = []
+    for geom in [geoms[0], geoms[2], geoms[3]]:
+        p = geom.representative_point()
+        col, row = ~da.raster.transform * (p.x, p.y)
+        vals.append(da.data[int(np.floor(row)), int(np.floor(col))])
+
+    assert np.all(ds0["test"].values == np.array(vals))
+
+
+def test_sample_geoms_crs_reprojection(demda):
+    da_3857 = demda
+    da_3857.name = "test"
+    w, s, e, n = da_3857.raster.bounds
+    x_center = w + (e - w) / 2
+    y_center = s + (n - s) / 2
+    transformer = Transformer.from_crs(3857, 4326, always_xy=True)
+    lon, lat = transformer.transform(x_center, y_center)
+    gdf_4326 = gpd.GeoDataFrame(geometry=[Point(lon, lat)], crs=4326)
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=DeprecationWarning)
+        ds_sampled = da_3857.raster.sample_geoms(
+            gdf_4326, stats=["mean"], sampling_strategy="centroid"
+        )
+
+    assert "index" in ds_sampled.dims
+    assert ds_sampled["index"].values[0] == gdf_4326.index[0]
+    for var in (da_3857.name,):
+        assert var in ds_sampled.data_vars
+
+    sampled_x = ds_sampled["x"].values[0]
+    sampled_y = ds_sampled["y"].values[0]
+    assert 0 <= sampled_x < da_3857.raster.width
+    assert 0 <= sampled_y < da_3857.raster.height
+
+
+def test_sample_geoms_all_outside(demda):
+    gdf = gpd.GeoDataFrame(geometry=[Point((100, 100))], crs=3857)
+
+    with pytest.raises(ValueError, match="outside raster"):
+        demda.raster.sample_geoms(gdf, stats=["mean"], sampling_strategy="centroid")
 
 
 def test_create_rotated_grid_from_geom_axis_aligned():
