@@ -909,7 +909,7 @@ class XRasterBase(XGeoBase):
             {'count', 'min', 'max', 'sum', 'mean', 'std', 'median', 'q##'}.
             Multiple percentiles can be calculated using comma-separated values,
             e.g.: 'q10,50,90'. Statistics ignore the nodata value and are applied
-            along the x and y dimension. By default 'mean'
+            along the x and y dimension.
         variables: list of str, optional
             List of variable names to calculate zonal statistics for. If None, all variables
             are used. By default None
