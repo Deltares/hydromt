@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Callable, ClassVar
 
 import xarray as xr
+from aiohttp.client_exceptions import ClientResponseError
 from pydantic import Field
 
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
@@ -145,8 +146,14 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                 if ext != first_ext and not self.options.ext_override:
                     logger.warning(f"Reading zarr and {_uri} was not, skipping...")
                 else:
-                    datasets.append(preprocessor(opn(_uri)))
-
+                    try:
+                        datasets.append(preprocessor(opn(_uri)))
+                    except ClientResponseError as e:
+                        if e.status == 401:
+                            raise PermissionError(
+                                f"Unauthorized access to {_uri}. Check your credentials."
+                            ) from e
+                        raise
             ds: xr.Dataset = xr.merge(datasets)
         # Normal netcdf file(s)
         elif first_ext in _NETCDF_EXT:

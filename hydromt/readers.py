@@ -208,7 +208,6 @@ def open_raster(
     data : DataArray
         DataArray
     """
-    chunks = chunks or {}
     kwargs.update(masked=mask_nodata, default_name="data", chunks=chunks)
     if not mask_nodata:  # if mask_and_scale by default True in xarray ?
         kwargs.update(mask_and_scale=False)
@@ -292,7 +291,6 @@ def open_mfraster(
     data : DataSet
         The newly created DataSet.
     """
-    chunks = chunks or {}
     mosaic_kwargs = mosaic_kwargs or {}
     if concat and mosaic:
         raise ValueError("Only one of 'mosaic' or 'concat' can be True.")
