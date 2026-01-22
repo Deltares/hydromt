@@ -13,6 +13,7 @@ Unreleased
 
 New
 ---
+- Added ARCO_data predefined catalog for accessing ARCO ERA5, ERA5_hourly, ERA5_ocean, and ESA worldcover datasets (#1357).
 
 Changed
 -------
