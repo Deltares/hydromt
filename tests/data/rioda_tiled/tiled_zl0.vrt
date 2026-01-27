@@ -7,7 +7,7 @@
     <Scale>1.0</Scale>
     <ColorInterp>Gray</ColorInterp>
     <SimpleSource>
-      <SourceFilename relativeToVRT="1">0\0\0.tif</SourceFilename>
+      <SourceFilename relativeToVRT="1">0/0/0.tif</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="256" RasterYSize="256" DataType="Float32" BlockXSize="256" BlockYSize="256" />
       <SrcRect xOff="0" yOff="0" xSize="256" ySize="256" />
@@ -15,7 +15,7 @@
       <NoDataValue>-9999.0</NoDataValue>
     </SimpleSource>
     <SimpleSource>
-      <SourceFilename relativeToVRT="1">0\0\1.tif</SourceFilename>
+      <SourceFilename relativeToVRT="1">0/0/1.tif</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="256" RasterYSize="256" DataType="Float32" BlockXSize="256" BlockYSize="256" />
       <SrcRect xOff="0" yOff="0" xSize="256" ySize="256" />
@@ -23,7 +23,7 @@
       <NoDataValue>-9999.0</NoDataValue>
     </SimpleSource>
     <SimpleSource>
-      <SourceFilename relativeToVRT="1">0\0\2.tif</SourceFilename>
+      <SourceFilename relativeToVRT="1">0/0/2.tif</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="256" RasterYSize="256" DataType="Float32" BlockXSize="256" BlockYSize="256" />
       <SrcRect xOff="0" yOff="0" xSize="256" ySize="256" />
@@ -31,7 +31,7 @@
       <NoDataValue>-9999.0</NoDataValue>
     </SimpleSource>
     <SimpleSource>
-      <SourceFilename relativeToVRT="1">0\0\3.tif</SourceFilename>
+      <SourceFilename relativeToVRT="1">0/0/3.tif</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="256" RasterYSize="256" DataType="Float32" BlockXSize="256" BlockYSize="256" />
       <SrcRect xOff="0" yOff="0" xSize="256" ySize="256" />
@@ -39,7 +39,7 @@
       <NoDataValue>-9999.0</NoDataValue>
     </SimpleSource>
     <SimpleSource>
-      <SourceFilename relativeToVRT="1">0\1\0.tif</SourceFilename>
+      <SourceFilename relativeToVRT="1">0/1/0.tif</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="256" RasterYSize="256" DataType="Float32" BlockXSize="256" BlockYSize="256" />
       <SrcRect xOff="0" yOff="0" xSize="256" ySize="256" />
@@ -47,7 +47,7 @@
       <NoDataValue>-9999.0</NoDataValue>
     </SimpleSource>
     <SimpleSource>
-      <SourceFilename relativeToVRT="1">0\1\1.tif</SourceFilename>
+      <SourceFilename relativeToVRT="1">0/1/1.tif</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="256" RasterYSize="256" DataType="Float32" BlockXSize="256" BlockYSize="256" />
       <SrcRect xOff="0" yOff="0" xSize="256" ySize="256" />
@@ -55,7 +55,7 @@
       <NoDataValue>-9999.0</NoDataValue>
     </SimpleSource>
     <SimpleSource>
-      <SourceFilename relativeToVRT="1">0\1\2.tif</SourceFilename>
+      <SourceFilename relativeToVRT="1">0/1/2.tif</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="256" RasterYSize="256" DataType="Float32" BlockXSize="256" BlockYSize="256" />
       <SrcRect xOff="0" yOff="0" xSize="256" ySize="256" />
@@ -63,7 +63,7 @@
       <NoDataValue>-9999.0</NoDataValue>
     </SimpleSource>
     <SimpleSource>
-      <SourceFilename relativeToVRT="1">0\1\3.tif</SourceFilename>
+      <SourceFilename relativeToVRT="1">0/1/3.tif</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="256" RasterYSize="256" DataType="Float32" BlockXSize="256" BlockYSize="256" />
       <SrcRect xOff="0" yOff="0" xSize="256" ySize="256" />
@@ -71,7 +71,7 @@
       <NoDataValue>-9999.0</NoDataValue>
     </SimpleSource>
     <SimpleSource>
-      <SourceFilename relativeToVRT="1">0\2\0.tif</SourceFilename>
+      <SourceFilename relativeToVRT="1">0/2/0.tif</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="256" RasterYSize="256" DataType="Float32" BlockXSize="256" BlockYSize="256" />
       <SrcRect xOff="0" yOff="0" xSize="256" ySize="256" />
@@ -79,7 +79,7 @@
       <NoDataValue>-9999.0</NoDataValue>
     </SimpleSource>
     <SimpleSource>
-      <SourceFilename relativeToVRT="1">0\2\1.tif</SourceFilename>
+      <SourceFilename relativeToVRT="1">0/2/1.tif</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="256" RasterYSize="256" DataType="Float32" BlockXSize="256" BlockYSize="256" />
       <SrcRect xOff="0" yOff="0" xSize="256" ySize="256" />
@@ -87,7 +87,7 @@
       <NoDataValue>-9999.0</NoDataValue>
     </SimpleSource>
     <SimpleSource>
-      <SourceFilename relativeToVRT="1">0\2\2.tif</SourceFilename>
+      <SourceFilename relativeToVRT="1">0/2/2.tif</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="256" RasterYSize="256" DataType="Float32" BlockXSize="256" BlockYSize="256" />
       <SrcRect xOff="0" yOff="0" xSize="256" ySize="256" />
@@ -95,7 +95,7 @@
       <NoDataValue>-9999.0</NoDataValue>
     </SimpleSource>
     <SimpleSource>
-      <SourceFilename relativeToVRT="1">0\2\3.tif</SourceFilename>
+      <SourceFilename relativeToVRT="1">0/2/3.tif</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="256" RasterYSize="256" DataType="Float32" BlockXSize="256" BlockYSize="256" />
       <SrcRect xOff="0" yOff="0" xSize="256" ySize="256" />
@@ -103,7 +103,7 @@
       <NoDataValue>-9999.0</NoDataValue>
     </SimpleSource>
     <SimpleSource>
-      <SourceFilename relativeToVRT="1">0\3\0.tif</SourceFilename>
+      <SourceFilename relativeToVRT="1">0/3/0.tif</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="256" RasterYSize="256" DataType="Float32" BlockXSize="256" BlockYSize="256" />
       <SrcRect xOff="0" yOff="0" xSize="256" ySize="256" />
@@ -111,7 +111,7 @@
       <NoDataValue>-9999.0</NoDataValue>
     </SimpleSource>
     <SimpleSource>
-      <SourceFilename relativeToVRT="1">0\3\1.tif</SourceFilename>
+      <SourceFilename relativeToVRT="1">0/3/1.tif</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="256" RasterYSize="256" DataType="Float32" BlockXSize="256" BlockYSize="256" />
       <SrcRect xOff="0" yOff="0" xSize="256" ySize="256" />
@@ -119,7 +119,7 @@
       <NoDataValue>-9999.0</NoDataValue>
     </SimpleSource>
     <SimpleSource>
-      <SourceFilename relativeToVRT="1">0\3\2.tif</SourceFilename>
+      <SourceFilename relativeToVRT="1">0/3/2.tif</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="256" RasterYSize="256" DataType="Float32" BlockXSize="256" BlockYSize="256" />
       <SrcRect xOff="0" yOff="0" xSize="256" ySize="256" />
@@ -127,7 +127,7 @@
       <NoDataValue>-9999.0</NoDataValue>
     </SimpleSource>
     <SimpleSource>
-      <SourceFilename relativeToVRT="1">0\3\3.tif</SourceFilename>
+      <SourceFilename relativeToVRT="1">0/3/3.tif</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="256" RasterYSize="256" DataType="Float32" BlockXSize="256" BlockYSize="256" />
       <SrcRect xOff="0" yOff="0" xSize="256" ySize="256" />

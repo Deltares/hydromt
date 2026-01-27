@@ -22,7 +22,7 @@ dependencies = [
 	"numba",                  # speed up computations (used in e.g. stats)
 	"numpy",                  # pin necessary to ensure compatability with C headers
 	"packaging",              # compare versions of hydromt
-	"pandas",                 # Dataframes
+	"pandas<3",               # Dataframes
 	"pooch",                  # data fetching
 	"pyarrow",
 	"pydantic~=2.4",          # Validation
@@ -212,7 +212,12 @@ disallow_any_generics = true
 
 [tool.pixi.workspace]
 channels = ["conda-forge"]
-platforms = ["linux-64", "win-64"]
+platforms = ["linux-64", "win-64", "osx-arm64"]
+
+[tool.pixi.dependencies]
+netcdf4 = "*"     # duplication is necessary to resolve macos issues
+rasterio = "<1.5" # duplication is necessary to resolve macos issues
+
 
 [tool.pixi.feature.py311.dependencies]
 python = "3.11.*"
