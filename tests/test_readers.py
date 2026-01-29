@@ -265,7 +265,7 @@ def test_read_workflow_yaml():
         Path(TEST_DATA_DIR, "build_config.yml")
     )
 
-    assert model_type is None
+    assert model_type == "Model"
     assert "components" in model_init
     assert len(steps) == 2
 
@@ -279,7 +279,7 @@ def test_read_workflow_yaml_extended():
         Path(TEST_DATA_DIR, "build_config_extended.yml")
     )
 
-    assert model_type == "model"
+    assert model_type == "Model"
     assert "components" in model_init
     assert len(steps) == 3
 

@@ -16,6 +16,7 @@ from pyproj import CRS
 
 from hydromt._utils import _rgetattr, _validate_steps, log
 from hydromt.data_catalog import DataCatalog
+from hydromt.io import read_yaml
 from hydromt.model.components import (
     ModelComponent,
     SpatialModelComponent,
@@ -23,7 +24,6 @@ from hydromt.model.components import (
 from hydromt.model.root import ModelRoot
 from hydromt.model.steps import hydromt_step
 from hydromt.plugins import PLUGINS
-from hydromt.readers import read_yaml
 
 __all__ = ["Model"]
 

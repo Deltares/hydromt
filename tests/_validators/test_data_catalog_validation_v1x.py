@@ -11,12 +11,12 @@ from hydromt._validators.data_catalog_v1x import (
     DataCatalogV1MetaData,
     DataCatalogV1Validator,
 )
-from hydromt.readers import _yml_from_uri_or_path
+from hydromt.io import yml_from_uri_or_path
 from tests.conftest import TEST_DATA_DIR
 
 
 def test_deltares_data_catalog_v1(latest_dd_version_uri):
-    yml_dict = _yml_from_uri_or_path(latest_dd_version_uri)
+    yml_dict = yml_from_uri_or_path(latest_dd_version_uri)
     # would raise error if something goes wrong
     _ = DataCatalogV1Validator.from_dict(yml_dict)
 

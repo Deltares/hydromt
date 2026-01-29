@@ -24,12 +24,12 @@ def test_write_validation_validation():
 
 
 def test_validate_component_config_wrong_characters():
-    with pytest.raises(ValueError, match="is not a valid python identifier"):
+    with pytest.raises(ValidationError, match="is not a valid python identifier"):
         HydromtComponentConfig(name="1test", type=ModelComponent)
 
 
 def test_validate_component_config_reserved_keyword():
-    with pytest.raises(ValueError, match="is a python reserved keyword"):
+    with pytest.raises(ValidationError, match="is a python reserved keyword"):
         HydromtComponentConfig(name="import", type=ModelComponent)
 
 
