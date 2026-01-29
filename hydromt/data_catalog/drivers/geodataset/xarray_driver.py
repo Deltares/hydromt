@@ -97,7 +97,7 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
             datasets = []
             for _uri in uris:
                 ext = splitext(_uri)[-1]
-                if ext != first_ext:
+                if ext != first_ext and not self.options.ext_override:
                     logger.warning(f"Reading zarr and {_uri} was not, skipping...")
                 else:
                     datasets.append(preprocessor(opn(_uri)))
@@ -107,7 +107,7 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
             filtered_uris = []
             for _uri in uris:
                 ext = splitext(_uri)[-1]
-                if ext != first_ext:
+                if ext != first_ext and not self.options.ext_override:
                     logger.warning(f"Reading netcdf and {_uri} was not, skipping...")
                 else:
                     filtered_uris.append(_uri)
