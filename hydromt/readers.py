@@ -6,7 +6,7 @@ from glob import glob
 from io import IOBase
 from os.path import abspath, basename, dirname, isfile, join, splitext
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 import dask
 import geopandas as gpd
@@ -14,11 +14,8 @@ import numpy as np
 import pandas as pd
 import pyproj
 import rasterio
-import requests
 import rioxarray
-import tomli
 import xarray as xr
-import yaml
 from pyogrio import read_dataframe
 from pyproj import CRS
 from shapely.geometry import LineString, Point, Polygon, box
@@ -26,12 +23,10 @@ from shapely.geometry.base import GEOMETRY_TYPES
 
 from hydromt._utils.naming_convention import _expand_uri_placeholders, _placeholders
 from hydromt._utils.path import _make_config_paths_absolute
-from hydromt._utils.uris import _is_valid_url
+from hydromt._validators.model_config import HydromtModelStep
 from hydromt.gis import gis_utils, raster, raster_utils, vector, vector_utils
-
-if TYPE_CHECKING:
-    from hydromt._validators.model_config import HydromtModelStep
-
+from hydromt.io import read_yaml
+from hydromt.parsers import parse_workflow
 
 logger = logging.getLogger(__name__)
 
@@ -46,9 +41,6 @@ __all__ = [
     "open_geodataset",
     "open_vector_from_table",
     "open_timeseries_from_table",
-    "read_toml",
-    "read_yaml",
-    "read_workflow_yaml",
 ]
 
 OPEN_VECTOR_PREDICATE = Literal[
@@ -766,69 +758,6 @@ def open_vector_from_table(
     return gdf
 
 
-def read_workflow_yaml(
-    path: str | Path,
-    modeltype: str | None = None,
-    defaults: Dict[str, Any] | None = None,
-    abs_path: bool = True,
-    skip_abspath_sections: List[str] | None = ["global"],  # noqa: B006
-) -> tuple[str, Dict[str, Any], List["HydromtModelStep"]]:
-    """Read HydroMT workflow yaml file.
-
-    Parameters
-    ----------
-    path : StrPath
-        Path to workflow yaml file.
-    modeltype : str, optional
-        Model type (eg wflow, sfincs). If given, this overrules the modeltype
-        specified in the workflow file, by default None
-    defaults : dict, optional
-        Nested dictionary with default options, by default dict()
-    abs_path : bool, optional
-        If True, parse string values to an absolute path if the a file or folder
-        with that name (string value) relative to the config file exist,
-        by default True
-    skip_abspath_sections: list
-        These sections are not evaluated for absolute paths if abs_path=True,
-        by default ['global']
-
-    Returns
-    -------
-    modeltype : str | None
-        Model type (eg wflow, sfincs)
-    model_init : dict
-        Model initialization options to be used when instantiating a `hydromt.Model`
-    steps : list of HydromtModelStep
-        List of model steps to be executed. Can be passed to `hydromt.Model.build` and
-        `hydromt.Model.update`.
-    """
-    if not isfile(path):
-        raise IOError(f"HydroMT workflow file not found at {path}")
-
-    d = _config_read(
-        path,
-        defaults=defaults,
-        abs_path=abs_path,
-        skip_abspath_sections=skip_abspath_sections,
-    )
-
-    modeltype = modeltype if modeltype is not None else d.pop("modeltype", None)
-    model_init = d.pop("global", {})
-
-    # steps are required
-    if "steps" not in d:
-        error_msg = (
-            f"It seems your workflow file at {path} does not "
-            "contain a `steps` section. Perhaps you're using a v0.x format? "
-        )
-        logger.error(error_msg)
-        raise RuntimeError(error_msg)
-
-    steps = d.pop("steps")
-
-    return modeltype, model_init, steps
-
-
 def _config_read(
     config_path: Union[Path, str],
     defaults: Optional[Dict[str, Any]] = None,
@@ -983,32 +912,50 @@ def open_ncs(
     return ncs
 
 
-def read_yaml(path: str | Path) -> dict[str, Any]:
-    """Read yaml file and return as dict."""
-    with open(path, "rb") as stream:
-        yml = yaml.safe_load(stream)
+def read_workflow_yaml(
+    path: str | Path,
+    modeltype: str | None = None,
+    defaults: dict[str, Any] | None = None,
+    abs_path: bool = True,
+    skip_abspath_sections: list[str] | None = None,
+) -> tuple[str, dict[str, Any], list[HydromtModelStep]]:
+    """Read HydroMT workflow YAML file and return modeltype, global config and runtime steps.
 
-    return yml
+    Parameters
+    ----------
+    path : str | Path
+        Path to the HydroMT workflow YAML file.
+    modeltype : str | None, optional
+        Model type to use. If None, the model type is read from the YAML file.
+    defaults : dict[str, Any] | None, optional
+        Default configuration values to merge with the YAML file.
+    abs_path : bool, default=True
+        Whether to resolve relative paths to absolute paths.
+    skip_abspath_sections : list[str] | None, optional
+        List of sections to skip when resolving absolute paths.
 
-
-def _parse_yaml(text: str) -> Dict[str, Any]:
-    return yaml.safe_load(text)
-
-
-def read_toml(path: str | Path) -> dict[str, Any]:
-    """Read toml file and return as dict."""
-    with open(path, "rb") as f:
-        data = tomli.load(f)
-
-    return data
-
-
-def _yml_from_uri_or_path(uri_or_path: str | Path) -> Dict[str, Any]:
-    if _is_valid_url(str(uri_or_path)):
-        with requests.get(str(uri_or_path), stream=True) as r:
-            r.raise_for_status()
-            yml = _parse_yaml(r.text)
-
-    else:
-        yml = read_yaml(uri_or_path)
-    return yml
+    Returns
+    -------
+    modeltype : str | None
+        Model type (eg wflow, sfincs)
+    model_init : dict
+        Model initialization options to be used when instantiating a hydromt.Model
+    steps : list of HydromtModelStep
+        List of model steps to be executed. Can be passed to hydromt.Model.build and hydromt.Model.update.
+    """
+    path = Path(path)
+    defaults = defaults or {}
+    data = read_yaml(path)
+    workflow = parse_workflow(
+        data,
+        modeltype=modeltype,
+        defaults=defaults,
+        abs_path=abs_path,
+        skip_abspath_sections=skip_abspath_sections,
+        root=path.parent,
+    )
+    return (
+        workflow.modeltype.__name__,
+        workflow.globals_.model_dump(),
+        workflow.build_runtime_steps(),
+    )
