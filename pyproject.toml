@@ -192,6 +192,10 @@ filterwarnings = [
 	"ignore:Consolidated metadata is currently not part in the Zarr format 3 specification:UserWarning",
 	# irrelevant radolan engine warning
 	"ignore:Engine 'radolan' loading failed.*:RuntimeWarning",
+
+	# macos specific, see https://github.com/shapely/shapely/issues/2215
+	"ignore:divide by zero encountered in oriented_envelope:RuntimeWarning:shapely",
+	"ignore:invalid value encountered in oriented_envelope:RuntimeWarning:shapely",
 ]
 
 [tool.mypy]
@@ -215,9 +219,10 @@ channels = ["conda-forge"]
 platforms = ["linux-64", "win-64", "osx-arm64"]
 
 [tool.pixi.dependencies]
-netcdf4 = "*"     # duplication is necessary to resolve macos issues
-rasterio = "<1.5" # duplication is necessary to resolve macos issues
-
+netcdf4 = "*"                # duplication is necessary to resolve macos issues
+rasterio = "<1.5"            # duplication is necessary to resolve macos issues
+libgdal-hdf5 = ">=3.12.1,<4"
+libgdal-netcdf = ">=3.12.1,<4"
 
 [tool.pixi.feature.py311.dependencies]
 python = "3.11.*"
