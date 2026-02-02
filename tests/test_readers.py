@@ -261,30 +261,27 @@ def test_open_nc_geo_map_coord_sets_close(tmpdir):
 
 
 def test_read_workflow_yaml():
-    model_type, model_init, steps = read_workflow_yaml(
-        Path(TEST_DATA_DIR, "build_config.yml")
-    )
+    workflow = read_workflow_yaml(Path(TEST_DATA_DIR, "build_config.yml"))
 
-    assert model_type == "Model"
-    assert "components" in model_init
-    assert len(steps) == 2
+    assert workflow.modeltype.__name__ == "Model"
+    assert workflow.globals_.components is not None
+    assert len(workflow.steps) == 2
 
     # Check relative path was skipped in global section
-    config_filename = model_init["components"]["config"]["filename"]
+    config_filename = workflow.globals_.components[0].filename
     assert config_filename == "run_config.toml"
 
 
 def test_read_workflow_yaml_extended():
-    model_type, model_init, steps = read_workflow_yaml(
-        Path(TEST_DATA_DIR, "build_config_extended.yml")
-    )
+    workflow = read_workflow_yaml(Path(TEST_DATA_DIR, "build_config_extended.yml"))
 
-    assert model_type == "Model"
-    assert "components" in model_init
-    assert len(steps) == 3
+    assert workflow.modeltype.__name__ == "Model"
+    assert workflow.globals_.components is not None
+    assert len(workflow.steps) == 3
 
     # Check relative paths
-    config_filename = model_init["components"]["config"]["filename"]
+    config_filename = workflow.globals_.components[0].filename
     assert config_filename == "run_config.toml"
-    config_template = steps[0]["config.create"]["template"]
-    assert config_template == Path(TEST_DATA_DIR, "run_config.toml")
+
+    config_template = workflow.steps[0].args["template"]
+    assert config_template == "run_config.toml"

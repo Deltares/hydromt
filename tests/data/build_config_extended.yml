@@ -10,7 +10,6 @@ steps:
   - config.update:
       data:
         starttime: 2010-01-01
-        model.type: model
   - write:
       components:
         - config

@@ -63,7 +63,9 @@ def parse_workflow(
     global_cfg = HydromtGlobalConfig.model_validate(
         data.get("global", {}), context=context
     )
-    raw_steps = [RawStep.model_validate(s) for s in data.get("steps", [])]
+    raw_steps = [
+        RawStep.model_validate(s, context=context) for s in data.get("steps", [])
+    ]
 
     return HydromtModelSetup(
         modeltype=PLUGINS.model_plugins.get(resolved_modeltype, resolved_modeltype),

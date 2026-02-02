@@ -9,12 +9,25 @@ from abc import ABCMeta
 from inspect import _empty, signature
 from os.path import isabs, isfile, join
 from pathlib import Path
-from typing import Any, Dict, List, Optional, TypeVar, Union, cast
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import geopandas as gdp
 from pyproj import CRS
 
-from hydromt._utils import _rgetattr, _validate_steps, log
+from hydromt._utils import log
+from hydromt._validators.model_config import (
+    HydromtComponentConfig,
+    HydromtModelStep,
+    RawStep,
+)
 from hydromt.data_catalog import DataCatalog
 from hydromt.io import read_yaml
 from hydromt.model.components import (
@@ -141,13 +154,25 @@ class Model(object, metaclass=ABCMeta):
         for name, value in components.items():
             if isinstance(value, ModelComponent):
                 self.add_component(name, value)
+            elif isinstance(value, HydromtComponentConfig):
+                self.add_component(
+                    name, value.type(self, **value.model_dump(exclude={"type", "name"}))
+                )
             elif isinstance(value, dict):
                 type_name = value.pop("type")
-                component_type = PLUGINS.component_plugins[type_name]
+                if type_name in PLUGINS.component_plugins:
+                    component_type = PLUGINS.component_plugins[type_name]
+                elif type_name in PLUGINS.component_plugins.values():
+                    component_type = type_name  # type: ignore
+                else:
+                    raise ValueError(
+                        f"Unknown component type: {type_name}, options are: "
+                        f"[{', '.join(PLUGINS.component_plugins)}]"
+                    )
                 self.add_component(name, component_type(self, **value))
             else:
                 raise ValueError(
-                    "Error in components argument. Type is not a ModelComponent or dict."
+                    f"Error in components argument. Type {type(value)} is not a ModelComponent or dict."
                 )
 
     def add_component(self, name: str, component: ModelComponent) -> None:
@@ -299,28 +324,10 @@ class Model(object, metaclass=ABCMeta):
         """
         with log.to_file(Path(self.root.path) / "hydromt.log"):
             log.log_version()
+
             steps = steps or []
-            _validate_steps(self, steps)
-
-            for step_dict in steps:
-                step, kwargs = next(iter(step_dict.items()))
-                logger.info(f"build: {step}")
-                # Call the methods.
-                method = _rgetattr(self, step)
-                params = {
-                    param: arg.default
-                    for param, arg in signature(method).parameters.items()
-                    if arg.default != _empty
-                }
-                merged: dict[str, Any] = {}
-                if params:
-                    merged.update(**params)
-                if kwargs:
-                    merged.update(**kwargs)
-                for k, v in merged.items():
-                    logger.info(f"{step}.{k}={v}")
-
-                method(**merged)
+            runtime_steps = [self._to_runtime_step(step) for step in steps]
+            [self._execute_model_step(step_obj) for step_obj in runtime_steps]
 
             # If there are any write options included in the steps,
             # we don't need to write the whole model.
@@ -334,8 +341,8 @@ class Model(object, metaclass=ABCMeta):
         *,
         model_out: str | Path | None = None,
         write: Optional[bool] = True,
-        steps: Optional[List[Dict[str, Dict[str, Any]]]] = None,
         forceful_overwrite: bool = False,
+        steps: Optional[List[Dict[str, Dict[str, Any]]]] = None,
     ):
         r"""Single method to update a model based the settings in `steps`.
 
@@ -382,8 +389,10 @@ class Model(object, metaclass=ABCMeta):
             self.root.path / "hydromt.log", append=self.root.is_reading_mode()
         ):
             log.log_version()
+
             steps = steps or []
-            _validate_steps(self, steps)
+            runtime_steps = [self._to_runtime_step(step) for step in steps]
+
             if not self.root.is_writing_mode():
                 if model_out is None:
                     raise ValueError(
@@ -410,26 +419,8 @@ class Model(object, metaclass=ABCMeta):
                     "Model region not found, setup model using `build` first."
                 )
 
-            # loop over methods from config file
-            for step_dict in steps:
-                step, kwargs = next(iter(step_dict.items()))
-                logger.info(f"update: {step}")
-                # Call the methods.
-                method = _rgetattr(self, step)
-                params = {
-                    param: arg.default
-                    for param, arg in signature(method).parameters.items()
-                    if arg.default != _empty
-                }
-                merged = {}
-                if params:
-                    merged.update(**params)
-                if kwargs:
-                    merged.update(**kwargs)
-                for k, v in merged.items():
-                    logger.info(f"{step}.{k}={v}")
-                method(**merged)
-
+            # Execute steps
+            [self._execute_model_step(step_obj) for step_obj in runtime_steps]
             # If there are any write options included in the steps,
             # we don't need to write the whole model.
             if write and not self._options_contain_write(steps):
@@ -477,7 +468,17 @@ class Model(object, metaclass=ABCMeta):
 
     @staticmethod
     def _options_contain_write(steps: List[Dict[str, Dict[str, Any]]]) -> bool:
-        return any("write" in next(iter(step_dict)) for step_dict in steps)
+        for step in steps:
+            if isinstance(step, dict):
+                if "write" in next(iter(step)):
+                    return True
+            elif isinstance(step, HydromtModelStep):
+                if "write" in step.name:
+                    return True
+            elif isinstance(step, RawStep):
+                if "write" in step.name:
+                    return True
+        return False
 
     @hydromt_step
     def write_data_catalog(
@@ -530,6 +531,59 @@ class Model(object, metaclass=ABCMeta):
                 )
 
             cat.to_yml(path, root=root)
+
+    def _build_runtime_steps(
+        self,
+        steps: list[dict[str, dict[str, Any]] | RawStep],
+    ) -> list[HydromtModelStep]:
+        rt_steps = []
+        for i, step in enumerate(steps):
+            try:
+                rt_steps.append(self._to_runtime_step(step))
+            except Exception as e:
+                step_name = step.name if isinstance(step, RawStep) else step["name"]
+                raise ValueError(
+                    f"Validation of step {i + 1} ({step_name}) failed: {e}"
+                ) from e
+        return rt_steps
+
+    def _to_runtime_step(
+        self,
+        step: dict[str, dict[str, Any]] | RawStep,
+    ) -> HydromtModelStep:
+        if isinstance(step, RawStep):
+            name = step.name
+            args = step.args
+        elif isinstance(step, dict):
+            name, args = next(iter(step.items()))
+        else:
+            raise ValueError(f"Invalid step type: {type(step)}")
+
+        comp_name, fn_name = name.split(".") if "." in name else (None, name)
+        instance = self.components.get(comp_name, self)
+
+        try:
+            fn = getattr(instance, fn_name)
+        except (AttributeError, KeyError):
+            raise ValueError(f"Step '{name}' not found on {type(instance).__name__}")
+
+        return HydromtModelStep(name=name, fn=fn, args=args)
+
+    def _execute_model_step(self, step: HydromtModelStep) -> None:
+        fn = step.fn
+        kwargs = step.args or {}
+
+        for k, v in kwargs.items():
+            logger.info(f"{step.name}.{k}={v}")
+
+        sig = signature(fn)
+        bound_args = {
+            param: p.default
+            for param, p in sig.parameters.items()
+            if p.default != _empty
+        }
+        bound_args.update(kwargs)
+        fn(**bound_args)
 
     def test_equal(self, other: "Model") -> tuple[bool, Dict[str, str]]:
         """Test if two models are equal, based on their components.

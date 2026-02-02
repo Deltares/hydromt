@@ -46,14 +46,12 @@ steps:
 def test_read_workflow_yaml(workflow_yaml: tuple[Path, Path, Path, Path]):
     yaml_path, data_lib_abs, data_lib_rel, tmp_path = workflow_yaml
 
-    modeltype, model_init, steps = read_workflow_yaml(
-        yaml_path, skip_abspath_sections=None
-    )
-    assert modeltype == Model.__name__
-    assert data_lib_abs in model_init["data_libs"]
-    assert yaml_path.parent / data_lib_rel in model_init["data_libs"]
-    assert "artifact_data" in model_init["data_libs"]
-    assert len(steps) == 3
+    workflow = read_workflow_yaml(yaml_path, skip_abspath_sections=None)
+    assert workflow.modeltype.__name__ == Model.__name__
+    assert data_lib_abs in workflow.globals_.data_libs
+    assert yaml_path.parent / data_lib_rel in workflow.globals_.data_libs
+    assert "artifact_data" in workflow.globals_.data_libs
+    assert len(workflow.steps) == 3
 
 
 def test_missing_modeltype(tmp_path: Path):
@@ -65,18 +63,6 @@ steps: []
 """)
     with pytest.raises(ValueError, match="Model type not specified"):
         read_workflow_yaml(yaml_path)
-
-
-def test_empty_steps(tmp_path: Path):
-    yaml_path = tmp_path / "workflow.yml"
-    yaml_path.write_text("""
-modeltype: model
-global:
-  data_libs: []
-""")
-    # Should return empty list of steps without error
-    modeltype, model_init, steps = read_workflow_yaml(yaml_path)
-    assert steps == []
 
 
 def test_absolute_and_relative_paths(tmp_path: Path):
@@ -94,16 +80,16 @@ global:
     - {abs_path.as_posix()}
 steps: []
 """)
-    modeltype, model_init, steps = read_workflow_yaml(yaml_path)
+    workflow = read_workflow_yaml(yaml_path)
     # Relative path resolved to absolute
     assert any(
         isinstance(x, Path) and x.is_absolute() and x.name == "file.yml"
-        for x in model_init["data_libs"]
+        for x in workflow.globals_.data_libs
     )
     # Absolute path stays absolute
     assert any(
         isinstance(x, Path) and x.is_absolute() and x.name == "absolute_file.yml"
-        for x in model_init["data_libs"]
+        for x in workflow.globals_.data_libs
     )
 
 
@@ -117,10 +103,10 @@ global:
     - {catalog_name}
 steps: []
 """)
-    modeltype, model_init, steps = read_workflow_yaml(yaml_path)
+    workflow = read_workflow_yaml(yaml_path)
     # Should keep catalog string as-is
     assert any(
-        isinstance(x, str) and x == catalog_name for x in model_init["data_libs"]
+        isinstance(dc, str) and dc == catalog_name for dc in workflow.globals_.data_libs
     )
 
 
@@ -135,12 +121,12 @@ global:
       filename: run_config.toml
 steps: []
 """)
-    modeltype, model_init, steps = read_workflow_yaml(yaml_path)
+    workflow = read_workflow_yaml(yaml_path)
     # Component should be a list of HydromtComponentConfig-like dicts
-    comp = model_init["components"][0]
-    assert comp["type"] == ConfigComponent
-    assert comp["name"] == "config"
-    assert comp["filename"] == "run_config.toml"
+    comp = workflow.globals_.components[0]
+    assert comp.type is ConfigComponent
+    assert comp.name == "config"
+    assert comp.filename == "run_config.toml"
 
 
 def test_invalid_step_name(tmp_path: Path):
@@ -162,33 +148,29 @@ def test_defaults_merging(workflow_yaml: tuple[Path, Path, Path, Path]):
     yaml_path, data_lib_abs, data_lib_rel, tmp_path = workflow_yaml
 
     defaults = {"global": {"new_option": 42}}
-    _, model_init, _ = read_workflow_yaml(
+    workflow = read_workflow_yaml(
         yaml_path, defaults=defaults, skip_abspath_sections=["global"]
     )
-    assert model_init.get("new_option") == 42
+    assert workflow.globals_.new_option == 42
     # Ensure original data_libs preserved
-    assert "artifact_data" in model_init["data_libs"]
+    assert "artifact_data" in workflow.globals_.data_libs
 
 
 def test_abs_path_behavior(workflow_yaml: tuple[Path, Path, Path, Path]):
     yaml_path, data_lib_abs, data_lib_rel, tmp_path = workflow_yaml
 
     # abs_path=True should resolve relative paths
-    _, model_init, _ = read_workflow_yaml(
-        yaml_path, abs_path=True, skip_abspath_sections=None
-    )
-    resolved_paths = [p for p in model_init["data_libs"] if isinstance(p, Path)]
+    workflow = read_workflow_yaml(yaml_path, abs_path=True, skip_abspath_sections=None)
+    resolved_paths = [p for p in workflow.globals_.data_libs if isinstance(p, Path)]
     assert any(p.is_absolute() and p.exists() for p in resolved_paths)
     # The catalog string should remain a string
-    assert "artifact_data" in model_init["data_libs"]
+    assert "artifact_data" in workflow.globals_.data_libs
 
     # abs_path=False should keep relative paths
-    _, model_init_rel, _ = read_workflow_yaml(
-        yaml_path, abs_path=False, skip_abspath_sections=None
-    )
+    workflow = read_workflow_yaml(yaml_path, abs_path=False, skip_abspath_sections=None)
     assert any(
         isinstance(p, Path) and not p.is_absolute()
-        for p in model_init_rel["data_libs"]
+        for p in workflow.globals_.data_libs
         if p != "artifact_data"
     )
 
@@ -197,10 +179,10 @@ def test_skip_abspath_sections(workflow_yaml: tuple[Path, Path, Path, Path]):
     yaml_path, data_lib_abs, data_lib_rel, tmp_path = workflow_yaml
 
     # Skip global section, relative paths should remain relative
-    _, model_init, _ = read_workflow_yaml(
+    workflow = read_workflow_yaml(
         yaml_path, abs_path=True, skip_abspath_sections=["global"]
     )
-    data_libs = model_init["data_libs"]
+    data_libs = workflow.globals_.data_libs
     rel_paths = [p for p in data_libs if isinstance(p, Path) and not p.is_absolute()]
     assert any(rel_paths)
     # Catalog string still preserved

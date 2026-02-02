@@ -23,7 +23,7 @@ from shapely.geometry.base import GEOMETRY_TYPES
 
 from hydromt._utils.naming_convention import _expand_uri_placeholders, _placeholders
 from hydromt._utils.path import _make_config_paths_absolute
-from hydromt._validators.model_config import HydromtModelStep
+from hydromt._validators.model_config import HydromtModelSetup
 from hydromt.gis import gis_utils, raster, raster_utils, vector, vector_utils
 from hydromt.io import read_yaml
 from hydromt.parsers import parse_workflow
@@ -918,7 +918,7 @@ def read_workflow_yaml(
     defaults: dict[str, Any] | None = None,
     abs_path: bool = True,
     skip_abspath_sections: list[str] | None = None,
-) -> tuple[str, dict[str, Any], list[HydromtModelStep]]:
+) -> HydromtModelSetup:
     """Read HydroMT workflow YAML file and return modeltype, global config and runtime steps.
 
     Parameters
@@ -946,7 +946,9 @@ def read_workflow_yaml(
     path = Path(path)
     defaults = defaults or {}
     data = read_yaml(path)
-    workflow = parse_workflow(
+    _check_not_v0_workflow(data, path)
+
+    return parse_workflow(
         data,
         modeltype=modeltype,
         defaults=defaults,
@@ -954,8 +956,24 @@ def read_workflow_yaml(
         skip_abspath_sections=skip_abspath_sections,
         root=path.parent,
     )
-    return (
-        workflow.modeltype.__name__,
-        workflow.globals_.model_dump(),
-        workflow.build_runtime_steps(),
-    )
+
+
+def _check_not_v0_workflow(data: dict[str, Any], path: Path) -> None:
+    """Check if the workflow file is in v0 format and raise an informative error if so.
+
+    Parameters
+    ----------
+    data : dict[str, Any]
+        The workflow data read from the YAML file.
+    path : Path
+        The path to the workflow YAML file.
+
+    Raises
+    ------
+    ValueError
+        If the workflow file is in v0 format.
+    """
+    if "steps" not in data:
+        msg = f"It seems your workflow file at {path} does not contain a `steps` section. Perhaps you're using a v0.x format?"
+        logger.error(msg)
+        raise ValueError(msg)

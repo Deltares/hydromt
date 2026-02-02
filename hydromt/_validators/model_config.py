@@ -5,7 +5,14 @@ from keyword import iskeyword
 from pathlib import Path
 from typing import Any, Callable, Type
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_serializer,
+    field_validator,
+    model_validator,
+)
 
 from hydromt.plugins import PLUGINS
 
@@ -49,8 +56,17 @@ class RawStep(BaseModel):
         name, args = next(iter(v.items()))
         return {"name": name, "args": args or {}}
 
+    @field_validator("name", mode="after")
+    def validate_name(cls, name: str) -> str:
+        if name.count(".") not in (0, 1):
+            raise ValueError(
+                f"Invalid step name '{name}': too many '.' characters. Expected format: '<component_name>.<function>' or '<function>'"
+            )
+        return name
+
 
 class HydromtModelStep(BaseModel):
+    name: str
     fn: Callable[..., Any]
     args: dict[str, Any] = Field(default_factory=dict)
 
@@ -61,10 +77,15 @@ class HydromtModelStep(BaseModel):
     @model_validator(mode="after")
     def validate_signature(self):
         sig = inspect.signature(self.fn)
-        if "self" in sig.parameters:
-            sig.bind(**{"self": None, **self.args})
-        else:
-            sig.bind(**self.args)
+        try:
+            if "self" in sig.parameters:
+                sig.bind(**{"self": None, **self.args})
+            else:
+                sig.bind(**self.args)
+        except TypeError as e:
+            raise ValueError(
+                f"Step function '{self.name}' argument validation failed: {e}"
+            )
         return self
 
 
@@ -100,6 +121,14 @@ class HydromtGlobalConfig(BaseModel):
                 resolved.append(p)
         return resolved
 
+    @field_serializer("components", mode="plain")
+    def serialize_components_field(self, v, info):
+        """Serialize components as a name-based dictionary."""
+        return {
+            c.name: {k: val for k, val in c.model_dump().items() if k != "name"}
+            for c in v
+        }
+
 
 class HydromtModelSetup(BaseModel):
     modeltype: type
@@ -116,47 +145,7 @@ class HydromtModelSetup(BaseModel):
     @classmethod
     def validate_model_type(cls, v):
         if isinstance(v, str):
+            if v not in PLUGINS.model_plugins:
+                raise ValueError(f"Unknown model '{v}'")
             return PLUGINS.model_plugins[v]
         return v
-
-    def build_runtime_steps(self) -> list[HydromtModelStep]:
-        runtime_steps = []
-        for raw in self.steps:
-            fn = self._resolve_function(
-                raw.name, self.modeltype, self.globals_.components
-            )
-            runtime_steps.append(HydromtModelStep(fn=fn, args=raw.args))
-        return runtime_steps
-
-    @staticmethod
-    def _resolve_function(
-        name: str, modeltype: type, components: list[HydromtComponentConfig]
-    ):
-        split = name.split(".")
-        if len(split) > 2:
-            raise ValueError(
-                f"Invalid step name '{name}'. Use <component>.<function> or <function>."
-            )
-
-        if len(split) == 2:
-            comp_name, fn_name = split
-            try:
-                owner = next(c.type for c in components if c.name == comp_name)
-            except StopIteration:
-                raise ValueError(f"Component '{comp_name}' not defined")
-        else:
-            fn_name = split[0]
-            owner = modeltype
-
-        members = inspect.getmembers(
-            owner,
-            predicate=lambda v: inspect.isfunction(v)
-            and v.__name__ == fn_name
-            and hasattr(v, "__ishydromtstep__"),
-        )
-        if not members:
-            raise ValueError(
-                f"Function '{fn_name}' not found on {owner.__name__} or not marked with @hydromt_step."
-            )
-
-        return members[0][1]
