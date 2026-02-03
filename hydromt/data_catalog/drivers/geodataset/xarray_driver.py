@@ -2,7 +2,6 @@
 
 import logging
 from functools import partial
-from os.path import splitext
 from pathlib import Path
 from typing import Any, ClassVar
 
@@ -90,28 +89,25 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
             },
         )
         preprocessor = self.options.get_preprocessor()
-        first_ext = splitext(uris[0])[-1]
+        first_ext = self.options.get_reading_ext(uris[0])
 
+        # Filter uris based on extension
+        filtered_uris = []
+        for _uri in uris:
+            ext = self.options.get_reading_ext(_uri)
+            if ext != first_ext:
+                logger.warning(
+                    f"Reading {first_ext} and {_uri} has a different extension, skipping..."
+                )
+            else:
+                filtered_uris.append(_uri)
+
+        # Read and merge
         if first_ext == _ZARR_EXT:
             opn = partial(xr.open_zarr, **self.options.get_kwargs())
-            datasets = []
-            for _uri in uris:
-                ext = splitext(_uri)[-1]
-                if ext != first_ext and not self.options.ext_override:
-                    logger.warning(f"Reading zarr and {_uri} was not, skipping...")
-                else:
-                    datasets.append(preprocessor(opn(_uri)))
-
+            datasets = [preprocessor(opn(_uri)) for _uri in filtered_uris]
             ds: xr.Dataset = xr.merge(datasets)
         elif first_ext in _NETCDF_EXT:
-            filtered_uris = []
-            for _uri in uris:
-                ext = splitext(_uri)[-1]
-                if ext != first_ext and not self.options.ext_override:
-                    logger.warning(f"Reading netcdf and {_uri} was not, skipping...")
-                else:
-                    filtered_uris.append(_uri)
-
             ds: xr.Dataset = xr.open_mfdataset(
                 filtered_uris,
                 decode_coords="all",
@@ -121,8 +117,9 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
             )
         else:
             raise ValueError(
-                f"Unknown extention for GeoDatasetXarrayDriver: {first_ext} "
+                f"Unknown extension for GeoDatasetXarrayDriver: {first_ext} "
             )
+
         for variable in ds.data_vars:
             if ds[variable].size == 0:
                 exec_nodata_strat(

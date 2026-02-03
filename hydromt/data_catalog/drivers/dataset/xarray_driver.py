@@ -36,10 +36,10 @@ class DatasetXarrayOptions(DriverOptions):
         """Get the preprocessor function."""
         return get_preprocessor(self.preprocess)
 
-    def get_ext_override(self, uris: list[str]) -> str:
-        """Get the extension override."""
+    def get_reading_ext(self, uri: str) -> str:
+        """Get the file extension to use for reading, can be overridden."""
         if not self.ext_override:
-            return splitext(uris[0])[-1]
+            return splitext(uri)[-1]
         return self.ext_override
 
 
@@ -90,27 +90,25 @@ class DatasetXarrayDriver(DatasetDriver):
             If the provided files have mixed or unsupported extensions.
         """
         preprocessor = self.options.get_preprocessor()
-        first_ext = self.options.get_ext_override(uris)
+        first_ext = self.options.get_reading_ext(uris[0])
+
+        # Filter uris based on extension
+        filtered_uris = []
+        for _uri in uris:
+            ext = self.options.get_reading_ext(_uri)
+            if ext != first_ext:
+                logger.warning(
+                    f"Reading {first_ext} and {_uri} has a different extension, skipping..."
+                )
+            else:
+                filtered_uris.append(_uri)
+
+        # Read and merge
         if first_ext == ".zarr":
             opn: Callable = partial(xr.open_zarr, **self.options.get_kwargs())
-            datasets = []
-            for _uri in uris:
-                ext = splitext(_uri)[-1]
-                if ext != first_ext and not self.options.ext_override:
-                    logger.warning(f"Reading zarr and {_uri} was not, skipping...")
-                else:
-                    datasets.append(preprocessor(opn(_uri)))
-
+            datasets = [preprocessor(opn(_uri)) for _uri in filtered_uris]
             ds: xr.Dataset = xr.merge(datasets)
         elif first_ext in [".nc", ".netcdf"]:
-            filtered_uris = []
-            for _uri in uris:
-                ext = splitext(_uri)[-1]
-                if ext != first_ext and not self.options.ext_override:
-                    logger.warning(f"Reading netcdf and {_uri} was not, skipping...")
-                else:
-                    filtered_uris.append(_uri)
-
             ds: xr.Dataset = xr.open_mfdataset(
                 filtered_uris,
                 decode_coords="all",
@@ -119,7 +117,8 @@ class DatasetXarrayDriver(DatasetDriver):
                 decode_timedelta=True,
             )
         else:
-            raise ValueError(f"Unknown extension for DatasetXarrayDriver: {first_ext} ")
+            raise ValueError(f"Unknown extension for DatasetXarrayDriver: {first_ext}")
+
         for variable in ds.data_vars:
             if ds[variable].size == 0:
                 exec_nodata_strat(

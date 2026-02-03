@@ -3,6 +3,7 @@
 import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
+from posixpath import splitext
 from typing import Any
 
 import xarray as xr
@@ -26,9 +27,18 @@ class GeoDatasetOptions(DriverOptions):
     preprocess: str | None = None
     """Name of preprocessor to apply on geodataset after reading. Available preprocessors include: round_latlon, to_datetimeindex, remove_duplicates, harmonise_dims. See their docstrings for details."""
 
+    ext_override: str | None = None
+    """Override the file extension check and try to read all files as the given extension. Useful when reading zarr files without the .zarr extension."""
+
     def get_preprocessor(self) -> Preprocessor:
         """Get the preprocessor function."""
         return get_preprocessor(self.preprocess)
+
+    def get_reading_ext(self, uri: str) -> str:
+        """Get the file extension to use for reading, can be overridden."""
+        if not self.ext_override:
+            return splitext(uri)[-1]
+        return self.ext_override
 
 
 class GeoDatasetDriver(BaseDriver, ABC):
