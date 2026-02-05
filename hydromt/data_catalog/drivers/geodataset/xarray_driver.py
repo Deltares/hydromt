@@ -1,7 +1,6 @@
 """GeoDatasetDriver for zarr data."""
 
 import logging
-from functools import partial
 from pathlib import Path
 from typing import Any, ClassVar
 
@@ -91,21 +90,31 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
         preprocessor = self.options.get_preprocessor()
         first_ext = self.options.get_reading_ext(uris[0])
 
+        # Determine reading extensions based on first file
+        if first_ext in _NETCDF_EXT:
+            reading_extentions = {".nc", ".netcdf"}
+        elif first_ext == _ZARR_EXT:
+            reading_extentions = {".zarr"}
+        else:
+            raise ValueError(f"Unknown extension for DatasetXarrayDriver: {first_ext}")
+
         # Filter uris based on extension
         filtered_uris = []
         for _uri in uris:
             ext = self.options.get_reading_ext(_uri)
-            if ext != first_ext:
+            if ext not in reading_extentions:
                 logger.warning(
-                    f"Reading {first_ext} and {_uri} has a different extension, skipping..."
+                    f"Reading {reading_extentions} and {_uri} has a different extension, skipping..."
                 )
             else:
                 filtered_uris.append(_uri)
 
         # Read and merge
         if first_ext == _ZARR_EXT:
-            opn = partial(xr.open_zarr, **self.options.get_kwargs())
-            datasets = [preprocessor(opn(_uri)) for _uri in filtered_uris]
+            datasets = [
+                preprocessor(xr.open_zarr(_uri, **self.options.get_kwargs()))
+                for _uri in filtered_uris
+            ]
             ds: xr.Dataset = xr.merge(datasets)
         elif first_ext in _NETCDF_EXT:
             ds: xr.Dataset = xr.open_mfdataset(
