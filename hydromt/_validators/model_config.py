@@ -84,6 +84,11 @@ class RawStep(BaseModel):
                 f"Step '{self.name}' not found on {type(instance).__name__}"
             )
 
+        if not hasattr(fn, "__ishydromtstep__"):
+            raise ValueError(
+                f"Step function '{self.name}' is not decorated with @hydromt_step"
+            )
+
         return HydromtModelStep(name=self.name, fn=fn, args=self.args)
 
 

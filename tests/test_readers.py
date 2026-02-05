@@ -15,6 +15,9 @@ from upath import UPath
 import hydromt
 from hydromt import _compat
 from hydromt.gis.raster import GEO_MAP_COORD
+from hydromt.model.components.config import ConfigComponent
+from hydromt.model.model import Model
+from hydromt.plugins import PLUGINS
 from hydromt.readers import (
     open_geodataset,
     open_mfcsv,
@@ -26,6 +29,43 @@ from hydromt.readers import (
 )
 from hydromt.writers import write_xy
 from tests.conftest import TEST_DATA_DIR
+
+
+@pytest.fixture
+def workflow_yaml(tmp_path: Path):
+    data_lib_rel = "examples/local_sources_relative.yml"
+    data_lib_abs = tmp_path / "examples/local_sources_absolute.yml"
+
+    yaml_content = f"""
+modeltype: model
+global:
+  data_libs:
+    - {data_lib_rel}
+    - {data_lib_abs}
+    - artifact_data
+  components:
+    config:
+      type: ConfigComponent
+      filename: run_config.toml
+steps:
+  - config.create:
+      template: run_config.toml
+  - config.update:
+      data:
+        starttime: 2010-01-01
+        model.type: model
+  - write:
+      components:
+        - config
+"""
+    yaml_path = tmp_path / "workflow.yml"
+    yaml_path.write_text(yaml_content)
+
+    for dc in [tmp_path / data_lib_rel, data_lib_abs]:
+        dc.parent.mkdir(parents=True, exist_ok=True)
+        dc.write_text("dummy")
+
+    return yaml_path, data_lib_abs, data_lib_rel
 
 
 def test_open_vector(tmp_path: Path, df, geodf, world):
@@ -285,3 +325,130 @@ def test_read_workflow_yaml_extended():
 
     config_template = workflow.steps[0].args["template"]
     assert config_template == "run_config.toml"
+
+
+def test_read_workflow_yaml_basic(workflow_yaml):
+    yaml_path, data_lib_abs, data_lib_rel = workflow_yaml
+
+    workflow = read_workflow_yaml(yaml_path)
+
+    assert workflow.modeltype is Model
+    assert data_lib_abs in workflow.globals_.data_libs
+    assert (yaml_path.parent / data_lib_rel).resolve() in workflow.globals_.data_libs
+    assert "artifact_data" in workflow.globals_.data_libs
+    assert len(workflow.steps) == 3
+
+
+def test_read_workflow_yaml_missing_modeltype(tmp_path: Path):
+    yaml_path = tmp_path / "workflow.yml"
+    yaml_path.write_text(
+        """
+global:
+  data_libs: []
+steps: []
+"""
+    )
+
+    with pytest.raises(ValueError, match=r"Model type not specified"):
+        read_workflow_yaml(yaml_path)
+
+
+@pytest.mark.parametrize(
+    ("abs_path", "skip", "expect_absolute"),
+    [
+        (True, None, True),
+        (False, None, False),
+        (True, ["global"], False),
+    ],
+)
+def test_read_workflow_yaml_data_lib_path_resolution(
+    workflow_yaml, abs_path, skip, expect_absolute
+):
+    yaml_path, abs_catalog, rel_catalog = workflow_yaml
+
+    workflow = read_workflow_yaml(
+        yaml_path,
+        abs_path=abs_path,
+        skip_abspath_sections=skip,
+    )
+
+    assert abs_catalog in workflow.globals_.data_libs
+    assert "artifact_data" in workflow.globals_.data_libs
+
+    if expect_absolute:
+        assert (yaml_path.parent / rel_catalog).resolve() in workflow.globals_.data_libs
+    else:
+        assert Path(rel_catalog) in workflow.globals_.data_libs
+
+
+def test_read_workflow_yaml_predefined_catalogs_preserved(tmp_path: Path):
+    catalog_name = next(iter(PLUGINS.catalog_plugins))
+    yaml_path = tmp_path / "workflow.yml"
+
+    yaml_path.write_text(
+        f"""
+modeltype: model
+global:
+  data_libs:
+    - {catalog_name}
+steps: []
+"""
+    )
+
+    workflow = read_workflow_yaml(yaml_path)
+
+    assert workflow.globals_.data_libs == [catalog_name]
+
+
+def test_read_workflow_yaml_component_dict_syntax(tmp_path: Path):
+    yaml_path = tmp_path / "workflow.yml"
+    yaml_path.write_text(
+        """
+modeltype: model
+global:
+  components:
+    config:
+      type: ConfigComponent
+      filename: run_config.toml
+steps: []
+"""
+    )
+
+    workflow = read_workflow_yaml(yaml_path)
+    comp = workflow.globals_.components[0]
+
+    assert comp.name == "config"
+    assert comp.type is ConfigComponent
+    assert comp.filename == "run_config.toml"
+
+
+def test_read_workflow_yaml_invalid_step_name_rejected(tmp_path: Path):
+    yaml_path = tmp_path / "workflow.yml"
+    yaml_path.write_text(
+        """
+modeltype: model
+global:
+  components:
+    config:
+      type: ConfigComponent
+steps:
+  - invalid.step.name.too.long: {}
+"""
+    )
+
+    with pytest.raises(ValueError, match=r"Invalid step name"):
+        read_workflow_yaml(yaml_path)
+
+
+def test_read_workflow_yaml_defaults_merging(workflow_yaml):
+    yaml_path, _, _ = workflow_yaml
+
+    defaults = {"global": {"new_option": 42}}
+    workflow = read_workflow_yaml(
+        yaml_path,
+        defaults=defaults,
+        skip_abspath_sections=["global"],
+    )
+
+    assert workflow.globals_.new_option == 42
+    assert "artifact_data" in workflow.globals_.data_libs
