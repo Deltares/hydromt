@@ -6,7 +6,6 @@ import os
 import shutil
 import typing
 from abc import ABCMeta
-from inspect import _empty, signature
 from os.path import isabs, isfile, join
 from pathlib import Path
 from typing import (
@@ -25,8 +24,8 @@ from pyproj import CRS
 from hydromt._utils import log
 from hydromt._validators.model_config import (
     HydromtComponentConfig,
-    HydromtModelStep,
     RawStep,
+    create_raw_step,
 )
 from hydromt.data_catalog import DataCatalog
 from hydromt.io import read_yaml
@@ -281,8 +280,8 @@ class Model(object, metaclass=ABCMeta):
     def build(
         self,
         *,
-        write: Optional[bool] = True,
-        steps: List[Dict[str, Dict[str, Any]]],
+        write: bool = True,
+        steps: list[dict[str, dict[str, Any]]],
     ):
         r"""Single method to build a model from scratch based on settings in `steps`.
 
@@ -325,13 +324,16 @@ class Model(object, metaclass=ABCMeta):
         with log.to_file(Path(self.root.path) / "hydromt.log"):
             log.log_version()
 
+            # Execute steps
             steps = steps or []
-            runtime_steps = [self._to_runtime_step(step) for step in steps]
-            [self._execute_model_step(step_obj) for step_obj in runtime_steps]
+            raw_steps = [create_raw_step(step) for step in steps]
+            bound_steps = [step.to_model_step(self) for step in raw_steps]
+            for step_obj in bound_steps:
+                step_obj.execute()
 
             # If there are any write options included in the steps,
             # we don't need to write the whole model.
-            if write and not self._options_contain_write(steps):
+            if write and not self._steps_contain_write(raw_steps):
                 self.write()
 
             self.close()
@@ -340,9 +342,9 @@ class Model(object, metaclass=ABCMeta):
         self,
         *,
         model_out: str | Path | None = None,
-        write: Optional[bool] = True,
+        write: bool = True,
         forceful_overwrite: bool = False,
-        steps: Optional[List[Dict[str, Dict[str, Any]]]] = None,
+        steps: list[dict[str, dict[str, Any]]] | None = None,
     ):
         r"""Single method to update a model based the settings in `steps`.
 
@@ -389,10 +391,6 @@ class Model(object, metaclass=ABCMeta):
             self.root.path / "hydromt.log", append=self.root.is_reading_mode()
         ):
             log.log_version()
-
-            steps = steps or []
-            runtime_steps = [self._to_runtime_step(step) for step in steps]
-
             if not self.root.is_writing_mode():
                 if model_out is None:
                     raise ValueError(
@@ -420,10 +418,15 @@ class Model(object, metaclass=ABCMeta):
                 )
 
             # Execute steps
-            [self._execute_model_step(step_obj) for step_obj in runtime_steps]
+            steps = steps or []
+            raw_steps = [create_raw_step(step) for step in steps]
+            bound_steps = [step.to_model_step(self) for step in raw_steps]
+            for step_obj in bound_steps:
+                step_obj.execute()
+
             # If there are any write options included in the steps,
             # we don't need to write the whole model.
-            if write and not self._options_contain_write(steps):
+            if write and not self._steps_contain_write(raw_steps):
                 self.write()
 
             self.close()
@@ -467,17 +470,10 @@ class Model(object, metaclass=ABCMeta):
             c.read()
 
     @staticmethod
-    def _options_contain_write(steps: List[Dict[str, Dict[str, Any]]]) -> bool:
+    def _steps_contain_write(steps: list[RawStep]) -> bool:
         for step in steps:
-            if isinstance(step, dict):
-                if "write" in next(iter(step)):
-                    return True
-            elif isinstance(step, HydromtModelStep):
-                if "write" in step.name:
-                    return True
-            elif isinstance(step, RawStep):
-                if "write" in step.name:
-                    return True
+            if "write" in step.name:
+                return True
         return False
 
     @hydromt_step
@@ -531,59 +527,6 @@ class Model(object, metaclass=ABCMeta):
                 )
 
             cat.to_yml(path, root=root)
-
-    def _build_runtime_steps(
-        self,
-        steps: list[dict[str, dict[str, Any]] | RawStep],
-    ) -> list[HydromtModelStep]:
-        rt_steps = []
-        for i, step in enumerate(steps):
-            try:
-                rt_steps.append(self._to_runtime_step(step))
-            except Exception as e:
-                step_name = step.name if isinstance(step, RawStep) else step["name"]
-                raise ValueError(
-                    f"Validation of step {i + 1} ({step_name}) failed: {e}"
-                ) from e
-        return rt_steps
-
-    def _to_runtime_step(
-        self,
-        step: dict[str, dict[str, Any]] | RawStep,
-    ) -> HydromtModelStep:
-        if isinstance(step, RawStep):
-            name = step.name
-            args = step.args
-        elif isinstance(step, dict):
-            name, args = next(iter(step.items()))
-        else:
-            raise ValueError(f"Invalid step type: {type(step)}")
-
-        comp_name, fn_name = name.split(".") if "." in name else (None, name)
-        instance = self.components.get(comp_name, self)
-
-        try:
-            fn = getattr(instance, fn_name)
-        except (AttributeError, KeyError):
-            raise ValueError(f"Step '{name}' not found on {type(instance).__name__}")
-
-        return HydromtModelStep(name=name, fn=fn, args=args)
-
-    def _execute_model_step(self, step: HydromtModelStep) -> None:
-        fn = step.fn
-        kwargs = step.args or {}
-
-        for k, v in kwargs.items():
-            logger.info(f"{step.name}.{k}={v}")
-
-        sig = signature(fn)
-        bound_args = {
-            param: p.default
-            for param, p in sig.parameters.items()
-            if p.default != _empty
-        }
-        bound_args.update(kwargs)
-        fn(**bound_args)
 
     def test_equal(self, other: "Model") -> tuple[bool, Dict[str, str]]:
         """Test if two models are equal, based on their components.

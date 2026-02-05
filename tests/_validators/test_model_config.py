@@ -18,28 +18,21 @@ def mock_component(mock_model):
     return GridComponent(mock_model)
 
 
-def _assert_validation_error_msg(exc: ValidationError, msg_substr: str):
-    errors = exc.errors()
-    assert len(errors) == 1, f"Expected 1 error, got {len(errors)}: {errors}"
-    matched = any(msg_substr in err["msg"] for err in errors)
-    assert matched, f"Expected substring '{msg_substr}' not found in error: {errors}"
-
-
 def test_write_validation_validation():
     d = {"components": ["config", "geoms", "grid"]}
     HydromtModelStep(name="write", fn=Model.write, args=d)
 
 
 def test_validate_component_config_wrong_characters():
-    with pytest.raises(ValidationError) as exc:
+    with pytest.raises(
+        ValidationError, match=r"1test is not a valid Python identifier"
+    ):
         HydromtComponentConfig(name="1test", type=ModelComponent)
-    _assert_validation_error_msg(exc, "1test is not a valid Python identifier")
 
 
 def test_validate_component_config_reserved_keyword():
-    with pytest.raises(ValidationError) as exc:
+    with pytest.raises(ValidationError, match=r"import is a Python reserved keyword"):
         HydromtComponentConfig(name="import", type=ModelComponent)
-    _assert_validation_error_msg(exc, "import is a Python reserved keyword")
 
 
 def test_validate_component_config_unknown_component():

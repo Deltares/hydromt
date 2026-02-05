@@ -1,9 +1,10 @@
 """Pydantic models for the validation of model config files."""
 
 import inspect
+import logging
 from keyword import iskeyword
 from pathlib import Path
-from typing import Any, Callable, Type
+from typing import Any, Callable, Protocol, Type
 
 from pydantic import (
     BaseModel,
@@ -15,6 +16,12 @@ from pydantic import (
 )
 
 from hydromt.plugins import PLUGINS
+
+logger = logging.getLogger(__name__)
+
+
+class Model(Protocol):
+    components: dict[str, Any]
 
 
 class HydromtComponentConfig(BaseModel):
@@ -64,6 +71,21 @@ class RawStep(BaseModel):
             )
         return name
 
+    def to_model_step(self, model_instance: Model) -> "HydromtModelStep":
+        comp_name, fn_name = (
+            self.name.split(".") if "." in self.name else (None, self.name)
+        )
+        instance = model_instance.components.get(comp_name, model_instance)
+
+        try:
+            fn = getattr(instance, fn_name)
+        except (AttributeError, KeyError):
+            raise ValueError(
+                f"Step '{self.name}' not found on {type(instance).__name__}"
+            )
+
+        return HydromtModelStep(name=self.name, fn=fn, args=self.args)
+
 
 class HydromtModelStep(BaseModel):
     name: str
@@ -87,6 +109,21 @@ class HydromtModelStep(BaseModel):
                 f"Step function '{self.name}' argument validation failed: {e}"
             )
         return self
+
+    def execute(self):
+        kwargs = self.args or {}
+
+        for k, v in kwargs.items():
+            logger.info(f"{self.name}.{k}={v}")
+
+        sig = inspect.signature(self.fn)
+        bound_args = {
+            param: p.default
+            for param, p in sig.parameters.items()
+            if p.default != inspect._empty
+        }
+        bound_args.update(kwargs)
+        self.fn(**bound_args)
 
 
 class HydromtGlobalConfig(BaseModel):
@@ -149,3 +186,9 @@ class HydromtModelSetup(BaseModel):
                 raise ValueError(f"Unknown model '{v}'")
             return PLUGINS.model_plugins[v]
         return v
+
+
+def create_raw_step(step_dict: dict[str, dict[str, Any]]) -> RawStep:
+    if isinstance(step_dict, RawStep):
+        return step_dict
+    return RawStep.model_validate(step_dict)
