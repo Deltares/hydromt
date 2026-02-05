@@ -14,7 +14,7 @@ if sys.version_info >= (3, 11):
 else:
     import tomli as tomllib
 
-__all__ = ["read_yaml", "read_toml", "read_uri", "yml_from_uri_or_path"]
+__all__ = ["read_yaml", "read_toml", "read_uri", "_yml_from_uri_or_path"]
 
 
 def read_yaml(path: str | Path) -> dict[str, Any]:
@@ -39,7 +39,7 @@ def read_uri(uri: str | Path) -> str:
     return content
 
 
-def yml_from_uri_or_path(uri_or_path: str | Path) -> dict[str, Any]:
+def _yml_from_uri_or_path(uri_or_path: str | Path) -> dict[str, Any]:
     """Read YAML content from a URI or local path and return as dict."""
     if _is_valid_url(str(uri_or_path)):
         yml_text = read_uri(uri_or_path)

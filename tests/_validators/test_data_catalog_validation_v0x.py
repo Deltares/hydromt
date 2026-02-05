@@ -10,11 +10,11 @@ from hydromt._validators.data_catalog_v0x import (
     DataCatalogV0MetaData,
     DataCatalogV0Validator,
 )
-from hydromt.io import yml_from_uri_or_path
+from hydromt.io import _yml_from_uri_or_path
 
 
 def test_deltares_data_catalog_v0(dd_v0_catalog):
-    yml_dict = yml_from_uri_or_path(dd_v0_catalog)
+    yml_dict = _yml_from_uri_or_path(dd_v0_catalog)
     yml_dict["meta"]["validate_hydromt_version"] = False
     # would raise error if something goes wrong
     _ = DataCatalogV0Validator.from_dict(yml_dict)

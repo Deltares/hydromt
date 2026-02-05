@@ -1,4 +1,3 @@
-modeltype: model
 global:
   components:
     config:

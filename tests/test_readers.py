@@ -301,7 +301,10 @@ def test_open_nc_geo_map_coord_sets_close(tmpdir):
 
 
 def test_read_workflow_yaml():
-    workflow = read_workflow_yaml(Path(TEST_DATA_DIR, "build_config.yml"))
+    workflow = read_workflow_yaml(
+        path=Path(TEST_DATA_DIR, "build_config.yml"),
+        modeltype="model",
+    )
 
     assert workflow.modeltype.__name__ == "Model"
     assert workflow.globals_.components is not None

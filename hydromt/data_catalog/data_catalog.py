@@ -62,7 +62,7 @@ from hydromt.data_catalog.sources import (
 )
 from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
 from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
-from hydromt.io import yml_from_uri_or_path
+from hydromt.io import _yml_from_uri_or_path
 from hydromt.plugins import PLUGINS
 from hydromt.typing import Bbox, SourceSpecDict, TimeRange
 
@@ -694,7 +694,7 @@ class DataCatalog(object):
             DataCatalog object with parsed yaml file added.
         """
         logger.info(f"Parsing data catalog from {urlpath}")
-        yml = yml_from_uri_or_path(urlpath)
+        yml = _yml_from_uri_or_path(urlpath)
         # read meta data
         meta = yml.pop("meta", {})
         if catalog_name is None:
