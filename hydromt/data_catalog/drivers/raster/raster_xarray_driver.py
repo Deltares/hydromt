@@ -27,8 +27,8 @@ from hydromt.typing import (
 
 logger = logging.getLogger(__name__)
 
-_ZARR_EXT = ".zarr"
-_NETCDF_EXT = [".nc", ".netcdf"]
+_ZARR_EXT: set[str] = {".zarr"}
+_NETCDF_EXT: set[str] = {".nc", ".netcdf"}
 
 
 class RasterXarrayOptions(DriverOptions):
@@ -63,7 +63,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
 
     name = "raster_xarray"
     supports_writing = True
-    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {_ZARR_EXT, *_NETCDF_EXT}
+    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = _ZARR_EXT | _NETCDF_EXT
     options: RasterXarrayOptions = Field(
         default_factory=RasterXarrayOptions, description=DRIVER_OPTIONS_DESCRIPTION
     )
@@ -138,9 +138,9 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
 
         # Determine reading extensions based on first file
         if first_ext in _NETCDF_EXT:
-            reading_extentions = {".nc", ".netcdf"}
-        elif first_ext == _ZARR_EXT:
-            reading_extentions = {".zarr"}
+            reading_extentions = _NETCDF_EXT
+        elif first_ext in _ZARR_EXT:
+            reading_extentions = _ZARR_EXT
         else:
             raise ValueError(f"Unknown extension for DatasetXarrayDriver: {first_ext}")
 
@@ -156,7 +156,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                 filtered_uris.append(_uri)
 
         # Read and merge
-        if first_ext == _ZARR_EXT:
+        if first_ext in _ZARR_EXT:
             datasets = [
                 preprocessor(xr.open_zarr(_uri, **self.options.get_kwargs()))
                 for _uri in filtered_uris
@@ -224,9 +224,9 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                 f"Unknown extension for RasterDatasetXarrayDriver: {ext},"
                 "switching to zarr"
             )
-            path = no_ext + _ZARR_EXT
-            ext = _ZARR_EXT
-        if ext == _ZARR_EXT:
+            path = no_ext + next(iter(_ZARR_EXT))
+            ext = next(iter(_ZARR_EXT))
+        if ext in _ZARR_EXT:
             write_kwargs.setdefault("zarr_format", 2)
             data.to_zarr(path, mode="w", **write_kwargs)
         else:

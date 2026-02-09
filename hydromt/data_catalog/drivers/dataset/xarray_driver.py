@@ -19,8 +19,8 @@ from hydromt.error import NoDataStrategy, exec_nodata_strat
 logger = logging.getLogger(__name__)
 
 
-_ZARR_EXT = ".zarr"
-_NETCDF_EXT = [".nc", ".netcdf"]
+_ZARR_EXT: set[str] = {".zarr"}
+_NETCDF_EXT: set[str] = {".nc", ".netcdf"}
 
 
 class DatasetXarrayOptions(DriverOptions):
@@ -58,7 +58,7 @@ class DatasetXarrayDriver(DatasetDriver):
 
     name: ClassVar[str] = "dataset_xarray"
     supports_writing: ClassVar[bool] = True
-    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {".zarr", ".nc", ".netcdf"}
+    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = _ZARR_EXT | _NETCDF_EXT
 
     options: DatasetXarrayOptions = Field(
         default_factory=DatasetXarrayOptions, description=DRIVER_OPTIONS_DESCRIPTION
@@ -97,9 +97,9 @@ class DatasetXarrayDriver(DatasetDriver):
 
         # Determine reading extensions based on first file
         if first_ext in _NETCDF_EXT:
-            reading_extentions = set(_NETCDF_EXT)
-        elif first_ext == _ZARR_EXT:
-            reading_extentions = {_ZARR_EXT}
+            reading_extentions = _NETCDF_EXT
+        elif first_ext in _ZARR_EXT:
+            reading_extentions = _ZARR_EXT
         else:
             raise ValueError(f"Unknown extension for DatasetXarrayDriver: {first_ext}")
 
@@ -115,13 +115,13 @@ class DatasetXarrayDriver(DatasetDriver):
                 filtered_uris.append(_uri)
 
         # Read and merge
-        if first_ext == ".zarr":
+        if first_ext in _ZARR_EXT:
             datasets = [
                 preprocessor(xr.open_zarr(_uri, **self.options.get_kwargs()))
                 for _uri in filtered_uris
             ]
             ds: xr.Dataset = xr.merge(datasets)
-        elif first_ext in [".nc", ".netcdf"]:
+        elif first_ext in _NETCDF_EXT:
             ds: xr.Dataset = xr.open_mfdataset(
                 filtered_uris,
                 decode_coords="all",
@@ -179,10 +179,10 @@ class DatasetXarrayDriver(DatasetDriver):
         path = Path(path)
         ext = path.suffix
         write_kwargs = write_kwargs or {}
-        if ext == ".zarr":
+        if ext in _ZARR_EXT:
             write_kwargs.setdefault("zarr_format", 2)
             data.to_zarr(path, **write_kwargs)
-        elif ext in [".nc", ".netcdf"]:
+        elif ext in _NETCDF_EXT:
             data.to_netcdf(path, **write_kwargs)
         else:
             raise ValueError(f"Unknown extension for DatasetXarrayDriver: {ext} ")

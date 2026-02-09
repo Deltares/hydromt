@@ -24,8 +24,8 @@ from hydromt.typing import (
 
 logger = logging.getLogger(__name__)
 
-_ZARR_EXT = ".zarr"
-_NETCDF_EXT = [".nc", ".netcdf"]
+_ZARR_EXT: set[str] = {".zarr"}
+_NETCDF_EXT: set[str] = {".nc", ".netcdf"}
 
 
 class GeoDatasetXarrayDriver(GeoDatasetDriver):
@@ -39,7 +39,7 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
 
     name: ClassVar[str] = "geodataset_xarray"
     supports_writing = True
-    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {_ZARR_EXT, *_NETCDF_EXT}
+    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = _ZARR_EXT | _NETCDF_EXT
     options: GeoDatasetOptions = Field(
         default_factory=GeoDatasetOptions, description=DRIVER_OPTIONS_DESCRIPTION
     )
@@ -92,9 +92,9 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
 
         # Determine reading extensions based on first file
         if first_ext in _NETCDF_EXT:
-            reading_extentions = {".nc", ".netcdf"}
-        elif first_ext == _ZARR_EXT:
-            reading_extentions = {".zarr"}
+            reading_extentions = _NETCDF_EXT
+        elif first_ext in _ZARR_EXT:
+            reading_extentions = _ZARR_EXT
         else:
             raise ValueError(f"Unknown extension for DatasetXarrayDriver: {first_ext}")
 
@@ -110,7 +110,7 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
                 filtered_uris.append(_uri)
 
         # Read and merge
-        if first_ext == _ZARR_EXT:
+        if first_ext in _ZARR_EXT:
             datasets = [
                 preprocessor(xr.open_zarr(_uri, **self.options.get_kwargs()))
                 for _uri in filtered_uris
@@ -172,7 +172,7 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
         path = Path(path)
         ext = path.suffix
         write_kwargs = write_kwargs or {}
-        if ext == _ZARR_EXT:
+        if ext in _ZARR_EXT:
             write_kwargs.setdefault("zarr_format", 2)
             data.vector.to_zarr(path, **write_kwargs)
         elif ext in _NETCDF_EXT:
