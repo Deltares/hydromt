@@ -118,12 +118,7 @@ def parse_region_basin(
     _assert_parsed_values(
         key=next(iter(kwargs)), region_value=value0, kind=kind, expected=expected_keys
     )
-    kwargs_str = dict()
-    for k, v in kwargs.items():
-        if isinstance(v, gpd.GeoDataFrame):
-            v = f"GeoDataFrame {v.total_bounds} (crs = {v.crs})"
-        kwargs_str.update({k: v})
-    logger.debug(f"Parsed region (kind={kind}): {str(kwargs_str)}")
+    logger.debug(f"Parsed region (kind={kind}): {_stringify_region_dict(kwargs)}")
 
     ds_org = data_catalog.get_rasterdataset(hydrography_path)
     if "bounds" not in kwargs and basin_index_path is not None:
@@ -156,7 +151,7 @@ def parse_region_bbox(region: dict, *, crs: int = 4326) -> gpd.GeoDataFrame:
     _assert_parsed_values(
         key=next(iter(kwargs)), region_value=value0, kind="bbox", expected=["bbox"]
     )
-    logger.debug(f"Parsed region (kind={kind}): {str(kwargs)}")
+    logger.debug(f"Parsed region (kind={kind}): {_stringify_region_dict(kwargs)}")
 
     bbox = kwargs["bbox"]
     geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=crs)
@@ -193,12 +188,7 @@ def parse_region_geom(
     _assert_parsed_values(
         key=next(iter(kwargs)), region_value=value0, kind="geom", expected=["geom"]
     )
-    kwargs_str = dict()
-    for k, v in kwargs.items():
-        if isinstance(v, gpd.GeoDataFrame):
-            v = f"GeoDataFrame {v.total_bounds} (crs = {v.crs})"
-        kwargs_str.update({k: v})
-    logger.debug(f"Parsed region (kind={kind}): {str(kwargs_str)}")
+    logger.debug(f"Parsed region (kind={kind}): {_stringify_region_dict(kwargs)}")
 
     geom = kwargs["geom"]
     if geom.crs is None:
@@ -237,13 +227,7 @@ def parse_region_grid(
     value0 = options.pop(kind)
 
     _assert_parse_key(kind, "grid")
-
-    parsed_region = {}
-    for k, v in options.items():
-        if isinstance(v, xr.DataArray):
-            v = f"DataArray {v.raster.bounds} (crs = {v.raster.crs})"
-        parsed_region.update({k: v})
-    logger.debug(f"Parsed region (kind={kind}): {str(parsed_region)}")
+    logger.debug(f"Parsed region (kind={kind}): {_stringify_region_dict(options)}")
 
     data_catalog = data_catalog or DataCatalog()
     da = data_catalog.get_rasterdataset(
@@ -276,7 +260,7 @@ def parse_region_other_model(region: dict) -> "Model":
     value0 = kwargs.pop(kind)
 
     _assert_parse_key(kind, *PLUGINS.model_plugins.keys())
-    logger.debug(f"Parsed region (kind={kind}): {str(kwargs)}")
+    logger.debug(f"Parsed region (kind={kind}): {_stringify_region_dict(kwargs)}")
 
     model_class = PLUGINS.model_plugins[kind]
     return model_class(root=value0, mode="r")
@@ -359,6 +343,19 @@ def _parse_region_value(
         )
         kwarg = dict(xy=xy)
     return kwarg
+
+
+def _stringify_region_dict(d: dict) -> str:
+    messages = []
+    for k, v in d.items():
+        if isinstance(v, gpd.GeoDataFrame):
+            stringified = f"GeoDataFrame (total_bounds={v.total_bounds}, crs={v.crs})"
+        elif isinstance(v, xr.DataArray):
+            stringified = f"DataArray (bounds={v.raster.bounds}, crs={v.raster.crs})"
+        else:
+            stringified = str(v)
+        messages.append(f"{k}: {stringified}")
+    return ", ".join(messages)
 
 
 def _assert_parse_key(key: str, *expected: str) -> None:
