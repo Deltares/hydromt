@@ -218,12 +218,6 @@ disallow_any_generics = true
 channels = ["conda-forge"]
 platforms = ["linux-64", "win-64", "osx-arm64"]
 
-[tool.pixi.dependencies]
-netcdf4 = "*"                # duplication is necessary to resolve macos issues
-rasterio = "<1.5"            # duplication is necessary to resolve macos issues
-libgdal-hdf5 = ">=3.12.1,<4"
-libgdal-netcdf = ">=3.12.1,<4"
-
 [tool.pixi.feature.py311.dependencies]
 python = "3.11.*"
 
@@ -393,3 +387,10 @@ full-py311 = { features = [
 	"examples",
 ], solve-group = "py311" }
 min-py311 = { features = ["py311", "test"], solve-group = "py311" }
+
+# pypi does not have these binary wheels for osx-arm64
+[tool.pixi.target.osx-arm64.dependencies]
+netcdf4 = "*"
+rasterio = ">=1.4.4,<1.5"
+libgdal-hdf5 = ">=3.12.1,<4"
+libgdal-netcdf = ">=3.12.1,<4"
