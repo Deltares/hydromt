@@ -257,9 +257,7 @@ def build(
         mod = workflow.modeltype(
             root=model_root,
             mode=mode,
-            data_libs=workflow.globals_.data_libs,
-            components={c.name: c for c in workflow.globals_.components},
-            **workflow.globals_.model_dump(exclude={"data_libs", "components"}),
+            **workflow.globals_.model_dump(),
         )
         mod.data_catalog.cache = cache
 
@@ -340,9 +338,7 @@ def update(
         mod = workflow.modeltype(
             root=model_root,
             mode=mode,
-            data_libs=workflow.globals_.data_libs,
-            components={c.name: c for c in workflow.globals_.components},
-            **workflow.globals_.model_dump(exclude={"data_libs", "components"}),
+            **workflow.globals_.model_dump(),
         )
         mod.data_catalog.cache = cache
         mod.update(model_out=model_out, steps=workflow.steps, forceful_overwrite=fo)
