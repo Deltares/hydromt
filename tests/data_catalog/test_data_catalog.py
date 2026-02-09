@@ -24,7 +24,7 @@ from shapely import box
 from yaml import dump
 
 from hydromt._compat import HAS_GCSFS, HAS_GDAL, HAS_OPENPYXL, HAS_S3FS
-from hydromt._io import _yml_from_uri_or_path
+from hydromt._io import yml_from_uri_or_path
 from hydromt.config import Settings
 from hydromt.data_catalog.adapters import (
     GeoDataFrameAdapter,
@@ -1880,9 +1880,9 @@ def test_from_stac():
 def test_yml_from_uri_path():
     uri = "https://google.com/nothinghere"
     with pytest.raises(requests.HTTPError):
-        _yml_from_uri_or_path(uri)
+        yml_from_uri_or_path(uri)
     uri = "https://raw.githubusercontent.com/Deltares/hydromt/main/.pre-commit-config.yaml"
-    yml = _yml_from_uri_or_path(uri)
+    yml = yml_from_uri_or_path(uri)
     assert isinstance(yml, dict)
     assert len(yml) > 0
 

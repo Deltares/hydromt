@@ -33,7 +33,7 @@ from pystac import Catalog as StacCatalog
 from pystac import CatalogType, MediaType
 
 from hydromt import __version__
-from hydromt._io import _yml_from_uri_or_path
+from hydromt._io import yml_from_uri_or_path
 from hydromt._utils import (
     _deep_merge,
     _partition_dictionaries,
@@ -694,7 +694,7 @@ class DataCatalog(object):
             DataCatalog object with parsed yaml file added.
         """
         logger.info(f"Parsing data catalog from {urlpath}")
-        yml = _yml_from_uri_or_path(urlpath)
+        yml = yml_from_uri_or_path(urlpath)
         # read meta data
         meta = yml.pop("meta", {})
         if catalog_name is None:
