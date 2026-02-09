@@ -44,6 +44,7 @@ __all__ = [
     "read_toml",
     "read_uri",
     "read_yaml",
+    "read_workflow_yaml",
     "yml_from_uri_or_path",
 ]
 
