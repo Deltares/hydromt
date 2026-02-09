@@ -99,7 +99,9 @@ def full(
             shape = cs.shape
             if hasattr(cs, "dims"):
                 dims = cs.dims
-    data = f(shape, (fill_value or nodata), dtype=dtype)
+    if fill_value is None:
+        fill_value = nodata
+    data = f(shape, fill_value, dtype=dtype)
     da = xr.DataArray(data, coords, dims, name, attrs)
     da.raster.set_nodata(nodata)
     da.raster.set_crs(crs)
