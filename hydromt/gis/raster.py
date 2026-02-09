@@ -7,7 +7,7 @@
 
 """Extension for xarray to provide rasterio capabilities to xarray datasets/arrays."""
 
-from __future__ import annotations
+from __future__ import annotations  # noqa: I001
 
 import datetime
 import itertools
@@ -15,7 +15,7 @@ import logging
 import math
 import os
 from os.path import join
-from typing import Any, Optional, Tuple, Union
+from typing import Any, Callable, Literal, Optional, Tuple, Union
 
 import cftime
 import dask
@@ -25,7 +25,6 @@ import pandas as pd
 import pyproj
 import rasterio.fill
 import rasterio.warp
-import rioxarray  # noqa: F401
 import shapely
 import xarray as xr
 from affine import Affine
@@ -33,11 +32,11 @@ from pyproj import CRS
 from rasterio import features
 from rasterio.enums import MergeAlg, Resampling
 from rasterio.rio.overview import get_maximum_overview_level
+import rioxarray  # noqa: F401
 from scipy import ndimage
 from scipy.interpolate import griddata
 from scipy.spatial import cKDTree
 from shapely.geometry import LineString, Polygon, box
-
 from hydromt.gis import gis_utils, raster_utils
 from hydromt.gis._gdal_drivers import GDAL_EXT_CODE_MAP
 
@@ -45,7 +44,7 @@ logger = logging.getLogger(__name__)
 XDIMS = ("x", "longitude", "lon", "long")
 YDIMS = ("y", "latitude", "lat")
 GEO_MAP_COORD = "spatial_ref"
-
+_STAT_REDUCERS = ["count", "min", "max", "sum", "mean", "std", "median"]
 __all__ = [
     "RasterDataArray",
     "RasterDataset",
@@ -892,19 +891,28 @@ class XRasterBase(XGeoBase):
             obj_out = obj_out.raster.mask(ds_sel["mask"])
         return obj_out
 
-    def zonal_stats(self, gdf, stats, all_touched=False):
+    def zonal_stats(
+        self,
+        gdf: gpd.GeoDataFrame,
+        stats: str | list[str] | Callable,
+        variables: list[str] | None = None,
+        all_touched: bool = False,
+    ):
         """Calculate zonal statistics of raster samples aggregated for geometries.
 
         Arguments
         ---------
         gdf: geopandas.GeoDataFrame
             GeoDataFrame with geometries
-        stats: list of str, callable
+        stats: str | list[str] | Callable
             Statistics to compute from raster values, options include
             {'count', 'min', 'max', 'sum', 'mean', 'std', 'median', 'q##'}.
-            Multiple percentiles can be calculated using comma-seperated values,
+            Multiple percentiles can be calculated using comma-separated values,
             e.g.: 'q10,50,90'. Statistics ignore the nodata value and are applied
-            along the x and y dimension. By default ['mean']
+            along the x and y dimension.
+        variables: list of str, optional
+            List of variable names to calculate zonal statistics for. If None, all variables
+            are used. By default None
         all_touched : bool, optional
             If True, all pixels touched by geometries will used to define the sample.
             If False, only pixels whose center is within the geometry or that are
@@ -916,12 +924,16 @@ class XRasterBase(XGeoBase):
             Output dataset with a variable for each combination of input variable
             and statistic.
         """
-        _ST = ["count", "min", "max", "sum", "mean", "std", "median"]
 
-        def rmd(ds, stat):
+        def rmd(ds: xr.Dataset, stat: str):
             return {var: f"{var}_{stat}" for var in ds.raster.vars}
 
-        def gen_zonal_stat(ds, geoms, stats, all_touched=False):
+        def gen_zonal_stat(
+            ds: xr.Dataset,
+            geoms: list[gpd.GeoSeries],
+            stats: list[str] | Callable,
+            all_touched: bool = False,
+        ):
             dims = (ds.raster.y_dim, ds.raster.x_dim)
             for i, geom in enumerate(geoms):
                 # add buffer to work with point geometries
@@ -940,7 +952,7 @@ class XRasterBase(XGeoBase):
                 ds1 = ds1.where(mask == 1)
                 dss = []
                 for stat in stats:
-                    if stat in _ST:
+                    if stat in _STAT_REDUCERS:
                         ds1_stat = getattr(ds1, stat)(dims)
                         dss.append(ds1_stat.rename(rmd(ds1, stat)))
                     elif isinstance(stat, str) and stat.startswith("q"):
@@ -956,16 +968,18 @@ class XRasterBase(XGeoBase):
                         raise ValueError(f"Stat {stat} not valid.")
                 yield xr.merge(dss), i
 
-        if isinstance(stats, str):
-            stats = stats.split()
-        elif callable(stats):
-            stats = list([stats])
+        if not isinstance(stats, list):
+            stats = [stats]
 
         if gdf.crs is not None and self.crs is not None and gdf.crs != self.crs:
             gdf = gdf.to_crs(self.crs)
         geoms = gdf["geometry"].values
 
         ds = self._obj.copy()
+
+        if variables is not None:
+            ds = ds[variables]
+
         if isinstance(ds, xr.DataArray):
             if ds.name is None:
                 ds.name = "values"
@@ -978,6 +992,127 @@ class XRasterBase(XGeoBase):
         dss, idx = zip(*out, strict=False)
         ds_out = xr.concat(dss, "index")
         ds_out["index"] = xr.IndexVariable("index", gdf.index.values[np.array(idx)])
+
+        return ds_out
+
+    def sample_geoms(
+        self,
+        gdf: gpd.GeoDataFrame,
+        sampling_strategy: Literal["centroid", "representative_point"],
+        stats: str | list[str] | Callable = "mean",
+        variables: list[str] | None = None,
+    ):
+        """For each geometry, compute one sample point in the raster and compute stats across bands.
+
+        Fast sampling of raster values at geometry centroids (or representative points).
+        Intended for cases where raster resolution >> geometry size.
+        No rasterization or spatial aggregation is performed.
+
+        Parameters
+        ----------
+        gdf : geopandas.GeoDataFrame
+            GeoDataFrame with geometries
+        stats : str, list of str, callable, optional
+            Statistics to compute from raster values, options include
+            {'mean', 'min', 'max', 'sum', 'std', 'median'}.
+            Multiple statistics can be calculated by providing a list.
+            Only applicable when raster has multiple bands (e.g. time series).
+            If the raster has a single band, the sampled value is returned directly, ignoring stats.
+            By default None
+        sampling_strategy : {'centroid', 'representative_point'}, optional
+            Method to get point location from geometry.
+            'centroid': use geometry centroid
+            'representative_point': use geometry representative point.
+            By default 'representative_point'
+        variables : list of str, optional
+            List of variable names to sample from dataset. If None, all variables
+            are sampled. By default None
+
+        Returns
+        -------
+        obj_out: xr.Dataset
+            Output dataset with a variable for each combination of input variable
+            and statistic. Note that the output dataset can have nodata values if
+            sampled points fall outside the raster extent. Handling this is the
+            responsibility of the caller.
+        """
+        if isinstance(stats, str):
+            stats = stats.split()
+        elif callable(stats):
+            stats = [stats]
+
+        if gdf.crs is not None and self.crs is not None and gdf.crs != self.crs:
+            gdf = gdf.to_crs(self.crs)
+
+        if sampling_strategy == "centroid":
+            points = gdf.geometry.centroid
+        elif sampling_strategy == "representative_point":
+            points = gdf.geometry.representative_point()
+        else:
+            raise ValueError(f"Invalid sampling_strategy: {sampling_strategy}")
+
+        # determine which geometries fall inside raster bounds
+        gdf_points = gdf.copy()
+        gdf_points["geometry"] = points
+        w, s, e, n = self.bounds
+        valid_mask = (
+            (gdf_points.geometry.x >= w)
+            & (gdf_points.geometry.x <= e)
+            & (gdf_points.geometry.y >= s)
+            & (gdf_points.geometry.y <= n)
+        )
+        if not valid_mask.any():
+            raise ValueError("All geometries outside raster domain")
+
+        gdf_points = gdf_points[valid_mask]
+        valid_indices = gdf_points.index.values
+
+        ds = self._obj.copy()
+        if variables is not None:
+            ds = ds[variables]
+
+        sampled = ds.raster.sample(gdf_points)
+        if isinstance(sampled, xr.DataArray):
+            sampled = sampled.to_dataset(name=sampled.name or "values")
+
+        out_vars = {}
+        for var in sampled.data_vars:
+            da = sampled[var]
+            dims_to_reduce = [d for d in da.dims if d != "index"]
+
+            # single-band or single-point: no reduction
+            if not dims_to_reduce:
+                out_vars[var] = da
+                continue
+
+            # multiple dims: apply stats
+            for stat in stats:
+                if stat in _STAT_REDUCERS:
+                    res = getattr(da, stat)(dim=dims_to_reduce)
+                    name = f"{var}_{stat}"
+                elif isinstance(stat, str) and stat.startswith("q"):
+                    qs = np.array([float(q) for q in stat.strip("q").split(",")])
+                    res = da.quantile(qs / 100, dim=dims_to_reduce)
+                    name = f"{var}_quantile"
+                elif callable(stat):
+                    res = da.reduce(stat, dim=dims_to_reduce)
+                    name = f"{var}_{stat.__name__}"
+                else:
+                    raise ValueError(f"Stat {stat} not valid for point sampling")
+                out_vars[name] = res
+
+        ds_out = xr.Dataset(out_vars)
+        col, row = ~self.transform * (
+            gdf_points.geometry.x.values,
+            gdf_points.geometry.y.values,
+        )
+        cols = np.floor(col).astype(int)
+        rows = np.floor(row).astype(int)
+        ds_out = ds_out.assign_coords(
+            index=("index", valid_indices),
+            x=("index", cols),
+            y=("index", rows),
+        )
 
         return ds_out
 
