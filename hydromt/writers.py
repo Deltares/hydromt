@@ -94,6 +94,8 @@ def write_nc(
         If True, rename x_dim and y_dim to standard names depending on the CRS
         (x/y for projected and lat/lon for geographic). Only used if
         ``gdal_compliant`` is set to True. By default False
+    force_overwrite : bool, optional
+        If True, forces the file to be overwritten if it already exists. By default False
     force_sn : bool, optional
         If True, forces the dataset to have South -> North orientation. Only used
         if ``gdal_compliant`` is set to True. By default False
