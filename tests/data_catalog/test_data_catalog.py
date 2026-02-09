@@ -24,6 +24,7 @@ from shapely import box
 from yaml import dump
 
 from hydromt._compat import HAS_GCSFS, HAS_GDAL, HAS_OPENPYXL, HAS_S3FS
+from hydromt._io import _yml_from_uri_or_path
 from hydromt.config import Settings
 from hydromt.data_catalog.adapters import (
     GeoDataFrameAdapter,
@@ -44,7 +45,6 @@ from hydromt.data_catalog.sources import (
 from hydromt.data_catalog.sources.dataframe import DataFrameSource
 from hydromt.error import NoDataException, NoDataStrategy
 from hydromt.gis.gis_utils import _to_geographic_bbox
-from hydromt.io import _yml_from_uri_or_path
 from hydromt.typing import Bbox, TimeRange
 from hydromt.writers import write_xy
 from tests.conftest import DATA_DIR, TEST_DATA_DIR

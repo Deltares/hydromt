@@ -21,11 +21,11 @@ from pyproj import CRS
 from shapely.geometry import LineString, Point, Polygon, box
 from shapely.geometry.base import GEOMETRY_TYPES
 
+from hydromt._io import _yml_from_uri_or_path, read_toml, read_uri, read_yaml
 from hydromt._utils.naming_convention import _expand_uri_placeholders, _placeholders
 from hydromt._utils.path import _make_config_paths_absolute
 from hydromt._validators.model_config import HydromtModelSetup
 from hydromt.gis import gis_utils, raster, raster_utils, vector, vector_utils
-from hydromt.io import read_yaml
 from hydromt.parsers import parse_workflow
 
 logger = logging.getLogger(__name__)
@@ -41,6 +41,10 @@ __all__ = [
     "open_geodataset",
     "open_vector_from_table",
     "open_timeseries_from_table",
+    "read_toml",
+    "read_uri",
+    "read_yaml",
+    "_yml_from_uri_or_path",
 ]
 
 OPEN_VECTOR_PREDICATE = Literal[

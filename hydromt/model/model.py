@@ -21,6 +21,7 @@ from typing import (
 import geopandas as gdp
 from pyproj import CRS
 
+from hydromt._io import read_yaml
 from hydromt._utils import log
 from hydromt._validators.model_config import (
     HydromtComponentConfig,
@@ -28,7 +29,6 @@ from hydromt._validators.model_config import (
     create_raw_step,
 )
 from hydromt.data_catalog import DataCatalog
-from hydromt.io import read_yaml
 from hydromt.model.components import (
     ModelComponent,
     SpatialModelComponent,

@@ -12,6 +12,7 @@ import click
 from pydantic import ValidationError
 
 from hydromt import __version__
+from hydromt._io import read_yaml
 from hydromt._utils import log
 from hydromt._validators import Format
 from hydromt._validators.data_catalog_v0x import DataCatalogV0Validator
@@ -19,7 +20,6 @@ from hydromt._validators.data_catalog_v1x import DataCatalogV1Validator
 from hydromt.cli import _utils
 from hydromt.data_catalog import DataCatalog
 from hydromt.error import NoDataStrategy
-from hydromt.io import read_yaml
 from hydromt.plugins import PLUGINS
 from hydromt.readers import read_workflow_yaml
 from hydromt.typing.type_def import StrPath, TimeRange

@@ -5,8 +5,8 @@ from os.path import isfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, cast
 
+from hydromt._io import read_toml, read_yaml
 from hydromt._utils.path import _make_config_paths_relative
-from hydromt.io import read_toml, read_yaml
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.steps import hydromt_step
 from hydromt.writers import write_toml, write_yaml
