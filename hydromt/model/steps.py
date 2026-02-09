@@ -3,7 +3,6 @@
 from typing import Any, Callable, TypeVar
 
 F = TypeVar("F", bound=Callable[..., Any])
-STEP_REGISTRY: dict[str, Callable[..., Any]] = {}
 
 
 def hydromt_step(funcobj: F) -> F:
@@ -12,6 +11,5 @@ def hydromt_step(funcobj: F) -> F:
     Only methods decorated with this decorator are allowed to be called by Model.build and Model.update.
     """
     funcobj.__ishydromtstep__ = True  # type: ignore[attr-defined]
-    STEP_REGISTRY[funcobj.__name__] = funcobj
 
     return funcobj

@@ -1,4 +1,4 @@
-"""lowe-level IO functions for Hydromt, should not depend on other hydromt modules."""
+"""low-level IO functions for Hydromt, should not depend on other hydromt modules."""
 
 import sys
 from pathlib import Path
@@ -32,7 +32,7 @@ def read_toml(path: str | Path) -> dict[str, Any]:
 
 
 def read_uri(uri: str | Path) -> str:
-    """Read content from a URI or local path and return as string."""
+    """Read content from a URI and return as string."""
     with requests.get(str(uri), stream=True) as r:
         r.raise_for_status()
         content = r.text

@@ -941,12 +941,10 @@ def read_workflow_yaml(
 
     Returns
     -------
-    modeltype : str | None
-        Model type (eg wflow, sfincs)
-    model_init : dict
-        Model initialization options to be used when instantiating a hydromt.Model
-    steps : list of HydromtModelStep
-        List of model steps to be executed. Can be passed to hydromt.Model.build and hydromt.Model.update.
+    HydromtModelSetup
+        A dataclass containing the model type, global configuration, and runtime steps.
+        Access the model type with `.modeltype`, the global configuration with `.globals_`,
+        and the runtime steps with `.steps`.
     """
     path = Path(path)
     defaults = defaults or {}
