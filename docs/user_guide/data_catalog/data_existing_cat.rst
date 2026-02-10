@@ -83,3 +83,10 @@ Available pre-defined data catalogs
 .. include:: ../../_generated/aws_data.rst
 .. include:: ../../_generated/gcs_cmip6_data.rst
 .. include:: ../../_generated/arco_data.rst
+
+
+ARCO data catalog
+-----------------
+In order to use the ARCO data catalog, you need to setup credentials for accessing the data on Earth Data Hub.
+This includes creating an account on Earth Data Hub and setting up a .netrc file with your credentials.
+You can find more information on how to do this in the `ARCO data catalog documentation <https://earthdatahub.destine.eu/getting-started#configuring-netrc>`_.
