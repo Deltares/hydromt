@@ -35,7 +35,7 @@ era5_land:
         North: 90.125
       time_range:
         start: '1950-01-02'
-        end: '2023-11-30'
+        end: '2025-12-31'
     crs: 4326
   data_adapter:
     unit_mult:
@@ -88,7 +88,7 @@ era5_land_hourly:
         North: 90.125
       time_range:
         start: '1950-01-01'
-        end: '2023-03-01'
+        end: 'present'
     crs: 4326
   data_adapter:
     unit_mult:
@@ -137,8 +137,8 @@ era5_ocean:
         East: 359.75
         North: 90.25
       time_range:
-        start: '1979-01-01'
-        end: '2022-04-08'
+        start: '1940-01-01'
+        end: 'present'
     crs: 4326
   data_adapter:
     rename:
