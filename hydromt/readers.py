@@ -24,7 +24,7 @@ from shapely.geometry.base import GEOMETRY_TYPES
 from hydromt._io import read_toml, read_uri, read_yaml, yml_from_uri_or_path
 from hydromt._utils.naming_convention import _expand_uri_placeholders, _placeholders
 from hydromt._utils.path import _make_config_paths_absolute
-from hydromt._validators.model_config import HydromtModelSetup
+from hydromt._validators.model_config import WorkflowSpec
 from hydromt.gis import gis_utils, raster, raster_utils, vector, vector_utils
 from hydromt.parsers import parse_workflow
 
@@ -923,7 +923,7 @@ def read_workflow_yaml(
     defaults: dict[str, Any] | None = None,
     abs_path: bool = True,
     skip_abspath_sections: list[str] | None = None,
-) -> HydromtModelSetup:
+) -> WorkflowSpec:
     """Read HydroMT workflow YAML file and return modeltype, global config and runtime steps.
 
     Parameters
@@ -941,7 +941,7 @@ def read_workflow_yaml(
 
     Returns
     -------
-    HydromtModelSetup
+    WorkflowSpec
         A dataclass containing the model type, global configuration, and runtime steps.
         Access the model type with `.modeltype`, the global configuration with `.globals_`,
         and the runtime steps with `.steps`.
