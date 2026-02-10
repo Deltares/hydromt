@@ -1918,16 +1918,16 @@ def require_arco_credentials():
     try:
         netrc.netrc()
         if "data.earthdatahub.destine.eu" not in netrc.netrc().hosts:
-            pytest.skip("No ARCO credentials found in .netrc file.")
+            pytest.skip("No Earth Data Hub credentials found in .netrc file.")
     except FileNotFoundError:
         pytest.skip("No .netrc file found for ARCO mirror authentication.")
 
 
 @pytest.mark.integration
 @pytest.mark.parametrize("datasource", ["era5", "era5_hourly", "era5_ocean"])
-def test_era5_ARCO_destine_datasources(datasource: str, require_arco_credentials):
+def test_era5_arco_destine_datasources(datasource: str, require_arco_credentials):
     warnings.filterwarnings("ignore", category=zarr.errors.ZarrUserWarning)
-    datacatalog = DataCatalog(data_libs=["ARCO_data"])
+    datacatalog = DataCatalog(data_libs=["arco_data"])
     if datasource == "era5_ocean":  # Dataset only covers oceans
         bbox = [-4.49901, 46.750592, -3.999132, 47.034009]
     else:
@@ -1942,7 +1942,7 @@ def test_era5_ARCO_destine_datasources(datasource: str, require_arco_credentials
 @pytest.mark.integration
 @pytest.mark.skipif(not HAS_S3FS, reason="s3fs is not installed")
 def test_esa_world_cover_aws(tmp_path: Path):
-    datacatalog = DataCatalog(data_libs=["ARCO_data"])
+    datacatalog = DataCatalog(data_libs=["arco_data"])
     bbox = [4.2715461044, 52.0537179493, 4.3550421814, 52.1043572932]
     data = datacatalog.get_rasterdataset("esa_worldcover", bbox=bbox)
     assert isinstance(data, xr.DataArray)
