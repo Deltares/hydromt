@@ -6,7 +6,7 @@ meta:
   name: arco_data
   hydromt_version: '>1.0a,<2'
 
-era5:
+era5_land:
   data_type: RasterDataset
   uri: "https://data.earthdatahub.destine.eu/era5/era5-land-daily-utc-v1.zarr"
   driver:
@@ -61,7 +61,7 @@ era5:
       temp_max: -273.15
       temp_min: -273.15
 
-era5_hourly:
+era5_land_hourly:
   data_type: RasterDataset
   uri: https://data.earthdatahub.destine.eu/era5/reanalysis-era5-land-no-antartica-v0.zarr
   driver:

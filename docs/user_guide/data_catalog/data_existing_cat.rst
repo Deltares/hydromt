@@ -82,4 +82,4 @@ Available pre-defined data catalogs
 .. include:: ../../_generated/artifact_data.rst
 .. include:: ../../_generated/aws_data.rst
 .. include:: ../../_generated/gcs_cmip6_data.rst
-.. include:: ../../_generated/ARCO_data.rst
+.. include:: ../../_generated/arco_data.rst
