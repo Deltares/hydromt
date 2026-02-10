@@ -35,9 +35,9 @@ from pystac import CatalogType, MediaType
 from hydromt import __version__
 from hydromt._io import yml_from_uri_or_path
 from hydromt._utils import (
-    _deep_merge,
     _partition_dictionaries,
     _single_var_as_array,
+    deep_merge,
 )
 from hydromt.config import SETTINGS
 from hydromt.data_catalog.adapters import (
@@ -1965,7 +1965,7 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
             for diff in variants:
                 source_copy = copy.deepcopy(source)
                 source_copy = {
-                    str(k): v for (k, v) in _deep_merge(source_copy, diff).items()
+                    str(k): v for (k, v) in deep_merge(source_copy, diff).items()
                 }
 
                 data_dicts.append({name: source_copy})

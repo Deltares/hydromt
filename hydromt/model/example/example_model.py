@@ -50,17 +50,17 @@ class ExampleModel(Model):
         **catalog_keys,
     ):
         """Initialize ExampleModel."""
-        self.config = ConfigComponent(
+        self._config = ConfigComponent(
             self,
             filename=str(config_filename),
         )
-        self.grid = ExampleGridComponent(self)
+        self._grid = ExampleGridComponent(self)
 
         components = components or {}
         components.update(
             {
-                "config": self.config,
-                "grid": self.grid,
+                "config": self._config,
+                "grid": self._grid,
             }
         )
 
@@ -72,3 +72,13 @@ class ExampleModel(Model):
             data_libs=data_libs,
             **catalog_keys,
         )
+
+    @property
+    def config(self) -> ConfigComponent:
+        """Return the config component."""
+        return self._config
+
+    @property
+    def grid(self) -> ExampleGridComponent:
+        """Return the grid component."""
+        return self._grid

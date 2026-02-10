@@ -7,7 +7,7 @@ from hydromt._utils.dataset import (
     _shift_dataset_time,
     _single_var_as_array,
 )
-from hydromt._utils.deep_merge import _deep_merge
+from hydromt._utils.deep_merge import deep_merge
 from hydromt._utils.dictionaries import _partition_dictionaries
 from hydromt._utils.elevation import _elevation2rgba, _rgba2elevation
 from hydromt._utils.log import initialize_logging, to_file
@@ -22,7 +22,7 @@ from hydromt._utils.uris import _is_valid_url, _strip_scheme
 __all__ = [
     "cache_vrt_tiles",
     "copy_to_local",
-    "_deep_merge",
+    "deep_merge",
     "_rename_vars",
     "_set_metadata",
     "initialize_logging",

@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import Any
 
+from hydromt._utils import deep_merge
 from hydromt._validators.model_config import (
     HydromtGlobalConfig,
     HydromtModelSetup,
@@ -43,7 +44,7 @@ def parse_workflow(
     """
     # Merge defaults
     if defaults:
-        data = _deep_update(defaults, data)
+        data = deep_merge(defaults, data)
 
     # Determine model type
     resolved_modeltype = modeltype or data.get("modeltype")
@@ -72,16 +73,3 @@ def parse_workflow(
         globals_=global_cfg,
         steps=raw_steps,
     )
-
-
-def _deep_update(base: dict, override: dict) -> dict:
-    """Recursively update a dictionary."""
-    result = base.copy()
-
-    for k, v in override.items():
-        if k in result and isinstance(result[k], dict) and isinstance(v, dict):
-            result[k] = _deep_update(result[k], v)
-        else:
-            result[k] = v
-
-    return result

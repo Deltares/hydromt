@@ -471,10 +471,7 @@ class Model(object, metaclass=ABCMeta):
 
     @staticmethod
     def _steps_contain_write(steps: list[RawStep]) -> bool:
-        for step in steps:
-            if "write" in step.name:
-                return True
-        return False
+        return any("write" in step.name for step in steps)
 
     @hydromt_step
     def write_data_catalog(
