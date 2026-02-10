@@ -14,7 +14,7 @@ from hydromt._validators.data_catalog_v1x import (
     DataCatalogV1MetaData,
     DataCatalogV1Validator,
 )
-from hydromt._validators.model_config import HydromtModelSetup, HydromtModelStep
+from hydromt._validators.model_config import WorkflowSpec, WorkflowStep
 from hydromt._validators.region import (
     BoundingBoxRegion,
     PathRegion,
@@ -35,8 +35,8 @@ __all__ = [
     "PathRegion",
     "Region",
     "validate_region",
-    "HydromtModelStep",
-    "HydromtModelSetup",
+    "WorkflowStep",
+    "WorkflowSpec",
     "Format",
 ]
 

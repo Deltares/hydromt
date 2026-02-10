@@ -326,7 +326,7 @@ def test_read_workflow_yaml_extended():
     config_filename = workflow.globals_.components[0].filename
     assert config_filename == "run_config.toml"
 
-    config_template = workflow.steps[0].args["template"]
+    config_template = workflow.steps[0].kwargs["template"]
     assert config_template == "run_config.toml"
 
 

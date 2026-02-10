@@ -24,9 +24,9 @@ from pyproj import CRS
 from hydromt._io import read_yaml
 from hydromt._utils import log
 from hydromt._validators.model_config import (
-    HydromtComponentConfig,
-    RawStep,
-    create_raw_step,
+    ComponentSpec,
+    WorkflowStep,
+    create_workflow_step,
 )
 from hydromt.data_catalog import DataCatalog
 from hydromt.model.components import (
@@ -153,7 +153,7 @@ class Model(object, metaclass=ABCMeta):
         for name, value in components.items():
             if isinstance(value, ModelComponent):
                 self.add_component(name, value)
-            elif isinstance(value, HydromtComponentConfig):
+            elif isinstance(value, ComponentSpec):
                 self.add_component(
                     name, value.type(self, **value.model_dump(exclude={"type", "name"}))
                 )
@@ -326,10 +326,9 @@ class Model(object, metaclass=ABCMeta):
 
             # Execute steps
             steps = steps or []
-            raw_steps = [create_raw_step(step) for step in steps]
-            bound_steps = [step.to_model_step(self) for step in raw_steps]
-            for step_obj in bound_steps:
-                step_obj.execute()
+            raw_steps = [create_workflow_step(step) for step in steps]
+            [step.bind_to_model(self) for step in raw_steps]
+            [step.execute() for step in raw_steps]
 
             # If there are any write options included in the steps,
             # we don't need to write the whole model.
@@ -419,10 +418,9 @@ class Model(object, metaclass=ABCMeta):
 
             # Execute steps
             steps = steps or []
-            raw_steps = [create_raw_step(step) for step in steps]
-            bound_steps = [step.to_model_step(self) for step in raw_steps]
-            for step_obj in bound_steps:
-                step_obj.execute()
+            raw_steps = [create_workflow_step(step) for step in steps]
+            [step.bind_to_model(self) for step in raw_steps]
+            [step.execute() for step in raw_steps]
 
             # If there are any write options included in the steps,
             # we don't need to write the whole model.
@@ -470,7 +468,7 @@ class Model(object, metaclass=ABCMeta):
             c.read()
 
     @staticmethod
-    def _steps_contain_write(steps: list[RawStep]) -> bool:
+    def _steps_contain_write(steps: list[WorkflowStep]) -> bool:
         return any("write" in step.name for step in steps)
 
     @hydromt_step

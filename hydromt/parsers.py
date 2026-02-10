@@ -5,9 +5,9 @@ from typing import Any
 
 from hydromt._utils import deep_merge
 from hydromt._validators.model_config import (
-    HydromtGlobalConfig,
-    HydromtModelSetup,
-    RawStep,
+    ModelSpec,
+    WorkflowSpec,
+    WorkflowStep,
 )
 from hydromt.plugins import PLUGINS
 
@@ -19,7 +19,7 @@ def parse_workflow(
     abs_path: bool = True,
     skip_abspath_sections: list[str] | None = None,
     root: Path | None = None,
-) -> HydromtModelSetup:
+) -> WorkflowSpec:
     """Read and validate HydroMT workflow YAML data.
 
     Parameters
@@ -39,7 +39,7 @@ def parse_workflow(
 
     Returns
     -------
-    HydromtModelSetup
+    WorkflowSpec
         The validated HydroMT model setup.
     """
     # Merge defaults
@@ -61,14 +61,12 @@ def parse_workflow(
         context["root"] = root
 
     # Validate
-    global_cfg = HydromtGlobalConfig.model_validate(
-        data.get("global", {}), context=context
-    )
+    global_cfg = ModelSpec.model_validate(data.get("global", {}), context=context)
     raw_steps = [
-        RawStep.model_validate(s, context=context) for s in data.get("steps", [])
+        WorkflowStep.model_validate(s, context=context) for s in data.get("steps", [])
     ]
 
-    return HydromtModelSetup(
+    return WorkflowSpec(
         modeltype=PLUGINS.model_plugins.get(resolved_modeltype, resolved_modeltype),
         globals_=global_cfg,
         steps=raw_steps,
