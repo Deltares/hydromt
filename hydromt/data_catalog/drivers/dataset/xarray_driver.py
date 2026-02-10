@@ -69,17 +69,7 @@ class DatasetXarrayDriver(DatasetDriver):
         """
         preprocessor = self.options.get_preprocessor()
         io_format = self.options.get_io_format(uris[0])
-
-        # Filter uris based on extension
-        filtered_uris = []
-        for _uri in uris:
-            _format = self.options.get_io_format(_uri)
-            if _format != io_format:
-                logger.warning(
-                    f"Reading {_format} and {_uri} has a different extension, skipping..."
-                )
-            else:
-                filtered_uris.append(_uri)
+        filtered_uris = self.options.filter_uris_by_format(uris, io_format)
 
         # Read and merge
         if io_format == "zarr":
