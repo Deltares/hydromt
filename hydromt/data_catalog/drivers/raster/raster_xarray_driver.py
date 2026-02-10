@@ -11,11 +11,14 @@ from pydantic import Field
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers.base_driver import (
     DRIVER_OPTIONS_DESCRIPTION,
-    DriverOptions,
 )
-from hydromt.data_catalog.drivers.preprocessing import Preprocessor, get_preprocessor
 from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
     RasterDatasetDriver,
+)
+from hydromt.data_catalog.drivers.xarray_options import (
+    _NETCDF_EXT,
+    _ZARR_EXT,
+    XarrayDriverOptions,
 )
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.typing import (
@@ -26,29 +29,6 @@ from hydromt.typing import (
 )
 
 logger = logging.getLogger(__name__)
-
-_ZARR_EXT: set[str] = {".zarr"}
-_NETCDF_EXT: set[str] = {".nc", ".netcdf"}
-
-
-class RasterXarrayOptions(DriverOptions):
-    """Options for RasterXarrayDriver."""
-
-    preprocess: str | None = None
-    """Name of preprocessor to apply before merging datasets. Available preprocessors include: round_latlon, to_datetimeindex, remove_duplicates, harmonise_dims. See their docstrings for details."""
-
-    ext_override: str | None = None
-    """Override the file extension check and try to read all files as the given extension. Useful when reading zarr files without the .zarr extension."""
-
-    def get_preprocessor(self) -> Preprocessor:
-        """Get the preprocessor function."""
-        return get_preprocessor(self.preprocess)
-
-    def get_reading_ext(self, uri: str) -> str:
-        """Get the file extension to use for reading, can be overridden."""
-        if not self.ext_override:
-            return splitext(uri)[-1]
-        return self.ext_override
 
 
 class RasterDatasetXarrayDriver(RasterDatasetDriver):
@@ -64,8 +44,8 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
     name = "raster_xarray"
     supports_writing = True
     SUPPORTED_EXTENSIONS: ClassVar[set[str]] = _ZARR_EXT | _NETCDF_EXT
-    options: RasterXarrayOptions = Field(
-        default_factory=RasterXarrayOptions, description=DRIVER_OPTIONS_DESCRIPTION
+    options: XarrayDriverOptions = Field(
+        default_factory=XarrayDriverOptions, description=DRIVER_OPTIONS_DESCRIPTION
     )
 
     def read(
@@ -134,35 +114,27 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
             return None  # handle_nodata == ignore
 
         preprocessor = self.options.get_preprocessor()
-        first_ext = self.options.get_reading_ext(uris[0])
-
-        # Determine reading extensions based on first file
-        if first_ext in _NETCDF_EXT:
-            reading_extentions = _NETCDF_EXT
-        elif first_ext in _ZARR_EXT:
-            reading_extentions = _ZARR_EXT
-        else:
-            raise ValueError(f"Unknown extension for DatasetXarrayDriver: {first_ext}")
+        io_format = self.options.get_io_format(uris[0])
 
         # Filter uris based on extension
         filtered_uris = []
         for _uri in uris:
-            ext = self.options.get_reading_ext(_uri)
-            if ext not in reading_extentions:
+            _format = self.options.get_io_format(_uri)
+            if _format != io_format:
                 logger.warning(
-                    f"Reading {reading_extentions} and {_uri} has a different extension, skipping..."
+                    f"Reading {io_format} and {_uri} has a different extension, skipping..."
                 )
             else:
                 filtered_uris.append(_uri)
 
         # Read and merge
-        if first_ext in _ZARR_EXT:
+        if io_format == "zarr":
             datasets = [
                 preprocessor(xr.open_zarr(_uri, **self.options.get_kwargs()))
                 for _uri in filtered_uris
             ]
             ds: xr.Dataset = xr.merge(datasets)
-        elif first_ext in _NETCDF_EXT:
+        elif io_format == "netcdf4":
             ds: xr.Dataset = xr.open_mfdataset(
                 filtered_uris,
                 decode_coords="all",
@@ -172,7 +144,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
             )
         else:
             raise ValueError(
-                f"Unknown extension for RasterDatasetXarrayDriver: {first_ext}"
+                f"Unknown extension for RasterDatasetXarrayDriver: {self.options.get_reading_ext(uris[0])} "
             )
 
         for variable in ds.data_vars:

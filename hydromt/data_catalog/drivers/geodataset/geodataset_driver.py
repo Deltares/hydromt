@@ -3,7 +3,6 @@
 import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
-from posixpath import splitext
 from typing import Any
 
 import xarray as xr
@@ -12,40 +11,19 @@ from pydantic import Field
 from hydromt.data_catalog.drivers.base_driver import (
     DRIVER_OPTIONS_DESCRIPTION,
     BaseDriver,
-    DriverOptions,
 )
-from hydromt.data_catalog.drivers.preprocessing import Preprocessor, get_preprocessor
+from hydromt.data_catalog.drivers.xarray_options import XarrayDriverOptions
 from hydromt.error import NoDataStrategy
 from hydromt.typing import Geom, Predicate, SourceMetadata
 
 logger = logging.getLogger(__name__)
 
 
-class GeoDatasetOptions(DriverOptions):
-    """Options for GeoDatasetVectorDriver."""
-
-    preprocess: str | None = None
-    """Name of preprocessor to apply on geodataset after reading. Available preprocessors include: round_latlon, to_datetimeindex, remove_duplicates, harmonise_dims. See their docstrings for details."""
-
-    ext_override: str | None = None
-    """Override the file extension check and try to read all files as the given extension. Useful when reading zarr files without the .zarr extension."""
-
-    def get_preprocessor(self) -> Preprocessor:
-        """Get the preprocessor function."""
-        return get_preprocessor(self.preprocess)
-
-    def get_reading_ext(self, uri: str) -> str:
-        """Get the file extension to use for reading, can be overridden."""
-        if not self.ext_override:
-            return splitext(uri)[-1]
-        return self.ext_override
-
-
 class GeoDatasetDriver(BaseDriver, ABC):
     """Abstract Driver to read GeoDatasets."""
 
-    options: GeoDatasetOptions = Field(
-        default_factory=GeoDatasetOptions, description=DRIVER_OPTIONS_DESCRIPTION
+    options: XarrayDriverOptions = Field(
+        default_factory=XarrayDriverOptions, description=DRIVER_OPTIONS_DESCRIPTION
     )
 
     @abstractmethod

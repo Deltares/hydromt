@@ -13,7 +13,11 @@ from hydromt.data_catalog.drivers.base_driver import (
 )
 from hydromt.data_catalog.drivers.geodataset.geodataset_driver import (
     GeoDatasetDriver,
-    GeoDatasetOptions,
+)
+from hydromt.data_catalog.drivers.xarray_options import (
+    _NETCDF_EXT,
+    _ZARR_EXT,
+    XarrayDriverOptions,
 )
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.typing import (
@@ -23,9 +27,6 @@ from hydromt.typing import (
 )
 
 logger = logging.getLogger(__name__)
-
-_ZARR_EXT: set[str] = {".zarr"}
-_NETCDF_EXT: set[str] = {".nc", ".netcdf"}
 
 
 class GeoDatasetXarrayDriver(GeoDatasetDriver):
@@ -40,8 +41,8 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
     name: ClassVar[str] = "geodataset_xarray"
     supports_writing = True
     SUPPORTED_EXTENSIONS: ClassVar[set[str]] = _ZARR_EXT | _NETCDF_EXT
-    options: GeoDatasetOptions = Field(
-        default_factory=GeoDatasetOptions, description=DRIVER_OPTIONS_DESCRIPTION
+    options: XarrayDriverOptions = Field(
+        default_factory=XarrayDriverOptions, description=DRIVER_OPTIONS_DESCRIPTION
     )
 
     def read(
@@ -88,35 +89,27 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
             },
         )
         preprocessor = self.options.get_preprocessor()
-        first_ext = self.options.get_reading_ext(uris[0])
-
-        # Determine reading extensions based on first file
-        if first_ext in _NETCDF_EXT:
-            reading_extentions = _NETCDF_EXT
-        elif first_ext in _ZARR_EXT:
-            reading_extentions = _ZARR_EXT
-        else:
-            raise ValueError(f"Unknown extension for DatasetXarrayDriver: {first_ext}")
+        io_format = self.options.get_io_format(uris[0])
 
         # Filter uris based on extension
         filtered_uris = []
         for _uri in uris:
-            ext = self.options.get_reading_ext(_uri)
-            if ext not in reading_extentions:
+            _format = self.options.get_io_format(_uri)
+            if _format != io_format:
                 logger.warning(
-                    f"Reading {reading_extentions} and {_uri} has a different extension, skipping..."
+                    f"Reading {io_format} and {_uri} has a different extension, skipping..."
                 )
             else:
                 filtered_uris.append(_uri)
 
         # Read and merge
-        if first_ext in _ZARR_EXT:
+        if io_format == "zarr":
             datasets = [
                 preprocessor(xr.open_zarr(_uri, **self.options.get_kwargs()))
                 for _uri in filtered_uris
             ]
             ds: xr.Dataset = xr.merge(datasets)
-        elif first_ext in _NETCDF_EXT:
+        elif io_format == "netcdf4":
             ds: xr.Dataset = xr.open_mfdataset(
                 filtered_uris,
                 decode_coords="all",
@@ -126,7 +119,7 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
             )
         else:
             raise ValueError(
-                f"Unknown extension for GeoDatasetXarrayDriver: {first_ext} "
+                f"Unknown extension for GeoDatasetXarrayDriver: {io_format} "
             )
 
         for variable in ds.data_vars:
