@@ -264,8 +264,8 @@ class GCSCMIP6DataCatalog(PredefinedCatalog):
 class ARCODataCatalog(PredefinedCatalog):
     """ARCO data catalog."""
 
-    base_url = f"{CATALOG_ROOT}/ARCO_data"
-    name = "ARCO_data"
+    base_url = f"{CATALOG_ROOT}/arco_data"
+    name = "arco_data"
 
 
 def _replace_line_endings(file_path: Path):

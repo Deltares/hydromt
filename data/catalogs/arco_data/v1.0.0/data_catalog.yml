@@ -3,7 +3,7 @@
 
 meta:
   version: v1.0.0
-  name: ARCO_data
+  name: arco_data
   hydromt_version: '>1.0a,<2'
 
 era5:
