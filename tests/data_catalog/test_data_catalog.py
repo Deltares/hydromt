@@ -1045,7 +1045,7 @@ class TestGetRasterDataset:
             cache_dir=test_settings.cache_root.as_posix(),
         )
         da = data_catalog.get_rasterdataset(
-            "esa_worldcover_2020_v100",
+            "esa_worldcover",
             bbox=[12.0, 46.0, 12.5, 46.50],
         )
         assert da.name == "landuse"
@@ -1924,7 +1924,7 @@ def require_earthdatahub_credentials():
 
 
 @pytest.mark.integration
-@pytest.mark.parametrize("datasource", ["era5", "era5_hourly", "era5_ocean"])
+@pytest.mark.parametrize("datasource", ["era5_land", "era5_land_hourly", "era5_ocean"])
 def test_era5_earthdatahub_datasources(
     datasource: str, require_earthdatahub_credentials
 ):
