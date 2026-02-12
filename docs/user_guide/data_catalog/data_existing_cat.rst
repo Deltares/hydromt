@@ -78,15 +78,46 @@ Using a predefined catalog
 Available pre-defined data catalogs
 -----------------------------------
 
+Deltares data catalog
+^^^^^^^^^^^^^^^^^^^^^
+Data available for Deltares colleagues (p: drive). For non Deltares users, you can use it as inspiration to create your own. The catalog and it's different versions can be viewed here: https://github.com/Deltares/hydromt/tree/main/data/catalogs/deltares_data
+
+Available data:
+
 .. include:: ../../_generated/deltares_data.rst
+
+Artifact data catalog
+^^^^^^^^^^^^^^^^^^^^^
+Global data extract around the Piave basin in Northern Italy used for documentation, training and testing of HydroMT. The catalog and its different versions can be viewed here: https://github.com/Deltares/hydromt/tree/main/data/catalogs/artifact_data
+
+Available data:
+
 .. include:: ../../_generated/artifact_data.rst
+
+AWS data catalog
+^^^^^^^^^^^^^^^^
+Data openly available in Amazon s3 bucket. The catalog and its different versions can be viewed here: https://github.com/Deltares/hydromt/tree/main/data/catalogs/aws_data
+
+Available data:
+
 .. include:: ../../_generated/aws_data.rst
+
+GCS CMIP6 data catalog
+^^^^^^^^^^^^^^^^^^^^^^
+CMIP6 dataset openly available and stored on a public Google Cloud Store. The catalog and its different versions can be viewed here: https://github.com/Deltares/hydromt/tree/main/data/catalogs/gcs_cmip6_data
+
+Available data:
+
 .. include:: ../../_generated/gcs_cmip6_data.rst
-.. include:: ../../_generated/arco_data.rst
 
-
-ARCO data catalog
------------------
-In order to use the ARCO data catalog, you need to setup credentials for accessing the data on Earth Data Hub.
+Earth Data Hub data catalog
+^^^^^^^^^^^^^^^^^
+Data stored in `Earth Data Hub <https://earthdatahub.destine.eu/>` (Destination Earth). In order to use this  catalog, you need to setup credentials for accessing the data on Earth Data Hub.
 This includes creating an account on Earth Data Hub and setting up a .netrc file with your credentials.
-You can find more information on how to do this in the `ARCO data catalog documentation <https://earthdatahub.destine.eu/getting-started#configuring-netrc>`_.
+You can find more information on how to do this in the `Earth Data Hub documentation <https://earthdatahub.destine.eu/getting-started#configuring-netrc>`_.
+
+The catalog and its different versions can be viewed here: https://github.com/Deltares/hydromt/tree/main/data/catalogs/earthdatahub_data
+
+Available data:
+
+.. include:: ../../_generated/earthdatahub_data.rst

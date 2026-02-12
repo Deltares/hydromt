@@ -13,7 +13,7 @@ Unreleased
 
 New
 ---
-- Added arco_data predefined catalog for accessing ARCO ERA5_land, ERA5_land_hourly, ERA5_ocean, and ESA worldcover datasets (#1357).
+- Added earthdatahub_data predefined catalog for accessing ERA5_land, ERA5_land_hourly, ERA5_ocean (#1357).
 - Added ``raster.sample_geoms`` as a faster alternative to ``raster.zonal_stats`` meant for the case when ``geometry size << raster resolution``.
 
 Changed
