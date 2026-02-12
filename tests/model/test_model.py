@@ -1235,6 +1235,7 @@ def test_read_calls_components(mocker: MockerFixture):
 def test_build_two_components_writes_one(mocker: MockerFixture, tmp_path: Path):
     foo = mocker.Mock(spec_set=ModelComponent)
     foo.write.__ishydromtstep__ = True
+    foo.write.__name__ = "foo.write"
     bar = mocker.Mock(spec_set=ModelComponent)
     m = Model(root=tmp_path)
     m.add_component("foo", foo)
@@ -1259,10 +1260,10 @@ def test_build_write_disabled_does_not_write(mocker: MockerFixture, tmp_path: Pa
 
 
 def test_build_non_existing_step(tmp_path: Path):
-    m = Model(root=tmp_path)
+    m1 = Model(root=tmp_path)
 
-    with pytest.raises(KeyError):
-        m.build(steps=[{"foo": {}}])
+    with pytest.raises(ValueError, match="Step 'foo' not found"):
+        m1.build(steps=[{"foo": {}}])
 
 
 def test_add_component_duplicate_throws(mocker: MockerFixture):

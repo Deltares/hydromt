@@ -9,20 +9,19 @@ from pathlib import Path
 from typing import Any, Optional
 
 import click
-import numpy as np
 from pydantic import ValidationError
 
 from hydromt import __version__
+from hydromt._io import read_yaml
 from hydromt._utils import log
 from hydromt._validators import Format
 from hydromt._validators.data_catalog_v0x import DataCatalogV0Validator
 from hydromt._validators.data_catalog_v1x import DataCatalogV1Validator
-from hydromt._validators.model_config import HydromtModelSetup
 from hydromt.cli import _utils
 from hydromt.data_catalog import DataCatalog
 from hydromt.error import NoDataStrategy
 from hydromt.plugins import PLUGINS
-from hydromt.readers import read_workflow_yaml, read_yaml
+from hydromt.readers import read_workflow_yaml
 from hydromt.typing.type_def import StrPath, TimeRange
 from hydromt.writers import write_yaml
 
@@ -240,26 +239,30 @@ def build(
     log.log_version()
     # Model.build will manage the filehandlers and logging
 
-    modeltype, kwargs, steps = read_workflow_yaml(config, modeltype=model)
-    # parse data catalog options from global section in config and cli options
-    data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
-    data_libs += list(data)  # add data catalogs from cli
-    if dd and "deltares_data" not in data_libs:  # deltares_data from cli
-        data_libs = ["deltares_data"] + data_libs  # prepend!
+    try:
+        workflow = read_workflow_yaml(config, modeltype=model)
+    except Exception as e:
+        logger.exception(e)
+        raise
+
+    workflow.globals_.data_libs.extend(data)  # add data catalogs from cli
+    if (
+        dd and "deltares_data" not in workflow.globals_.data_libs
+    ):  # deltares_data from cli
+        workflow.globals_.data_libs.insert(0, "deltares_data")  # prepend!
+
+    mode = "w+" if fo else "w"
     try:
         # initialize model and create folder structure
-        mode = "w+" if fo else "w"
-        if modeltype not in PLUGINS.model_plugins:
-            raise ValueError("Unknown model")
-        mod = PLUGINS.model_plugins[modeltype](
+        mod = workflow.modeltype(
             root=model_root,
             mode=mode,
-            data_libs=data_libs,
-            **kwargs,
+            **workflow.globals_.model_dump(),
         )
         mod.data_catalog.cache = cache
+
         # build model
-        mod.build(steps=steps)
+        mod.build(steps=workflow.steps)
 
     except Exception as e:
         logger.exception(e)  # catch and log errors
@@ -323,25 +326,22 @@ def update(
     # Model.update will manage the filehandlers and logging
 
     mode = "r+" if model_root == model_out else "r"
-    modeltype, kwargs, steps = read_workflow_yaml(config, modeltype=model)
+    workflow = read_workflow_yaml(config, modeltype=model)
+    workflow.globals_.data_libs.extend(data)  # add data catalogs from cli
 
-    if modeltype not in PLUGINS.model_plugins:
-        raise ValueError("Unknown model")
-    # parse data catalog options from global section in config and cli options
-    data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
-    data_libs += list(data)  # add data catalogs from cli
-    if dd and "deltares_data" not in data_libs:  # deltares_data from cli
-        data_libs = ["deltares_data"] + data_libs  # prepend!
+    if (
+        dd and "deltares_data" not in workflow.globals_.data_libs
+    ):  # deltares_data from cli
+        workflow.globals_.data_libs.insert(0, "deltares_data")  # prepend!
     try:
         # initialize model and create folder structure
-        mod = PLUGINS.model_plugins[modeltype](
+        mod = workflow.modeltype(
             root=model_root,
             mode=mode,
-            data_libs=data_libs,
-            **kwargs,
+            **workflow.globals_.model_dump(),
         )
         mod.data_catalog.cache = cache
-        mod.update(model_out=model_out, steps=steps, forceful_overwrite=fo)
+        mod.update(model_out=model_out, steps=workflow.steps, forceful_overwrite=fo)
     except Exception as e:
         logger.exception(e)  # catch and log errors
         raise
@@ -394,8 +394,7 @@ def _validate_config(config: Path, model: Optional[str], fmt: Format) -> bool:
         return False
 
     try:
-        modeltype, kwargs, steps = read_workflow_yaml(config, modeltype=model)
-        HydromtModelSetup(modeltype=modeltype, globals=kwargs, steps=steps)
+        _ = read_workflow_yaml(config, modeltype=model)
     except (ValidationError, ValueError, RuntimeError) as e:
         logger.error(f"Workflow yaml {config} has the following error(s): {e}")
         return False

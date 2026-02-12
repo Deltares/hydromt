@@ -6,15 +6,28 @@ import os
 import shutil
 import typing
 from abc import ABCMeta
-from inspect import _empty, signature
 from os.path import isabs, isfile, join
 from pathlib import Path
-from typing import Any, Dict, List, Optional, TypeVar, Union, cast
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import geopandas as gdp
 from pyproj import CRS
 
-from hydromt._utils import _rgetattr, _validate_steps, log
+from hydromt._io import read_yaml
+from hydromt._utils import log
+from hydromt._validators.model_config import (
+    HydromtComponentConfig,
+    RawStep,
+    create_raw_step,
+)
 from hydromt.data_catalog import DataCatalog
 from hydromt.model.components import (
     ModelComponent,
@@ -23,7 +36,6 @@ from hydromt.model.components import (
 from hydromt.model.root import ModelRoot
 from hydromt.model.steps import hydromt_step
 from hydromt.plugins import PLUGINS
-from hydromt.readers import read_yaml
 
 __all__ = ["Model"]
 
@@ -141,13 +153,25 @@ class Model(object, metaclass=ABCMeta):
         for name, value in components.items():
             if isinstance(value, ModelComponent):
                 self.add_component(name, value)
+            elif isinstance(value, HydromtComponentConfig):
+                self.add_component(
+                    name, value.type(self, **value.model_dump(exclude={"type", "name"}))
+                )
             elif isinstance(value, dict):
                 type_name = value.pop("type")
-                component_type = PLUGINS.component_plugins[type_name]
+                if type_name in PLUGINS.component_plugins:
+                    component_type = PLUGINS.component_plugins[type_name]
+                elif type_name in PLUGINS.component_plugins.values():
+                    component_type = type_name  # type: ignore
+                else:
+                    raise ValueError(
+                        f"Unknown component type: {type_name}, options are: "
+                        f"[{', '.join(PLUGINS.component_plugins)}]"
+                    )
                 self.add_component(name, component_type(self, **value))
             else:
                 raise ValueError(
-                    "Error in components argument. Type is not a ModelComponent or dict."
+                    f"Error in components argument. Type {type(value)} is not a ModelComponent or dict."
                 )
 
     def add_component(self, name: str, component: ModelComponent) -> None:
@@ -256,8 +280,8 @@ class Model(object, metaclass=ABCMeta):
     def build(
         self,
         *,
-        write: Optional[bool] = True,
-        steps: List[Dict[str, Dict[str, Any]]],
+        write: bool = True,
+        steps: list[dict[str, dict[str, Any]]],
     ):
         r"""Single method to build a model from scratch based on settings in `steps`.
 
@@ -299,32 +323,17 @@ class Model(object, metaclass=ABCMeta):
         """
         with log.to_file(Path(self.root.path) / "hydromt.log"):
             log.log_version()
+
+            # Execute steps
             steps = steps or []
-            _validate_steps(self, steps)
-
-            for step_dict in steps:
-                step, kwargs = next(iter(step_dict.items()))
-                logger.info(f"build: {step}")
-                # Call the methods.
-                method = _rgetattr(self, step)
-                params = {
-                    param: arg.default
-                    for param, arg in signature(method).parameters.items()
-                    if arg.default != _empty
-                }
-                merged: dict[str, Any] = {}
-                if params:
-                    merged.update(**params)
-                if kwargs:
-                    merged.update(**kwargs)
-                for k, v in merged.items():
-                    logger.info(f"{step}.{k}={v}")
-
-                method(**merged)
+            raw_steps = [create_raw_step(step) for step in steps]
+            bound_steps = [step.to_model_step(self) for step in raw_steps]
+            for step_obj in bound_steps:
+                step_obj.execute()
 
             # If there are any write options included in the steps,
             # we don't need to write the whole model.
-            if write and not self._options_contain_write(steps):
+            if write and not self._steps_contain_write(raw_steps):
                 self.write()
 
             self.close()
@@ -333,9 +342,9 @@ class Model(object, metaclass=ABCMeta):
         self,
         *,
         model_out: str | Path | None = None,
-        write: Optional[bool] = True,
-        steps: Optional[List[Dict[str, Dict[str, Any]]]] = None,
+        write: bool = True,
         forceful_overwrite: bool = False,
+        steps: list[dict[str, dict[str, Any]]] | None = None,
     ):
         r"""Single method to update a model based the settings in `steps`.
 
@@ -382,8 +391,6 @@ class Model(object, metaclass=ABCMeta):
             self.root.path / "hydromt.log", append=self.root.is_reading_mode()
         ):
             log.log_version()
-            steps = steps or []
-            _validate_steps(self, steps)
             if not self.root.is_writing_mode():
                 if model_out is None:
                     raise ValueError(
@@ -410,29 +417,16 @@ class Model(object, metaclass=ABCMeta):
                     "Model region not found, setup model using `build` first."
                 )
 
-            # loop over methods from config file
-            for step_dict in steps:
-                step, kwargs = next(iter(step_dict.items()))
-                logger.info(f"update: {step}")
-                # Call the methods.
-                method = _rgetattr(self, step)
-                params = {
-                    param: arg.default
-                    for param, arg in signature(method).parameters.items()
-                    if arg.default != _empty
-                }
-                merged = {}
-                if params:
-                    merged.update(**params)
-                if kwargs:
-                    merged.update(**kwargs)
-                for k, v in merged.items():
-                    logger.info(f"{step}.{k}={v}")
-                method(**merged)
+            # Execute steps
+            steps = steps or []
+            raw_steps = [create_raw_step(step) for step in steps]
+            bound_steps = [step.to_model_step(self) for step in raw_steps]
+            for step_obj in bound_steps:
+                step_obj.execute()
 
             # If there are any write options included in the steps,
             # we don't need to write the whole model.
-            if write and not self._options_contain_write(steps):
+            if write and not self._steps_contain_write(raw_steps):
                 self.write()
 
             self.close()
@@ -476,8 +470,8 @@ class Model(object, metaclass=ABCMeta):
             c.read()
 
     @staticmethod
-    def _options_contain_write(steps: List[Dict[str, Dict[str, Any]]]) -> bool:
-        return any("write" in next(iter(step_dict)) for step_dict in steps)
+    def _steps_contain_write(steps: list[RawStep]) -> bool:
+        return any("write" in step.name for step in steps)
 
     @hydromt_step
     def write_data_catalog(

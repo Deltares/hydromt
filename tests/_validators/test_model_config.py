@@ -20,16 +20,18 @@ def mock_component(mock_model):
 
 def test_write_validation_validation():
     d = {"components": ["config", "geoms", "grid"]}
-    HydromtModelStep(fn=Model.write, args=d)
+    HydromtModelStep(name="write", fn=Model.write, args=d)
 
 
 def test_validate_component_config_wrong_characters():
-    with pytest.raises(ValueError, match="is not a valid python identifier"):
+    with pytest.raises(
+        ValidationError, match=r"1test is not a valid Python identifier"
+    ):
         HydromtComponentConfig(name="1test", type=ModelComponent)
 
 
 def test_validate_component_config_reserved_keyword():
-    with pytest.raises(ValueError, match="is a python reserved keyword"):
+    with pytest.raises(ValidationError, match=r"import is a Python reserved keyword"):
         HydromtComponentConfig(name="import", type=ModelComponent)
 
 
@@ -58,15 +60,15 @@ def test_validate_step_signature_bind():
         def foo(self, a: int, b: str):
             pass
 
-    with pytest.raises(TypeError, match="missing a required argument: 'a'"):
-        HydromtModelStep(fn=foo, args={"b": "test"})
-    with pytest.raises(TypeError, match="missing a required argument: 'b'"):
-        HydromtModelStep(fn=foo, args={"a": 1})
-    with pytest.raises(TypeError, match="missing a required argument: 'a'"):
-        HydromtModelStep(fn=Bar.foo, args={"b": "test"})
-    with pytest.raises(TypeError, match="missing a required argument: 'b'"):
-        HydromtModelStep(fn=Bar.foo, args={"a": 1})
-    HydromtModelStep(fn=foo, args={"a": 1, "b": "test"})
+    with pytest.raises(ValueError, match="missing a required argument: 'a'"):
+        HydromtModelStep(name="foo", fn=foo, args={"b": "test"})
+    with pytest.raises(ValueError, match="missing a required argument: 'b'"):
+        HydromtModelStep(name="foo", fn=foo, args={"a": 1})
+    with pytest.raises(ValueError, match="missing a required argument: 'a'"):
+        HydromtModelStep(name="foo", fn=Bar.foo, args={"b": "test"})
+    with pytest.raises(ValueError, match="missing a required argument: 'b'"):
+        HydromtModelStep(name="foo", fn=Bar.foo, args={"a": 1})
+    HydromtModelStep(name="foo", fn=foo, args={"a": 1, "b": "test"})
 
 
 def test_validate_global_config_components():
