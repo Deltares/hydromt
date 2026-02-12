@@ -135,7 +135,7 @@ class DatasetXarrayDriver(DatasetDriver):
         ValueError
             If the provided file extension is unsupported.
         """
-        fmt = self.options.get_io_format(str(path))
+        fmt = self.options.get_io_format(path)
         write_kwargs = write_kwargs or {}
         if fmt == XarrayIOFormat.ZARR:
             write_kwargs.setdefault("zarr_format", 2)

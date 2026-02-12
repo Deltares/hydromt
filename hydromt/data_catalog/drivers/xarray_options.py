@@ -71,7 +71,7 @@ class XarrayDriverOptions(DriverOptions):
 
     def filter_uris_by_format(
         self, uris: list[str]
-    ) -> tuple[list[str], XarrayIOFormat | None]:
+    ) -> tuple[list[str], XarrayIOFormat]:
         """Filter the list of URIs to only include those matching the specified format.
 
         Parameters
@@ -87,6 +87,12 @@ class XarrayDriverOptions(DriverOptions):
             The xarray reading format to filter by, either 'zarr' or 'netcdf4'.
         """
         io_format = self.get_io_format(uris[0])
+        if io_format is None:
+            raise ValueError(
+                f"Unknown extension for XarrayDriverOptions: {self.get_reading_ext(uris[0])}. "
+                "This can be overridden by setting the `ext_override` option to a supported extension (e.g. '.zarr' or '.nc')"
+            )
+
         filtered_uris = []
         for _uri in uris:
             _format = self.get_io_format(_uri)
