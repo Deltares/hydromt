@@ -111,7 +111,7 @@ Available data:
 .. include:: ../../_generated/gcs_cmip6_data.rst
 
 Earth Data Hub data catalog
-^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Data stored in `Earth Data Hub <https://earthdatahub.destine.eu/>` (Destination Earth). In order to use this  catalog, you need to setup credentials for accessing the data on Earth Data Hub.
 This includes creating an account on Earth Data Hub and setting up a .netrc file with your credentials.
 You can find more information on how to do this in the `Earth Data Hub documentation <https://earthdatahub.destine.eu/getting-started#configuring-netrc>`_.
