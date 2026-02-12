@@ -34,6 +34,7 @@ from pystac import CatalogType, MediaType
 
 from hydromt import __version__
 from hydromt._utils import (
+    CatalogDumper,
     _deep_merge,
     _partition_dictionaries,
     _single_var_as_array,
@@ -894,7 +895,13 @@ class DataCatalog(object):
             data_dict.pop("root", None)  # remove root if it equals the yml_dir
         if data_dict:
             with open(path, "w") as f:
-                yaml.dump(data_dict, f, default_flow_style=False, sort_keys=False)
+                yaml.dump(
+                    data_dict,
+                    f,
+                    default_flow_style=False,
+                    sort_keys=False,
+                    Dumper=CatalogDumper,
+                )
         else:
             logger.info("The data catalog is empty, no yml file is written.")
 

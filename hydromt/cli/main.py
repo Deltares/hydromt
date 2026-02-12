@@ -13,7 +13,7 @@ import numpy as np
 from pydantic import ValidationError
 
 from hydromt import __version__
-from hydromt._utils import log
+from hydromt._utils import CatalogDumper, log
 from hydromt._validators import Format
 from hydromt._validators.data_catalog_v0x import DataCatalogV0Validator
 from hydromt._validators.data_catalog_v1x import DataCatalogV1Validator
@@ -368,6 +368,7 @@ def _validate_catalog(cat_path: Path, fmt: Format, upgrade: bool) -> bool:
                     exclude_defaults=True,
                     exclude_none=True,
                 ),
+                Dumper=CatalogDumper,
             )
             logger.info(f"Upgraded catalog written to {out_path}")
     elif fmt == Format.v1:
