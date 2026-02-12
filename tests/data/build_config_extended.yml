@@ -4,6 +4,9 @@ global:
     config:
       type: ConfigComponent
       filename: run_config.toml
+  data_libs:
+    - deltares_data
+    - aws_esa_worldcover.yml
 steps:
   - config.create:
       template: run_config.toml

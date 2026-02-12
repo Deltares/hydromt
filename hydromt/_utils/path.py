@@ -47,7 +47,9 @@ def _make_config_paths_absolute(
     for key, val in cfdict.items():
         if isinstance(val, dict):
             if key not in skip_abspath_sections:
-                cfdict[key] = _make_config_paths_absolute(val, root)
+                cfdict[key] = _make_config_paths_absolute(
+                    val, root, skip_abspath_sections
+                )
         elif isinstance(val, list) and all([isinstance(v, str) for v in val]):
             cfdict[key] = [_abspath(v, root) for v in val]
         # hydromt steps config case
