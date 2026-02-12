@@ -1,7 +1,6 @@
 """RasterDatasetDriver for zarr data."""
 
 import logging
-from os.path import splitext
 from pathlib import Path
 from typing import Any, ClassVar
 
@@ -16,9 +15,8 @@ from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
     RasterDatasetDriver,
 )
 from hydromt.data_catalog.drivers.xarray_options import (
-    _NETCDF_EXT,
-    _ZARR_EXT,
     XarrayDriverOptions,
+    XarrayIOFormat,
 )
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.typing import (
@@ -43,7 +41,9 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
 
     name = "raster_xarray"
     supports_writing = True
-    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = _ZARR_EXT | _NETCDF_EXT
+    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = (
+        XarrayIOFormat.ZARR.extensions | XarrayIOFormat.NETCDF4.extensions
+    )
     options: XarrayDriverOptions = Field(
         default_factory=XarrayDriverOptions, description=DRIVER_OPTIONS_DESCRIPTION
     )
@@ -114,17 +114,16 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
             return None  # handle_nodata == ignore
 
         preprocessor = self.options.get_preprocessor()
-        io_format = self.options.get_io_format(uris[0])
-        filtered_uris = self.options.filter_uris_by_format(uris, io_format)
+        filtered_uris, io_format = self.options.filter_uris_by_format(uris)
 
         # Read and merge
-        if io_format == "zarr":
+        if io_format == XarrayIOFormat.ZARR:
             datasets = [
                 preprocessor(xr.open_zarr(_uri, **self.options.get_kwargs()))
                 for _uri in filtered_uris
             ]
             ds: xr.Dataset = xr.merge(datasets)
-        elif io_format == "netcdf4":
+        elif io_format == XarrayIOFormat.NETCDF4:
             ds: xr.Dataset = xr.open_mfdataset(
                 filtered_uris,
                 decode_coords="all",
@@ -178,17 +177,16 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         ValueError
             If the file extension is not recognized or supported.
         """
-        no_ext, ext = splitext(path)
+        fmt = self.options.get_io_format(path)
         write_kwargs = write_kwargs or {}
-        # set filepath if incompat
-        if ext not in self.SUPPORTED_EXTENSIONS:
+        if fmt is None:
             logger.warning(
-                f"Unknown extension for RasterDatasetXarrayDriver: {ext},"
+                f"Unknown extension for RasterDatasetXarrayDriver: {self.options.get_reading_ext(path)},"
                 "switching to zarr"
             )
-            path = no_ext + next(iter(_ZARR_EXT))
-            ext = next(iter(_ZARR_EXT))
-        if ext in _ZARR_EXT:
+            fmt = XarrayIOFormat.ZARR
+            path = Path(path).with_suffix(next(iter(XarrayIOFormat.ZARR.extensions)))
+        if fmt == XarrayIOFormat.ZARR:
             write_kwargs.setdefault("zarr_format", 2)
             data.to_zarr(path, mode="w", **write_kwargs)
         else:

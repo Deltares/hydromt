@@ -15,9 +15,8 @@ from hydromt.data_catalog.drivers.geodataset.geodataset_driver import (
     GeoDatasetDriver,
 )
 from hydromt.data_catalog.drivers.xarray_options import (
-    _NETCDF_EXT,
-    _ZARR_EXT,
     XarrayDriverOptions,
+    XarrayIOFormat,
 )
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.typing import (
@@ -40,7 +39,9 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
 
     name: ClassVar[str] = "geodataset_xarray"
     supports_writing = True
-    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = _ZARR_EXT | _NETCDF_EXT
+    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = (
+        XarrayIOFormat.ZARR.extensions | XarrayIOFormat.NETCDF4.extensions
+    )
     options: XarrayDriverOptions = Field(
         default_factory=XarrayDriverOptions, description=DRIVER_OPTIONS_DESCRIPTION
     )
@@ -89,17 +90,16 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
             },
         )
         preprocessor = self.options.get_preprocessor()
-        io_format = self.options.get_io_format(uris[0])
-        filtered_uris = self.options.filter_uris_by_format(uris, io_format)
+        filtered_uris, io_format = self.options.filter_uris_by_format(uris)
 
         # Read and merge
-        if io_format == "zarr":
+        if io_format == XarrayIOFormat.ZARR:
             datasets = [
                 preprocessor(xr.open_zarr(_uri, **self.options.get_kwargs()))
                 for _uri in filtered_uris
             ]
             ds: xr.Dataset = xr.merge(datasets)
-        elif io_format == "netcdf4":
+        elif io_format == XarrayIOFormat.NETCDF4:
             ds: xr.Dataset = xr.open_mfdataset(
                 filtered_uris,
                 decode_coords="all",
@@ -109,7 +109,7 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
             )
         else:
             raise ValueError(
-                f"Unknown extension for GeoDatasetXarrayDriver: {io_format} "
+                f"Unknown extension for GeoDatasetXarrayDriver: {self.options.get_reading_ext(uris[0])} "
             )
 
         for variable in ds.data_vars:
@@ -152,15 +152,16 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
         ValueError
             If the file extension is not supported.
         """
-        path = Path(path)
-        ext = path.suffix
+        fmt = self.options.get_io_format(str(path))
         write_kwargs = write_kwargs or {}
-        if ext in _ZARR_EXT:
+        if fmt == XarrayIOFormat.ZARR:
             write_kwargs.setdefault("zarr_format", 2)
             data.vector.to_zarr(path, **write_kwargs)
-        elif ext in _NETCDF_EXT:
+        elif fmt == XarrayIOFormat.NETCDF4:
             data.vector.to_netcdf(path, **write_kwargs)
         else:
-            raise ValueError(f"Unknown extension for GeoDatasetXarrayDriver: {ext} ")
+            raise ValueError(
+                f"Unknown extension for GeoDatasetXarrayDriver: {self.options.get_reading_ext(path)}"
+            )
 
         return path
