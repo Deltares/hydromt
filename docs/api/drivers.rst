@@ -45,7 +45,7 @@ Raster Data Drivers
 
    RasterDatasetDriver
    RasterDatasetXarrayDriver
-   RasterXarrayOptions
+   XarrayDriverOptions
    RasterioDriver
    RasterioOptions
 
@@ -79,7 +79,7 @@ Geospatial Dataset Drivers
    :nosignatures:
 
    GeoDatasetDriver
-   GeoDatasetOptions
+   XarrayDriverOptions
    GeoDatasetXarrayDriver
    GeoDatasetVectorDriver
 
@@ -92,7 +92,7 @@ General Dataset Drivers
 
    DatasetDriver
    DatasetXarrayDriver
-   DatasetXarrayOptions
+   XarrayDriverOptions
 
 Preprocessing
 -------------

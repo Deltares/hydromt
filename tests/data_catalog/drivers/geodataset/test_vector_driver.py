@@ -10,7 +10,7 @@ from pytest_mock import MockerFixture
 from xarray import Dataset
 
 from hydromt.data_catalog.drivers import GeoDatasetVectorDriver, preprocessing
-from hydromt.data_catalog.drivers.geodataset.geodataset_driver import GeoDatasetOptions
+from hydromt.data_catalog.drivers.xarray_options import XarrayDriverOptions
 from hydromt.gis import vector
 from hydromt.readers import open_geodataset
 
@@ -38,7 +38,7 @@ class TestGeoDatasetVectorDriver:
 
         uris: List[str] = ["file.geojson"]
         driver = GeoDatasetVectorDriver(
-            options=GeoDatasetOptions(preprocess="remove_duplicates"),
+            options=XarrayDriverOptions(preprocess="remove_duplicates"),
         )
         res: Optional[Dataset] = driver.read(uris)
         assert res is not None

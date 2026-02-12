@@ -1,8 +1,6 @@
 """GeoDatasetDriver for zarr data."""
 
 import logging
-from functools import partial
-from os.path import splitext
 from pathlib import Path
 from typing import Any, ClassVar
 
@@ -15,7 +13,10 @@ from hydromt.data_catalog.drivers.base_driver import (
 )
 from hydromt.data_catalog.drivers.geodataset.geodataset_driver import (
     GeoDatasetDriver,
-    GeoDatasetOptions,
+)
+from hydromt.data_catalog.drivers.xarray_options import (
+    XarrayDriverOptions,
+    XarrayIOFormat,
 )
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.typing import (
@@ -25,9 +26,6 @@ from hydromt.typing import (
 )
 
 logger = logging.getLogger(__name__)
-
-_ZARR_EXT = ".zarr"
-_NETCDF_EXT = [".nc", ".netcdf"]
 
 
 class GeoDatasetXarrayDriver(GeoDatasetDriver):
@@ -41,9 +39,11 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
 
     name: ClassVar[str] = "geodataset_xarray"
     supports_writing = True
-    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {_ZARR_EXT, *_NETCDF_EXT}
-    options: GeoDatasetOptions = Field(
-        default_factory=GeoDatasetOptions, description=DRIVER_OPTIONS_DESCRIPTION
+    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = (
+        XarrayIOFormat.ZARR.extensions | XarrayIOFormat.NETCDF4.extensions
+    )
+    options: XarrayDriverOptions = Field(
+        default_factory=XarrayDriverOptions, description=DRIVER_OPTIONS_DESCRIPTION
     )
 
     def read(
@@ -90,28 +90,16 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
             },
         )
         preprocessor = self.options.get_preprocessor()
-        first_ext = splitext(uris[0])[-1]
+        filtered_uris, io_format = self.options.filter_uris_by_format(uris)
 
-        if first_ext == _ZARR_EXT:
-            opn = partial(xr.open_zarr, **self.options.get_kwargs())
-            datasets = []
-            for _uri in uris:
-                ext = splitext(_uri)[-1]
-                if ext != first_ext:
-                    logger.warning(f"Reading zarr and {_uri} was not, skipping...")
-                else:
-                    datasets.append(preprocessor(opn(_uri)))
-
+        # Read and merge
+        if io_format == XarrayIOFormat.ZARR:
+            datasets = [
+                preprocessor(xr.open_zarr(_uri, **self.options.get_kwargs()))
+                for _uri in filtered_uris
+            ]
             ds: xr.Dataset = xr.merge(datasets)
-        elif first_ext in _NETCDF_EXT:
-            filtered_uris = []
-            for _uri in uris:
-                ext = splitext(_uri)[-1]
-                if ext != first_ext:
-                    logger.warning(f"Reading netcdf and {_uri} was not, skipping...")
-                else:
-                    filtered_uris.append(_uri)
-
+        elif io_format == XarrayIOFormat.NETCDF4:
             ds: xr.Dataset = xr.open_mfdataset(
                 filtered_uris,
                 decode_coords="all",
@@ -121,8 +109,9 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
             )
         else:
             raise ValueError(
-                f"Unknown extention for GeoDatasetXarrayDriver: {first_ext} "
+                f"Unknown extension for GeoDatasetXarrayDriver: {self.options.get_reading_ext(uris[0])} "
             )
+
         for variable in ds.data_vars:
             if ds[variable].size == 0:
                 exec_nodata_strat(
@@ -163,15 +152,16 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
         ValueError
             If the file extension is not supported.
         """
-        path = Path(path)
-        ext = path.suffix
+        fmt = self.options.get_io_format(path)
         write_kwargs = write_kwargs or {}
-        if ext == _ZARR_EXT:
+        if fmt == XarrayIOFormat.ZARR:
             write_kwargs.setdefault("zarr_format", 2)
             data.vector.to_zarr(path, **write_kwargs)
-        elif ext in _NETCDF_EXT:
+        elif fmt == XarrayIOFormat.NETCDF4:
             data.vector.to_netcdf(path, **write_kwargs)
         else:
-            raise ValueError(f"Unknown extension for GeoDatasetXarrayDriver: {ext} ")
+            raise ValueError(
+                f"Unknown extension for GeoDatasetXarrayDriver: {self.options.get_reading_ext(path)}"
+            )
 
         return path

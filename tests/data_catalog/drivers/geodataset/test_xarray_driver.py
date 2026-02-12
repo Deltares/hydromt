@@ -66,7 +66,7 @@ class TestGeoDatasetXarrayDriver:
 
     def test_calls_nc_func_with_nc_ext(self, mocker: MockerFixture):
         mock_xr_open: mocker.MagicMock = mocker.patch(
-            "hydromt.data_catalog.drivers.raster.raster_xarray_driver.xr.open_mfdataset",
+            "hydromt.data_catalog.drivers.geodataset.xarray_driver.xr.open_mfdataset",
             spec=open_mfdataset,
         )
         mock_xr_open.return_value = xr.Dataset()
@@ -75,3 +75,57 @@ class TestGeoDatasetXarrayDriver:
         driver = GeoDatasetXarrayDriver()
         _ = driver.read(uris)
         assert mock_xr_open.call_count == 1
+
+    def test_calls_nc_func_with_nc_ext_override(self, mocker: MockerFixture):
+        mock_xr_open: mocker.MagicMock = mocker.patch(
+            "hydromt.data_catalog.drivers.geodataset.xarray_driver.xr.open_mfdataset",
+            spec=open_mfdataset,
+        )
+        mock_xr_open.return_value = xr.Dataset()
+
+        uris: List[str] = ["file.nc", "file.netcdf", "file.something", "file.else"]
+        driver = GeoDatasetXarrayDriver()
+
+        # No override should read only .nc
+        _ = driver.read(uris)
+        assert mock_xr_open.call_count == 1
+        assert mock_xr_open.call_args[0][0] == ["file.nc", "file.netcdf"]
+
+        # With override should read all as .nc
+        mock_xr_open.reset_mock()
+        driver.options.ext_override = ".nc"
+        _ = driver.read(uris)
+        assert mock_xr_open.call_count == 1
+        assert mock_xr_open.call_args[0][0] == uris
+
+    def test_calls_zarr_func_with_zarr_ext_override(self, mocker: MockerFixture):
+        mock_xr_open: mocker.MagicMock = mocker.patch(
+            "hydromt.data_catalog.drivers.geodataset.xarray_driver.xr.open_zarr",
+            spec=xr.open_zarr,
+        )
+        mock_xr_open.return_value = xr.Dataset()
+
+        uris: List[str] = [
+            "file.zarr",
+            "file.nc",
+            "file.netcdf",
+            "file.something",
+            "file.else",
+        ]
+        driver = GeoDatasetXarrayDriver()
+
+        # No override should read only .zarr
+        _ = driver.read(uris)
+
+        assert mock_xr_open.call_count == 1
+        called_uris = [call.args[0] for call in mock_xr_open.call_args_list]
+        assert called_uris == ["file.zarr"]
+
+        # With override should read all as .zarr
+        mock_xr_open.reset_mock()
+        driver.options.ext_override = ".zarr"
+        _ = driver.read(uris)
+
+        assert mock_xr_open.call_count == len(uris)
+        called_uris = [call.args[0] for call in mock_xr_open.call_args_list]
+        assert called_uris == uris

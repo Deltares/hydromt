@@ -20,6 +20,7 @@ Changed
 
 Fixed
 -----
+- ``ext_override`` option for Xarray Drivers is now properly used to filter uri's with a different extension.
 
 Deprecated
 ----------
