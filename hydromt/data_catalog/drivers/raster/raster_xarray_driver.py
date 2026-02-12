@@ -1,10 +1,8 @@
 """RasterDatasetDriver for zarr data."""
 
 import logging
-from functools import partial
-from os.path import splitext
 from pathlib import Path
-from typing import Any, Callable, ClassVar
+from typing import Any, ClassVar
 
 import xarray as xr
 from aiohttp.client_exceptions import ClientResponseError
@@ -13,11 +11,13 @@ from pydantic import Field
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers.base_driver import (
     DRIVER_OPTIONS_DESCRIPTION,
-    DriverOptions,
 )
-from hydromt.data_catalog.drivers.preprocessing import Preprocessor, get_preprocessor
 from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
     RasterDatasetDriver,
+)
+from hydromt.data_catalog.drivers.xarray_options import (
+    XarrayDriverOptions,
+    XarrayIOFormat,
 )
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.typing import (
@@ -28,29 +28,6 @@ from hydromt.typing import (
 )
 
 logger = logging.getLogger(__name__)
-
-_ZARR_EXT = ".zarr"
-_NETCDF_EXT = [".nc", ".netcdf"]
-
-
-class RasterXarrayOptions(DriverOptions):
-    """Options for RasterXarrayDriver."""
-
-    preprocess: str | None = None
-    """Name of preprocessor to apply before merging datasets. Available preprocessors include: round_latlon, to_datetimeindex, remove_duplicates, harmonise_dims. See their docstrings for details."""
-
-    ext_override: str | None = None
-    """Override the file extension check and try to read all files as the given extension. Useful when reading zarr files without the .zarr extension."""
-
-    def get_preprocessor(self) -> Preprocessor:
-        """Get the preprocessor function."""
-        return get_preprocessor(self.preprocess)
-
-    def get_ext_override(self, uris: list[str]) -> str | None:
-        """Get the extension override."""
-        if not self.ext_override:
-            return splitext(uris[0])[-1]
-        return self.ext_override
 
 
 class RasterDatasetXarrayDriver(RasterDatasetDriver):
@@ -65,9 +42,11 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
 
     name = "raster_xarray"
     supports_writing = True
-    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {_ZARR_EXT, *_NETCDF_EXT}
-    options: RasterXarrayOptions = Field(
-        default_factory=RasterXarrayOptions, description=DRIVER_OPTIONS_DESCRIPTION
+    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = (
+        XarrayIOFormat.ZARR.extensions | XarrayIOFormat.NETCDF4.extensions
+    )
+    options: XarrayDriverOptions = Field(
+        default_factory=XarrayDriverOptions, description=DRIVER_OPTIONS_DESCRIPTION
     )
 
     def read(
@@ -136,35 +115,17 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
             return None  # handle_nodata == ignore
 
         preprocessor = self.options.get_preprocessor()
-        first_ext = self.options.get_ext_override(uris)
+        filtered_uris, io_format = self.options.filter_uris_by_format(uris)
 
-        if first_ext == _ZARR_EXT:
-            opn: Callable = partial(xr.open_zarr, **self.options.get_kwargs())
-            datasets = []
-            for _uri in uris:
-                ext = splitext(_uri)[-1]
-                if ext != first_ext and not self.options.ext_override:
-                    logger.warning(f"Reading zarr and {_uri} was not, skipping...")
-                else:
-                    try:
-                        datasets.append(preprocessor(opn(_uri)))
-                    except ClientResponseError as e:
-                        if e.status == 401:
-                            raise PermissionError(
-                                f"Unauthorized access to {_uri}. Check your credentials."
-                            ) from e
-                        raise
+        # Read and merge
+        if io_format == XarrayIOFormat.ZARR:
+            datasets = [
+                preprocessor(ds)
+                for ds in self._open_zarrs(filtered_uris, self.options.get_kwargs())
+            ]
             ds: xr.Dataset = xr.merge(datasets)
-        # Normal netcdf file(s)
-        elif first_ext in _NETCDF_EXT:
-            filtered_uris = []
-            for _uri in uris:
-                ext = splitext(_uri)[-1]
-                if ext != first_ext:
-                    logger.warning(f"Reading netcdf and {_uri} was not, skipping...")
-                else:
-                    filtered_uris.append(_uri)
-            ds = xr.open_mfdataset(
+        elif io_format == XarrayIOFormat.NETCDF4:
+            ds: xr.Dataset = xr.open_mfdataset(
                 filtered_uris,
                 decode_coords="all",
                 preprocess=preprocessor,
@@ -173,8 +134,9 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
             )
         else:
             raise ValueError(
-                f"Unknown extension for RasterDatasetXarrayDriver: {first_ext} "
+                f"Unknown extension for RasterDatasetXarrayDriver: {self.options.get_reading_ext(uris[0])} "
             )
+
         for variable in ds.data_vars:
             if ds[variable].size == 0:
                 exec_nodata_strat(
@@ -216,20 +178,35 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         ValueError
             If the file extension is not recognized or supported.
         """
-        no_ext, ext = splitext(path)
+        fmt = self.options.get_io_format(path)
         write_kwargs = write_kwargs or {}
-        # set filepath if incompat
-        if ext not in self.SUPPORTED_EXTENSIONS:
+        if fmt is None:
             logger.warning(
-                f"Unknown extension for RasterDatasetXarrayDriver: {ext},"
+                f"Unknown extension for RasterDatasetXarrayDriver: {self.options.get_reading_ext(path)},"
                 "switching to zarr"
             )
-            path = no_ext + _ZARR_EXT
-            ext = _ZARR_EXT
-        if ext == _ZARR_EXT:
+            fmt = XarrayIOFormat.ZARR
+            path = Path(path).with_suffix(next(iter(XarrayIOFormat.ZARR.extensions)))
+        if fmt == XarrayIOFormat.ZARR:
             write_kwargs.setdefault("zarr_format", 2)
             data.to_zarr(path, mode="w", **write_kwargs)
         else:
             data.to_netcdf(path, **write_kwargs)
 
         return Path(path)
+
+    @staticmethod
+    def _open_zarrs(uris: list[str], read_kwargs: dict[str, Any]) -> list[xr.Dataset]:
+        """Open multiple zarr datasets with error handling."""
+        datasets = []
+        for _uri in uris:
+            try:
+                ds = xr.open_zarr(_uri, **read_kwargs)
+                datasets.append(ds)
+            except ClientResponseError as e:
+                if e.status == 401:
+                    raise PermissionError(
+                        f"Unauthorized access to {_uri}. Check your credentials."
+                    ) from e
+                raise
+        return datasets
