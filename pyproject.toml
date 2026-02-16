@@ -22,7 +22,7 @@ dependencies = [
 	"numba",                  # speed up computations (used in e.g. stats)
 	"numpy",                  # pin necessary to ensure compatability with C headers
 	"packaging",              # compare versions of hydromt
-	"pandas<3",               # Dataframes
+	"pandas<4",               # Dataframes
 	"pooch",                  # data fetching
 	"pyarrow",
 	"pydantic~=2.4",          # Validation
