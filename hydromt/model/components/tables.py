@@ -92,7 +92,7 @@ class TablesComponent(ModelComponent):
         self._initialize_tables(skip_read=True)
         logger.info("Reading model table files.")
         fn = filename or self._filename
-        for path, name in expand_uri_paths(str(self.root.path / fn)):
+        for name, path in expand_uri_paths(str(self.root.path / fn)).items():
             logger.info(f"Reading table from {path} into model as '{name}'.")
             tbl = pd.read_csv(path, **kwargs)
             self.set(tbl, name=name)

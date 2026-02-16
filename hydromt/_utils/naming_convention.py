@@ -71,7 +71,16 @@ def expand_uri_paths(
     placeholders: Optional[List[str]] = None,
 ) -> dict[str, str]:
     """
-    Expand a URI template into concrete paths and stable dataset names.
+    Expand a URI template into concrete paths and unique stable dataset names.
+
+    Parameters
+    ----------
+    uri : str
+        URI template containing placeholders (e.g., `{variable}`, `{year}`) and/or wildcards (`*`).
+    placeholders : list of str, optional
+        List of placeholder names to capture and use for naming datasets.
+        If not provided, no placeholders will be captured for naming and
+        the filename (without extension) will be used as the dataset name.
 
     Returns
     -------

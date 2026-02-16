@@ -171,7 +171,7 @@ class GeomsComponent(SpatialModelComponent):
         self._initialize(skip_read=True)
         f = filename or self._filename
         read_path = self.root.path / f
-        for path, name in expand_uri_paths(str(read_path)):
+        for name, path in expand_uri_paths(str(read_path)).items():
             geom = cast(GeoDataFrame, gpd.read_file(path, **kwargs))
             logger.debug(f"Reading model file {name} at {path}.")
             self.set(geom=geom, name=name)

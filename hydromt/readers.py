@@ -975,9 +975,9 @@ def open_ncs(
     ncs = {}
     path_template = root / filename_template
 
-    for path, name in expand_uri_paths(
+    for name, path in expand_uri_paths(
         str(path_template), placeholders=list(_PLACEHOLDERS)
-    ):
+    ).items():
         ds = open_nc(filepath=path, **kwargs)
         ncs[name] = ds
     return ncs
