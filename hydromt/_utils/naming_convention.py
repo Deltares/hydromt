@@ -4,7 +4,7 @@ from re import compile as compile_regex
 from re import error as regex_error
 from re import escape
 from string import Formatter
-from typing import Iterable, List, Optional, Pattern, Tuple
+from typing import List, Optional, Pattern, Tuple
 
 _PLACEHOLDERS = frozenset({"year", "month", "variable", "name", "overview_level"})
 _SEGMENT_PATTERN = r"[^/\\]+"
@@ -69,16 +69,17 @@ def expand_uri_paths(
     uri: str,
     *,
     placeholders: Optional[List[str]] = None,
-) -> Iterable[tuple[str, str]]:
+) -> dict[str, str]:
     """
     Expand a URI template into concrete paths and stable dataset names.
 
     Returns
     -------
-    Iterable[tuple[str, str]]
-        Tuples of (path, name)
+    dict[str, str]
+        Mapping of dataset names to paths
     """
     path_glob, _, regex = _expand_uri_placeholders(uri, placeholders=placeholders)
+    results = {}
 
     for path in glob(path_glob):
         match = regex.match(path)
@@ -88,4 +89,12 @@ def expand_uri_paths(
             # fallback to filename without extension if regex doesn't match
             name = Path(path).stem
 
-        yield str(path), name
+        if name in results:
+            raise ValueError(
+                f"Duplicate dataset name '{name}' generated from placeholder/wildcard uri '{uri}'. "
+                f"The duplicate name was generated from '{path}' and '{results[name]}'. "
+                "Consider using more specific placeholders to ensure unique names."
+            )
+        results[name] = path
+
+    return results
