@@ -1,9 +1,13 @@
+from glob import glob
+from pathlib import Path
 from re import compile as compile_regex
 from re import error as regex_error
+from re import escape
 from string import Formatter
-from typing import List, Optional, Pattern, Tuple
+from typing import Iterable, List, Optional, Pattern, Tuple
 
-_placeholders = frozenset({"year", "month", "variable", "name", "overview_level"})
+_PLACEHOLDERS = frozenset({"year", "month", "variable", "name", "overview_level"})
+_SEGMENT_PATTERN = r"[^/\\]+"
 
 
 def _expand_uri_placeholders(
@@ -18,30 +22,38 @@ def _expand_uri_placeholders(
         placeholders = []
     keys: list[str] = []
     pattern: str = ""
+    uri_expanded = ""
 
     if "{" in uri:
-        uri_expanded = ""
         for literal_text, key, fmt, _ in Formatter().parse(uri):
+            safe_literal = escape(literal_text).replace(r"\*", ".*").replace(r"\?", ".")
+            pattern += safe_literal
             uri_expanded += literal_text
-            pattern += literal_text
             if key is None:
                 continue
-            pattern += "(.*)"
+
+            if key in placeholders:
+                pattern += (
+                    f"({_SEGMENT_PATTERN})"  # capture only requested placeholders
+                )
+                keys.append(key)
+            else:
+                pattern += f"(?:{_SEGMENT_PATTERN})"  # match segment, but don't capture
+
             key_str = "{" + f"{key}:{fmt}" + "}" if fmt else "{" + key + "}"
-            # remove unused fields
+            # Determine if this key should become a wildcard
             if key in ["year", "month"] and time_range is None:
                 uri_expanded += "*"
             elif key == "variable" and variables is None:
                 uri_expanded += "*"
             elif key == "name":
                 uri_expanded += "*"
-            # escape unknown fields
-            elif key is not None and key not in placeholders:
-                uri_expanded = uri_expanded + "{" + key_str + "}"
             else:
-                uri_expanded = uri_expanded + key_str
-                keys.append(key)
+                uri_expanded += key_str
         uri = uri_expanded
+
+    # Anchor the regex to make sure the entire path matches, not just a substring
+    pattern = f"^{pattern}$"
 
     # windows paths creating invalid escape sequences
     try:
@@ -51,3 +63,29 @@ def _expand_uri_placeholders(
         regex = compile_regex(pattern.encode("unicode_escape").decode())
 
     return (uri, keys, regex)
+
+
+def expand_uri_paths(
+    uri: str,
+    *,
+    placeholders: Optional[List[str]] = None,
+) -> Iterable[tuple[str, str]]:
+    """
+    Expand a URI template into concrete paths and stable dataset names.
+
+    Returns
+    -------
+    Iterable[tuple[str, str]]
+        Tuples of (path, name)
+    """
+    path_glob, _, regex = _expand_uri_placeholders(uri, placeholders=placeholders)
+
+    for path in glob(path_glob):
+        match = regex.match(path)
+        if match and match.groups():
+            name = ".".join(match.groups())
+        else:
+            # fallback to filename without extension if regex doesn't match
+            name = Path(path).stem
+
+        yield str(path), name

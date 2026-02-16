@@ -1,12 +1,11 @@
 """Tables component."""
 
-import glob
 import logging
-from os.path import basename, join
 from typing import TYPE_CHECKING, Dict, Optional, Union, cast
 
 import pandas as pd
 
+from hydromt._utils.naming_convention import expand_uri_paths
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.steps import hydromt_step
 
@@ -93,12 +92,10 @@ class TablesComponent(ModelComponent):
         self._initialize_tables(skip_read=True)
         logger.info("Reading model table files.")
         fn = filename or self._filename
-        filenames = glob.glob(join(self.root.path, fn.format(name="*")))
-        if len(filenames) > 0:
-            for fn in filenames:
-                name = basename(fn).split(".")[0]
-                tbl = pd.read_csv(fn, **kwargs)
-                self.set(tbl, name=name)
+        for path, name in expand_uri_paths(str(self.root.path / fn)):
+            logger.info(f"Reading table from {path} into model as '{name}'.")
+            tbl = pd.read_csv(path, **kwargs)
+            self.set(tbl, name=name)
 
     def set(
         self,

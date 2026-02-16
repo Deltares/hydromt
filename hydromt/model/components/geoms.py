@@ -1,14 +1,13 @@
 """Geoms component."""
 
 import logging
-from glob import glob
 from typing import TYPE_CHECKING, Dict, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 from geopandas import GeoDataFrame, GeoSeries
 from geopandas.testing import assert_geodataframe_equal
 
-from hydromt._utils.naming_convention import _expand_uri_placeholders
+from hydromt._utils.naming_convention import expand_uri_paths
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step
@@ -172,13 +171,9 @@ class GeomsComponent(SpatialModelComponent):
         self._initialize(skip_read=True)
         f = filename or self._filename
         read_path = self.root.path / f
-        path_glob, _, regex = _expand_uri_placeholders(str(read_path))
-        paths = glob(path_glob)
-        for p in paths:
-            name = ".".join(regex.match(p).groups())  # type: ignore
-            geom = cast(GeoDataFrame, gpd.read_file(p, **kwargs))
-            logger.debug(f"Reading model file {name} at {p}.")
-
+        for path, name in expand_uri_paths(str(read_path)):
+            geom = cast(GeoDataFrame, gpd.read_file(path, **kwargs))
+            logger.debug(f"Reading model file {name} at {path}.")
             self.set(geom=geom, name=name)
 
     @hydromt_step

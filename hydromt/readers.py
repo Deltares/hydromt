@@ -24,7 +24,10 @@ from pyproj import CRS
 from shapely.geometry import LineString, Point, Polygon, box
 from shapely.geometry.base import GEOMETRY_TYPES
 
-from hydromt._utils.naming_convention import _expand_uri_placeholders, _placeholders
+from hydromt._utils.naming_convention import (
+    _PLACEHOLDERS,
+    expand_uri_paths,
+)
 from hydromt._utils.path import _make_config_paths_absolute
 from hydromt._utils.uris import _is_valid_url
 from hydromt.gis import gis_utils, raster, raster_utils, vector, vector_utils
@@ -972,12 +975,9 @@ def open_ncs(
     ncs = {}
     path_template = root / filename_template
 
-    path_glob, _, regex = _expand_uri_placeholders(
-        str(path_template), placeholders=list(_placeholders)
-    )
-    paths = glob(path_glob)
-    for path in paths:
-        name = ".".join(regex.match(path).groups())  # type: ignore
+    for path, name in expand_uri_paths(
+        str(path_template), placeholders=list(_PLACEHOLDERS)
+    ):
         ds = open_nc(filepath=path, **kwargs)
         ncs[name] = ds
     return ncs
