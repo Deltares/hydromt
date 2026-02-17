@@ -11540,8 +11540,8 @@ packages:
   requires_python: '>=3.8'
 - pypi: ./
   name: hydromt
-  version: 1.3.0.dev0
-  sha256: b15c20ffb428972148fa43362eabd5e1d79a2eece7e550cbbcb2f660031f8af6
+  version: 1.4.0.dev0
+  sha256: 8d76396d50ef85799ebefa1131a55132abc4e94e72ed3186dab002f3ba2e72e4
   requires_dist:
   - affine
   - bottleneck
@@ -11555,7 +11555,7 @@ packages:
   - numba
   - numpy
   - packaging
-  - pandas<3
+  - pandas<4
   - pooch
   - pyarrow
   - pydantic~=2.4
