@@ -28,7 +28,7 @@ class DatasetsComponent(ModelComponent):
     def __init__(
         self,
         model: "Model",
-        filename: str = "datasets/{name}.nc",
+        filename: str = "datasets/*.nc",
     ):
         """Initialize a DatasetsComponent.
 
@@ -38,7 +38,7 @@ class DatasetsComponent(ModelComponent):
             HydroMT model instance
         filename: str
             The path to use for reading and writing of component data by default.
-            by default "datasets/{name}.nc" ie one file per dataset in the data
+            by default ``datasets/*.nc`` ie one file per dataset in the data
             dictionary.
         """
         self._data: XArrayDict | None = None
@@ -115,9 +115,11 @@ class DatasetsComponent(ModelComponent):
         Parameters
         ----------
         filename : str, optional
-            filename relative to model root. should contain a {name} placeholder
-            which will be used to determine the names/keys of the datasets.
-            if None, the path that was provided at init will be used.
+            filename relative to model root. Should contain a * wildcard character
+            to read multiple files into the data dictionary. All files matching the
+            glob pattern defined by filename will be read. The filename without
+            extension will be used as the key in the data dictionary.
+            If None, the path that was provided at init will be used.
         **kwargs:
             Additional keyword arguments that are passed to the
             `hydromt.readers.open_ncs` function.
@@ -126,14 +128,15 @@ class DatasetsComponent(ModelComponent):
         self._initialize(skip_read=True)
         kwargs = {**{"engine": "netcdf4"}, **kwargs}
         filename_template = filename or self._filename
-        ncs = open_ncs(filename_template, root=self.root.path, **kwargs)
-        for name, ds in ncs.items():
+        for path, ds in open_ncs(
+            filename_template, root=self.root.path, **kwargs
+        ).items():
             self._open_datasets.append(ds)
             if len(ds.data_vars) == 1:
                 (da,) = ds.data_vars.values()
             else:
                 da = ds
-            self.set(data=da, name=name)
+            self.set(data=da, name=path.stem)
 
     @hydromt_step
     def write(
@@ -159,8 +162,9 @@ class DatasetsComponent(ModelComponent):
         nc_dict: dict
             Dictionary of xarray.Dataset and/or xarray.DataArray to write
         filename: str, optional
-            filename relative to model root and should contain a {name} placeholder
-            Can be a relative path.
+            filename relative to model root and must contain a * wildcard character
+            to write multiple files from the data dictionary. Each name in the data
+            dictionary will be used to replace the * character in the filename.
         gdal_compliant: bool, optional
             If True, convert xarray.Dataset and/or xarray.DataArray to gdal compliant
             format using :py:meth:`~hydromt.raster.gdal_compliant`
@@ -186,8 +190,7 @@ class DatasetsComponent(ModelComponent):
         to_netcdf_kwargs = to_netcdf_kwargs or {}
         to_netcdf_kwargs.setdefault("engine", "netcdf4")
 
-        filename = filename or self._filename
-
+        filename = (filename or self._filename).replace("*", "{name}")
         for name, ds in self.data.items():
             file_path = self.root.path / filename.format(name=name)
             file_path.parent.mkdir(parents=True, exist_ok=True)

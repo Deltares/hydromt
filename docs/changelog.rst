@@ -17,6 +17,8 @@ New
 
 Changed
 -------
+- ``open_ncs`` returns ``dict[Path, xr.Dataset]`` instead of ``dict[str, xr.Dataset]``.  Previously the filename without extension was used as the key, now its the full path.
+- ``open_ncs`` no longer accepts paths with placeholders: ``{name}`` etc. It now only accepts wildcards: '*' to denote reading multiple files.
 
 Fixed
 -----

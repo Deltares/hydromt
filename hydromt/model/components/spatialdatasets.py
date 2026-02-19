@@ -35,7 +35,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         model: "Model",
         *,
         region_component: str,
-        filename: str = "spatial_datasets/{name}.nc",
+        filename: str = "spatial_datasets/*.nc",
         region_filename: str = "spatial_datasets/spatial_datasets_region.geojson",
     ):
         """Initialize a SpatialDatasetsComponent.
@@ -49,11 +49,11 @@ class SpatialDatasetsComponent(SpatialModelComponent):
             region.
         filename: str
             The path to use for reading and writing of component data by default.
-            by default "spatial_datasets/{name}.nc" ie one file per xarray object in the
+            by default ``spatial_datasets/*.nc`` ie one file per xarray object in the
             data dictionary.
         region_filename: str
             The path to use for writing the region data to a file. By default
-            "spatial_datasets/spatial_datasets_region.geojson".
+            ``spatial_datasets/spatial_datasets_region.geojson``.
         """
         self._data: Optional[XArrayDict] = None
         self._filename: str = filename
@@ -103,7 +103,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         ---------
         data: xarray.Dataset or xarray.DataArray
             New xarray object to add
-        name: str
+        name: str, optional
             name of the xarray.
         """
         self._initialize()
@@ -142,25 +142,28 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         Parameters
         ----------
         filename : str, optional
-            filename relative to model root. should contain a {name} placeholder
-            which will be used to determine the names/keys of the datasets.
-            if None, the path that was provided at init will be used.
+            filename relative to model root. Should contain a * wildcard character
+            to read multiple files into the data dictionary. All files matching the
+            glob pattern defined by filename will be read. The filename without
+            extension will be used as the key in the data dictionary.
+            If None, the path that was provided at init will be used.
         **kwargs:
             Additional keyword arguments that are passed to the
-            `hydromt.readers.open_nc` function.
+            `hydromt.readers.open_ncs` function.
         """
         self.root._assert_read_mode()
         self._initialize(skip_read=True)
         kwargs = {**{"engine": "netcdf4"}, **kwargs}
         filename_template = filename or self._filename
-        ncs = open_ncs(filename_template, root=self.root.path, **kwargs)
-        for name, ds in ncs.items():
+        for path, ds in open_ncs(
+            filename_template, root=self.root.path, **kwargs
+        ).items():
             self._open_datasets.append(ds)
             if len(ds.data_vars) == 1:
                 (da,) = ds.data_vars.values()
             else:
                 da = ds
-            self.set(data=da, name=name)
+            self.set(data=da, name=path.stem)
 
     @hydromt_step
     def write(
@@ -211,7 +214,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
 
         to_netcdf_kwargs = to_netcdf_kwargs or {}
         to_netcdf_kwargs.setdefault("engine", "netcdf4")
-        filename = filename or self._filename
+        filename = (filename or self._filename).replace("*", "{name}")
 
         for name, ds in self.data.items():
             file_path = self.root.path / filename.format(name=name)

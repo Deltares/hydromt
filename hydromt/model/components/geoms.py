@@ -1,17 +1,16 @@
 """Geoms component."""
 
 import logging
-from glob import glob
 from typing import TYPE_CHECKING, Dict, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 from geopandas import GeoDataFrame, GeoSeries
 from geopandas.testing import assert_geodataframe_equal
 
-from hydromt._utils.naming_convention import _expand_uri_placeholders
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step
+from hydromt.readers import _expand_wildcard_path
 from hydromt.typing.crs import CRS
 
 if TYPE_CHECKING:
@@ -30,7 +29,7 @@ class GeomsComponent(SpatialModelComponent):
         self,
         model: "Model",
         *,
-        filename: str = "geoms/{name}.geojson",
+        filename: str = "geoms/*.geojson",
         region_component: Optional[str] = None,
         region_filename: str = "geoms/geoms_region.geojson",
     ):
@@ -42,14 +41,14 @@ class GeomsComponent(SpatialModelComponent):
             HydroMT model instance
         filename: str
             The path to use for reading and writing of component data by default.
-            by default "geoms/{name}.geojson" ie one file per geodataframe in the data dictionary.
+            by default ``geoms/*.geojson`` ie one file per geodataframe in the data dictionary.
         region_component: str, optional
             The name of the region component to use as reference for this component's
             region. If None, the region will be set to the union of all geometries in
             the data dictionary.
         region_filename: str
             The path to use for writing the region data to a file. By default
-            "geoms/geoms_region.geojson".
+            ``geoms/geoms_region.geojson``.
         """
         self._data: Optional[Dict[str, Union[GeoDataFrame, GeoSeries]]] = None
         self._filename: str = filename
@@ -156,14 +155,14 @@ class GeomsComponent(SpatialModelComponent):
     def read(self, filename: Optional[str] = None, **kwargs) -> None:
         r"""Read model geometries files at <root>/<filename>.
 
-        key-word arguments are passed to :py:func:`geopandas.read_file`
-
         Parameters
         ----------
         filename : str, optional
-            filename relative to model root. should contain a {name} placeholder
-            which will be used to determine the names/keys of the geometries.
-            if None, the path that was provided at init will be used.
+            filename relative to model root. Should contain a * wildcard character
+            to read multiple files into the data dictionary. All files matching the
+            glob pattern defined by filename will be read. The filename without
+            extension will be used as the key in the data dictionary.
+            If None, the path that was provided at init will be used.
         **kwargs:
             Additional keyword arguments that are passed to the
             `geopandas.read_file` function.
@@ -172,14 +171,10 @@ class GeomsComponent(SpatialModelComponent):
         self._initialize(skip_read=True)
         f = filename or self._filename
         read_path = self.root.path / f
-        path_glob, _, regex = _expand_uri_placeholders(str(read_path))
-        paths = glob(path_glob)
-        for p in paths:
-            name = ".".join(regex.match(p).groups())  # type: ignore
-            geom = cast(GeoDataFrame, gpd.read_file(p, **kwargs))
-            logger.debug(f"Reading model file {name} at {p}.")
-
-            self.set(geom=geom, name=name)
+        for path in _expand_wildcard_path(read_path):
+            geom = cast(GeoDataFrame, gpd.read_file(path, **kwargs))
+            logger.debug(f"Reading model file {path.stem} at {path}.")
+            self.set(geom=geom, name=path.stem)
 
     @hydromt_step
     def write(
@@ -214,7 +209,7 @@ class GeomsComponent(SpatialModelComponent):
             )
             return
 
-        filename = filename or self._filename
+        filename = (filename or self._filename).replace("*", "{name}")
 
         for name, gdf in self.data.items():
             if len(gdf) == 0:
