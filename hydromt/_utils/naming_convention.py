@@ -1,5 +1,3 @@
-from glob import glob
-from pathlib import Path
 from re import compile as compile_regex
 from re import error as regex_error
 from re import escape
@@ -63,47 +61,3 @@ def _expand_uri_placeholders(
         regex = compile_regex(pattern.encode("unicode_escape").decode())
 
     return (uri, keys, regex)
-
-
-def expand_uri_paths(
-    uri: str,
-    *,
-    placeholders: Optional[List[str]] = None,
-) -> dict[str, str]:
-    """
-    Expand a URI template into concrete paths and unique stable dataset names.
-
-    Parameters
-    ----------
-    uri : str
-        URI template containing placeholders (e.g., `{variable}`, `{year}`) and/or wildcards (`*`).
-    placeholders : list of str, optional
-        List of placeholder names to capture and use for naming datasets.
-        If not provided, no placeholders will be captured for naming and
-        the filename (without extension) will be used as the dataset name.
-
-    Returns
-    -------
-    dict[str, str]
-        Mapping of dataset names to paths
-    """
-    path_glob, _, regex = _expand_uri_placeholders(uri, placeholders=placeholders)
-    results = {}
-
-    for path in glob(path_glob):
-        match = regex.match(path)
-        if match and match.groups():
-            name = ".".join(match.groups())
-        else:
-            # fallback to filename without extension if regex doesn't match
-            name = Path(path).stem
-
-        if name in results:
-            raise ValueError(
-                f"Duplicate dataset name '{name}' generated from placeholder/wildcard uri '{uri}'. "
-                f"The duplicate name was generated from '{path}' and '{results[name]}'. "
-                "Consider using more specific placeholders to ensure unique names."
-            )
-        results[name] = path
-
-    return results
