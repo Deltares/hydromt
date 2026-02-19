@@ -28,7 +28,7 @@ class DatasetsComponent(ModelComponent):
     def __init__(
         self,
         model: "Model",
-        filename: str = "datasets/{name}.nc",
+        filename: str = "datasets/*.nc",
     ):
         """Initialize a DatasetsComponent.
 
@@ -38,7 +38,7 @@ class DatasetsComponent(ModelComponent):
             HydroMT model instance
         filename: str
             The path to use for reading and writing of component data by default.
-            by default "datasets/{name}.nc" ie one file per dataset in the data
+            by default "datasets/*.nc" ie one file per dataset in the data
             dictionary.
         """
         self._data: XArrayDict | None = None
@@ -162,8 +162,9 @@ class DatasetsComponent(ModelComponent):
         nc_dict: dict
             Dictionary of xarray.Dataset and/or xarray.DataArray to write
         filename: str, optional
-            filename relative to model root and should contain a {name} placeholder
-            Can be a relative path.
+            filename relative to model root and must contain a * wildcard character
+            to write multiple files from the data dictionary. Each name in the data
+            dictionary will be used to replace the * character in the filename.
         gdal_compliant: bool, optional
             If True, convert xarray.Dataset and/or xarray.DataArray to gdal compliant
             format using :py:meth:`~hydromt.raster.gdal_compliant`
@@ -189,8 +190,7 @@ class DatasetsComponent(ModelComponent):
         to_netcdf_kwargs = to_netcdf_kwargs or {}
         to_netcdf_kwargs.setdefault("engine", "netcdf4")
 
-        filename = filename or self._filename
-
+        filename = (filename or self._filename).replace("*", "{name}")
         for name, ds in self.data.items():
             file_path = self.root.path / filename.format(name=name)
             file_path.parent.mkdir(parents=True, exist_ok=True)

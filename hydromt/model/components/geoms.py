@@ -29,7 +29,7 @@ class GeomsComponent(SpatialModelComponent):
         self,
         model: "Model",
         *,
-        filename: str = "geoms/{name}.geojson",
+        filename: str = "geoms/*.geojson",
         region_component: Optional[str] = None,
         region_filename: str = "geoms/geoms_region.geojson",
     ):
@@ -41,7 +41,7 @@ class GeomsComponent(SpatialModelComponent):
             HydroMT model instance
         filename: str
             The path to use for reading and writing of component data by default.
-            by default "geoms/{name}.geojson" ie one file per geodataframe in the data dictionary.
+            by default "geoms/*.geojson" ie one file per geodataframe in the data dictionary.
         region_component: str, optional
             The name of the region component to use as reference for this component's
             region. If None, the region will be set to the union of all geometries in
@@ -209,7 +209,7 @@ class GeomsComponent(SpatialModelComponent):
             )
             return
 
-        filename = filename or self._filename
+        filename = (filename or self._filename).replace("*", "{name}")
 
         for name, gdf in self.data.items():
             if len(gdf) == 0:

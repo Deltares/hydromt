@@ -35,7 +35,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         model: "Model",
         *,
         region_component: str,
-        filename: str = "spatial_datasets/{name}.nc",
+        filename: str = "spatial_datasets/*.nc",
         region_filename: str = "spatial_datasets/spatial_datasets_region.geojson",
     ):
         """Initialize a SpatialDatasetsComponent.
@@ -49,7 +49,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
             region.
         filename: str
             The path to use for reading and writing of component data by default.
-            by default "spatial_datasets/{name}.nc" ie one file per xarray object in the
+            by default "spatial_datasets/*.nc" ie one file per xarray object in the
             data dictionary.
         region_filename: str
             The path to use for writing the region data to a file. By default
@@ -103,7 +103,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         ---------
         data: xarray.Dataset or xarray.DataArray
             New xarray object to add
-        name: str
+        name: str, optional
             name of the xarray.
         """
         self._initialize()
@@ -214,7 +214,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
 
         to_netcdf_kwargs = to_netcdf_kwargs or {}
         to_netcdf_kwargs.setdefault("engine", "netcdf4")
-        filename = filename or self._filename
+        filename = (filename or self._filename).replace("*", "{name}")
 
         for name, ds in self.data.items():
             file_path = self.root.path / filename.format(name=name)

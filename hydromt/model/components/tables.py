@@ -26,7 +26,7 @@ class TablesComponent(ModelComponent):
     def __init__(
         self,
         model: "Model",
-        filename: str = "tables/{name}.csv",
+        filename: str = "tables/*.csv",
     ):
         """Initialize a TablesComponent.
 
@@ -37,7 +37,7 @@ class TablesComponent(ModelComponent):
         filename: str
             The default place that should be used for reading and writing unless the
             user overrides it. If a relative path is given it will be used as being
-            relative to the model root. By default `tables/{name}.csv` for this
+            relative to the model root. By default `tables/*.csv` for this
             component, and can be either relative or absolute.
         """
         self._data: Optional[Dict[str, Union[pd.DataFrame, pd.Series]]] = None
@@ -71,7 +71,7 @@ class TablesComponent(ModelComponent):
             )
             return
 
-        filename = filename or self._filename
+        filename = (filename or self._filename).replace("*", "{name}")
 
         kwargs.setdefault("index", False)
         kwargs.setdefault("header", True)
