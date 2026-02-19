@@ -5,6 +5,11 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - pyproject.toml
+      - hydromt/**
 
 permissions:
   contents: read
