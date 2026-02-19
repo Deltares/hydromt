@@ -100,7 +100,7 @@ doc = [
 	"nbsphinx",                     # build notebooks in docs
 	"pydata-sphinx-theme>=0.15.2",  # theme
 	"sphinx_autosummary_accessors", # doc layout
-	"sphinx",                       # build docks
+	"sphinx<9",                     # build docs, v9 is not compatible with sphinx_autosummary_accessors
 	"sphinx_design",                # doc layout
 	"sphinx-click",                 # click integration
 	"sbom4python",                  # generate software bill of materials
