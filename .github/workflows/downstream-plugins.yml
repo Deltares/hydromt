@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   downstream:
-    name: Test plugins against hydromt release (candidate)
+    name: Test ${{ matrix.plugin.name }} against hydromt release (candidate)
     runs-on: ubuntu-latest
 
     strategy:
