@@ -15,6 +15,7 @@ import xugrid as xu
 import zarr
 import zarr.storage
 from dask import config as dask_config
+from packaging.version import Version
 from pytest_mock import MockerFixture
 from shapely.geometry import box
 
@@ -36,7 +37,8 @@ xr.set_options(use_new_combine_kwarg_defaults=True)
 # This is the recommended by pandas and will become default behaviour in pandas 3.0.
 # https://pandas.pydata.org/pandas-docs/stable/user_guide/copy_on_write.html#copy-on-write-chained-assignment
 # https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-pd.options.mode.copy_on_write = True
+if Version(pd.__version__) < Version("3.0.0"):
+    pd.options.mode.copy_on_write = True
 
 xr.set_options(use_new_combine_kwarg_defaults=True)
 
