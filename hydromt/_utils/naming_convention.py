@@ -15,9 +15,30 @@ def _expand_uri_placeholders(
 ) -> tuple[str, list[str], Pattern[str]]:
     """Expand known placeholders in the URI.
 
-    This function takes a URI with placeholders and expands it into a regex pattern that can be used to match actual URIs.
+    This function takes a URI with placeholders and expands it into a regex pattern.
     It also returns a list of keys corresponding to the placeholders that were captured in the regex.
 
+    Parameters
+    ----------
+    uri : str
+        The URI containing placeholders to be expanded. Should not contain any regex special characters, as they will be escaped.
+    placeholders : list[str] | None, optional
+        A list of placeholder names to capture in the regex.
+        If None, no placeholders will be captured, but they will still be expanded in the URI.
+        Default is None.
+    time_range : tuple[str, str] | None, optional
+        A tuple containing the start and end of a time range (e.g., ("2020", "2021")).
+        If provided, the function will not expand "year" and "month" placeholders to wildcards.
+        Default is None.
+    variables : list[str] | None, optional
+        A list of variable names to capture in the regex.
+        If provided, the function will not expand the "variable" placeholder to a wildcard.
+        Default is None.
+
+    Returns
+    -------
+    tuple[str, list[str], Pattern[str]]
+        A tuple containing the expanded URI, a list of keys corresponding to the captured placeholders, and a compiled regex pattern for matching the expanded URI.
     """
     if placeholders is None:
         placeholders = []

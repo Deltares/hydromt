@@ -21,7 +21,7 @@ Changed
 Fixed
 -----
 - ``ext_override`` option for Xarray Drivers is now properly used to filter uri's with a different extension.
-- ``expand_uri_paths`` function where the uri has no placeholders: ``{name}``, and only wildcards: ``*`` now correctly resolve.
+- ``open_ncs`` no longer accepts paths with placeholders. It now only accepts wildcards: '*' to denote reading multiple files.
 
 Deprecated
 ----------
