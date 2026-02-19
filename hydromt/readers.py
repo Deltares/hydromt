@@ -6,7 +6,7 @@ from glob import glob
 from io import IOBase
 from os.path import abspath, basename, dirname, isfile, join, splitext
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Literal
 
 import dask
 import geopandas as gpd
@@ -24,10 +24,6 @@ from pyproj import CRS
 from shapely.geometry import LineString, Point, Polygon, box
 from shapely.geometry.base import GEOMETRY_TYPES
 
-from hydromt._utils.naming_convention import (
-    _PLACEHOLDERS,
-    expand_uri_paths,
-)
 from hydromt._utils.path import _make_config_paths_absolute
 from hydromt._utils.uris import _is_valid_url
 from hydromt.gis import gis_utils, raster, raster_utils, vector, vector_utils
@@ -61,10 +57,10 @@ OPEN_VECTOR_DRIVER = Literal["csv", "xls", "xy", "pyogrio", "parquet", "xlsx"]
 
 
 def open_mfcsv(
-    paths: Dict[Union[str, int], Union[str, Path]],
+    paths: dict[str | int, str | Path],
     concat_dim: str,
     *,
-    driver_kwargs: Optional[Dict[str, Any]] = None,
+    driver_kwargs: dict[str, Any] | None = None,
     variable_axis: Literal[0, 1] = 1,
     segmented_by: Literal["id", "var"] = "id",
 ) -> xr.Dataset:
@@ -72,7 +68,7 @@ def open_mfcsv(
 
     Arguments
     ---------
-    paths : Dict[str | int, str | Path],
+    paths : dict[str | int, str | Path],
         Dictionary containing a id -> filename mapping. Here the ids,
         should correspond to the values of the `concat_dim` dimension and
         the corresponding setting of `segmented_by`. I.e. if files are
@@ -82,7 +78,7 @@ def open_mfcsv(
     concat_dim : str,
         name of the dimension that will be created by concatinating
         all of the supplied csv files.
-    driver_kwargs : Dict[str, Any],
+    driver_kwargs : dict[str, Any],
         Any additional arguments to be passed to pandas' `read_csv` function.
     variable_axis : Literal[0, 1] = 1,
         The axis along which your variables or ids are. so if the csvs have the
@@ -106,7 +102,7 @@ def open_mfcsv(
             f"Unknown segmentation provided: {segmented_by}, options are ['var','id']"
         )
 
-    csv_kwargs: Dict[str, Any] = {"index_col": 0}
+    csv_kwargs: dict[str, Any] = {"index_col": 0}
     if driver_kwargs is not None:
         csv_kwargs.update(**driver_kwargs)
 
@@ -176,11 +172,11 @@ def open_mfcsv(
 
 
 def open_raster(
-    uri: Union[str, Path, IOBase, rasterio.DatasetReader, rasterio.vrt.WarpedVRT],
+    uri: str | Path | IOBase | rasterio.DatasetReader | rasterio.vrt.WarpedVRT,
     *,
     mask_nodata: bool = False,
-    chunks: Union[int, Tuple[int, ...], Dict[str, int], None] = None,
-    nodata: Union[int, float, None] = None,
+    chunks: int | tuple[int, ...] | dict[str, int] | None = None,
+    nodata: int | float | None = None,
     **kwargs,
 ) -> xr.DataArray:
     """Open a gdal-readable file with rasterio based on.
@@ -240,13 +236,13 @@ def open_raster(
 
 
 def open_mfraster(
-    uris: Union[str, list[str | Path]],
+    uris: str | list[str | Path],
     *,
-    chunks: Union[int, Tuple[int, ...], Dict[str, int], None] = None,
+    chunks: int | tuple[int, ...] | dict[str, int] | None = None,
     concat: bool = False,
     concat_dim: str = "dim0",
     mosaic: bool = False,
-    mosaic_kwargs: Optional[Dict[str, Any]] = None,
+    mosaic_kwargs: dict[str, Any] | None = None,
     **kwargs,
 ) -> xr.Dataset:
     """Open multiple gdal-readable files as single Dataset with geospatial attributes.
@@ -309,7 +305,7 @@ def open_mfraster(
     if len(uris) == 0:
         raise OSError("no files to open")
 
-    da_lst: List[xr.DataArray] = []
+    da_lst: list[xr.DataArray] = []
     index_lst, file_attrs = [], []
     for i, uri in enumerate(uris):
         # read file
@@ -512,7 +508,7 @@ def open_geodataset(
     if filetype in ["csv", "parquet", "xls", "xlsx", "xy"]:
         kwargs.update(assert_gtype="Point", driver=filetype)
     # read geometry file
-    polygon: Optional[Polygon] = box(*bbox) if bbox else None
+    polygon: Polygon | None = box(*bbox) if bbox else None
     gdf = open_vector(loc_path, crs=crs, bbox=polygon, geom=geom, **kwargs)
     if index_dim is None:
         index_dim = gdf.index.name if gdf.index.name is not None else "index"
@@ -600,12 +596,12 @@ def open_timeseries_from_table(path, *, name=None, index_dim="index", **kwargs):
 def open_vector(
     path: str | Path,
     *,
-    driver: Optional[OPEN_VECTOR_DRIVER] = None,
-    crs: Optional[CRS] = None,
-    dst_crs: Optional[CRS] = None,
-    bbox: Optional[Tuple[float]] = None,
-    geom: Optional[Union[gpd.GeoDataFrame, gpd.GeoSeries]] = None,
-    assert_gtype: Optional[Union[Point, LineString, Polygon]] = None,
+    driver: OPEN_VECTOR_DRIVER | None = None,
+    crs: CRS | None = None,
+    dst_crs: CRS | None = None,
+    bbox: tuple[float, float, float, float] | None = None,
+    geom: gpd.GeoDataFrame | gpd.GeoSeries | None = None,
+    assert_gtype: Point | LineString | Polygon | None = None,
     predicate: OPEN_VECTOR_PREDICATE = "intersects",
     **kwargs,
 ):
@@ -772,10 +768,10 @@ def open_vector_from_table(
 def read_workflow_yaml(
     path: str | Path,
     modeltype: str | None = None,
-    defaults: Dict[str, Any] | None = None,
+    defaults: dict[str, Any] | None = None,
     abs_path: bool = True,
-    skip_abspath_sections: List[str] | None = ["global"],  # noqa: B006
-) -> tuple[str, Dict[str, Any], List["HydromtModelStep"]]:
+    skip_abspath_sections: list[str] | None = ["global"],  # noqa: B006
+) -> tuple[str, dict[str, Any], list["HydromtModelStep"]]:
     """Read HydroMT workflow yaml file.
 
     Parameters
@@ -802,7 +798,7 @@ def read_workflow_yaml(
     model_init : dict
         Model initialization options to be used when instantiating a `hydromt.Model`
     steps : list of HydromtModelStep
-        List of model steps to be executed. Can be passed to `hydromt.Model.build` and
+        list of model steps to be executed. Can be passed to `hydromt.Model.build` and
         `hydromt.Model.update`.
     """
     if not isfile(path):
@@ -833,30 +829,30 @@ def read_workflow_yaml(
 
 
 def _config_read(
-    config_path: Union[Path, str],
-    defaults: Optional[Dict[str, Any]] = None,
+    config_path: Path | str,
+    defaults: dict[str, Any] | None = None,
     abs_path: bool = False,
-    skip_abspath_sections: Optional[List[str]] = None,
-) -> Dict[str, Any]:
+    skip_abspath_sections: list[str] | None = None,
+) -> dict[str, Any]:
     """Read configuration/workflow file and parse to (nested) dictionary.
 
     Parameters
     ----------
-    config_path : Union[Path, str]
+    config_path : Path | str
         Path to configuration file
-    defaults : dict, optional
-        Nested dictionary with default options, by default dict()
+    defaults : dict[str, Any] | None, optional
+        Nested dictionary with default options, by default None
     abs_path : bool, optional
         If True, parse string values to an absolute path if the a file or folder
         with that name (string value) relative to the config file exist,
         by default False
-    skip_abspath_sections: list, optional
+    skip_abspath_sections: list[str] | None, optional
         These sections are not evaluated for absolute paths if abs_path=True,
         by default ['setup_config']
 
     Returns
     -------
-    Dict[str, Any]
+    dict[str, Any]
         Configuration dictionary.
     """
     defaults = defaults or {}
@@ -882,9 +878,9 @@ def _config_read(
 
 
 def _parse_values(
-    cfdict: Dict[str, Any],
+    cfdict: dict[str, Any],
     skip_eval: bool = False,
-    skip_eval_sections: Optional[List[str]] = None,
+    skip_eval_sections: list[str] | None = None,
 ):
     """Parse string values to python default objects.
 
@@ -894,12 +890,12 @@ def _parse_values(
         Configuration dictionary.
     skip_eval : bool, optional
         Set true to skip evaluation, by default False
-    skip_eval_sections : List, optional
-        List of sections to skip evaluation, by default []
+    skip_eval_sections : list[str] | None, optional
+        list of sections to skip evaluation, by default []
 
     Returns
     -------
-    Dict[str, Any]
+    dict[str, Any]
         Configuration dictionary with evaluated values.
     """
     skip_eval_sections = skip_eval_sections or []
@@ -954,7 +950,7 @@ def open_ncs(
     filename_template: str | Path,
     root: Path,
     **kwargs,
-) -> Dict[str, xr.Dataset]:
+) -> dict[Path, xr.Dataset]:
     """Read netcdf files at <root>/<file> and return as dict of xarray.Dataset.
 
     Parameters
@@ -969,18 +965,13 @@ def open_ncs(
 
     Returns
     -------
-    Dict[str, xr.Dataset]
+    dict[Path, xr.Dataset]
         dict of xarray.Dataset. Don't forget to close them when you're done!
     """
-    ncs = {}
-    path_template = root / filename_template
-
-    for name, path in expand_uri_paths(
-        str(path_template), placeholders=list(_PLACEHOLDERS)
-    ).items():
-        ds = open_nc(filepath=path, **kwargs)
-        ncs[name] = ds
-    return ncs
+    return {
+        path: open_nc(filepath=path, **kwargs)
+        for path in _expand_wildcard_path(root / filename_template)
+    }
 
 
 def read_yaml(path: str | Path) -> dict[str, Any]:
@@ -991,7 +982,7 @@ def read_yaml(path: str | Path) -> dict[str, Any]:
     return yml
 
 
-def _parse_yaml(text: str) -> Dict[str, Any]:
+def _parse_yaml(text: str) -> dict[str, Any]:
     return yaml.safe_load(text)
 
 
@@ -1003,7 +994,7 @@ def read_toml(path: str | Path) -> dict[str, Any]:
     return data
 
 
-def _yml_from_uri_or_path(uri_or_path: str | Path) -> Dict[str, Any]:
+def _yml_from_uri_or_path(uri_or_path: str | Path) -> dict[str, Any]:
     if _is_valid_url(str(uri_or_path)):
         with requests.get(str(uri_or_path), stream=True) as r:
             r.raise_for_status()
@@ -1012,3 +1003,35 @@ def _yml_from_uri_or_path(uri_or_path: str | Path) -> Dict[str, Any]:
     else:
         yml = read_yaml(uri_or_path)
     return yml
+
+
+def _expand_wildcard_path(path: Path) -> list[Path]:
+    """Expand a path containing wildcards into a list of matching paths.
+
+    Just globbing over the filename, but not the full path can lead to unexpected results
+    if the wildcard is in the parent directory. For example, if the path is `data/*/file.csv`,
+    glob will match all files named `file.csv` in any subdirectory of `data`, but it won't
+    match files named `file.csv` in `data` itself. This function ensures that the glob
+    pattern is applied to the entire path, not just the filename.
+
+    Parameters
+    ----------
+    path : Path
+        Path containing wildcards to expand.
+
+    Raises
+    ------
+    ValueError
+        If the path contains curly braces, which are not allowed in this context.
+
+    Returns
+    -------
+    list[Path]
+        list of paths matching the wildcard pattern.
+    """
+    str_path = path.as_posix()
+    if "{" in str_path or "}" in str_path:
+        raise ValueError(
+            "Curly braces are not allowed in the path. Please use glob patterns with '*' instead of placeholders."
+        )
+    return [Path(p) for p in glob(str_path)]

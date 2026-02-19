@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING, Dict, Optional, Union, cast
 
 import pandas as pd
 
-from hydromt._utils.naming_convention import expand_uri_paths
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.steps import hydromt_step
+from hydromt.readers import _expand_wildcard_path
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model
@@ -87,15 +87,28 @@ class TablesComponent(ModelComponent):
 
     @hydromt_step
     def read(self, filename: Optional[str] = None, **kwargs) -> None:
-        """Read tables at provided or default file path if none is provided."""
+        """Read tables at provided or default file path if none is provided.
+
+        Parameters
+        ----------
+        filename : str, optional
+            filename relative to model root. Should contain a * wildcard character
+            to read multiple files into the data dictionary. All files matching the
+            glob pattern defined by filename will be read. The filename without
+            extension will be used as the key in the data dictionary.
+            If None, the path that was provided at init will be used.
+        **kwargs:
+            Additional keyword arguments that are passed to the
+            `pandas.read_csv` function.
+        """
         self.root._assert_read_mode()
         self._initialize_tables(skip_read=True)
         logger.info("Reading model table files.")
         fn = filename or self._filename
-        for name, path in expand_uri_paths(str(self.root.path / fn)).items():
-            logger.info(f"Reading table from {path} into model as '{name}'.")
+        for path in _expand_wildcard_path(self.root.path / fn):
+            logger.info(f"Reading table from {path} into model as '{path.stem}'.")
             tbl = pd.read_csv(path, **kwargs)
-            self.set(tbl, name=name)
+            self.set(tbl, name=path.stem)
 
     def set(
         self,

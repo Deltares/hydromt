@@ -7,10 +7,10 @@ import geopandas as gpd
 from geopandas import GeoDataFrame, GeoSeries
 from geopandas.testing import assert_geodataframe_equal
 
-from hydromt._utils.naming_convention import expand_uri_paths
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step
+from hydromt.readers import _expand_wildcard_path
 from hydromt.typing.crs import CRS
 
 if TYPE_CHECKING:
@@ -155,14 +155,14 @@ class GeomsComponent(SpatialModelComponent):
     def read(self, filename: Optional[str] = None, **kwargs) -> None:
         r"""Read model geometries files at <root>/<filename>.
 
-        key-word arguments are passed to :py:func:`geopandas.read_file`
-
         Parameters
         ----------
         filename : str, optional
-            filename relative to model root. should contain a {name} placeholder
-            which will be used to determine the names/keys of the geometries.
-            if None, the path that was provided at init will be used.
+            filename relative to model root. Should contain a * wildcard character
+            to read multiple files into the data dictionary. All files matching the
+            glob pattern defined by filename will be read. The filename without
+            extension will be used as the key in the data dictionary.
+            If None, the path that was provided at init will be used.
         **kwargs:
             Additional keyword arguments that are passed to the
             `geopandas.read_file` function.
@@ -171,10 +171,10 @@ class GeomsComponent(SpatialModelComponent):
         self._initialize(skip_read=True)
         f = filename or self._filename
         read_path = self.root.path / f
-        for name, path in expand_uri_paths(str(read_path)).items():
+        for path in _expand_wildcard_path(read_path):
             geom = cast(GeoDataFrame, gpd.read_file(path, **kwargs))
-            logger.debug(f"Reading model file {name} at {path}.")
-            self.set(geom=geom, name=name)
+            logger.debug(f"Reading model file {path.stem} at {path}.")
+            self.set(geom=geom, name=path.stem)
 
     @hydromt_step
     def write(
