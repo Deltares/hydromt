@@ -6,7 +6,7 @@ on:
       - "v*"
   workflow_dispatch:
   pull_request:
-    branches: [main]
+    branches: [main, feat/release-test-automation-downstream-plugins]
     paths:
       - pyproject.toml
       - hydromt/**
