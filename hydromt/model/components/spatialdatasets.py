@@ -49,11 +49,11 @@ class SpatialDatasetsComponent(SpatialModelComponent):
             region.
         filename: str
             The path to use for reading and writing of component data by default.
-            by default "spatial_datasets/*.nc" ie one file per xarray object in the
+            by default ``spatial_datasets/*.nc`` ie one file per xarray object in the
             data dictionary.
         region_filename: str
             The path to use for writing the region data to a file. By default
-            "spatial_datasets/spatial_datasets_region.geojson".
+            ``spatial_datasets/spatial_datasets_region.geojson``.
         """
         self._data: Optional[XArrayDict] = None
         self._filename: str = filename

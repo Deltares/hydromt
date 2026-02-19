@@ -37,7 +37,7 @@ class TablesComponent(ModelComponent):
         filename: str
             The default place that should be used for reading and writing unless the
             user overrides it. If a relative path is given it will be used as being
-            relative to the model root. By default `tables/*.csv` for this
+            relative to the model root. By default ``tables/*.csv`` for this
             component, and can be either relative or absolute.
         """
         self._data: Optional[Dict[str, Union[pd.DataFrame, pd.Series]]] = None

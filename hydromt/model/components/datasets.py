@@ -38,7 +38,7 @@ class DatasetsComponent(ModelComponent):
             HydroMT model instance
         filename: str
             The path to use for reading and writing of component data by default.
-            by default "datasets/*.nc" ie one file per dataset in the data
+            by default ``datasets/*.nc`` ie one file per dataset in the data
             dictionary.
         """
         self._data: XArrayDict | None = None

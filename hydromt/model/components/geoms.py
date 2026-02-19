@@ -41,14 +41,14 @@ class GeomsComponent(SpatialModelComponent):
             HydroMT model instance
         filename: str
             The path to use for reading and writing of component data by default.
-            by default "geoms/*.geojson" ie one file per geodataframe in the data dictionary.
+            by default ``geoms/*.geojson`` ie one file per geodataframe in the data dictionary.
         region_component: str, optional
             The name of the region component to use as reference for this component's
             region. If None, the region will be set to the union of all geometries in
             the data dictionary.
         region_filename: str
             The path to use for writing the region data to a file. By default
-            "geoms/geoms_region.geojson".
+            ``geoms/geoms_region.geojson``.
         """
         self._data: Optional[Dict[str, Union[GeoDataFrame, GeoSeries]]] = None
         self._filename: str = filename
