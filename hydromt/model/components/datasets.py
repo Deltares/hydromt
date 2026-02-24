@@ -190,9 +190,9 @@ class DatasetsComponent(ModelComponent):
         to_netcdf_kwargs = to_netcdf_kwargs or {}
         to_netcdf_kwargs.setdefault("engine", "netcdf4")
 
-        filename = (filename or self._filename).replace("*", "{name}")
         for name, ds in self.data.items():
-            file_path = self.root.path / filename.format(name=name)
+            filename = (filename or self._filename).replace("*", name)
+            file_path = self.root.path / filename
             file_path.parent.mkdir(parents=True, exist_ok=True)
             logger.info(
                 f"{self.model.name}.{self.name_in_model}: Writing datasets to {file_path}."

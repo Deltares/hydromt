@@ -209,8 +209,6 @@ class GeomsComponent(SpatialModelComponent):
             )
             return
 
-        filename = (filename or self._filename).replace("*", "{name}")
-
         for name, gdf in self.data.items():
             if len(gdf) == 0:
                 logger.warning(
@@ -218,7 +216,8 @@ class GeomsComponent(SpatialModelComponent):
                 )
                 continue
 
-            write_path = self.root.path / filename.format(name=name)
+            filename = (filename or self._filename).replace("*", name)
+            write_path = self.root.path / filename
             write_path.parent.mkdir(parents=True, exist_ok=True)
             logger.info(
                 f"{self.model.name}.{self.name_in_model}: Writing geoms to {write_path}."

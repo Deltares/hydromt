@@ -71,14 +71,13 @@ class TablesComponent(ModelComponent):
             )
             return
 
-        filename = (filename or self._filename).replace("*", "{name}")
-
         kwargs.setdefault("index", False)
         kwargs.setdefault("header", True)
         kwargs.setdefault("sep", ",")
 
         for name, value in self.data.items():
-            write_path = self.root.path / filename.format(name=name)
+            filename = (filename or self._filename).replace("*", name)
+            write_path = self.root.path / filename
             write_path.parent.mkdir(parents=True, exist_ok=True)
             logger.info(
                 f"{self.model.name}.{self.name_in_model}: Writing table to {write_path}."
