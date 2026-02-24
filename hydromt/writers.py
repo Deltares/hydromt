@@ -27,10 +27,10 @@ __all__ = [
 ]
 
 
-def write_yaml(path: str | Path, data: dict[str, Any]):
+def write_yaml(path: str | Path, data: dict[str, Any], **kwargs):
     """Write a dictionary to a yaml formatted file."""
     with open(path, "w") as f:
-        dump_yaml(data, f)
+        dump_yaml(data, f, **kwargs)
 
 
 def write_toml(path: str | Path, data: dict[str, Any]):

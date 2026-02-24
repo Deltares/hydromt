@@ -10,6 +10,7 @@ from hydromt._utils.dataset import (
 from hydromt._utils.deep_merge import _deep_merge
 from hydromt._utils.dictionaries import _partition_dictionaries
 from hydromt._utils.elevation import _elevation2rgba, _rgba2elevation
+from hydromt._utils.format import CatalogDumper
 from hydromt._utils.log import initialize_logging, to_file
 from hydromt._utils.nodata import _has_no_data, _set_raster_nodata, _set_vector_nodata
 from hydromt._utils.path import _make_config_paths_absolute, _make_config_paths_relative
@@ -20,6 +21,7 @@ from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt._utils.uris import _is_valid_url, _strip_scheme
 
 __all__ = [
+    "CatalogDumper",
     "cache_vrt_tiles",
     "copy_to_local",
     "_deep_merge",
