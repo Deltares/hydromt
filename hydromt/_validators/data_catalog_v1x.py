@@ -20,6 +20,7 @@ from pyproj import CRS
 from pyproj.exceptions import CRSError
 
 from hydromt import __version__ as HYDROMT_VERSION
+from hydromt._io import yml_from_uri_or_path
 from hydromt._validators.data_catalog_v0x import (
     DataCatalogV0Item,
     DataCatalogV0ItemMetadata,
@@ -27,7 +28,6 @@ from hydromt._validators.data_catalog_v0x import (
     DataCatalogV0Validator,
 )
 from hydromt.data_catalog.drivers.base_driver import DriverOptions
-from hydromt.readers import _yml_from_uri_or_path
 from hydromt.typing import Bbox, Number, TimeRange
 
 DRIVER_RENAME_MAPPING: Dict[str, Dict[str, str]] = {
@@ -420,5 +420,5 @@ class DataCatalogV1Validator(BaseModel):
     @staticmethod
     def from_yml(path: str):
         """Create a validated data catalog loaded from the provided path."""
-        yml_dict = _yml_from_uri_or_path(path)
+        yml_dict = yml_from_uri_or_path(path)
         return DataCatalogV1Validator.from_dict(yml_dict)

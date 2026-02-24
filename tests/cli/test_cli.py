@@ -79,10 +79,7 @@ def test_cli_build_missing_arg_workflow(
         r = CliRunner().invoke(hydromt_cli, cmd)
 
     assert r.exit_code == 1
-    assert (
-        "Validation of step 1 (config.update) failed because of the following error:"
-        in caplog.text
-    )
+    assert "Step function 'config.update' argument validation failed:" in caplog.text
 
 
 def test_cli_build_v0x_workflow(tmp_path: Path, caplog: pytest.LogCaptureFixture):
@@ -117,10 +114,7 @@ def test_cli_update_missing_arg(tmp_path: Path, caplog: pytest.LogCaptureFixture
         r = CliRunner().invoke(hydromt_cli, cmd)
 
     assert r.exit_code == 1
-    assert (
-        "Validation of step 1 (config.update) failed because of the following error:"
-        in caplog.text
-    )
+    assert "Step function 'config.update' argument validation failed:" in caplog.text
 
 
 def test_cli_update_v0x_workflow(tmp_path: Path, caplog: pytest.LogCaptureFixture):

@@ -33,10 +33,11 @@ from pystac import Catalog as StacCatalog
 from pystac import CatalogType, MediaType
 
 from hydromt import __version__
+from hydromt._io import yml_from_uri_or_path
 from hydromt._utils import (
-    _deep_merge,
     _partition_dictionaries,
     _single_var_as_array,
+    deep_merge,
 )
 from hydromt.config import SETTINGS
 from hydromt.data_catalog.adapters import (
@@ -63,7 +64,6 @@ from hydromt.data_catalog.sources import (
 from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
 from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
 from hydromt.plugins import PLUGINS
-from hydromt.readers import _yml_from_uri_or_path
 from hydromt.typing import Bbox, SourceSpecDict, TimeRange
 
 logger = logging.getLogger(__name__)
@@ -694,7 +694,7 @@ class DataCatalog(object):
             DataCatalog object with parsed yaml file added.
         """
         logger.info(f"Parsing data catalog from {urlpath}")
-        yml = _yml_from_uri_or_path(urlpath)
+        yml = yml_from_uri_or_path(urlpath)
         # read meta data
         meta = yml.pop("meta", {})
         if catalog_name is None:
@@ -1965,7 +1965,7 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
             for diff in variants:
                 source_copy = copy.deepcopy(source)
                 source_copy = {
-                    str(k): v for (k, v) in _deep_merge(source_copy, diff).items()
+                    str(k): v for (k, v) in deep_merge(source_copy, diff).items()
                 }
 
                 data_dicts.append({name: source_copy})

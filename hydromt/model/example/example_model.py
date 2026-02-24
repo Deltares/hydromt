@@ -2,6 +2,8 @@
 
 # Implement model class following model API
 import logging
+from pathlib import Path
+from typing import Any
 
 from hydromt.model import Model
 from hydromt.model.components import ConfigComponent
@@ -38,20 +40,29 @@ class ExampleModel(Model):
 
     def __init__(
         self,
-        root: str | None = None,
+        root: str | Path | None = None,
+        *,
         config_filename: str | None = "settings.toml",
+        components: dict[str, Any] | None = None,
         mode: str = "w",
-        data_libs: list[str] | str | None = None,
+        data_libs: list[str | Path] | Path | str | None = None,
+        region_component: str | None = None,
         **catalog_keys,
     ):
         """Initialize ExampleModel."""
-        components = {
-            "config": ConfigComponent(
-                self,
-                filename=str(config_filename),
-            ),
-            "grid": ExampleGridComponent(self),
-        }
+        self._config = ConfigComponent(
+            self,
+            filename=str(config_filename),
+        )
+        self._grid = ExampleGridComponent(self)
+
+        components = components or {}
+        components.update(
+            {
+                "config": self._config,
+                "grid": self._grid,
+            }
+        )
 
         super().__init__(
             root,
@@ -62,14 +73,12 @@ class ExampleModel(Model):
             **catalog_keys,
         )
 
-    ## Properties
-    # Components
     @property
     def config(self) -> ConfigComponent:
         """Return the config component."""
-        return self.components["config"]
+        return self._config
 
     @property
     def grid(self) -> ExampleGridComponent:
         """Return the grid component."""
-        return self.components["grid"]
+        return self._grid

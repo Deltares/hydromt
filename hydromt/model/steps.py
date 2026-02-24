@@ -11,4 +11,5 @@ def hydromt_step(funcobj: F) -> F:
     Only methods decorated with this decorator are allowed to be called by Model.build and Model.update.
     """
     funcobj.__ishydromtstep__ = True  # type: ignore[attr-defined]
+
     return funcobj
