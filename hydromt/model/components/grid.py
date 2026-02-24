@@ -176,8 +176,8 @@ class GridComponent(SpatialModelComponent):
             )
             return
 
-        filename = filename or self._filename
-        full_path = self.root.path / filename
+        _filename = filename or self._filename
+        full_path = self.root.path / _filename
         full_path.parent.mkdir(parents=True, exist_ok=True)
         logger.info(
             f"{self.model.name}.{self.name_in_model}: Writing grid data to {full_path}."
