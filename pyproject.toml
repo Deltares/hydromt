@@ -22,7 +22,7 @@ dependencies = [
 	"numba",                  # speed up computations (used in e.g. stats)
 	"numpy",                  # pin necessary to ensure compatability with C headers
 	"packaging",              # compare versions of hydromt
-	"pandas<3",               # Dataframes
+	"pandas>=3",              # Dataframes
 	"pooch",                  # data fetching
 	"pyarrow",
 	"pydantic~=2.4",          # Validation
@@ -238,6 +238,7 @@ pandoc = "*"
 
 [tool.pixi.feature.io.dependencies]
 pyflwdir = ">=0.5.4"
+zarr = ">=3.1,<4.0"
 
 [tool.pixi.feature.vrt.dependencies]
 gdal = ">=3.5.0"
