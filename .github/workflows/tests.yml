@@ -39,7 +39,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['311','312','313']
+        python-version: ['311','312','313','314']
         dependencies: ['min', 'full']
 
     name: pytest ${{ matrix.dependencies }}-${{ matrix.python-version }} (${{ matrix.os }})
