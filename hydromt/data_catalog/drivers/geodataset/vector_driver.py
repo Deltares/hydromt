@@ -12,8 +12,8 @@ from hydromt.data_catalog.drivers.base_driver import (
 )
 from hydromt.data_catalog.drivers.geodataset.geodataset_driver import (
     GeoDatasetDriver,
-    GeoDatasetOptions,
 )
+from hydromt.data_catalog.drivers.xarray_options import XarrayDriverOptions
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.readers import open_geodataset
 from hydromt.typing import CRS, Geom, Predicate, SourceMetadata
@@ -48,8 +48,8 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
         ".fgb",
     }
 
-    options: GeoDatasetOptions = Field(
-        default_factory=GeoDatasetOptions, description=DRIVER_OPTIONS_DESCRIPTION
+    options: XarrayDriverOptions = Field(
+        default_factory=XarrayDriverOptions, description=DRIVER_OPTIONS_DESCRIPTION
     )
 
     def read(

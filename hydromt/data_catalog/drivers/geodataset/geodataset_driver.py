@@ -11,31 +11,19 @@ from pydantic import Field
 from hydromt.data_catalog.drivers.base_driver import (
     DRIVER_OPTIONS_DESCRIPTION,
     BaseDriver,
-    DriverOptions,
 )
-from hydromt.data_catalog.drivers.preprocessing import Preprocessor, get_preprocessor
+from hydromt.data_catalog.drivers.xarray_options import XarrayDriverOptions
 from hydromt.error import NoDataStrategy
 from hydromt.typing import Geom, Predicate, SourceMetadata
 
 logger = logging.getLogger(__name__)
 
 
-class GeoDatasetOptions(DriverOptions):
-    """Options for GeoDatasetVectorDriver."""
-
-    preprocess: str | None = None
-    """Name of preprocessor to apply on geodataset after reading. Available preprocessors include: round_latlon, to_datetimeindex, remove_duplicates, harmonise_dims. See their docstrings for details."""
-
-    def get_preprocessor(self) -> Preprocessor:
-        """Get the preprocessor function."""
-        return get_preprocessor(self.preprocess)
-
-
 class GeoDatasetDriver(BaseDriver, ABC):
     """Abstract Driver to read GeoDatasets."""
 
-    options: GeoDatasetOptions = Field(
-        default_factory=GeoDatasetOptions, description=DRIVER_OPTIONS_DESCRIPTION
+    options: XarrayDriverOptions = Field(
+        default_factory=XarrayDriverOptions, description=DRIVER_OPTIONS_DESCRIPTION
     )
 
     @abstractmethod

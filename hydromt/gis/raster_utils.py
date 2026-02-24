@@ -99,7 +99,9 @@ def full(
             shape = cs.shape
             if hasattr(cs, "dims"):
                 dims = cs.dims
-    data = f(shape, (fill_value or nodata), dtype=dtype)
+    if fill_value is None:
+        fill_value = nodata
+    data = f(shape, fill_value, dtype=dtype)
     da = xr.DataArray(data, coords, dims, name, attrs)
     da.raster.set_nodata(nodata)
     da.raster.set_crs(crs)
@@ -212,9 +214,10 @@ def full_like(
     """
     if not isinstance(other, xr.DataArray):
         raise ValueError("other should be xarray.DataArray.")
+    nodata_vals = [nodata, other.raster.nodata, np.nan]
     da = full(
         coords={d: c for d, c in other.coords.items() if d in other.dims},
-        nodata=(nodata or other.raster.nodata or np.nan),
+        nodata=next(item for item in nodata_vals if item is not None),
         fill_value=fill_value,
         dtype=(dtype or other.dtype),
         shape=other.shape,

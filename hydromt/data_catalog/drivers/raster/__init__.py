@@ -5,17 +5,17 @@ from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
 )
 from hydromt.data_catalog.drivers.raster.raster_xarray_driver import (
     RasterDatasetXarrayDriver,
-    RasterXarrayOptions,
 )
 from hydromt.data_catalog.drivers.raster.rasterio_driver import (
     RasterioDriver,
     RasterioOptions,
 )
+from hydromt.data_catalog.drivers.xarray_options import XarrayDriverOptions
 
 __all__ = [
     "RasterDatasetDriver",
     "RasterDatasetXarrayDriver",
     "RasterioDriver",
-    "RasterXarrayOptions",
+    "XarrayDriverOptions",
     "RasterioOptions",
 ]
