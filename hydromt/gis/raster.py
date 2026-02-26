@@ -16,7 +16,6 @@ import math
 import os
 from os.path import join
 from typing import Any, Callable, Literal, Optional, Tuple, Union
-
 import cftime
 import dask
 import geopandas as gpd
@@ -37,7 +36,7 @@ from scipy import ndimage
 from scipy.interpolate import griddata
 from scipy.spatial import cKDTree
 from shapely.geometry import LineString, Polygon, box
-from hydromt.gis import gis_utils, raster_utils
+from hydromt.gis import _normalize, gis_utils, raster_utils
 from hydromt.gis._gdal_drivers import GDAL_EXT_CODE_MAP
 
 logger = logging.getLogger(__name__)
@@ -889,6 +888,8 @@ class XRasterBase(XGeoBase):
         obj_out = self._obj.isel(ds_sel[[self.y_dim, self.x_dim]])
         if np.any(~ds_sel["mask"]):  # mask out of domain points
             obj_out = obj_out.raster.mask(ds_sel["mask"])
+        # convert to native dtypes
+        obj_out = _normalize.normalize_xarray_dtypes(obj_out)
         return obj_out
 
     def zonal_stats(
@@ -1113,7 +1114,7 @@ class XRasterBase(XGeoBase):
             x=("index", cols),
             y=("index", rows),
         )
-
+        ds_out = _normalize.normalize_xarray_dtypes(ds_out)
         return ds_out
 
     def reclassify(self, reclass_table: pd.DataFrame, method: str = "exact"):
@@ -1141,16 +1142,24 @@ class XRasterBase(XGeoBase):
         def reclass_exact(x, ddict):
             return np.vectorize(ddict.get)(x, np.nan)
 
+        def _safe_numpy_dtype(dtype):
+            if pd.api.types.is_string_dtype(dtype):
+                return object
+            elif pd.api.types.is_float_dtype(dtype):
+                return np.float32
+            elif pd.api.types.is_integer_dtype(dtype):
+                return np.int32
+            else:
+                return dtype
+
         da = self._obj.copy()
         ds_out = xr.Dataset(coords=da.coords)
 
         keys = reclass_table.index.values
         params = reclass_table.columns
         # limit dtypes to avoid gdal errors downstream
-        ddict = {"float64": np.float32, "int64": np.int32}
         dtypes = {
-            c: ddict.get(str(reclass_table[c].dtype), reclass_table[c].dtype)
-            for c in reclass_table.columns
+            c: _safe_numpy_dtype(reclass_table[c].dtype) for c in reclass_table.columns
         }
         reclass_table = reclass_table.astype(dtypes)
         # Get the nodata line
@@ -1164,10 +1173,12 @@ class XRasterBase(XGeoBase):
                     f"The nodata value {nodata_ref} is not in the reclass table."
                     "None will be used for the params."
                 )
+
         # apply for each parameter
         for param in params:
             values = reclass_table[param].values
             d = dict(zip(keys, values, strict=False))
+
             da_param = xr.apply_ufunc(
                 reclass_exact,
                 da,
@@ -1180,6 +1191,7 @@ class XRasterBase(XGeoBase):
             )
             da_param.attrs.update(_FillValue=nodata)
             ds_out[param] = da_param
+
         return ds_out
 
     def clip(self, xslice: slice, yslice: slice):
@@ -2616,6 +2628,7 @@ class RasterDataset(XRasterBase):
                 ds[var] = self._obj[var].raster.reproject(
                     method=method[var], **reproj_kwargs
                 )
+        ds = _normalize.normalize_xarray_dtypes(ds)
         return ds
 
     def interpolate_na(self, method: str = "nearest", **kwargs):
@@ -2640,6 +2653,7 @@ class RasterDataset(XRasterBase):
         ds_out = xr.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
             ds_out[var] = self._obj[var].raster.interpolate_na(method=method, **kwargs)
+        ds_out = _normalize.normalize_xarray_dtypes(ds_out)
         return ds_out
 
     def reproject_like(self, other, method="nearest"):
@@ -2696,6 +2710,7 @@ class RasterDataset(XRasterBase):
         # make sure coordinates are identical!
         xcoords, ycoords = other.raster.xcoords, other.raster.ycoords
         ds = ds.assign_coords({xcoords.name: xcoords, ycoords.name: ycoords})
+        ds = _normalize.normalize_xarray_dtypes(ds)
         return ds
 
     def reindex2d(self, index):
@@ -2717,6 +2732,7 @@ class RasterDataset(XRasterBase):
         ds_out = xr.Dataset(attrs=self._obj.attrs)
         for var in self.vars:
             ds_out[var] = self._obj[var].raster.reindex2d(index=index)
+        ds_out = _normalize.normalize_xarray_dtypes(ds_out)
         return ds_out
 
     def to_mapstack(

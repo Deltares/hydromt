@@ -22,9 +22,9 @@ dependencies = [
 	"numba",                  # speed up computations (used in e.g. stats)
 	"numpy",                  # pin necessary to ensure compatability with C headers
 	"packaging",              # compare versions of hydromt
-	"pandas>=3",              # Dataframes
+	"pandas<4",               # Dataframes
 	"pooch",                  # data fetching
-	"pyarrow",
+	"pyarrow",                # Apache Arrow bindings
 	"pydantic~=2.4",          # Validation
 	"pydantic-settings~=2.2", # Settings Management
 	"pyflwdir>=0.5.4",        # Hight models and derivatives
@@ -100,7 +100,7 @@ doc = [
 	"nbsphinx",                     # build notebooks in docs
 	"pydata-sphinx-theme>=0.15.2",  # theme
 	"sphinx_autosummary_accessors", # doc layout
-	"sphinx",                       # build docks
+	"sphinx<9",                     # build docs, v9 is not compatible with sphinx_autosummary_accessors
 	"sphinx_design",                # doc layout
 	"sphinx-click",                 # click integration
 	"sbom4python",                  # generate software bill of materials
