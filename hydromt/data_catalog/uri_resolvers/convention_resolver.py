@@ -22,6 +22,13 @@ from hydromt.typing import (
 logger = logging.getLogger(__name__)
 
 
+class SafeDict(dict):
+    """A dict that returns the placeholder string for missing keys instead of raising KeyError."""
+
+    def __missing__(self, key):
+        return "{" + key + "}"
+
+
 class ConventionResolver(URIResolver):
     """URIDataResolver using HydroMT naming conventions."""
 
@@ -150,7 +157,9 @@ class ConventionResolver(URIResolver):
             product(dates, variables),
         )
         uris: list[str] = list(
-            self._resolve_wildcards(map(lambda fmt: uri_expanded.format(**fmt), fmts))
+            self._resolve_wildcards(
+                map(lambda fmt: uri_expanded.format_map(SafeDict(**fmt)), fmts)
+            )
         )
         if not uris:
             exec_nodata_strat(

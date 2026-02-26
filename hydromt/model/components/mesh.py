@@ -1,7 +1,7 @@
 """Mesh Component."""
 
 import logging
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, cast
 
 import geopandas as gpd
 import xarray as xr
@@ -36,7 +36,7 @@ class MeshComponent(SpatialModelComponent):
         model: "Model",
         *,
         filename: str = "mesh/mesh.nc",
-        region_component: Optional[str] = None,
+        region_component: str | None = None,
         region_filename: str = "mesh/mesh_region.geojson",
     ):
         """
@@ -49,7 +49,7 @@ class MeshComponent(SpatialModelComponent):
         filename: str
             The path to use for reading and writing of component data by default.
             by default "mesh/mesh.nc".
-        region_component: str, optional
+        region_component: str | None, optional
             The name of the region component to use as reference for this component's
             region. If None, the region will be set to the total bounds of the mesh.
             Note that the create method only works if the region_component is None.
@@ -64,15 +64,15 @@ class MeshComponent(SpatialModelComponent):
             region_component=region_component,
             region_filename=region_filename,
         )
-        self._data: Optional[xu.UgridDataset] = None
+        self._data: xu.UgridDataset | None = None
         self._filename: str = filename
 
     def set(
         self,
-        data: Union[xu.UgridDataArray, xu.UgridDataset],
+        data: xu.UgridDataArray | xu.UgridDataset,
         *,
-        name: Optional[str] = None,
-        grid_name: Optional[str] = None,
+        name: str | None = None,
+        grid_name: str | None = None,
         overwrite_grid: bool = False,
     ) -> None:
         """Add data to mesh.
@@ -84,10 +84,10 @@ class MeshComponent(SpatialModelComponent):
         ----------
         data: xugrid.UgridDataArray or xugrid.UgridDataset
             new layer to add to mesh, should contain only one grid topology.
-        name: str, optional
+        name: str | None, optional
             Name of new object layer, this is used to overwrite the name of
             a UgridDataArray.
-        grid_name: str, optional
+        grid_name: str | None, optional
             Name of the mesh grid to add data to. If None, inferred from data.
             Can be used for renaming the grid.
         overwrite_grid: bool, optional
@@ -111,7 +111,7 @@ class MeshComponent(SpatialModelComponent):
     @hydromt_step
     def write(
         self,
-        filename: Optional[str] = None,
+        filename: str | None = None,
         *,
         write_optional_ugrid_attributes: bool = False,
         **kwargs,
@@ -139,8 +139,8 @@ class MeshComponent(SpatialModelComponent):
             )
             return
 
-        filename = filename or self._filename
-        full_path = self.root.path / filename
+        _filename = filename or self._filename
+        full_path = self.root.path / _filename
         logger.info(
             f"{self.model.name}.{self.name_in_model}: Writing mesh to {full_path}."
         )
@@ -157,9 +157,9 @@ class MeshComponent(SpatialModelComponent):
     @hydromt_step
     def read(
         self,
-        filename: Optional[str] = None,
+        filename: str | None = None,
         *,
-        crs: Optional[Union[CRS, int]] = None,
+        crs: CRS | int | None = None,
         **kwargs,
     ) -> None:
         """Read model mesh data at <root>/<filename> and add to mesh property.
@@ -180,11 +180,11 @@ class MeshComponent(SpatialModelComponent):
         self.root._assert_read_mode()
         self._initialize(skip_read=True)
 
-        filename = filename or str(self._filename)
-        files = open_ncs(filename, root=self.root.path, **kwargs).values()
-        self._open_datasets.extend(files)
-        if len(files) > 0:
-            ds = xr.merge(files)
+        filename_template = (filename or self._filename).replace("*", "{name}")
+        datasets = open_ncs(filename_template, root=self.root.path, **kwargs).values()
+        self._open_datasets.extend(datasets)
+        if len(datasets) > 0:
+            ds = xr.merge(datasets)
             if ds.rio.crs is not None:  # parse crs
                 crs = ds.raster.crs
                 ds = ds.drop_vars(GEO_MAP_COORD, errors="ignore")
@@ -210,7 +210,7 @@ class MeshComponent(SpatialModelComponent):
             self._data = uds
 
     @property
-    def data(self) -> Union[xu.UgridDataArray, xu.UgridDataset]:
+    def data(self) -> xu.UgridDataArray | xu.UgridDataset:
         """
         Model static mesh data. It returns a xugrid.UgridDataset.
 
@@ -231,21 +231,21 @@ class MeshComponent(SpatialModelComponent):
                 self.read()
 
     @property
-    def crs(self) -> Optional[CRS]:
+    def crs(self) -> CRS | None:
         """Returns model mesh crs."""
         if len(self.data) > 0:
             return next(iter(self.data.ugrid.crs.values()))
         return None
 
     @property
-    def bounds(self) -> Optional[Tuple[float, float, float, float]]:
+    def bounds(self) -> tuple[float, float, float, float] | None:
         """Returns model mesh bounds."""
         if len(self.data) > 0:
             return self.data.ugrid.bounds
         return None
 
     @property
-    def _region_data(self) -> Optional[gpd.GeoDataFrame]:
+    def _region_data(self) -> gpd.GeoDataFrame | None:
         """Return mesh total_bounds as a geodataframe."""
         if len(self.data) > 0:
             region = gpd.GeoDataFrame(
@@ -255,7 +255,7 @@ class MeshComponent(SpatialModelComponent):
         return None
 
     @property
-    def mesh_names(self) -> List[str]:
+    def mesh_names(self) -> list[str]:
         """List of grid names in mesh."""
         if len(self.data.grids) > 0:
             return [grid.name for grid in self.data.ugrid.grids]
@@ -263,7 +263,7 @@ class MeshComponent(SpatialModelComponent):
             return []
 
     @property
-    def mesh_grids(self) -> Dict[str, Union[xu.Ugrid1d, xu.Ugrid2d]]:
+    def mesh_grids(self) -> dict[str, xu.Ugrid1d | xu.Ugrid2d]:
         """Dictionary of grid names and Ugrid topologies in mesh."""
         grids = dict()
         if len(self.data.grids) > 0:
@@ -273,7 +273,7 @@ class MeshComponent(SpatialModelComponent):
         return grids
 
     @property
-    def mesh_datasets(self) -> Dict[str, xu.UgridDataset]:
+    def mesh_datasets(self) -> dict[str, xu.UgridDataset]:
         """Dictionnary of grid names and corresponding UgridDataset topology and data variables in mesh."""  # noqa: E501
         datasets = dict()
         if len(self.data) > 0:
@@ -285,7 +285,7 @@ class MeshComponent(SpatialModelComponent):
         return datasets
 
     @property
-    def mesh_gdf(self) -> Dict[str, gpd.GeoDataFrame]:
+    def mesh_gdf(self) -> dict[str, gpd.GeoDataFrame]:
         """Returns dict of geometry of grids in mesh as a gpd.GeoDataFrame."""
         mesh_gdf = dict()
         if len(self.data.grids) > 0:
@@ -304,7 +304,7 @@ class MeshComponent(SpatialModelComponent):
 
     def get_mesh(
         self, grid_name: str, include_data: bool = False
-    ) -> Union[xu.Ugrid1d, xu.Ugrid2d, xu.UgridDataArray, xu.UgridDataset]:
+    ) -> xu.Ugrid1d | xu.Ugrid2d | xu.UgridDataArray | xu.UgridDataset:
         """
         Return a specific grid topology from mesh based on grid_name.
 
@@ -320,7 +320,7 @@ class MeshComponent(SpatialModelComponent):
 
         Returns
         -------
-        uds: Union[xu.Ugrid1d, xu.Ugrid2d, xu.UgridDataArray, xu.UgridDataset]
+        uds: xu.Ugrid1d | xu.Ugrid2d | xu.UgridDataArray | xu.UgridDataset
             Grid topology with or without data variables.
         """
         if len(self.data) == 0:
@@ -357,7 +357,7 @@ class MeshComponent(SpatialModelComponent):
 
     def _add_mesh(
         self, data: xu.UgridDataset, grid_name: str, overwrite_grid: bool
-    ) -> Optional[CRS]:
+    ) -> CRS | None:
         if len(self.data) == 0:
             # Check on crs
             if not data.ugrid.grid.crs:
@@ -395,7 +395,7 @@ class MeshComponent(SpatialModelComponent):
                             f"Overwriting grid {grid_name} and the corresponding"
                             " data variables in mesh."
                         )
-                        grids: List[xr.Dataset] = [
+                        grids: list[xr.Dataset] = [
                             self.mesh_datasets[g].ugrid.to_dataset(
                                 optional_attributes=True
                             )
@@ -407,7 +407,7 @@ class MeshComponent(SpatialModelComponent):
                         self._data = xu.UgridDataset(grids)
             # Check again mesh_names, could have changed if overwrite_grid=True
             if grid_name in self.mesh_names:
-                grids: List[xr.Dataset] = [
+                grids: list[xr.Dataset] = [
                     self.mesh_datasets[g].ugrid.to_dataset(optional_attributes=True)
                     for g in self.mesh_names
                 ]
@@ -443,7 +443,7 @@ class MeshComponent(SpatialModelComponent):
 
     @staticmethod
     def _check_ugrid(
-        data: Union[xu.UgridDataArray, xu.UgridDataset], name: Optional[str]
+        data: xu.UgridDataArray | xu.UgridDataset, name: str | None
     ) -> xu.UgridDataset:
         if not isinstance(data, (xu.UgridDataArray, xu.UgridDataset)):
             raise ValueError(
@@ -460,7 +460,7 @@ class MeshComponent(SpatialModelComponent):
             return data.to_dataset()
         return data
 
-    def _get_mesh_grid_data(self, grid_name: str) -> Union[xu.Ugrid1d, xu.Ugrid2d]:
+    def _get_mesh_grid_data(self, grid_name: str) -> xu.Ugrid1d | xu.Ugrid2d:
         if self._region_component is not None:
             reference_component = self.model.get_component(self._region_component)
             self._check_mesh_component(grid_name, reference_component)

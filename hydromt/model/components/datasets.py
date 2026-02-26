@@ -1,7 +1,7 @@
 """Xarrays component."""
 
 import logging
-from typing import TYPE_CHECKING, Any, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import xarray as xr
 from pandas import DataFrame
@@ -38,7 +38,7 @@ class DatasetsComponent(ModelComponent):
             HydroMT model instance
         filename: str
             The path to use for reading and writing of component data by default.
-            by default "datasets/{name}.nc" ie one file per dataset in the data
+            by default ``datasets/{name}.nc`` ie one file per dataset in the data
             dictionary.
         """
         self._data: XArrayDict | None = None
@@ -66,7 +66,7 @@ class DatasetsComponent(ModelComponent):
 
     def set(
         self,
-        data: Union[Dataset, DataArray],
+        data: Dataset | DataArray,
         name: str | None = None,
         split_dataset: bool = False,
     ):
@@ -85,7 +85,7 @@ class DatasetsComponent(ModelComponent):
         assert self._data is not None
         if split_dataset:
             if isinstance(data, Dataset):
-                ds: dict[str, Union[Dataset, DataArray]] = {
+                ds: dict[str, Dataset | DataArray] = {
                     str(name): data[name] for name in data.data_vars
                 }
             else:
@@ -115,9 +115,14 @@ class DatasetsComponent(ModelComponent):
         Parameters
         ----------
         filename : str, optional
-            filename relative to model root. should contain a {name} placeholder
-            which will be used to determine the names/keys of the datasets.
-            if None, the path that was provided at init will be used.
+            Filename relative to model root. Should contain either a * wildcard character
+            or a {name} placeholder to read multiple files into the data dictionary.
+            All files matching the glob pattern defined by filename will be read.
+            If a {name} placeholder is used, that name will be used as the key in the
+            data dictionary.
+            If no {name} placeholder is used, the filename without extension will be used
+            as the key in the data dictionary.
+            If None, the path that was provided at init will be used.
         **kwargs:
             Additional keyword arguments that are passed to the
             `hydromt.readers.open_ncs` function.
@@ -125,9 +130,11 @@ class DatasetsComponent(ModelComponent):
         self.root._assert_read_mode()
         self._initialize(skip_read=True)
         kwargs = {**{"engine": "netcdf4"}, **kwargs}
-        filename_template = filename or self._filename
-        ncs = open_ncs(filename_template, root=self.root.path, **kwargs)
-        for name, ds in ncs.items():
+
+        filename_template = (filename or self._filename).replace("*", "{name}")
+        for name, ds in open_ncs(
+            filename_template, root=self.root.path, **kwargs
+        ).items():
             self._open_datasets.append(ds)
             if len(ds.data_vars) == 1:
                 (da,) = ds.data_vars.values()
@@ -159,8 +166,9 @@ class DatasetsComponent(ModelComponent):
         nc_dict: dict
             Dictionary of xarray.Dataset and/or xarray.DataArray to write
         filename: str, optional
-            filename relative to model root and should contain a {name} placeholder
-            Can be a relative path.
+            filename relative to model root and must contain a {name} placeholder or a *
+            wildcard character to write multiple files from the data dictionary.
+            Each name in the data dictionary will be used to replace the {name} placeholder or the * character in the filename.
         gdal_compliant: bool, optional
             If True, convert xarray.Dataset and/or xarray.DataArray to gdal compliant
             format using :py:meth:`~hydromt.raster.gdal_compliant`
@@ -185,11 +193,9 @@ class DatasetsComponent(ModelComponent):
 
         to_netcdf_kwargs = to_netcdf_kwargs or {}
         to_netcdf_kwargs.setdefault("engine", "netcdf4")
-
-        filename = filename or self._filename
-
+        placeholder_filename = (filename or self._filename).replace("*", "{name}")
         for name, ds in self.data.items():
-            file_path = self.root.path / filename.format(name=name)
+            file_path = self.root.path / placeholder_filename.format(name=name)
             file_path.parent.mkdir(parents=True, exist_ok=True)
             logger.info(
                 f"{self.model.name}.{self.name_in_model}: Writing datasets to {file_path}."

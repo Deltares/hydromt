@@ -51,12 +51,11 @@ def test_model_tables_reads_and_writes_correctly(df, tmp_path: Path):
     model = Model(root=tmp_path, mode="r+")
     model.add_component("test_table", TablesComponent(model))
     component = cast(TablesComponent, model.test_table)
-
     component.set(tables=df, name="table")
-
     model.write()
+
     clean_model = Model(root=tmp_path, mode="r")
-    clean_model.add_component("test_table", TablesComponent(model))
+    clean_model.add_component("test_table", TablesComponent(clean_model))
     clean_model.read()
 
     clean_component = cast(TablesComponent, clean_model.test_table)
