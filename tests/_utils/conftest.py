@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import Any
 
 import geopandas as gpd
 import numpy as np
@@ -57,6 +58,40 @@ def create_vrt_source(
 
 
 # Actual fixtures
+@pytest.fixture(scope="session")
+def catalog_dummy() -> dict[str, Any]:
+    catalog = {
+        "raster1": {
+            "crs": 4326,
+            "data_type": "RasterDataset",
+            "driver": {
+                "name": "rasterio",
+                "filesystem": "local",
+            },
+            "uri": "foo.tif",
+        },
+        "vector1": {
+            "crs": 4326,
+            "data_type": "GeoDataFrame",
+            "driver": {
+                "name": "pyogrio",
+                "filesystem": "local",
+            },
+            "uri": "bar.fgb",
+        },
+        "raster2": {
+            "crs": 3857,
+            "data_type": "RasterDataset",
+            "driver": {
+                "name": "rasterio",
+                "filesystem": "local",
+            },
+            "uri": "baz.tif",
+        },
+    }
+    return catalog
+
+
 @pytest.fixture(scope="session")
 def geom_select1() -> gpd.GeoDataFrame:
     gdf = gpd.GeoDataFrame(

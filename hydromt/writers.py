@@ -14,6 +14,7 @@ from dask.diagnostics import ProgressBar
 from tomli_w import dump as dump_toml
 from yaml import dump as dump_yaml
 
+from hydromt.gis import _normalize
 from hydromt.typing.deferred_file_close import DeferredFileClose
 
 logger = logging.getLogger(__name__)
@@ -27,10 +28,10 @@ __all__ = [
 ]
 
 
-def write_yaml(path: str | Path, data: dict[str, Any]):
+def write_yaml(path: str | Path, data: dict[str, Any], **kwargs):
     """Write a dictionary to a yaml formatted file."""
     with open(path, "w") as f:
-        dump_yaml(data, f)
+        dump_yaml(data, f, **kwargs)
 
 
 def write_toml(path: str | Path, data: dict[str, Any]):
@@ -216,7 +217,7 @@ def _nc_progress(
         raise ValueError(
             "'compute' argument is ignored in ds.to_netcdf function. Did you mean to use 'progressbar'?"
         )
-
+    ds = _normalize.normalize_xarray_dtypes(ds)
     obj = ds.to_netcdf(file_path, compute=False, **to_netcdf_kwargs)
     with ProgressBar() if progressbar else nullcontext():
         obj.compute()

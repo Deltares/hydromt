@@ -135,7 +135,7 @@ class ConventionResolver(URIResolver):
         if time_range:
             dates = self._get_dates(keys, time_range)
         else:
-            dates = pd.PeriodIndex(["1970-01-01"], freq="d")  # fill any valid value
+            dates = pd.PeriodIndex(["1970-01-01"], freq="D")  # fill any valid value
         if not variables:
             variables = [""]  # fill any valid value
         if zoom:
