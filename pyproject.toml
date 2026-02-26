@@ -46,7 +46,7 @@ dependencies = [
 	"zarr>=3.1,<4",           # zarr
 ]
 
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.15"
 readme = "README.rst"
 classifiers = [
 	"Development Status :: 5 - Production/Stable",
@@ -202,7 +202,7 @@ filterwarnings = [
 # TODO: Re-enable the tests
 exclude = ["docs/.*", "tests/.*"]
 plugins = ["pydantic.mypy", "numpy.typing.mypy_plugin"]
-python_version = "3.11"
+python_version = "3.14"
 ignore_missing_imports = true
 
 warn_unused_configs = true
@@ -227,6 +227,9 @@ python = "3.12.*"
 [tool.pixi.feature.py313.dependencies]
 python = "3.13.*"
 
+[tool.pixi.feature.py314.dependencies]
+python = "3.14.*"
+
 [tool.pixi.pypi-dependencies]
 hydromt = { path = ".", editable = true }
 
@@ -235,6 +238,7 @@ pandoc = "*"
 
 [tool.pixi.feature.io.dependencies]
 pyflwdir = ">=0.5.4"
+zarr = ">=3.1,<4.0"
 
 [tool.pixi.feature.vrt.dependencies]
 gdal = ">=3.5.0"
@@ -323,7 +327,7 @@ clean-docs-examples = { cmd = ["rm", "-rf", "docs/examples"] }
 
 [tool.pixi.environments]
 default = { features = [
-	"py311",
+	"py314",
 	"io",
 	"vrt",
 	"extra",
@@ -331,10 +335,10 @@ default = { features = [
 	"test",
 	"doc",
 	"examples",
-], solve-group = "py311" }
+], solve-group = "py314" }
 
 full-latest = { features = [
-	"py313",
+	"py314",
 	"io",
 	"vrt",
 	"extra",
@@ -342,15 +346,27 @@ full-latest = { features = [
 	"test",
 	"doc",
 	"examples",
-], solve-group = "py313" }
-min-latest = { features = ["py313", "test"], solve-group = "py313" }
+], solve-group = "py314" }
+min-latest = { features = ["py314", "test"], solve-group = "py314" }
 slim-latest = { features = [
-	"py313",
+	"py314",
 	"io",
 	"vrt",
 	"extra",
 	"examples",
-], solve-group = "py313" }
+], solve-group = "py314" }
+
+full-py314 = { features = [
+	"py314",
+	"io",
+	"vrt",
+	"extra",
+	"dev",
+	"test",
+	"doc",
+	"examples",
+], solve-group = "py314" }
+min-py314 = { features = ["py314", "test"], solve-group = "py314" }
 
 full-py313 = { features = [
 	"py313",
