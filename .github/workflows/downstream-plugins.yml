@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   downstream:
-    name: Test ${{ matrix.plugin.name }} against hydromt release (candidate)
+    name: Test ${{ matrix.plugin.name }} (deps=${{ matrix.with_deps }})
     runs-on: ubuntu-latest
 
     strategy:
@@ -22,21 +22,21 @@ jobs:
             repo: Deltares/hydromt_wflow
             pixi_task: test
             environment: default
+        with_deps: [false, true]
 
     steps:
       - name: Checkout hydromt
         uses: actions/checkout@v6
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
+      - name: Install pixi
+        uses: prefix-dev/setup-pixi@v0.9.4
         with:
-          python-version: "3.14"
+          pixi-version: "v0.59.0"
 
       - name: Build hydromt wheel
         run: |
-          python -m pip install --upgrade pip build
-          python -m build --wheel
-          ls dist
+          pixi run python -m pip install --upgrade pip build
+          pixi run python -m build --wheel
 
       - name: Record hydromt dist path
         run: echo "HYDROMT_DIST=$GITHUB_WORKSPACE/dist" >> $GITHUB_ENV
@@ -48,16 +48,19 @@ jobs:
           path: plugin
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install pixi
-        uses: prefix-dev/setup-pixi@v0.9.4
-        with:
-          pixi-version: "v0.59.0"
-
-      - name: Install hydromt candidate into plugin env
+      - name: Install hydromt candidate
         working-directory: plugin
         run: |
+          # We install the wheel in two ways:
+          # 1. --no-deps (strict API) to ensure the plugin works with only the candidate wheel
+          # 2. with deps (default) to ensure it still works when all dependencies are installed
+
           pixi install -e ${{ matrix.plugin.environment }}
-          pixi run -e ${{ matrix.plugin.environment }} uv pip install "$HYDROMT_DIST"/hydromt-*.whl
+          if [ "${{ matrix.with_deps }}" = "true" ]; then
+              pixi run -e ${{ matrix.plugin.environment }} python -m pip install --force-reinstall "$HYDROMT_DIST"/hydromt-*.whl
+          else
+              pixi run -e ${{ matrix.plugin.environment }} python -m pip install --force-reinstall --no-deps "$HYDROMT_DIST"/hydromt-*.whl
+          fi
 
       - name: Run plugin compatibility tests
         working-directory: plugin
