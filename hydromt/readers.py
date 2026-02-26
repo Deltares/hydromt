@@ -553,44 +553,56 @@ def open_timeseries_from_table(path, *, name=None, index_dim="index", **kwargs):
         DataArray
     """
     _, ext = splitext(path)
+
     if ext == ".csv":
         csv_kwargs = dict(index_col=0, parse_dates=False)
         csv_kwargs.update(**kwargs)
         df = pd.read_csv(path, **csv_kwargs)
-    elif ext in [".parquet", ".pq"]:
+    elif ext in {".parquet", ".pq"}:
         df = pd.read_parquet(path, **kwargs)
     else:
         raise ValueError(f"Unknown table file format: {ext}")
 
-    first_index_elt = df.index[0]
-    first_col_name = df.columns[0]
-
-    try:
-        if isinstance(first_index_elt, (int, float, np.number)):
-            raise ValueError()
-        pd.to_datetime(first_index_elt)
-        # if this succeeds than axis 0 is the time dim
-    except ValueError:
+    def _is_datetime_like(value):
+        if isinstance(value, (int, float, np.number)):
+            return False
         try:
-            if isinstance(first_col_name, (int, float, np.number)):
-                raise ValueError()
-            pd.to_datetime(first_col_name)
-            df = df.T
-        except ValueError:
-            raise ValueError(f"No time index found in file: {path}")
+            pd.to_datetime(value)
+            return True
+        except Exception:
+            return False
 
-    if np.dtype(df.index).type != np.datetime64:
+    index_is_time = _is_datetime_like(df.index[0])
+    columns_are_time = _is_datetime_like(df.columns[0])
+
+    if index_is_time:
+        pass
+    elif columns_are_time:
+        df = df.T
+    else:
+        raise ValueError(f"No time index found in file: {path}")
+
+    # enforce datetime index
+    try:
         df.index = pd.to_datetime(df.index)
+    except Exception as e:
+        raise ValueError(
+            f"Index could not be parsed as datetime in file: {path}"
+        ) from e
 
-    # try parsing column index to integers
+    # parse column index to integers
     if isinstance(df.columns[0], str):
         try:
-            df.columns = [int("".join(filter(str.isdigit, n))) for n in df.columns]
-            assert df.columns.size == np.unique(df.columns).size
-        except (ValueError, AssertionError):
+            cols = [int("".join(filter(str.isdigit, c))) for c in df.columns]
+            if len(cols) != len(set(cols)):
+                raise ValueError()
+            df.columns = cols
+        except Exception:
             raise ValueError(f"No numeric index found in file: {path}")
+
     df.columns.name = index_dim
     name = name if name is not None else basename(path).split(".")[0]
+
     return xr.DataArray(df, dims=("time", index_dim), name=name)
 
 

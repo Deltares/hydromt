@@ -60,7 +60,7 @@ def download_africa_daily(outroot, start="2020-01-01", end="2021-03-31"):
         None
     """
     BASE_URL = "https://data.chc.ucsb.edu/products/CHIRPS-2.0/africa_daily/tifs/p05"
-    for date in pd.date_range(start=start, end=end, freq="d"):
+    for date in pd.date_range(start=start, end=end, freq="D"):
         if date > pd.to_datetime("today").date():
             return
         date_str = date.strftime("%Y.%m.%d")
