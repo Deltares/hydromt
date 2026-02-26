@@ -1,0 +1,68 @@
+name: Downstream plugin compatibility
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  downstream:
+    name: Test ${{ matrix.plugin.name }} (deps=${{ matrix.with_deps }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        plugin:
+          - name: hydromt-wflow
+            repo: Deltares/hydromt_wflow
+            pixi_task: test
+            environment: default
+        with_deps: [false, true]
+
+    steps:
+      - name: Checkout hydromt
+        uses: actions/checkout@v6
+
+      - name: Install pixi
+        uses: prefix-dev/setup-pixi@v0.9.4
+        with:
+          pixi-version: "v0.59.0"
+
+      - name: Build hydromt wheel
+        run: |
+          pixi run python -m pip install --upgrade pip build
+          pixi run python -m build --wheel
+
+      - name: Record hydromt dist path
+        run: echo "HYDROMT_DIST=$GITHUB_WORKSPACE/dist" >> $GITHUB_ENV
+
+      - name: Checkout plugin
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ matrix.plugin.repo }}
+          path: plugin
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install hydromt candidate
+        working-directory: plugin
+        run: |
+          # We install the wheel in two ways:
+          # 1. --no-deps (strict API) to ensure the plugin works with only the candidate wheel
+          # 2. with deps (default) to ensure it still works when all dependencies are installed
+
+          pixi install -e ${{ matrix.plugin.environment }}
+          if [ "${{ matrix.with_deps }}" = "true" ]; then
+              pixi run -e ${{ matrix.plugin.environment }} python -m pip install --force-reinstall "$HYDROMT_DIST"/hydromt-*.whl
+          else
+              pixi run -e ${{ matrix.plugin.environment }} python -m pip install --force-reinstall --no-deps "$HYDROMT_DIST"/hydromt-*.whl
+          fi
+
+      - name: Run plugin compatibility tests
+        working-directory: plugin
+        run: |
+          pixi run -e ${{ matrix.plugin.environment }} --no-install ${{ matrix.plugin.pixi_task }}
