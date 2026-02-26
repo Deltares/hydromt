@@ -771,7 +771,7 @@ def read_workflow_yaml(
     modeltype: str | None = None,
     defaults: Dict[str, Any] | None = None,
     abs_path: bool = True,
-    skip_abspath_sections: List[str] | None = ["global"],  # noqa: B006
+    skip_abspath_sections: List[str] | None = None,
 ) -> tuple[str, Dict[str, Any], List["HydromtModelStep"]]:
     """Read HydroMT workflow yaml file.
 
@@ -790,7 +790,7 @@ def read_workflow_yaml(
         by default True
     skip_abspath_sections: list
         These sections are not evaluated for absolute paths if abs_path=True,
-        by default ['global']
+        by default ["setup_config"]
 
     Returns
     -------
@@ -849,7 +849,7 @@ def _config_read(
         by default False
     skip_abspath_sections: list, optional
         These sections are not evaluated for absolute paths if abs_path=True,
-        by default ['setup_config']
+        by default["setup_config"]
 
     Returns
     -------
