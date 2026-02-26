@@ -24,6 +24,7 @@ from pyproj import CRS
 from shapely.geometry import LineString, Point, Polygon, box
 from shapely.geometry.base import GEOMETRY_TYPES
 
+from hydromt._utils.naming_convention import _expand_uri_placeholders
 from hydromt._utils.path import _make_config_paths_absolute
 from hydromt._utils.uris import _is_valid_url
 from hydromt.gis import gis_utils, raster, raster_utils, vector, vector_utils
@@ -950,7 +951,7 @@ def open_ncs(
     filename_template: str | Path,
     root: Path,
     **kwargs,
-) -> dict[Path, xr.Dataset]:
+) -> dict[str | Path, xr.Dataset]:
     """Read netcdf files at <root>/<file> and return as dict of xarray.Dataset.
 
     Parameters
@@ -965,13 +966,26 @@ def open_ncs(
 
     Returns
     -------
-    dict[Path, xr.Dataset]
+    dict[Path | str, xr.Dataset]
         dict of xarray.Dataset. Don't forget to close them when you're done!
+        Paths are used as keys if {name} placeholder is not used in the filename,
+        otherwise the candidate name is used as key, which is based on the value
+        of the {name} placeholder
     """
-    return {
-        path: open_nc(filepath=path, **kwargs)
-        for path in _expand_wildcard_path(root / filename_template)
-    }
+    if "{name}" in str(filename_template):
+        return {
+            name: open_nc(filepath=path, **kwargs)
+            for path, name in _expand_wildcards_and_name_placeholder(
+                filename_template, root
+            ).items()
+        }
+    else:
+        return {
+            path: open_nc(filepath=path, **kwargs)
+            for path in _expand_wildcards_and_name_placeholder(
+                filename_template, root
+            ).keys()
+        }
 
 
 def read_yaml(path: str | Path) -> dict[str, Any]:
@@ -1005,33 +1019,41 @@ def _yml_from_uri_or_path(uri_or_path: str | Path) -> dict[str, Any]:
     return yml
 
 
-def _expand_wildcard_path(path: Path) -> list[Path]:
-    """Expand a path containing wildcards into a list of matching paths.
-
-    Just globbing over the filename, but not the full path can lead to unexpected results
-    if the wildcard is in the parent directory. For example, if the path is `data/*/file.csv`,
-    glob will match all files named `file.csv` in any subdirectory of `data`, but it won't
-    match files named `file.csv` in `data` itself. This function ensures that the glob
-    pattern is applied to the entire path, not just the filename.
+def _expand_wildcards_and_name_placeholder(
+    filename_template: str, root: Path
+) -> dict[Path, str]:
+    """Expand wildcards and {name} placeholder in filename template.
 
     Parameters
     ----------
-    path : Path
-        Path containing wildcards to expand.
-
-    Raises
-    ------
-    ValueError
-        If the path contains curly braces, which are not allowed in this context.
+    filename_template : str
+        Filename template relative to model root, may contain wildcards and {name} placeholder
+    root : Path
+        The path to the model directory in which to write.
 
     Returns
     -------
-    list[Path]
-        list of paths matching the wildcard pattern.
+    dict[Path, str]
+        dict with file paths as keys and candidate names as values. If {name} placeholder is
+        used in the filename template, the candidate name is based on the value of the {name}
+        placeholder. If {name} placeholder is not used, the candidate name is based on the
+        filename's stem.
     """
-    str_path = path.as_posix()
-    if "{" in str_path or "}" in str_path:
-        raise ValueError(
-            "Curly braces are not allowed in the path. Please use glob patterns with '*' instead of placeholders."
-        )
-    return [Path(p) for p in glob(str_path)]
+    uri_expanded, keys, regex = _expand_uri_placeholders(
+        uri=(root / filename_template).as_posix(), placeholders=["name"]
+    )
+    files = (Path(p) for p in glob(uri_expanded))
+
+    if "name" not in keys:
+        # no {name} placeholder was used, so return dict[Path, candidate name based on filename]
+        return {path: path.stem for path in files}
+
+    # {name} placeholder was used, so return dict[Path, candidate name based on {name} placeholder]
+    out: dict[Path, str] = {}
+    for path in files:
+        m = regex.match(path.as_posix())
+        if not m:
+            continue
+        group_dict = dict(zip(keys, m.groups(), strict=True))
+        out[path] = group_dict["name"]
+    return out

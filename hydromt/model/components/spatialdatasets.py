@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import xarray as xr
 from geopandas import GeoDataFrame
@@ -35,7 +35,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         model: "Model",
         *,
         region_component: str,
-        filename: str = "spatial_datasets/*.nc",
+        filename: str = "spatial_datasets/{name}.nc",
         region_filename: str = "spatial_datasets/spatial_datasets_region.geojson",
     ):
         """Initialize a SpatialDatasetsComponent.
@@ -49,13 +49,13 @@ class SpatialDatasetsComponent(SpatialModelComponent):
             region.
         filename: str
             The path to use for reading and writing of component data by default.
-            by default ``spatial_datasets/*.nc`` ie one file per xarray object in the
+            by default ``spatial_datasets/{name}.nc`` ie one file per xarray object in the
             data dictionary.
         region_filename: str
             The path to use for writing the region data to a file. By default
             ``spatial_datasets/spatial_datasets_region.geojson``.
         """
-        self._data: Optional[XArrayDict] = None
+        self._data: XArrayDict | None = None
         self._filename: str = filename
         super().__init__(
             model=model,
@@ -83,7 +83,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
                 self.read()
 
     @property
-    def _region_data(self) -> Optional[GeoDataFrame]:
+    def _region_data(self) -> GeoDataFrame | None:
         raise AttributeError(
             "region cannot be found in spatialdatasets component."
             "Meaning that the region_component is not set or could not be found in"
@@ -93,8 +93,8 @@ class SpatialDatasetsComponent(SpatialModelComponent):
     # @hydromt_step
     def set(
         self,
-        data: Union[Dataset, DataArray],
-        name: Optional[str] = None,
+        data: Dataset | DataArray,
+        name: str | None = None,
         split_dataset: bool = False,
     ):
         """Add data to the xarray component.
@@ -103,7 +103,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         ---------
         data: xarray.Dataset or xarray.DataArray
             New xarray object to add
-        name: str, optional
+        name: str | None, optional
             name of the xarray.
         """
         self._initialize()
@@ -134,18 +134,21 @@ class SpatialDatasetsComponent(SpatialModelComponent):
             self._data[name] = d
 
     @hydromt_step
-    def read(self, filename: Optional[str] = None, **kwargs) -> None:
+    def read(self, filename: str | None = None, **kwargs) -> None:
         """Read model dataset files at <root>/<filename>.
 
         key-word arguments are passed to :py:func:`hydromt.readers.open_nc`
 
         Parameters
         ----------
-        filename : str, optional
-            filename relative to model root. Should contain a * wildcard character
-            to read multiple files into the data dictionary. All files matching the
-            glob pattern defined by filename will be read. The filename without
-            extension will be used as the key in the data dictionary.
+        filename : str | None, optional
+            Filename relative to model root. Should contain either a * wildcard character
+            or a {name} placeholder to read multiple files into the data dictionary.
+            All files matching the glob pattern defined by filename will be read.
+            If a {name} placeholder is used, that name will be used as the key in the
+            data dictionary.
+            If no {name} placeholder is used, the filename without extension will be used
+            as the key in the data dictionary.
             If None, the path that was provided at init will be used.
         **kwargs:
             Additional keyword arguments that are passed to the
@@ -154,21 +157,21 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         self.root._assert_read_mode()
         self._initialize(skip_read=True)
         kwargs = {**{"engine": "netcdf4"}, **kwargs}
-        filename_template = filename or self._filename
-        for path, ds in open_ncs(
-            filename_template, root=self.root.path, **kwargs
+        placeholder_filename = (filename or self._filename).replace("*", "{name}")
+        for name, ds in open_ncs(
+            placeholder_filename, root=self.root.path, **kwargs
         ).items():
             self._open_datasets.append(ds)
             if len(ds.data_vars) == 1:
                 (da,) = ds.data_vars.values()
             else:
                 da = ds
-            self.set(data=da, name=path.stem)
+            self.set(data=da, name=name)
 
     @hydromt_step
     def write(
         self,
-        filename: Optional[str] = None,
+        filename: str | None = None,
         *,
         gdal_compliant: bool = False,
         rename_dims: bool = False,
@@ -186,7 +189,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
 
         Parameters
         ----------
-        nc_dict: dict
+        nc_dict: dict[str, xr.Dataset | xr.DataArray]
             Dictionary of xarray.Dataset and/or xarray.DataArray to write
         fn: str
             filename relative to model root and should contain a {name} placeholder
@@ -200,7 +203,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         force_sn: bool, optional
             If True, forces the dataset to have South -> North orientation. Only used
             if ``gdal_compliant`` is set to True. By default, False.
-        to_netcdf_kwargs: dict, optional
+        to_netcdf_kwargs: dict[str, Any] | None, optional
             Additional keyword arguments that are passed to the `to_netcdf`
             function.
         """
@@ -214,10 +217,9 @@ class SpatialDatasetsComponent(SpatialModelComponent):
 
         to_netcdf_kwargs = to_netcdf_kwargs or {}
         to_netcdf_kwargs.setdefault("engine", "netcdf4")
-
+        placeholder_filename = (filename or self._filename).replace("*", "{name}")
         for name, ds in self.data.items():
-            _filename = (filename or self._filename).replace("*", name)
-            file_path = self.root.path / _filename
+            file_path = self.root.path / placeholder_filename.format(name=name)
             file_path.parent.mkdir(parents=True, exist_ok=True)
             logger.info(
                 f"{self.model.name}.{self.name_in_model}: Writing spatial dataset to {file_path}."
@@ -238,14 +240,14 @@ class SpatialDatasetsComponent(SpatialModelComponent):
     @hydromt_step
     def add_raster_data_from_rasterdataset(
         self,
-        raster_filename: Union[str, Path, Dataset],
-        variables: Optional[List] = None,
-        fill_method: Optional[str] = None,
-        name: Optional[str] = None,
-        reproject_method: Optional[str] = None,
+        raster_filename: str | Path | Dataset,
+        variables: list[str] | None = None,
+        fill_method: str | None = None,
+        name: str | None = None,
+        reproject_method: str | None = None,
         split_dataset: bool = True,
-        rename: Optional[Dict[str, str]] = None,
-    ) -> List[str]:
+        rename: dict[str, str] | None = None,
+    ) -> list[str]:
         """HYDROMT CORE METHOD: Add data variable(s) from ``raster_filename`` to datasets component.
 
         If raster is a xarray dataset, all variables will be added unless ``variables``
@@ -259,7 +261,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         raster_filename: str, Path, xr.Dataset
             Data catalog key, path to raster file or raster xarray data object.
         variables: list, optional
-            List of variables to add to datasets from raster_filename. By default all.
+            list of variables to add to datasets from raster_filename. By default all.
         fill_method : str, optional
             If specified, fills nodata values using fill_nodata method.
             Available methods are {'linear', 'nearest', 'cubic', 'rio_idw'}.
@@ -307,17 +309,17 @@ class SpatialDatasetsComponent(SpatialModelComponent):
     @hydromt_step
     def add_raster_data_from_raster_reclass(
         self,
-        raster_filename: Union[str, Path, DataArray],
-        reclass_table_filename: Union[str, Path, DataFrame],
-        reclass_variables: List,
-        variable: Optional[str] = None,
-        fill_method: Optional[str] = None,
-        reproject_method: Optional[str] = None,
-        name: Optional[str] = None,
+        raster_filename: str | Path | DataArray,
+        reclass_table_filename: str | Path | DataFrame,
+        reclass_variables: list[str],
+        variable: str | None = None,
+        fill_method: str | None = None,
+        reproject_method: str | None = None,
+        name: str | None = None,
         split_dataset: bool = True,
-        rename: Optional[Dict] = None,
+        rename: dict[str, str] | None = None,
         **kwargs,
-    ) -> List[str]:
+    ) -> list[str]:
         r"""HYDROMT CORE METHOD: Add data variable(s) to datasets component by reclassifying the data in ``raster_filename`` based on ``reclass_table_filename``.
 
         This is done by reclassifying the data in
@@ -335,10 +337,10 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         reclass_table_filename: str, Path, pd.DataFrame
             Data catalog key, path to tabular data file or tabular pandas dataframe
             object for the reclassification table of `raster_filename`.
-        reclass_variables: list
-            List of reclass_variables from reclass_table_filename table to add to the datasets. Index
+        reclass_variables: list[str]
+            list of reclass_variables from reclass_table_filename table to add to the datasets. Index
             column should match values in `raster_filename`.
-        variable: str, optional
+        variable: str | None = None
             Name of raster dataset variable to use. This is only required when reading
             datasets with multiple variables. By default None.
         fill_method : str, optional
@@ -397,7 +399,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
 
         return list(ds_vars.data_vars.keys())
 
-    def test_equal(self, other: ModelComponent) -> Tuple[bool, Dict[str, str]]:
+    def test_equal(self, other: ModelComponent) -> tuple[bool, dict[str, str]]:
         """
         Test if two DatasetsComponents are equal.
 

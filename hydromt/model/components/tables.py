@@ -1,13 +1,13 @@
 """Tables component."""
 
 import logging
-from typing import TYPE_CHECKING, Dict, Optional, Union, cast
+from typing import TYPE_CHECKING, cast
 
 import pandas as pd
 
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.steps import hydromt_step
-from hydromt.readers import _expand_wildcard_path
+from hydromt.readers import _expand_wildcards_and_name_placeholder
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model
@@ -26,7 +26,7 @@ class TablesComponent(ModelComponent):
     def __init__(
         self,
         model: "Model",
-        filename: str = "tables/*.csv",
+        filename: str = "tables/{name}.csv",
     ):
         """Initialize a TablesComponent.
 
@@ -37,15 +37,15 @@ class TablesComponent(ModelComponent):
         filename: str
             The default place that should be used for reading and writing unless the
             user overrides it. If a relative path is given it will be used as being
-            relative to the model root. By default ``tables/*.csv`` for this
+            relative to the model root. By default ``tables/{name}.csv`` for this
             component, and can be either relative or absolute.
         """
-        self._data: Optional[Dict[str, Union[pd.DataFrame, pd.Series]]] = None
+        self._data: dict[str, pd.DataFrame | pd.Series] = None
         self._filename: str = filename
         super().__init__(model=model)
 
     @property
-    def data(self) -> Dict[str, Union[pd.DataFrame, pd.Series]]:
+    def data(self) -> dict[str, pd.DataFrame | pd.Series]:
         """Model tables."""
         if self._data is None:
             self._initialize_tables()
@@ -61,7 +61,7 @@ class TablesComponent(ModelComponent):
                 self.read()
 
     @hydromt_step
-    def write(self, filename: Optional[str] = None, **kwargs) -> None:
+    def write(self, filename: str | None = None, **kwargs) -> None:
         """Write tables at provided or default file path if none is provided."""
         self.root._assert_write_mode()
 
@@ -76,7 +76,7 @@ class TablesComponent(ModelComponent):
         kwargs.setdefault("sep", ",")
 
         for name, value in self.data.items():
-            _filename = (filename or self._filename).replace("*", name)
+            _filename = (filename or self._filename).format(name=name)
             write_path = self.root.path / _filename
             write_path.parent.mkdir(parents=True, exist_ok=True)
             logger.info(
@@ -85,16 +85,19 @@ class TablesComponent(ModelComponent):
             value.to_csv(write_path, **kwargs)
 
     @hydromt_step
-    def read(self, filename: Optional[str] = None, **kwargs) -> None:
+    def read(self, filename: str | None = None, **kwargs) -> None:
         """Read tables at provided or default file path if none is provided.
 
         Parameters
         ----------
-        filename : str, optional
-            filename relative to model root. Should contain a * wildcard character
-            to read multiple files into the data dictionary. All files matching the
-            glob pattern defined by filename will be read. The filename without
-            extension will be used as the key in the data dictionary.
+        filename : str | None, optional
+            Filename relative to model root. Should contain either a * wildcard character
+            or a {name} placeholder to read multiple files into the data dictionary.
+            All files matching the glob pattern defined by filename will be read.
+            If a {name} placeholder is used, that name will be used as the key in the
+            data dictionary.
+            If no {name} placeholder is used, the filename without extension will be used
+            as the key in the data dictionary.
             If None, the path that was provided at init will be used.
         **kwargs:
             Additional keyword arguments that are passed to the
@@ -103,33 +106,33 @@ class TablesComponent(ModelComponent):
         self.root._assert_read_mode()
         self._initialize_tables(skip_read=True)
         logger.info("Reading model table files.")
-        fn = filename or self._filename
-        for path in _expand_wildcard_path(self.root.path / fn):
-            logger.info(f"Reading table from {path} into model as '{path.stem}'.")
+        placeholder_filename = (filename or self._filename).replace("*", "{name}")
+        for path, name in _expand_wildcards_and_name_placeholder(
+            placeholder_filename, self.root.path
+        ).items():
+            logger.info(f"Reading table from {path} into model as '{name}'.")
             tbl = pd.read_csv(path, **kwargs)
-            self.set(tbl, name=path.stem)
+            self.set(tbl, name=name)
 
     def set(
         self,
-        tables: Union[
-            Union[pd.DataFrame, pd.Series], Dict[str, Union[pd.DataFrame, pd.Series]]
-        ],
-        name: Optional[str] = None,
+        tables: pd.DataFrame | pd.Series | dict[str, pd.DataFrame | pd.Series],
+        name: str | None = None,
     ) -> None:
         """Add (a) table(s) <pandas.DataFrame> to model.
 
         Parameters
         ----------
-        tables : pandas.DataFrame, pandas.Series or dict
+        tables : pandas.DataFrame, pandas.Series or dict[str, pd.DataFrame | pd.Series]
             Table(s) to add to model.
             Multiple tables can be added at once by passing a dict of tables.
-        name : str, optional
+        name : str | None, optional
             Name of table, by default None. Required when tables is not a dict.
         """
         self._initialize_tables()
         assert self._data is not None
         # added here so we only have to declare types once
-        tables_to_add: Dict[str, Union[pd.DataFrame, pd.Series]]
+        tables_to_add: dict[str, pd.DataFrame | pd.Series]
 
         if not isinstance(tables, dict):
             if name is None:

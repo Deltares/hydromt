@@ -317,7 +317,7 @@ def test_model_build_update_with_data(
         "maps": {
             "type": "SpatialDatasetsComponent",
             "region_component": "grid",
-            "filename": "maps/*.nc",
+            "filename": "maps/{name}.nc",
         },
         "forcing": {
             "type": "SpatialDatasetsComponent",
@@ -327,7 +327,7 @@ def test_model_build_update_with_data(
         "forcing2": {
             "type": "SpatialDatasetsComponent",
             "region_component": "grid",
-            "filename": "forcing2/*.nc",
+            "filename": "forcing2/{name}.nc",
         },
         "geoms": {"type": "GeomsComponent"},
     }

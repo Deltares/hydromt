@@ -1,6 +1,5 @@
 import re
 from string import Formatter
-from typing import Pattern
 
 _PLACEHOLDERS = frozenset({"year", "month", "variable", "name", "overview_level"})
 _SEGMENT_PATTERN = r"[^/\\]+"
@@ -12,7 +11,7 @@ def _expand_uri_placeholders(
     placeholders: list[str] | None = None,
     time_range: tuple[str, str] | None = None,
     variables: list[str] | None = None,
-) -> tuple[str, list[str], Pattern[str]]:
+) -> tuple[str, list[str], re.Pattern[str]]:
     """Expand known placeholders in the URI.
 
     This function takes a URI with placeholders and expands it into a regex pattern.
