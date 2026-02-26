@@ -274,17 +274,46 @@ def test_read_workflow_yaml():
     assert config_filename == "run_config.toml"
 
 
-def test_read_workflow_yaml_extended():
+def test_read_workflow_yaml_extended_all_absolute():
     model_type, model_init, steps = read_workflow_yaml(
-        Path(TEST_DATA_DIR, "build_config_extended.yml")
+        Path(TEST_DATA_DIR, "build_config_extended.yml"),
+        skip_abspath_sections=None,
     )
 
     assert model_type == "model"
     assert "components" in model_init
     assert len(steps) == 3
 
-    # Check relative paths
+    # Check relative paths in global section were made absolute, and step paths were also made absolute
+    # global
+    config_filename = model_init["components"]["config"]["filename"]
+    assert config_filename == Path(TEST_DATA_DIR, "run_config.toml")
+    assert model_init["data_libs"] == [
+        "deltares_data",
+        Path(TEST_DATA_DIR, "aws_esa_worldcover.yml"),
+    ]
+
+    # steps
+    config_template = steps[0]["config.create"]["template"]
+    assert config_template == Path(TEST_DATA_DIR, "run_config.toml")
+
+
+def test_read_workflow_yaml_extended_keep_relative():
+    model_type, model_init, steps = read_workflow_yaml(
+        Path(TEST_DATA_DIR, "build_config_extended.yml"),
+        skip_abspath_sections=["global"],
+    )
+
+    assert model_type == "model"
+    assert "components" in model_init
+    assert len(steps) == 3
+
+    # Check global section paths are kept relative, but step paths are made absolute
+    # global
     config_filename = model_init["components"]["config"]["filename"]
     assert config_filename == "run_config.toml"
+    assert model_init["data_libs"] == ["deltares_data", "aws_esa_worldcover.yml"]
+
+    # steps
     config_template = steps[0]["config.create"]["template"]
     assert config_template == Path(TEST_DATA_DIR, "run_config.toml")
