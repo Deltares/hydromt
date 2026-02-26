@@ -957,7 +957,7 @@ def open_ncs(
     Parameters
     ----------
     filename_template : str
-        Filename relative to model root, may contain wildcards
+        Filename relative to model root, may contain wildcards and/or a {name} placeholder.
     root : Path
         The path to the model directory in which to write
     **kwargs:
@@ -971,21 +971,27 @@ def open_ncs(
         Paths are used as keys if {name} placeholder is not used in the filename,
         otherwise the candidate name is used as key, which is based on the value
         of the {name} placeholder
+
+    Notes
+    -----
+    If the filename template contains a {name} placeholder, the candidate name is
+    based on the value of the {name} placeholder. If the filename template does not
+    contain a {name} placeholder, the candidate name is based on the filename's stem.
+
+    When using the {name} placeholder, be aware that duplicate keys can be generated for
+    some paths, which can lead to some paths being overwritten in the output dict. A warning
+    is logged if this happens.
     """
+    paths = _expand_wildcards_and_name_placeholder(filename_template, root)
     if "{name}" in str(filename_template):
-        return {
-            name: open_nc(filepath=path, **kwargs)
-            for path, name in _expand_wildcards_and_name_placeholder(
-                filename_template, root
-            ).items()
-        }
+        out = {name: open_nc(filepath=path, **kwargs) for path, name in paths.items()}
+        if len(out) < len(paths):
+            logger.warning(
+                "Duplicate keys generated for some paths, some paths are overwritten in the output dict. "
+            )
     else:
-        return {
-            path: open_nc(filepath=path, **kwargs)
-            for path in _expand_wildcards_and_name_placeholder(
-                filename_template, root
-            ).keys()
-        }
+        out = {path: open_nc(filepath=path, **kwargs) for path in paths.keys()}
+    return out
 
 
 def read_yaml(path: str | Path) -> dict[str, Any]:
