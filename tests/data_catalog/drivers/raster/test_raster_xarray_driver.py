@@ -2,11 +2,13 @@
 
 from pathlib import Path
 from typing import List
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 from uuid import uuid4
 
 import numpy as np
+import pytest
 import xarray as xr
+from aiohttp.client_exceptions import ClientResponseError
 from pytest_mock import MockerFixture
 from xarray import open_mfdataset, open_zarr
 
@@ -94,6 +96,34 @@ class TestRasterXarrayDriver:
         assert res["variable"].shape == (10, 10)
         assert list(res.coords.keys()) == ["xc", "yc"]
         assert res["variable"].values[0, 0] == 42
+
+    def test_read_clientresponse_error(self, mocker):
+        def cre(status=500, message="boom"):
+            return ClientResponseError(
+                request_info=Mock(real_url="https://example.com/data.zarr"),
+                # history can be an empty tuple
+                history=(),
+                status=status,
+                message=message,
+                headers=None,
+            )
+
+        mocker.patch(
+            "hydromt.data_catalog.drivers.raster.raster_xarray_driver.xr.open_zarr",
+            side_effect=cre(),
+        )
+        test_zarr_uri = ["https://example.com/data.zarr"]
+        with pytest.raises(
+            ClientResponseError,
+        ):
+            RasterDatasetXarrayDriver().read(test_zarr_uri)
+
+        mocker.patch(
+            "hydromt.data_catalog.drivers.raster.raster_xarray_driver.xr.open_zarr",
+            side_effect=cre(status=401),
+        )
+        with pytest.raises(PermissionError, match="Unauthorized access"):
+            RasterDatasetXarrayDriver().read(test_zarr_uri)
 
     def test_zarr_write(self, raster_ds: xr.Dataset, managed_tmp_path: Path):
         zarr_path = managed_tmp_path / "raster.zarr"
