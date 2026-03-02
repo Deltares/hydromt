@@ -71,10 +71,30 @@ jobs:
           pixi list -e ${{ matrix.plugin.environment }}
 
           # what python will import
-          pixi run --no-install -e ${{ matrix.plugin.environment }} python -m pip freeze
-
+          pixi run --no-install -e ${{ matrix.plugin.environment }} \
+            python -m pip freeze
 
       - name: Run plugin compatibility tests
         working-directory: plugin
         run: |
           pixi run -e ${{ matrix.plugin.environment }} --no-install ${{ matrix.plugin.pixi_task }}
+
+      - name: Failure guidance
+        if: failure()
+        run: |
+          echo ""
+          echo "Downstream compatibility failure"
+          echo ""
+          echo "Plugin: ${{ matrix.plugin.name }}"
+          echo "With dependencies: ${{ matrix.with_deps }}"
+          echo ""
+          if [ "${{ matrix.with_deps }}" = "false" ]; then
+            echo "This failure is NON-BLOCKING."
+            echo "It indicates that the new hydromt version is not drop-in compatible"
+            echo "with an existing plugin environment."
+            echo "Action: review and decide on what to do; accept, document, or fix."
+          else
+            echo "This failure IS A RELEASE BLOCKER."
+            echo "Dependency resolution or runtime compatibility is broken."
+            echo "Action: must be fixed before release."
+          fi
