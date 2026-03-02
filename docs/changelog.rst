@@ -17,6 +17,7 @@ New
 
 Changed
 -------
+- ``open_ncs`` returns either ``dict[Path, xr.Dataset]`` or ``dict[str, xr.Dataset]``. When the uri contains no ``{name}`` placeholder, the full paths are used as keys. If there is a placehodler the key is the value of the ``{name}`` placeholder.
 
 Fixed
 -----
