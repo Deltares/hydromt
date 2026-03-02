@@ -76,8 +76,10 @@ jobs:
 
       - name: Run plugin compatibility tests
         working-directory: plugin
+        env:
+          PYTEST_ADDOPTS: "-p no:warnings"
         run: |
-          pixi run -e ${{ matrix.plugin.environment }} --no-install ${{ matrix.plugin.pixi_task }} -- -p no:warnings
+          pixi run -e ${{ matrix.plugin.environment }} --no-install ${{ matrix.plugin.pixi_task }}
 
       - name: Failure guidance
         if: failure()
