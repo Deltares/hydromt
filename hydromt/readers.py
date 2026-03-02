@@ -804,6 +804,7 @@ def read_workflow_yaml(
         These sections are not evaluated for absolute paths if abs_path=True,
         by default ["setup_config"]
 
+
     Returns
     -------
     modeltype : str | None
@@ -861,7 +862,7 @@ def _config_read(
         by default False
     skip_abspath_sections: list, optional
         These sections are not evaluated for absolute paths if abs_path=True,
-        by default["setup_config"]
+        by default ["setup_config"]
 
     Returns
     -------

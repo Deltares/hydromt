@@ -1,6 +1,7 @@
 """Tests for the cli submodule."""
 
 import logging
+from datetime import date
 from os.path import join
 from pathlib import Path
 from typing import Generator
@@ -12,6 +13,7 @@ from hydromt import __version__
 from hydromt.cli.main import main as hydromt_cli
 from hydromt.error import NoDataException
 from hydromt.model.components.grid import GridComponent
+from hydromt.readers import read_toml
 from tests.conftest import TEST_DATA_DIR
 
 BUILD_CONFIG_PATH = join(TEST_DATA_DIR, "build_config.yml")
@@ -181,12 +183,12 @@ def test_cli_build_update_model(tmp_path: Path, caplog: pytest.LogCaptureFixture
     r = CliRunner().invoke(hydromt_cli, cmd)
     assert r.exit_code == 0
     assert Path(root_out, "run_config.toml").exists()
+
     # Open and check content
-    with open(root_out / "run_config.toml") as f:
-        content = f.read()
-    assert "starttime = 2020-01-01" in content
-    assert '[model]\ntype = "model"' in content
-    assert "endtime " in content
+    content = read_toml(root_out / "run_config.toml")
+    assert content["starttime"] == date(year=2020, month=1, day=1)
+    assert content["model"]["type"] == "model"
+    assert "endtime" in content
 
 
 @pytest.mark.usefixtures("_reset_log_level")

@@ -262,7 +262,8 @@ def test_open_nc_geo_map_coord_sets_close(tmpdir):
 
 def test_read_workflow_yaml():
     model_type, model_init, steps = read_workflow_yaml(
-        Path(TEST_DATA_DIR, "build_config.yml")
+        Path(TEST_DATA_DIR, "build_config.yml"),
+        skip_abspath_sections=["global"],
     )
 
     assert model_type is None
