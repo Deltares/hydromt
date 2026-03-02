@@ -347,13 +347,13 @@ full-latest = { features = [
 	"examples",
 ], solve-group = "py314" }
 min-latest = { features = ["py314", "test"], solve-group = "py314" }
-slim-latest = { features = [
-	"py314",
+binder = { features = [
+	"py313",
 	"io",
 	"vrt",
 	"extra",
 	"examples",
-], solve-group = "py314" }
+], solve-group = "py313" } # cannot do 3.14 yet, cartopy does not provide wheels for 3.14 yet.
 
 full-py314 = { features = [
 	"py314",
