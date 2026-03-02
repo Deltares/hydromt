@@ -92,21 +92,31 @@ class ConfigComponent(ModelComponent):
             )
             return
 
-        file_path = file_path or self._filename
-        file_path = self.root.path / file_path
-        file_path.parent.mkdir(parents=True, exist_ok=True)
+        if file_path is not None:
+            # ``file_path`` absolute? yes -> use as is
+            # ``file_path`` absolute? no -> make absolute to model root
+            path = Path(self.model.root.path, file_path)
+        else:
+            # ``self._filename`` absolute? yes -> use ``self._filename.name`` as filename
+            # ``self._filename`` absolute? no -> use ``self._filename`` as filename
+            filename = Path(self._filename)
+            if filename.is_absolute():
+                filename = filename.name
+            path = self.root.path / filename
+
+        path.parent.mkdir(parents=True, exist_ok=True)
         logger.info(
-            f"{self.model.name}.{self.name_in_model}: Writing model config to {file_path}."
+            f"{self.model.name}.{self.name_in_model}: Writing model config to {path}."
         )
 
         write_data = _make_config_paths_relative(self.data, self.root.path)
-        match file_path.suffix.lower():
+        match path.suffix.lower():
             case ".yaml" | ".yml":
-                write_yaml(file_path, write_data)
+                write_yaml(path, write_data)
             case ".toml":
-                write_toml(file_path, write_data)
+                write_toml(path, write_data)
             case _:
-                raise ValueError(f"Unknown file extension: {file_path.suffix}")
+                raise ValueError(f"Unknown file extension: {path.suffix}")
 
     @hydromt_step
     def read(self, path: Optional[str] = None) -> None:
