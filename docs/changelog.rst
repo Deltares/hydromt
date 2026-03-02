@@ -17,10 +17,12 @@ New
 
 Changed
 -------
+-  Instead of skipping the ``global`` section by default, ``read_workflow_yaml`` now tries to convert all strings in all sections into absolute paths by default, by checking if the absolute path exists.
 
 Fixed
 -----
 - ``ext_override`` option for Xarray Drivers is now properly used to filter uri's with a different extension.
+- The ``data_libs`` section in workflow yaml files is now correctly converted to an absolute path using the workflo yaml's parent directory as the base.
 
 Deprecated
 ----------
