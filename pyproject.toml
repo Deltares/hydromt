@@ -238,7 +238,6 @@ pandoc = "*"
 
 [tool.pixi.feature.io.dependencies]
 pyflwdir = ">=0.5.4"
-zarr = ">=3.1,<4.0"
 
 [tool.pixi.feature.vrt.dependencies]
 gdal = ">=3.5.0"
