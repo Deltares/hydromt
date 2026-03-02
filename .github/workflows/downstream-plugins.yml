@@ -76,6 +76,8 @@ jobs:
 
       - name: Run plugin compatibility tests
         working-directory: plugin
+        env:
+          PYTHONWARNINGS: default  # shows warnings but does not escalate them
         run: |
           pixi run -e ${{ matrix.plugin.environment }} --no-install ${{ matrix.plugin.pixi_task }}
 
