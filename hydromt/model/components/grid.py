@@ -176,8 +176,8 @@ class GridComponent(SpatialModelComponent):
             )
             return
 
-        filename = filename or self._filename
-        full_path = self.root.path / filename
+        _filename = filename or self._filename
+        full_path = self.root.path / _filename
         full_path.parent.mkdir(parents=True, exist_ok=True)
         logger.info(
             f"{self.model.name}.{self.name_in_model}: Writing grid data to {full_path}."
@@ -204,20 +204,24 @@ class GridComponent(SpatialModelComponent):
         Parameters
         ----------
         filename : str, optional
-            filename relative to model root, by default 'grid/grid.nc'
+            Filename relative to model root. Should contain either a * wildcard character
+            or a {name} placeholder to read multiple files into the data dictionary.
+            All files matching the glob pattern defined by filename will be read.
+            If a {name} placeholder is used, that name will be used as the key in the
+            data dictionary.
+            If no {name} placeholder is used, the filename without extension will be used
+            as the key in the data dictionary.
+            If None, the path that was provided at init will be used.
         **kwargs : dict
             Additional keyword arguments to be passed to the `open_nc` method.
         """
         self.root._assert_read_mode()
         self._initialize_grid(skip_read=True)
-
-        loaded_nc_files = open_ncs(
-            filename or self._filename,
-            self.root.path,
-            **kwargs,
-        )
-        for ds in loaded_nc_files.values():
-            self.set(ds)
+        filename_template = (filename or self._filename).replace("*", "{name}")
+        for name, ds in open_ncs(
+            filename_template, root=self.root.path, **kwargs
+        ).items():
+            self.set(ds, name=name)
             self._open_datasets.append(ds)
 
     @property
