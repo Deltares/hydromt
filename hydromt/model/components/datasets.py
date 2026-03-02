@@ -131,7 +131,7 @@ class DatasetsComponent(ModelComponent):
         self._initialize(skip_read=True)
         kwargs = {**{"engine": "netcdf4"}, **kwargs}
 
-        filename_template = (filename or self._filename).replace("*", "{name}")
+        filename_template = str(filename or self._filename).replace("*", "{name}")
         for name, ds in open_ncs(
             filename_template, root=self.root.path, **kwargs
         ).items():
@@ -193,7 +193,7 @@ class DatasetsComponent(ModelComponent):
 
         to_netcdf_kwargs = to_netcdf_kwargs or {}
         to_netcdf_kwargs.setdefault("engine", "netcdf4")
-        placeholder_filename = (filename or self._filename).replace("*", "{name}")
+        placeholder_filename = str(filename or self._filename).replace("*", "{name}")
         for name, ds in self.data.items():
             file_path = self.root.path / placeholder_filename.format(name=name)
             file_path.parent.mkdir(parents=True, exist_ok=True)
