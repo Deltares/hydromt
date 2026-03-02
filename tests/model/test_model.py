@@ -3,6 +3,7 @@
 
 import logging
 import shutil
+from copy import deepcopy
 from os import makedirs
 from os.path import isfile, join
 from pathlib import Path
@@ -311,14 +312,28 @@ def test_model_build_update_with_data(
     )
     # Build model with some data
     bbox = [12.00, 45.00, 12.25, 45.25]
+    component_specs = {
+        "grid": {"type": "GridComponent"},
+        "maps": {
+            "type": "SpatialDatasetsComponent",
+            "region_component": "grid",
+            "filename": "maps/{name}.nc",
+        },
+        "forcing": {
+            "type": "SpatialDatasetsComponent",
+            "region_component": "grid",
+            "filename": "forcing/*.nc",
+        },
+        "forcing2": {
+            "type": "SpatialDatasetsComponent",
+            "region_component": "grid",
+            "filename": "forcing2/{name}.nc",
+        },
+        "geoms": {"type": "GeomsComponent"},
+    }
     model = Model(
         root=tmp_path,
-        components={
-            "grid": {"type": "GridComponent"},
-            "maps": {"type": "SpatialDatasetsComponent", "region_component": "grid"},
-            "forcing": {"type": "SpatialDatasetsComponent", "region_component": "grid"},
-            "geoms": {"type": "GeomsComponent"},
-        },
+        components=deepcopy(component_specs),
         region_component="grid",
         mode="w+",
     )
@@ -330,24 +345,15 @@ def test_model_build_update_with_data(
 
     model.build(
         steps=[
-            {
-                "maps.set": {
-                    "data": demda,
-                    "name": "elevtn",
-                }
-            },
-            {
-                "forcing.set": {
-                    "data": obsda,
-                    "name": "precip",
-                }
-            },
+            {"maps.set": {"data": demda, "name": "elevtn"}},
+            {"forcing.set": {"data": obsda, "name": "precip"}},
         ],
     )
     # Check that variables are present + files were created
     assert "elevtn" in model.maps.data
     assert "precip" in model.forcing.data
     assert (model.root.path / model.grid._filename).exists()
+
     assert_all_datasets_exist(model.maps.data, model.maps._filename, model.root.path)
     assert_all_datasets_exist(
         model.forcing.data, model.forcing._filename, model.root.path
@@ -356,16 +362,7 @@ def test_model_build_update_with_data(
     # Now update the model
     model = Model(
         root=tmp_path,
-        components={
-            "grid": {"type": "GridComponent"},
-            "maps": {"type": "SpatialDatasetsComponent", "region_component": "grid"},
-            "forcing": {"type": "SpatialDatasetsComponent", "region_component": "grid"},
-            "forcing2": {
-                "type": "SpatialDatasetsComponent",
-                "region_component": "grid",
-            },
-            "geoms": {"type": "GeomsComponent"},
-        },
+        components=deepcopy(component_specs),
         region_component="grid",
         mode="r+",
     )
@@ -383,6 +380,7 @@ def test_model_build_update_with_data(
     assert "precip" in model.forcing2.data
     assert "maps.set.name=elevtn2" in caplog.messages
     assert (model.root.path / model.grid._filename).exists()
+
     assert_all_datasets_exist(model.maps.data, model.maps._filename, model.root.path)
     assert_all_datasets_exist(
         model.forcing.data, model.forcing._filename, model.root.path
