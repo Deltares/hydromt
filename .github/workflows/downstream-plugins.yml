@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*"
+    branches: [feat/release-test-automation-downstream-plugins]
   workflow_dispatch:
 
 permissions:
@@ -48,19 +49,30 @@ jobs:
           path: plugin
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install hydromt candidate
+      - name: Install hydromt candidate (with deps)
+        if: matrix.with_deps == true
         working-directory: plugin
         run: |
-          # We install the wheel in two ways:
-          # 1. --no-deps (strict API) to ensure the plugin works with only the candidate wheel
-          # 2. with deps (default) to ensure it still works when all dependencies are installed
-
           pixi install -e ${{ matrix.plugin.environment }}
-          if [ "${{ matrix.with_deps }}" = "true" ]; then
-              pixi run -e ${{ matrix.plugin.environment }} python -m pip install --force-reinstall "$HYDROMT_DIST"/hydromt-*.whl
-          else
-              pixi run -e ${{ matrix.plugin.environment }} python -m pip install --force-reinstall --no-deps "$HYDROMT_DIST"/hydromt-*.whl
-          fi
+          pixi run -e ${{ matrix.plugin.environment }} \
+            python -m pip install --force-reinstall "$HYDROMT_DIST"/hydromt-*.whl
+
+      - name: Install hydromt candidate (no deps)
+        if: matrix.with_deps == false
+        working-directory: plugin
+        run: |
+          pixi install -e ${{ matrix.plugin.environment }}
+          pixi run -e ${{ matrix.plugin.environment }} \
+            python -m pip install --force-reinstall --no-deps "$HYDROMT_DIST"/hydromt-*.whl
+
+      - name: Echo solved environment
+        run: |
+          # what pixi thinks is installed
+          pixi list -e ${{ matrix.plugin.environment }}
+
+          # what python will import
+          pixi run --no-install -e ${{ matrix.plugin.environment }} python -m pip freeze
+
 
       - name: Run plugin compatibility tests
         working-directory: plugin
