@@ -46,7 +46,7 @@ dependencies = [
 	"zarr>=3.1,<4",           # zarr
 ]
 
-requires-python = ">=3.11,<3.15"
+requires-python = ">=3.12,<3.15"
 readme = "README.rst"
 classifiers = [
 	"Development Status :: 5 - Production/Stable",
@@ -55,9 +55,9 @@ classifiers = [
 	"Topic :: Scientific/Engineering :: Hydrology",
 	"License :: OSI Approved :: MIT License",
 	"Programming Language :: Python :: 3",
-	"Programming Language :: Python :: 3.11",
 	"Programming Language :: Python :: 3.12",
 	"Programming Language :: Python :: 3.13",
+	"Programming Language :: Python :: 3.14",
 ]
 dynamic = ['version', 'description']
 
@@ -140,7 +140,7 @@ description = { file = "hydromt/__init__.py" }
 
 [tool.ruff]
 line-length = 88
-target-version = "py311"
+target-version = "py314"
 exclude = ["docs", "hydromt/model/__init__.py"]
 
 [tool.ruff.lint]
@@ -217,9 +217,6 @@ disallow_any_generics = true
 [tool.pixi.workspace]
 channels = ["conda-forge"]
 platforms = ["linux-64", "win-64", "osx-arm64"]
-
-[tool.pixi.feature.py311.dependencies]
-python = "3.11.*"
 
 [tool.pixi.feature.py312.dependencies]
 python = "3.12.*"
@@ -390,18 +387,6 @@ full-py312 = { features = [
 	"examples",
 ], solve-group = "py312" }
 min-py312 = { features = ["py312", "test"], solve-group = "py312" }
-
-full-py311 = { features = [
-	"py311",
-	"io",
-	"vrt",
-	"extra",
-	"dev",
-	"test",
-	"doc",
-	"examples",
-], solve-group = "py311" }
-min-py311 = { features = ["py311", "test"], solve-group = "py311" }
 
 # pypi does not have these binary wheels for osx-arm64
 [tool.pixi.target.osx-arm64.dependencies]
