@@ -8,8 +8,8 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
-Unreleased
-==========
+v1.4.1 (2026-03-03)
+===================
 
 New
 ---
