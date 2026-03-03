@@ -180,7 +180,7 @@ class MeshComponent(SpatialModelComponent):
         self.root._assert_read_mode()
         self._initialize(skip_read=True)
 
-        filename_template = (filename or self._filename).replace("*", "{name}")
+        filename_template = str(filename or self._filename).replace("*", "{name}")
         datasets = open_ncs(filename_template, root=self.root.path, **kwargs).values()
         self._open_datasets.extend(datasets)
         if len(datasets) > 0:

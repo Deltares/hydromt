@@ -11095,7 +11095,7 @@ packages:
 - pypi: ./
   name: hydromt
   version: 1.4.0.dev0
-  sha256: 76f90fa7af6bf816241b8b7a0ed2672a7180c328c0a899d0e31e201a3f1bc9b4
+  sha256: 4a35d8b03a4a16ab12e7f17d7ebeb8a3f0f8c2623cc79e2b37b1d9c341ff0b1c
   requires_dist:
   - affine
   - bottleneck
@@ -11167,7 +11167,7 @@ packages:
   - pytest-mock ; extra == 'test'
   - pytest-timeout ; extra == 'test'
   - gdal>=3.5.0 ; extra == 'vrt'
-  requires_python: '>=3.12,<3.15'
+  requires_python: '>=3.11,<3.15'
   editable: true
 - conda: https://conda.anaconda.org/conda-forge/linux-64/icu-78.2-h33c6efd_0.conda
   sha256: 142a722072fa96cf16ff98eaaf641f54ab84744af81754c292cb81e0881c0329

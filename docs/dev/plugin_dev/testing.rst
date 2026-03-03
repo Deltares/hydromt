@@ -121,3 +121,37 @@ A basic example:
 This workflow will run your tests in different operating systems (Ubuntu and Windows), four different
 Python versions (3.10, 3.11, 3.12, and 3.13), and against both the latest released version of HydroMT and the latest development version.
 You can customize the workflow further based on your specific testing requirements.
+
+Adding your plugin to the compatibility test bench
+--------------------------------------------------
+
+Before each HydroMT core release, we run an automated downstream compatibility test against a selection of mature plugins.
+The goal is to detect breaking API changes and dependency conflicts before a release is published.
+
+Two installation modes are executed.
+
+In the first mode, HydroMT is installed with --no-deps.
+This upgrades only the HydroMT wheel while keeping the plugin's environment exactly as previously solved.
+This simulates a user upgrading HydroMT inside an already existing environment without re-solving dependencies.
+This run answers the question: does the new HydroMT version remain compatible with an existing plugin environment?
+Failures in this mode indicate that the upgrade is not drop-in compatible.
+These require review and a conscious decision, but are not automatically considered release blockers.
+
+In the second mode, HydroMT is installed allowing dependency updates.
+This permits the resolver to adjust third-party packages if required by the new HydroMT version.
+This simulates a clean installation or a full dependency resolution.
+This run answers the question: can HydroMT and the plugin still coexist in a consistently solved environment?
+Failures in this mode indicate a broken dependency graph or a fundamental incompatibility and are treated as release blockers.
+
+For meaningful participation in the compatibility test bench, your plugin must:
+
+1. Provide a Pixi environment that can be installed in a locked and reproducible way.
+2. Define a test task that runs the full test suite via Pytest.
+3. Does not require any interactive input or external services during testing.
+
+If a compatibility failure is detected, the core and plugin maintainers should coordinate.
+Depending on the nature of the issue, the resolution may involve restoring backward compatibility in HydroMT,
+relaxing overly strict dependency constraints in the plugin, or preparing a plugin update aligned with the new HydroMT release.
+
+The purpose of this test bench is not to guarantee that plugins never need updates.
+Rather it is to ensure that any required changes are identified and handled deliberately rather than discovered by end users after release.
