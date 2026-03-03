@@ -13,6 +13,24 @@ Unreleased
 
 New
 ---
+
+Changed
+-------
+
+Fixed
+-----
+
+Deprecated
+----------
+
+Removed
+-------
+
+v1.3.1 (2026-03-03)
+===================
+
+New
+---
 - Added ``raster.sample_geoms`` as a faster alternative to ``raster.zonal_stats`` meant for the case when ``geometry size << raster resolution``.
 - Added support for Python 3.14
 
