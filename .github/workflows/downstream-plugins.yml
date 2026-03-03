@@ -23,12 +23,10 @@ jobs:
             repo: Deltares/hydromt_wflow
             pixi_task: test
             environment: default
-          # HydromtSfincs is not yet ready to be used in this workflow.
-          # TODO merge https://github.com/Deltares/hydromt_sfincs/pull/346
-          # - name: hydromt_sfincs
-          #   repo: Deltares/hydromt_sfincs
-          #   pixi_task: tests
-          #   environment: default
+          - name: hydromt_sfincs
+            repo: Deltares/hydromt_sfincs
+            pixi_task: tests
+            environment: default
         with_deps: [false, true]
 
     steps:
@@ -74,11 +72,11 @@ jobs:
       - name: Echo solved environment
         run: |
           # what pixi thinks is installed
-          echo "pixi list output:\n"
+          echo "pixi list output:"
           pixi list -e ${{ matrix.plugin.environment }}
 
           # what python will import
-          echo "pip freeze output:\n"
+          echo "pip freeze output:"
           pixi run --no-install -e ${{ matrix.plugin.environment }} \
             python -m pip freeze
 
