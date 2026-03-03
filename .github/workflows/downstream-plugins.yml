@@ -18,6 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        with_deps: [false, true]
         plugin:
           - name: hydromt-wflow
             repo: Deltares/hydromt_wflow
@@ -27,7 +28,10 @@ jobs:
             repo: Deltares/hydromt_sfincs
             pixi_task: tests
             environment: default
-        with_deps: [false, true]
+          - name: hydromt-fiat
+            repo: Deltares/hydromt_fiat
+            pixi_task: test
+            environment: default
 
     steps:
       - name: Checkout hydromt
