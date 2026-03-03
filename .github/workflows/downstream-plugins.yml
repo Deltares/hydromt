@@ -23,7 +23,7 @@ jobs:
             repo: Deltares/hydromt_wflow
             pixi_task: test
             environment: default
-          - name: hydromt_sfincs
+          - name: hydromt-sfincs
             repo: Deltares/hydromt_sfincs
             pixi_task: tests
             environment: default
@@ -58,6 +58,7 @@ jobs:
         working-directory: plugin
         run: |
           pixi install -e ${{ matrix.plugin.environment }}
+          pixi run -e ${{ matrix.plugin.environment }} python -m ensurepip --upgrade
           pixi run -e ${{ matrix.plugin.environment }} \
             python -m pip install --force-reinstall "$HYDROMT_DIST"/hydromt-*.whl
 
@@ -66,6 +67,7 @@ jobs:
         working-directory: plugin
         run: |
           pixi install -e ${{ matrix.plugin.environment }}
+          pixi run -e ${{ matrix.plugin.environment }} python -m ensurepip --upgrade
           pixi run -e ${{ matrix.plugin.environment }} \
             python -m pip install --force-reinstall --no-deps "$HYDROMT_DIST"/hydromt-*.whl
 
