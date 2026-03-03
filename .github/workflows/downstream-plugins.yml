@@ -53,12 +53,15 @@ jobs:
           path: plugin
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Install plugin env
+        run: |
+          pixi install -e ${{ matrix.plugin.environment }}
+          pixi run -e ${{ matrix.plugin.environment }} python -m ensurepip --upgrade
+
       - name: Install hydromt candidate (with deps)
         if: matrix.with_deps == true
         working-directory: plugin
         run: |
-          pixi install -e ${{ matrix.plugin.environment }}
-          pixi run -e ${{ matrix.plugin.environment }} python -m ensurepip --upgrade
           pixi run -e ${{ matrix.plugin.environment }} \
             python -m pip install --force-reinstall "$HYDROMT_DIST"/hydromt-*.whl
 
@@ -66,8 +69,6 @@ jobs:
         if: matrix.with_deps == false
         working-directory: plugin
         run: |
-          pixi install -e ${{ matrix.plugin.environment }}
-          pixi run -e ${{ matrix.plugin.environment }} python -m ensurepip --upgrade
           pixi run -e ${{ matrix.plugin.environment }} \
             python -m pip install --force-reinstall --no-deps "$HYDROMT_DIST"/hydromt-*.whl
 
