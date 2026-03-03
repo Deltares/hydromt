@@ -46,7 +46,7 @@ dependencies = [
 	"zarr>=3.1,<4",           # zarr
 ]
 
-requires-python = ">=3.12,<3.15"
+requires-python = ">=3.11,<3.15"
 readme = "README.rst"
 classifiers = [
 	"Development Status :: 5 - Production/Stable",

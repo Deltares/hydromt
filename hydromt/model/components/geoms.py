@@ -172,7 +172,7 @@ class GeomsComponent(SpatialModelComponent):
         """
         self.root._assert_read_mode()
         self._initialize(skip_read=True)
-        placeholder_filename = (filename or self._filename).replace("*", "{name}")
+        placeholder_filename = str(filename or self._filename).replace("*", "{name}")
         for path, name in _expand_wildcards_and_name_placeholder(
             placeholder_filename, self.root.path
         ).items():
@@ -212,7 +212,7 @@ class GeomsComponent(SpatialModelComponent):
                 f"{self.model.name}.{self.name_in_model}: No geoms data found, skip writing."
             )
             return
-        placeholder_filename = (filename or self._filename).replace("*", "{name}")
+        placeholder_filename = str(filename or self._filename).replace("*", "{name}")
         for name, gdf in self.data.items():
             if len(gdf) == 0:
                 logger.warning(

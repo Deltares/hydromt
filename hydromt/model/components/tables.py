@@ -106,7 +106,7 @@ class TablesComponent(ModelComponent):
         self.root._assert_read_mode()
         self._initialize_tables(skip_read=True)
         logger.info("Reading model table files.")
-        placeholder_filename = (filename or self._filename).replace("*", "{name}")
+        placeholder_filename = str(filename or self._filename).replace("*", "{name}")
         for path, name in _expand_wildcards_and_name_placeholder(
             placeholder_filename, self.root.path
         ).items():

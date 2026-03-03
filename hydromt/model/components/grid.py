@@ -217,7 +217,7 @@ class GridComponent(SpatialModelComponent):
         """
         self.root._assert_read_mode()
         self._initialize_grid(skip_read=True)
-        filename_template = (filename or self._filename).replace("*", "{name}")
+        filename_template = str(filename or self._filename).replace("*", "{name}")
         for name, ds in open_ncs(
             filename_template, root=self.root.path, **kwargs
         ).items():
