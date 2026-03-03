@@ -157,7 +157,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         self.root._assert_read_mode()
         self._initialize(skip_read=True)
         kwargs = {**{"engine": "netcdf4"}, **kwargs}
-        placeholder_filename = (filename or self._filename).replace("*", "{name}")
+        placeholder_filename = str(filename or self._filename).replace("*", "{name}")
         for name, ds in open_ncs(
             placeholder_filename, root=self.root.path, **kwargs
         ).items():
@@ -217,7 +217,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
 
         to_netcdf_kwargs = to_netcdf_kwargs or {}
         to_netcdf_kwargs.setdefault("engine", "netcdf4")
-        placeholder_filename = (filename or self._filename).replace("*", "{name}")
+        placeholder_filename = str(filename or self._filename).replace("*", "{name}")
         for name, ds in self.data.items():
             file_path = self.root.path / placeholder_filename.format(name=name)
             file_path.parent.mkdir(parents=True, exist_ok=True)
