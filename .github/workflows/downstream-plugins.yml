@@ -4,6 +4,9 @@ on:
   push:
     tags:
       - "v*"
+    branches: [release/**]
+  pull_request:
+    branches: [release/**]
   workflow_dispatch:
 
 permissions:

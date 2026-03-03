@@ -3,9 +3,7 @@ name: SonarQube Scan and coverage
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
-      - v1
+    branches: [main, release/**]
     paths:
       - tests/**/*
       - hydromt/**/*
@@ -15,9 +13,7 @@ on:
       - .github/workflows/sonar.yml
       - sonar-project.properties
   pull_request:
-    branches:
-      - main
-      - v1
+    branches: [main, release/**]
     paths:
       - tests/**/*
       - hydromt/**/*
