@@ -12,6 +12,11 @@ on:
           - same
         default: minor
         description: "Is this a Major, Minor, or Patch release?"
+
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   build:
     defaults:

@@ -21,6 +21,9 @@ on:
       - pyproject.toml
       - .github/workflows/docs.yml
 
+permissions:
+  contents: write
+
 jobs:
   test-docs:
     defaults:
@@ -60,8 +63,6 @@ jobs:
             # Otherwise, echo the version number
             echo "DOC_VERSION=v$CURRENT_VERSION" >> "$GITHUB_ENV"
           fi
-
-
 
       - name: Upload to GitHub Pages
         if: ${{ github.event_name != 'pull_request' }}
