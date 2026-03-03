@@ -14,6 +14,7 @@ jobs:
   downstream:
     name: Test ${{ matrix.plugin.name }} (deps=${{ matrix.with_deps }})
     runs-on: ubuntu-latest
+    continue-on-error: true
 
     strategy:
       fail-fast: false
@@ -106,16 +107,21 @@ jobs:
           echo "Plugin: ${{ matrix.plugin.name }}"
           echo "With dependencies: ${{ matrix.with_deps }}"
           echo ""
+
           if [ "${{ matrix.with_deps }}" = "false" ]; then
-            echo "This failure is NON-BLOCKING."
-            echo "It indicates that the new hydromt version is not drop-in compatible"
-            echo "with an existing plugin environment."
-            echo "Action: review and decide on what to do; accept, document, or fix."
+            echo "This failure indicates that the new hydromt version is not drop-in compatible with an existing plugin environment."
           else
-            echo "This failure IS A RELEASE BLOCKER."
-            echo "Dependency resolution or runtime compatibility is broken."
-            echo "Action: must be fixed before release."
+            echo "This failure indicates that plugin code is not yet compatible with the updated dependencies of the .whl file."
+            echo "Or that the version ranges are not setup correctly for either the plugin or core."
           fi
+
+          echo ""
+          echo "ACTION: review errors and choose 1 or 2:
+          echo "1. Accept the failure: this failure is expected and is not a problem. Document that this is the case and why!"
+          echo "2. Fix the failure: Either in core before making the release, or in the plugin."
+
+          echo "Finally, let the plugin developer (team) know about any errors you encountered!"
+          echo "And that a new release of hydromt core is made!"
           echo ""
           echo "For more information, please review the docs:"
           echo "- https://deltares.github.io/hydromt/stable/dev/core_dev/release.html"
