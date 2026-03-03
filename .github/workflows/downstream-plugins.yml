@@ -62,7 +62,8 @@ jobs:
         if: matrix.with_deps == true
         working-directory: plugin
         run: |
-          pixi add hydromt@file:"$HYDROMT_DIST"/hydromt-*.whl --pypi
+          wheel_file=$(ls "$HYDROMT_DIST"/hydromt-*.whl)
+          pixi add "hydromt@file:$wheel_file" --pypi
 
       - name: Install plugin env
         working-directory: plugin
