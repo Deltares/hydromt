@@ -4,7 +4,6 @@ on:
   push:
     tags:
       - "v*"
-    branches: [feat/release-test-automation-downstream-plugins]
   workflow_dispatch:
 
 permissions:
