@@ -14,17 +14,14 @@ test = { cmd = "pytest tests" }
 my_plugin = { path = ".", editable = true }
 
 # Define features for different Python versions and Hydromt versions
-[feature.py310.dependencies]
-python = "3.10.*"
-
-[feature.py311.dependencies]
-python = "3.11.*"
-
 [feature.py312.dependencies]
 python = "3.12.*"
 
 [feature.py313.dependencies]
 python = "3.13.*"
+
+[feature.py314.dependencies]
+python = "3.14.*"
 
 [feature.hydromt_dev.pypi-dependencies]
 # Get the latest version from main
@@ -36,12 +33,10 @@ hydromt = ">=1.0,<2.0"
 
 # Define environments to combine features
 [environments]
-latest_310 = { features = ["py310", "hydromt_latest"], solve-group = "py310" }
-latest_311 = { features = ["py311", "hydromt_latest"], solve-group = "py311" }
 latest_312 = { features = ["py312", "hydromt_latest"], solve-group = "py312" }
 latest_313 = { features = ["py313", "hydromt_latest"], solve-group = "py313" }
+latest_314 = { features = ["py314", "hydromt_latest"], solve-group = "py314" }
 
-dev_310 = { features = ["py310", "hydromt_dev"], solve-group = "py310" }
-dev_311 = { features = ["py311", "hydromt_dev"], solve-group = "py311" }
 dev_312 = { features = ["py312", "hydromt_dev"], solve-group = "py312" }
 dev_313 = { features = ["py313", "hydromt_dev"], solve-group = "py313" }
+dev_314 = { features = ["py314", "hydromt_dev"], solve-group = "py314" }
