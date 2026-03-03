@@ -116,10 +116,10 @@ jobs:
           fi
 
           echo ""
-          echo "ACTION: review errors and choose 1 or 2:
+          echo "ACTION: review errors and choose 1 or 2:"
           echo "1. Accept the failure: this failure is expected and is not a problem. Document that this is the case and why!"
           echo "2. Fix the failure: Either in core before making the release, or in the plugin."
-
+          echo ""
           echo "Finally, let the plugin developer (team) know about any errors you encountered!"
           echo "And that a new release of hydromt core is made!"
           echo ""
