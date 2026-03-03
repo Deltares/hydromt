@@ -83,7 +83,7 @@ jobs:
         run: |
           # what pixi thinks is installed
           echo "pixi list output:"
-          pixi list -e ${{ matrix.plugin.environment }}  --no-install
+          pixi list -e ${{ matrix.plugin.environment }} --no-install
 
           # what python will import
           echo "pip freeze output:"
