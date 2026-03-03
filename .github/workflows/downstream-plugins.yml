@@ -54,6 +54,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install plugin env
+        working-directory: plugin
         run: |
           pixi install -e ${{ matrix.plugin.environment }}
           pixi run -e ${{ matrix.plugin.environment }} python -m ensurepip --upgrade
@@ -73,6 +74,7 @@ jobs:
             python -m pip install --force-reinstall --no-deps "$HYDROMT_DIST"/hydromt-*.whl
 
       - name: Echo solved environment
+        working-directory: plugin
         run: |
           # what pixi thinks is installed
           echo "pixi list output:"
