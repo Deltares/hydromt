@@ -61,20 +61,21 @@ jobs:
         working-directory: plugin
         run: |
           pixi install -e ${{ matrix.plugin.environment }}
-          pixi run -e ${{ matrix.plugin.environment }} python -m ensurepip --upgrade
+          pixi run -e ${{ matrix.plugin.environment }} --no-install \
+            python -m ensurepip --upgrade
 
       - name: Install hydromt candidate (with deps)
         if: matrix.with_deps == true
         working-directory: plugin
         run: |
-          pixi run -e ${{ matrix.plugin.environment }} \
+          pixi run -e ${{ matrix.plugin.environment }} --no-install \
             python -m pip install --force-reinstall "$HYDROMT_DIST"/hydromt-*.whl
 
       - name: Install hydromt candidate (no deps)
         if: matrix.with_deps == false
         working-directory: plugin
         run: |
-          pixi run -e ${{ matrix.plugin.environment }} \
+          pixi run -e ${{ matrix.plugin.environment }} --no-install \
             python -m pip install --force-reinstall --no-deps "$HYDROMT_DIST"/hydromt-*.whl
 
       - name: Echo solved environment
@@ -82,11 +83,11 @@ jobs:
         run: |
           # what pixi thinks is installed
           echo "pixi list output:"
-          pixi list -e ${{ matrix.plugin.environment }}
+          pixi list -e ${{ matrix.plugin.environment }}  --no-install
 
           # what python will import
           echo "pip freeze output:"
-          pixi run --no-install -e ${{ matrix.plugin.environment }} \
+          pixi run -e ${{ matrix.plugin.environment }} --no-install \
             python -m pip freeze
 
       - name: Run plugin compatibility tests
