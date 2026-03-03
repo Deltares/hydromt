@@ -49,7 +49,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.3.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.4.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
@@ -58,7 +58,7 @@
     <link rel="search" title="Search" href="../../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.3.0.dev0" />
+  <meta name="docsearch:version" content="1.4.0.dev0" />
   </head>
   
   
@@ -434,30 +434,12 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.drivers.base_driver</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">DRIVER_OPTIONS_DESCRIPTION</span><span class="p">,</span>
     <span class="n">BaseDriver</span><span class="p">,</span>
-    <span class="n">DriverOptions</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.drivers.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Preprocessor</span><span class="p">,</span> <span class="n">get_preprocessor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.drivers.xarray_options</span><span class="w"> </span><span class="kn">import</span> <span class="n">XarrayDriverOptions</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDataStrategy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Geom</span><span class="p">,</span> <span class="n">Predicate</span><span class="p">,</span> <span class="n">SourceMetadata</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
-
-
-<div class="viewcode-block" id="GeoDatasetOptions">
-<a class="viewcode-back" href="../../../../../_generated/hydromt.data_catalog.drivers.GeoDatasetOptions.html#hydromt.data_catalog.drivers.GeoDatasetOptions">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">GeoDatasetOptions</span><span class="p">(</span><span class="n">DriverOptions</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Options for GeoDatasetVectorDriver.&quot;&quot;&quot;</span>
-
-    <span class="n">preprocess</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Name of preprocessor to apply on geodataset after reading. Available preprocessors include: round_latlon, to_datetimeindex, remove_duplicates, harmonise_dims. See their docstrings for details.&quot;&quot;&quot;</span>
-
-<div class="viewcode-block" id="GeoDatasetOptions.get_preprocessor">
-<a class="viewcode-back" href="../../../../../_generated/hydromt.data_catalog.drivers.GeoDatasetOptions.html#hydromt.data_catalog.drivers.GeoDatasetOptions.get_preprocessor">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_preprocessor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Preprocessor</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the preprocessor function.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">get_preprocessor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">preprocess</span><span class="p">)</span></div>
-</div>
-
 
 
 <div class="viewcode-block" id="GeoDatasetDriver">
@@ -465,8 +447,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">GeoDatasetDriver</span><span class="p">(</span><span class="n">BaseDriver</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract Driver to read GeoDatasets.&quot;&quot;&quot;</span>
 
-    <span class="n">options</span><span class="p">:</span> <span class="n">GeoDatasetOptions</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
-        <span class="n">default_factory</span><span class="o">=</span><span class="n">GeoDatasetOptions</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">DRIVER_OPTIONS_DESCRIPTION</span>
+    <span class="n">options</span><span class="p">:</span> <span class="n">XarrayDriverOptions</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">XarrayDriverOptions</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">DRIVER_OPTIONS_DESCRIPTION</span>
     <span class="p">)</span>
 
 <div class="viewcode-block" id="GeoDatasetDriver.read">

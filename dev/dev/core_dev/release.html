@@ -50,7 +50,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.3.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.4.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
@@ -61,7 +61,7 @@
     <link rel="prev" title="Test and CI" href="test_ci.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.3.0.dev0" />
+  <meta name="docsearch:version" content="1.4.0.dev0" />
   </head>
   
   
@@ -405,6 +405,8 @@
 <li class="toctree-l2"><a class="reference internal" href="documentation.html">Adding Documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="test_ci.html">Test and CI</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Creating a release</a></li>
+
+
 </ul>
 </details></li>
 </ul>
@@ -483,6 +485,39 @@ Here you can use the comment posted to the release PR to see if the <cite>meta.y
 <li><p>celebrate the new release!</p></li>
 </ol>
 </section>
+<section id="plugin-compatibility-test">
+<h1>Plugin compatibility test<a class="headerlink" href="#plugin-compatibility-test" title="Link to this heading">#</a></h1>
+<p>Before finishing a new HydroMT core release, you must run the downstream plugin compatibility test.
+This is part of the release gate.
+It checks whether the new HydroMT wheel still works with a set of mature plugins.</p>
+<p>The workflow builds the actual wheel that would be published on PyPI and installs that wheel into each plugin’s Pixi environment.
+We do not use an editable install.
+This makes sure we test the real release artifact, including packaging metadata and included data files.</p>
+<p>For each plugin, the workflow runs in two modes.</p>
+<p>In the first mode, HydroMT is installed with –no-deps. (deps=false)
+This upgrades only the HydroMT wheel and keeps the plugin’s existing, already solved environment unchanged.
+This simulates a user upgrading HydroMT in an existing environment.
+If this fails, it means the upgrade is not fully drop-in compatible.
+These failures must be reviewed, but they are not automatically release blockers.</p>
+<p>In the second mode, HydroMT is installed allowing dependency updates. (deps=true)
+This allows the environment to re-solve and update third-party packages if needed.
+This simulates a clean installation.
+If this fails, the release is considered broken and must not be finalised.
+These failures are release blockers.</p>
+</section>
+<section id="how-to-run-the-compatibility-test">
+<h1>How to run the compatibility test<a class="headerlink" href="#how-to-run-the-compatibility-test" title="Link to this heading">#</a></h1>
+<ol class="arabic simple">
+<li><p>Make sure your release branch (for example release/vX.Y) is up to date.</p></li>
+<li><p>Go to the GitHub Actions tab.</p></li>
+<li><p>Select the “Downstream plugin compatibility” workflow.</p></li>
+<li><p>Click “Run workflow” and choose the release branch.</p></li>
+</ol>
+<p>If the <code class="docutils literal notranslate"><span class="pre">with</span> <span class="pre">dependencies</span></code> run fails, you must fix the problem before continuing the release.</p>
+<p>If the <code class="docutils literal notranslate"><span class="pre">no-deps</span></code> run fails, review the failure and decide what to do.
+You may need to restore backward compatibility in core, coordinate a plugin update, or accept that upgrading HydroMT requires re-solving the environment.</p>
+<p>Do not finalise the release until all blocking failures are resolved and advisory failures have been reviewed.</p>
+</section>
 
 
                 </article>
@@ -542,6 +577,21 @@ Here you can use the comment posted to the release PR to see if the <cite>meta.y
     <!-- dropdown will be populated by javascript on page load -->
   </div>
 </div></div>
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Creating a release</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#plugin-compatibility-test">Plugin compatibility test</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-run-the-compatibility-test">How to run the compatibility test</a></li>
+</ul>
+
+  </nav></div>
 
 </div></div>
               

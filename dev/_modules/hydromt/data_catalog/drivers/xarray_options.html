@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>hydromt.model.components.base &#8212; HydroMT  documentation</title>
+    <title>hydromt.data_catalog.drivers.xarray_options &#8212; HydroMT  documentation</title>
   
   
   
@@ -45,7 +45,7 @@
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/hydromt/model/components/base';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/hydromt/data_catalog/drivers/xarray_options';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
@@ -403,7 +403,7 @@
     
     <li class="breadcrumb-item"><a href="../../../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">hydromt.model.components.base</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">hydromt.data_catalog.drivers.xarray_options</span></li>
   </ul>
 </nav>
 </div>
@@ -420,113 +420,130 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <h1>Source code for hydromt.model.components.base</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Provides the base class for model components.&quot;&quot;&quot;</span>
+  <h1>Source code for hydromt.data_catalog.drivers.xarray_options</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Options for configuring xarray-based drivers in the data catalog.&quot;&quot;&quot;</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">cast</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">weakref</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReferenceType</span><span class="p">,</span> <span class="n">ref</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">splitext</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">Field</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataCatalog</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.typing.deferred_file_close</span><span class="w"> </span><span class="kn">import</span> <span class="n">DeferredFileClose</span>
-
-<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.root</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelRoot</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.drivers.base_driver</span><span class="w"> </span><span class="kn">import</span> <span class="n">DriverOptions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.drivers.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Preprocessor</span><span class="p">,</span> <span class="n">get_preprocessor</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="ModelComponent">
-<a class="viewcode-back" href="../../../../_generated/hydromt.model.components.ModelComponent.html#hydromt.model.components.ModelComponent">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ModelComponent</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for ModelComponent.&quot;&quot;&quot;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">XarrayIOFormat</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Enumeration of supported xarray IO formats, each associated with a set of file extensions.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="ModelComponent.__init__">
-<a class="viewcode-back" href="../../../../_generated/hydromt.model.components.ModelComponent.html#hydromt.model.components.ModelComponent.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="s2">&quot;Model&quot;</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__model_ref</span><span class="p">:</span> <span class="n">ReferenceType</span><span class="p">[</span><span class="s2">&quot;Model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ref</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_open_datasets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_deferred_file_close_handles</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DeferredFileClose</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span></div>
-
-
-<div class="viewcode-block" id="ModelComponent.read">
-<a class="viewcode-back" href="../../../../_generated/hydromt.model.components.ModelComponent.read.html#hydromt.model.components.ModelComponent.read">[docs]</a>
-    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read the file(s) into the component.&quot;&quot;&quot;</span>
-        <span class="o">...</span></div>
-
-
-<div class="viewcode-block" id="ModelComponent.write">
-<a class="viewcode-back" href="../../../../_generated/hydromt.model.components.ModelComponent.write.html#hydromt.model.components.ModelComponent.write">[docs]</a>
-    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write the component to file(s).&quot;&quot;&quot;</span>
-        <span class="o">...</span></div>
-
+    <span class="n">ZARR</span> <span class="o">=</span> <span class="s2">&quot;zarr&quot;</span>
+    <span class="n">NETCDF4</span> <span class="o">=</span> <span class="s2">&quot;netcdf4&quot;</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Model&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the model object this component is associated with.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s2">&quot;Model&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model_ref</span><span class="p">())</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extensions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the set of file extensions associated with this IO format.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span> <span class="o">==</span> <span class="n">XarrayIOFormat</span><span class="o">.</span><span class="n">ZARR</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;.zarr&quot;</span><span class="p">}</span>
+        <span class="k">elif</span> <span class="bp">self</span> <span class="o">==</span> <span class="n">XarrayIOFormat</span><span class="o">.</span><span class="n">NETCDF4</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;.nc&quot;</span><span class="p">,</span> <span class="s2">&quot;.netcdf&quot;</span><span class="p">}</span>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">()</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">name_in_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find the name of the component in the parent model components.&quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">component</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">name</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Component not found in model components.&quot;</span><span class="p">)</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">data_catalog</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataCatalog</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the data catalog of the model this component is associated with.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">data_catalog</span>
+<div class="viewcode-block" id="XarrayDriverOptions">
+<a class="viewcode-back" href="../../../../_generated/hydromt.data_catalog.drivers.XarrayDriverOptions.html#hydromt.data_catalog.drivers.XarrayDriverOptions">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">XarrayDriverOptions</span><span class="p">(</span><span class="n">DriverOptions</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Options for configuring xarray-based drivers.&quot;&quot;&quot;</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">root</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ModelRoot&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the root of the model this component is associated with.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">root</span>
+    <span class="n">preprocess</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Name of preprocessor to apply before merging datasets. Available preprocessors include: round_latlon, to_datetimeindex, remove_duplicates, harmonise_dims. See their docstrings for details.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ext_override</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Override the file extension check and try to read all files as the given extension. Useful when reading zarr files without the .zarr extension.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">test_equal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s2">&quot;ModelComponent&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test if two components are equal.</span>
+<div class="viewcode-block" id="XarrayDriverOptions.get_preprocessor">
+<a class="viewcode-back" href="../../../../_generated/hydromt.data_catalog.drivers.XarrayDriverOptions.html#hydromt.data_catalog.drivers.XarrayDriverOptions.get_preprocessor">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_preprocessor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Preprocessor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the preprocessor instance based on the configured preprocess string.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">get_preprocessor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">preprocess</span><span class="p">)</span></div>
 
-<span class="sd">        Inherit this method in the subclass to test for equality on data.</span>
-<span class="sd">        Don&#39;t forget to call super().test_equal(other) in the subclass.</span>
+
+<div class="viewcode-block" id="XarrayDriverOptions.get_reading_ext">
+<a class="viewcode-back" href="../../../../_generated/hydromt.data_catalog.drivers.XarrayDriverOptions.html#hydromt.data_catalog.drivers.XarrayDriverOptions.get_reading_ext">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_reading_ext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Determine the file extension to use for reading, either from the override or from the URI.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ext_override</span> <span class="ow">or</span> <span class="n">splitext</span><span class="p">(</span><span class="n">uri</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="XarrayDriverOptions.get_io_format">
+<a class="viewcode-back" href="../../../../_generated/hydromt.data_catalog.drivers.XarrayDriverOptions.html#hydromt.data_catalog.drivers.XarrayDriverOptions.get_io_format">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_io_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">XarrayIOFormat</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Determine the xarray reading format based on the file extension or override.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        other : ModelComponent</span>
-<span class="sd">            The component to compare against.</span>
+<span class="sd">        uri : str</span>
+<span class="sd">            The URI of the file to read, used to infer the format from the extension if no override is set.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        tuple[bool, Dict[str, str]]</span>
-<span class="sd">            True if the components are equal, and a dict with the associated errors per property checked.</span>
+<span class="sd">        format : XarrayIOFormat | None</span>
+<span class="sd">            The xarray reading format, either &#39;zarr&#39; or &#39;netcdf4&#39;. Returns None if the extension is unsupported.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">errors</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
-            <span class="n">errors</span><span class="p">[</span><span class="s2">&quot;__class__&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;other does not inherit from </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="si">}</span><span class="s2">.&quot;</span>
-        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">errors</span>
+        <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_reading_ext</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clean up all open datasets. Method to be called before finish_write.&quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">ds</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_datasets</span><span class="p">:</span>
-            <span class="n">ds</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_open_datasets</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">ext</span> <span class="ow">in</span> <span class="n">XarrayIOFormat</span><span class="o">.</span><span class="n">ZARR</span><span class="o">.</span><span class="n">extensions</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">XarrayIOFormat</span><span class="o">.</span><span class="n">ZARR</span>
+        <span class="k">elif</span> <span class="n">ext</span> <span class="ow">in</span> <span class="n">XarrayIOFormat</span><span class="o">.</span><span class="n">NETCDF4</span><span class="o">.</span><span class="n">extensions</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">XarrayIOFormat</span><span class="o">.</span><span class="n">NETCDF4</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">finish_write</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Finish the write functionality after cleanup was called for all components in the model.</span>
 
-<span class="sd">        All DeferredFileClose objects can overwrite any lazy loaded files now.</span>
+<div class="viewcode-block" id="XarrayDriverOptions.filter_uris_by_format">
+<a class="viewcode-back" href="../../../../_generated/hydromt.data_catalog.drivers.XarrayDriverOptions.html#hydromt.data_catalog.drivers.XarrayDriverOptions.filter_uris_by_format">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">filter_uris_by_format</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">uris</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">XarrayIOFormat</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Filter the list of URIs to only include those matching the specified format.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        uris : list[str]</span>
+<span class="sd">            List of URIs to filter.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        filtered_uris : list[str]</span>
+<span class="sd">            List of URIs that match the specified format.</span>
+<span class="sd">        io_format : XarrayIOFormat</span>
+<span class="sd">            The xarray reading format to filter by, either &#39;zarr&#39; or &#39;netcdf4&#39;.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">close_handle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deferred_file_close_handles</span><span class="p">:</span>
-            <span class="n">close_handle</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_deferred_file_close_handles</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+        <span class="n">io_format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_io_format</span><span class="p">(</span><span class="n">uris</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">io_format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unknown extension for XarrayDriverOptions: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">get_reading_ext</span><span class="p">(</span><span class="n">uris</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="s2">&quot;This can be overridden by setting the `ext_override` option to a supported extension (e.g. &#39;.zarr&#39; or &#39;.nc&#39;)&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">filtered_uris</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_uri</span> <span class="ow">in</span> <span class="n">uris</span><span class="p">:</span>
+            <span class="n">_format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_io_format</span><span class="p">(</span><span class="n">_uri</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">_format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;URI </span><span class="si">{</span><span class="n">_uri</span><span class="si">}</span><span class="s2"> has unsupported extension for format </span><span class="si">{</span><span class="n">io_format</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2"> and ext_override is not set, skipping...&quot;</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">_format</span> <span class="o">!=</span> <span class="n">io_format</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Reading </span><span class="si">{</span><span class="n">io_format</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">_uri</span><span class="si">}</span><span class="s2"> has a different format </span><span class="si">{</span><span class="n">_format</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">, skipping...&quot;</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">filtered_uris</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_uri</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">filtered_uris</span><span class="p">,</span> <span class="n">io_format</span></div>
+</div>
 
 </pre></div>
 

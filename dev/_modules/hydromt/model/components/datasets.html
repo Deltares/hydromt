@@ -49,7 +49,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.3.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.4.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
@@ -58,7 +58,7 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.3.0.dev0" />
+  <meta name="docsearch:version" content="1.4.0.dev0" />
   </head>
   
   
@@ -424,7 +424,7 @@
 <span></span><span class="sd">&quot;&quot;&quot;Xarrays component.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span>
@@ -465,7 +465,7 @@
 <span class="sd">            HydroMT model instance</span>
 <span class="sd">        filename: str</span>
 <span class="sd">            The path to use for reading and writing of component data by default.</span>
-<span class="sd">            by default &quot;datasets/{name}.nc&quot; ie one file per dataset in the data</span>
+<span class="sd">            by default ``datasets/{name}.nc`` ie one file per dataset in the data</span>
 <span class="sd">            dictionary.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">:</span> <span class="n">XArrayDict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
@@ -496,7 +496,7 @@
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.components.DatasetsComponent.set.html#hydromt.model.components.DatasetsComponent.set">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">],</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span> <span class="o">|</span> <span class="n">DataArray</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">split_dataset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
@@ -515,7 +515,7 @@
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">split_dataset</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">):</span>
-                <span class="n">ds</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">ds</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dataset</span> <span class="o">|</span> <span class="n">DataArray</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
                     <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">):</span> <span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">data_vars</span>
                 <span class="p">}</span>
             <span class="k">else</span><span class="p">:</span>
@@ -548,9 +548,14 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        filename : str, optional</span>
-<span class="sd">            filename relative to model root. should contain a {name} placeholder</span>
-<span class="sd">            which will be used to determine the names/keys of the datasets.</span>
-<span class="sd">            if None, the path that was provided at init will be used.</span>
+<span class="sd">            Filename relative to model root. Should contain either a * wildcard character</span>
+<span class="sd">            or a {name} placeholder to read multiple files into the data dictionary.</span>
+<span class="sd">            All files matching the glob pattern defined by filename will be read.</span>
+<span class="sd">            If a {name} placeholder is used, that name will be used as the key in the</span>
+<span class="sd">            data dictionary.</span>
+<span class="sd">            If no {name} placeholder is used, the filename without extension will be used</span>
+<span class="sd">            as the key in the data dictionary.</span>
+<span class="sd">            If None, the path that was provided at init will be used.</span>
 <span class="sd">        **kwargs:</span>
 <span class="sd">            Additional keyword arguments that are passed to the</span>
 <span class="sd">            `hydromt.readers.open_ncs` function.</span>
@@ -558,9 +563,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_assert_read_mode</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">skip_read</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="p">{</span><span class="s2">&quot;engine&quot;</span><span class="p">:</span> <span class="s2">&quot;netcdf4&quot;</span><span class="p">},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">}</span>
-        <span class="n">filename_template</span> <span class="o">=</span> <span class="n">filename</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span>
-        <span class="n">ncs</span> <span class="o">=</span> <span class="n">open_ncs</span><span class="p">(</span><span class="n">filename_template</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">ds</span> <span class="ow">in</span> <span class="n">ncs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+        <span class="n">filename_template</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{name}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">ds</span> <span class="ow">in</span> <span class="n">open_ncs</span><span class="p">(</span>
+            <span class="n">filename_template</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_open_datasets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="p">(</span><span class="n">da</span><span class="p">,)</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
@@ -595,8 +602,9 @@
 <span class="sd">        nc_dict: dict</span>
 <span class="sd">            Dictionary of xarray.Dataset and/or xarray.DataArray to write</span>
 <span class="sd">        filename: str, optional</span>
-<span class="sd">            filename relative to model root and should contain a {name} placeholder</span>
-<span class="sd">            Can be a relative path.</span>
+<span class="sd">            filename relative to model root and must contain a {name} placeholder or a *</span>
+<span class="sd">            wildcard character to write multiple files from the data dictionary.</span>
+<span class="sd">            Each name in the data dictionary will be used to replace the {name} placeholder or the * character in the filename.</span>
 <span class="sd">        gdal_compliant: bool, optional</span>
 <span class="sd">            If True, convert xarray.Dataset and/or xarray.DataArray to gdal compliant</span>
 <span class="sd">            format using :py:meth:`~hydromt.raster.gdal_compliant`</span>
@@ -621,11 +629,9 @@
 
         <span class="n">to_netcdf_kwargs</span> <span class="o">=</span> <span class="n">to_netcdf_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
         <span class="n">to_netcdf_kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;engine&quot;</span><span class="p">,</span> <span class="s2">&quot;netcdf4&quot;</span><span class="p">)</span>
-
-        <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span>
-
+        <span class="n">placeholder_filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{name}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">ds</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">file_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">filename</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">file_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">placeholder_filename</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
             <span class="n">file_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name_in_model</span><span class="si">}</span><span class="s2">: Writing datasets to </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">.&quot;</span>

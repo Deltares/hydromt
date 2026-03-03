@@ -49,7 +49,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.3.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.4.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
@@ -58,7 +58,7 @@
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.3.0.dev0" />
+  <meta name="docsearch:version" content="1.4.0.dev0" />
   </head>
   
   
@@ -429,7 +429,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">io</span><span class="w"> </span><span class="kn">import</span> <span class="n">IOBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">abspath</span><span class="p">,</span> <span class="n">basename</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">isfile</span><span class="p">,</span> <span class="n">join</span><span class="p">,</span> <span class="n">splitext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">dask</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
@@ -447,7 +447,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Point</span><span class="p">,</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">box</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">GEOMETRY_TYPES</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.naming_convention</span><span class="w"> </span><span class="kn">import</span> <span class="n">_expand_uri_placeholders</span><span class="p">,</span> <span class="n">_placeholders</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.naming_convention</span><span class="w"> </span><span class="kn">import</span> <span class="n">_expand_uri_placeholders</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">_make_config_paths_absolute</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.uris</span><span class="w"> </span><span class="kn">import</span> <span class="n">_is_valid_url</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.gis</span><span class="w"> </span><span class="kn">import</span> <span class="n">gis_utils</span><span class="p">,</span> <span class="n">raster</span><span class="p">,</span> <span class="n">raster_utils</span><span class="p">,</span> <span class="n">vector</span><span class="p">,</span> <span class="n">vector_utils</span>
@@ -483,10 +483,10 @@
 <div class="viewcode-block" id="open_mfcsv">
 <a class="viewcode-back" href="../../_generated/hydromt.readers.open_mfcsv.html#hydromt.readers.open_mfcsv">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">open_mfcsv</span><span class="p">(</span>
-    <span class="n">paths</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]],</span>
+    <span class="n">paths</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">],</span>
     <span class="n">concat_dim</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">driver_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">driver_kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">variable_axis</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="n">segmented_by</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;var&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
@@ -494,7 +494,7 @@
 
 <span class="sd">    Arguments</span>
 <span class="sd">    ---------</span>
-<span class="sd">    paths : Dict[str | int, str | Path],</span>
+<span class="sd">    paths : dict[str | int, str | Path],</span>
 <span class="sd">        Dictionary containing a id -&gt; filename mapping. Here the ids,</span>
 <span class="sd">        should correspond to the values of the `concat_dim` dimension and</span>
 <span class="sd">        the corresponding setting of `segmented_by`. I.e. if files are</span>
@@ -504,7 +504,7 @@
 <span class="sd">    concat_dim : str,</span>
 <span class="sd">        name of the dimension that will be created by concatinating</span>
 <span class="sd">        all of the supplied csv files.</span>
-<span class="sd">    driver_kwargs : Dict[str, Any],</span>
+<span class="sd">    driver_kwargs : dict[str, Any],</span>
 <span class="sd">        Any additional arguments to be passed to pandas&#39; `read_csv` function.</span>
 <span class="sd">    variable_axis : Literal[0, 1] = 1,</span>
 <span class="sd">        The axis along which your variables or ids are. so if the csvs have the</span>
@@ -528,7 +528,7 @@
             <span class="sa">f</span><span class="s2">&quot;Unknown segmentation provided: </span><span class="si">{</span><span class="n">segmented_by</span><span class="si">}</span><span class="s2">, options are [&#39;var&#39;,&#39;id&#39;]&quot;</span>
         <span class="p">)</span>
 
-    <span class="n">csv_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;index_col&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+    <span class="n">csv_kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;index_col&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
     <span class="k">if</span> <span class="n">driver_kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">csv_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">driver_kwargs</span><span class="p">)</span>
 
@@ -601,11 +601,11 @@
 <div class="viewcode-block" id="open_raster">
 <a class="viewcode-back" href="../../_generated/hydromt.readers.open_raster.html#hydromt.readers.open_raster">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">open_raster</span><span class="p">(</span>
-    <span class="n">uri</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">IOBase</span><span class="p">,</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">,</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">vrt</span><span class="o">.</span><span class="n">WarpedVRT</span><span class="p">],</span>
+    <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="n">IOBase</span> <span class="o">|</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">DatasetReader</span> <span class="o">|</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">vrt</span><span class="o">.</span><span class="n">WarpedVRT</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">mask_nodata</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">chunks</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">nodata</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">chunks</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">nodata</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Open a gdal-readable file with rasterio based on.</span>
@@ -668,13 +668,13 @@
 <div class="viewcode-block" id="open_mfraster">
 <a class="viewcode-back" href="../../_generated/hydromt.readers.open_mfraster.html#hydromt.readers.open_mfraster">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">open_mfraster</span><span class="p">(</span>
-    <span class="n">uris</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">]],</span>
+    <span class="n">uris</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">chunks</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">chunks</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">concat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">concat_dim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dim0&quot;</span><span class="p">,</span>
     <span class="n">mosaic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">mosaic_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">mosaic_kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Open multiple gdal-readable files as single Dataset with geospatial attributes.</span>
@@ -737,7 +737,7 @@
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">OSError</span><span class="p">(</span><span class="s2">&quot;no files to open&quot;</span><span class="p">)</span>
 
-    <span class="n">da_lst</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">da_lst</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">index_lst</span><span class="p">,</span> <span class="n">file_attrs</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">uri</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">uris</span><span class="p">):</span>
         <span class="c1"># read file</span>
@@ -946,7 +946,7 @@
     <span class="k">if</span> <span class="n">filetype</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;csv&quot;</span><span class="p">,</span> <span class="s2">&quot;parquet&quot;</span><span class="p">,</span> <span class="s2">&quot;xls&quot;</span><span class="p">,</span> <span class="s2">&quot;xlsx&quot;</span><span class="p">,</span> <span class="s2">&quot;xy&quot;</span><span class="p">]:</span>
         <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">assert_gtype</span><span class="o">=</span><span class="s2">&quot;Point&quot;</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="n">filetype</span><span class="p">)</span>
     <span class="c1"># read geometry file</span>
-    <span class="n">polygon</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Polygon</span><span class="p">]</span> <span class="o">=</span> <span class="n">box</span><span class="p">(</span><span class="o">*</span><span class="n">bbox</span><span class="p">)</span> <span class="k">if</span> <span class="n">bbox</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">polygon</span><span class="p">:</span> <span class="n">Polygon</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">box</span><span class="p">(</span><span class="o">*</span><span class="n">bbox</span><span class="p">)</span> <span class="k">if</span> <span class="n">bbox</span> <span class="k">else</span> <span class="kc">None</span>
     <span class="n">gdf</span> <span class="o">=</span> <span class="n">open_vector</span><span class="p">(</span><span class="n">loc_path</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="n">polygon</span><span class="p">,</span> <span class="n">geom</span><span class="o">=</span><span class="n">geom</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">index_dim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">index_dim</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">gdf</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;index&quot;</span>
@@ -993,44 +993,56 @@
 <span class="sd">        DataArray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">splitext</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s2">&quot;.csv&quot;</span><span class="p">:</span>
         <span class="n">csv_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">csv_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">csv_kwargs</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;.parquet&quot;</span><span class="p">,</span> <span class="s2">&quot;.pq&quot;</span><span class="p">]:</span>
+    <span class="k">elif</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;.parquet&quot;</span><span class="p">,</span> <span class="s2">&quot;.pq&quot;</span><span class="p">}:</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown table file format: </span><span class="si">{</span><span class="n">ext</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="n">first_index_elt</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">first_col_name</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first_index_elt</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">()</span>
-        <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">first_index_elt</span><span class="p">)</span>
-        <span class="c1"># if this succeeds than axis 0 is the time dim</span>
-    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_datetime_like</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="kc">False</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first_col_name</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">)):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">()</span>
-            <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">first_col_name</span><span class="p">)</span>
-            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">T</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No time index found in file: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">:</span>
+    <span class="n">index_is_time</span> <span class="o">=</span> <span class="n">_is_datetime_like</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">columns_are_time</span> <span class="o">=</span> <span class="n">_is_datetime_like</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">index_is_time</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">columns_are_time</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">T</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No time index found in file: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># enforce datetime index</span>
+    <span class="k">try</span><span class="p">:</span>
         <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Index could not be parsed as datetime in file: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
 
-    <span class="c1"># try parsing column index to integers</span>
+    <span class="c1"># parse column index to integers</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">isdigit</span><span class="p">,</span> <span class="n">n</span><span class="p">)))</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
-            <span class="k">assert</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">size</span>
-        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">AssertionError</span><span class="p">):</span>
+            <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">isdigit</span><span class="p">,</span> <span class="n">c</span><span class="p">)))</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cols</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">()</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">cols</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No numeric index found in file: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
     <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">index_dim</span>
     <span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">basename</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
     <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="n">index_dim</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
 
 
@@ -1040,12 +1052,12 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">open_vector</span><span class="p">(</span>
     <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">driver</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OPEN_VECTOR_DRIVER</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CRS</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">dst_crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CRS</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">bbox</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">geom</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">assert_gtype</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Point</span><span class="p">,</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Polygon</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">driver</span><span class="p">:</span> <span class="n">OPEN_VECTOR_DRIVER</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">crs</span><span class="p">:</span> <span class="n">CRS</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">dst_crs</span><span class="p">:</span> <span class="n">CRS</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">bbox</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">geom</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span> <span class="o">|</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">assert_gtype</span><span class="p">:</span> <span class="n">Point</span> <span class="o">|</span> <span class="n">LineString</span> <span class="o">|</span> <span class="n">Polygon</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">predicate</span><span class="p">:</span> <span class="n">OPEN_VECTOR_PREDICATE</span> <span class="o">=</span> <span class="s2">&quot;intersects&quot;</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
@@ -1218,10 +1230,10 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">read_workflow_yaml</span><span class="p">(</span>
     <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
     <span class="n">modeltype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">defaults</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">defaults</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">abs_path</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">skip_abspath_sections</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;global&quot;</span><span class="p">],</span>  <span class="c1"># noqa: B006</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="s2">&quot;HydromtModelStep&quot;</span><span class="p">]]:</span>
+    <span class="n">skip_abspath_sections</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="s2">&quot;HydromtModelStep&quot;</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read HydroMT workflow yaml file.</span>
 
 <span class="sd">    Parameters</span>
@@ -1239,7 +1251,8 @@
 <span class="sd">        by default True</span>
 <span class="sd">    skip_abspath_sections: list</span>
 <span class="sd">        These sections are not evaluated for absolute paths if abs_path=True,</span>
-<span class="sd">        by default [&#39;global&#39;]</span>
+<span class="sd">        by default [&quot;setup_config&quot;]</span>
+
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -1248,7 +1261,7 @@
 <span class="sd">    model_init : dict</span>
 <span class="sd">        Model initialization options to be used when instantiating a `hydromt.Model`</span>
 <span class="sd">    steps : list of HydromtModelStep</span>
-<span class="sd">        List of model steps to be executed. Can be passed to `hydromt.Model.build` and</span>
+<span class="sd">        list of model steps to be executed. Can be passed to `hydromt.Model.build` and</span>
 <span class="sd">        `hydromt.Model.update`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
@@ -1280,30 +1293,30 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_config_read</span><span class="p">(</span>
-    <span class="n">config_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-    <span class="n">defaults</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">config_path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">defaults</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">abs_path</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">skip_abspath_sections</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+    <span class="n">skip_abspath_sections</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read configuration/workflow file and parse to (nested) dictionary.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    config_path : Union[Path, str]</span>
+<span class="sd">    config_path : Path | str</span>
 <span class="sd">        Path to configuration file</span>
-<span class="sd">    defaults : dict, optional</span>
-<span class="sd">        Nested dictionary with default options, by default dict()</span>
+<span class="sd">    defaults : dict[str, Any] | None, optional</span>
+<span class="sd">        Nested dictionary with default options, by default None</span>
 <span class="sd">    abs_path : bool, optional</span>
 <span class="sd">        If True, parse string values to an absolute path if the a file or folder</span>
 <span class="sd">        with that name (string value) relative to the config file exist,</span>
 <span class="sd">        by default False</span>
-<span class="sd">    skip_abspath_sections: list, optional</span>
+<span class="sd">    skip_abspath_sections: list[str] | None, optional</span>
 <span class="sd">        These sections are not evaluated for absolute paths if abs_path=True,</span>
-<span class="sd">        by default [&#39;setup_config&#39;]</span>
+<span class="sd">        by default [&quot;setup_config&quot;]</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    Dict[str, Any]</span>
+<span class="sd">    dict[str, Any]</span>
 <span class="sd">        Configuration dictionary.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">defaults</span> <span class="o">=</span> <span class="n">defaults</span> <span class="ow">or</span> <span class="p">{}</span>
@@ -1329,9 +1342,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_parse_values</span><span class="p">(</span>
-    <span class="n">cfdict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">cfdict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">skip_eval</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">skip_eval_sections</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">skip_eval_sections</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse string values to python default objects.</span>
 
@@ -1341,12 +1354,12 @@
 <span class="sd">        Configuration dictionary.</span>
 <span class="sd">    skip_eval : bool, optional</span>
 <span class="sd">        Set true to skip evaluation, by default False</span>
-<span class="sd">    skip_eval_sections : List, optional</span>
-<span class="sd">        List of sections to skip evaluation, by default []</span>
+<span class="sd">    skip_eval_sections : list[str] | None, optional</span>
+<span class="sd">        list of sections to skip evaluation, by default []</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    Dict[str, Any]</span>
+<span class="sd">    dict[str, Any]</span>
 <span class="sd">        Configuration dictionary with evaluated values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">skip_eval_sections</span> <span class="o">=</span> <span class="n">skip_eval_sections</span> <span class="ow">or</span> <span class="p">[]</span>
@@ -1406,13 +1419,13 @@
     <span class="n">filename_template</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
     <span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read netcdf files at &lt;root&gt;/&lt;file&gt; and return as dict of xarray.Dataset.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    filename_template : str</span>
-<span class="sd">        Filename relative to model root, may contain wildcards</span>
+<span class="sd">        Filename relative to model root, may contain wildcards and/or a {name} placeholder.</span>
 <span class="sd">    root : Path</span>
 <span class="sd">        The path to the model directory in which to write</span>
 <span class="sd">    **kwargs:</span>
@@ -1421,21 +1434,32 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    Dict[str, xr.Dataset]</span>
+<span class="sd">    dict[Path | str, xr.Dataset]</span>
 <span class="sd">        dict of xarray.Dataset. Don&#39;t forget to close them when you&#39;re done!</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ncs</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">path_template</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="n">filename_template</span>
+<span class="sd">        Paths are used as keys if {name} placeholder is not used in the filename,</span>
+<span class="sd">        otherwise the candidate name is used as key, which is based on the value</span>
+<span class="sd">        of the {name} placeholder</span>
 
-    <span class="n">path_glob</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">regex</span> <span class="o">=</span> <span class="n">_expand_uri_placeholders</span><span class="p">(</span>
-        <span class="nb">str</span><span class="p">(</span><span class="n">path_template</span><span class="p">),</span> <span class="n">placeholders</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">_placeholders</span><span class="p">)</span>
-    <span class="p">)</span>
-    <span class="n">paths</span> <span class="o">=</span> <span class="n">glob</span><span class="p">(</span><span class="n">path_glob</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">regex</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">groups</span><span class="p">())</span>  <span class="c1"># type: ignore</span>
-        <span class="n">ds</span> <span class="o">=</span> <span class="n">open_nc</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">ncs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">ds</span>
-    <span class="k">return</span> <span class="n">ncs</span></div>
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    If the filename template contains a {name} placeholder, the candidate name is</span>
+<span class="sd">    based on the value of the {name} placeholder. If the filename template does not</span>
+<span class="sd">    contain a {name} placeholder, the candidate name is based on the filename&#39;s stem.</span>
+
+<span class="sd">    When using the {name} placeholder, be aware that duplicate keys can be generated for</span>
+<span class="sd">    some paths, which can lead to some paths being overwritten in the output dict. A warning</span>
+<span class="sd">    is logged if this happens.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">paths</span> <span class="o">=</span> <span class="n">_expand_wildcards_and_name_placeholder</span><span class="p">(</span><span class="n">filename_template</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">&quot;</span><span class="si">{name}</span><span class="s2">&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename_template</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">open_nc</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">paths</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">paths</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Duplicate keys generated for some paths, some paths are overwritten in the output dict. &quot;</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">{</span><span class="n">path</span><span class="p">:</span> <span class="n">open_nc</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+    <span class="k">return</span> <span class="n">out</span></div>
 
 
 
@@ -1450,7 +1474,7 @@
 
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_parse_yaml</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_yaml</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
     <span class="k">return</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
 
 
@@ -1465,7 +1489,7 @@
 
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_yml_from_uri_or_path</span><span class="p">(</span><span class="n">uri_or_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_yml_from_uri_or_path</span><span class="p">(</span><span class="n">uri_or_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
     <span class="k">if</span> <span class="n">_is_valid_url</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">uri_or_path</span><span class="p">)):</span>
         <span class="k">with</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">uri_or_path</span><span class="p">),</span> <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">r</span><span class="p">:</span>
             <span class="n">r</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
@@ -1474,6 +1498,46 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">yml</span> <span class="o">=</span> <span class="n">read_yaml</span><span class="p">(</span><span class="n">uri_or_path</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">yml</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_expand_wildcards_and_name_placeholder</span><span class="p">(</span>
+    <span class="n">filename_template</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">Path</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Expand wildcards and {name} placeholder in filename template.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename_template : str</span>
+<span class="sd">        Filename template relative to model root, may contain wildcards and {name} placeholder</span>
+<span class="sd">    root : Path</span>
+<span class="sd">        The path to the model directory in which to write.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict[Path, str]</span>
+<span class="sd">        dict with file paths as keys and candidate names as values. If {name} placeholder is</span>
+<span class="sd">        used in the filename template, the candidate name is based on the value of the {name}</span>
+<span class="sd">        placeholder. If {name} placeholder is not used, the candidate name is based on the</span>
+<span class="sd">        filename&#39;s stem.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">uri_expanded</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">regex</span> <span class="o">=</span> <span class="n">_expand_uri_placeholders</span><span class="p">(</span>
+        <span class="n">uri</span><span class="o">=</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="n">filename_template</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">(),</span> <span class="n">placeholders</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">glob</span><span class="p">(</span><span class="n">uri_expanded</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="s2">&quot;name&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+        <span class="c1"># no {name} placeholder was used, so return dict[Path, candidate name based on filename]</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">path</span><span class="p">:</span> <span class="n">path</span><span class="o">.</span><span class="n">stem</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">files</span><span class="p">}</span>
+
+    <span class="c1"># {name} placeholder was used, so return dict[Path, candidate name based on {name} placeholder]</span>
+    <span class="n">out</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">regex</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">as_posix</span><span class="p">())</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">m</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">group_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">groups</span><span class="p">(),</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="n">out</span><span class="p">[</span><span class="n">path</span><span class="p">]</span> <span class="o">=</span> <span class="n">group_dict</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">out</span>
 </pre></div>
 
                 </article>

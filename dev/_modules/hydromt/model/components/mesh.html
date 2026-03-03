@@ -49,7 +49,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.3.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.4.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
@@ -58,7 +58,7 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.3.0.dev0" />
+  <meta name="docsearch:version" content="1.4.0.dev0" />
   </head>
   
   
@@ -424,7 +424,7 @@
 <span></span><span class="sd">&quot;&quot;&quot;Mesh Component.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
@@ -463,7 +463,7 @@
         <span class="n">model</span><span class="p">:</span> <span class="s2">&quot;Model&quot;</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mesh/mesh.nc&quot;</span><span class="p">,</span>
-        <span class="n">region_component</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">region_component</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">region_filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mesh/mesh_region.geojson&quot;</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -476,7 +476,7 @@
 <span class="sd">        filename: str</span>
 <span class="sd">            The path to use for reading and writing of component data by default.</span>
 <span class="sd">            by default &quot;mesh/mesh.nc&quot;.</span>
-<span class="sd">        region_component: str, optional</span>
+<span class="sd">        region_component: str | None, optional</span>
 <span class="sd">            The name of the region component to use as reference for this component&#39;s</span>
 <span class="sd">            region. If None, the region will be set to the total bounds of the mesh.</span>
 <span class="sd">            Note that the create method only works if the region_component is None.</span>
@@ -491,7 +491,7 @@
             <span class="n">region_component</span><span class="o">=</span><span class="n">region_component</span><span class="p">,</span>
             <span class="n">region_filename</span><span class="o">=</span><span class="n">region_filename</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">xu</span><span class="o">.</span><span class="n">UgridDataset</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">:</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataset</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">filename</span></div>
 
 
@@ -499,10 +499,10 @@
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.components.MeshComponent.set.html#hydromt.model.components.MeshComponent.set">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xu</span><span class="o">.</span><span class="n">UgridDataArray</span><span class="p">,</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataset</span><span class="p">],</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataArray</span> <span class="o">|</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataset</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
-        <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">grid_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">grid_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">overwrite_grid</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add data to mesh.</span>
@@ -514,10 +514,10 @@
 <span class="sd">        ----------</span>
 <span class="sd">        data: xugrid.UgridDataArray or xugrid.UgridDataset</span>
 <span class="sd">            new layer to add to mesh, should contain only one grid topology.</span>
-<span class="sd">        name: str, optional</span>
+<span class="sd">        name: str | None, optional</span>
 <span class="sd">            Name of new object layer, this is used to overwrite the name of</span>
 <span class="sd">            a UgridDataArray.</span>
-<span class="sd">        grid_name: str, optional</span>
+<span class="sd">        grid_name: str | None, optional</span>
 <span class="sd">            Name of the mesh grid to add data to. If None, inferred from data.</span>
 <span class="sd">            Can be used for renaming the grid.</span>
 <span class="sd">        overwrite_grid: bool, optional</span>
@@ -544,7 +544,7 @@
     <span class="nd">@hydromt_step</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">filename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">write_optional_ugrid_attributes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
@@ -572,8 +572,8 @@
             <span class="p">)</span>
             <span class="k">return</span>
 
-        <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span>
-        <span class="n">full_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">filename</span>
+        <span class="n">_filename</span> <span class="o">=</span> <span class="n">filename</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span>
+        <span class="n">full_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">_filename</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name_in_model</span><span class="si">}</span><span class="s2">: Writing mesh to </span><span class="si">{</span><span class="n">full_path</span><span class="si">}</span><span class="s2">.&quot;</span>
         <span class="p">)</span>
@@ -593,9 +593,9 @@
     <span class="nd">@hydromt_step</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">filename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
-        <span class="n">crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">CRS</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">crs</span><span class="p">:</span> <span class="n">CRS</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read model mesh data at &lt;root&gt;/&lt;filename&gt; and add to mesh property.</span>
@@ -616,11 +616,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_assert_read_mode</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">skip_read</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">)</span>
-        <span class="n">files</span> <span class="o">=</span> <span class="n">open_ncs</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_open_datasets</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+        <span class="n">filename_template</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{name}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">datasets</span> <span class="o">=</span> <span class="n">open_ncs</span><span class="p">(</span><span class="n">filename_template</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_open_datasets</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">datasets</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">datasets</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">datasets</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># parse crs</span>
                 <span class="n">crs</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span>
                 <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">drop_vars</span><span class="p">(</span><span class="n">GEO_MAP_COORD</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
@@ -647,7 +647,7 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xu</span><span class="o">.</span><span class="n">UgridDataArray</span><span class="p">,</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataset</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataArray</span> <span class="o">|</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataset</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Model static mesh data. It returns a xugrid.UgridDataset.</span>
 
@@ -668,21 +668,21 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">crs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CRS</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">crs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CRS</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns model mesh crs.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">ugrid</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns model mesh bounds.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">ugrid</span><span class="o">.</span><span class="n">bounds</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_region_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_region_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return mesh total_bounds as a geodataframe.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">region</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span>
@@ -692,7 +692,7 @@
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">mesh_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mesh_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;List of grid names in mesh.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">grid</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">grid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">ugrid</span><span class="o">.</span><span class="n">grids</span><span class="p">]</span>
@@ -700,7 +700,7 @@
             <span class="k">return</span> <span class="p">[]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">mesh_grids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">xu</span><span class="o">.</span><span class="n">Ugrid1d</span><span class="p">,</span> <span class="n">xu</span><span class="o">.</span><span class="n">Ugrid2d</span><span class="p">]]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mesh_grids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">xu</span><span class="o">.</span><span class="n">Ugrid1d</span> <span class="o">|</span> <span class="n">xu</span><span class="o">.</span><span class="n">Ugrid2d</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Dictionary of grid names and Ugrid topologies in mesh.&quot;&quot;&quot;</span>
         <span class="n">grids</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -710,7 +710,7 @@
         <span class="k">return</span> <span class="n">grids</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">mesh_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataset</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mesh_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataset</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Dictionnary of grid names and corresponding UgridDataset topology and data variables in mesh.&quot;&quot;&quot;</span>  <span class="c1"># noqa: E501</span>
         <span class="n">datasets</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -722,7 +722,7 @@
         <span class="k">return</span> <span class="n">datasets</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">mesh_gdf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mesh_gdf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns dict of geometry of grids in mesh as a gpd.GeoDataFrame.&quot;&quot;&quot;</span>
         <span class="n">mesh_gdf</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -743,7 +743,7 @@
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.components.MeshComponent.get_mesh.html#hydromt.model.components.MeshComponent.get_mesh">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_mesh</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">grid_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">include_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xu</span><span class="o">.</span><span class="n">Ugrid1d</span><span class="p">,</span> <span class="n">xu</span><span class="o">.</span><span class="n">Ugrid2d</span><span class="p">,</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataArray</span><span class="p">,</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataset</span><span class="p">]:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xu</span><span class="o">.</span><span class="n">Ugrid1d</span> <span class="o">|</span> <span class="n">xu</span><span class="o">.</span><span class="n">Ugrid2d</span> <span class="o">|</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataArray</span> <span class="o">|</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataset</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a specific grid topology from mesh based on grid_name.</span>
 
@@ -759,7 +759,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        uds: Union[xu.Ugrid1d, xu.Ugrid2d, xu.UgridDataArray, xu.UgridDataset]</span>
+<span class="sd">        uds: xu.Ugrid1d | xu.Ugrid2d | xu.UgridDataArray | xu.UgridDataset</span>
 <span class="sd">            Grid topology with or without data variables.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -797,7 +797,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_add_mesh</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataset</span><span class="p">,</span> <span class="n">grid_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">overwrite_grid</span><span class="p">:</span> <span class="nb">bool</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CRS</span><span class="p">]:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CRS</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># Check on crs</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">ugrid</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
@@ -835,7 +835,7 @@
                             <span class="sa">f</span><span class="s2">&quot;Overwriting grid </span><span class="si">{</span><span class="n">grid_name</span><span class="si">}</span><span class="s2"> and the corresponding&quot;</span>
                             <span class="s2">&quot; data variables in mesh.&quot;</span>
                         <span class="p">)</span>
-                        <span class="n">grids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">grids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">mesh_datasets</span><span class="p">[</span><span class="n">g</span><span class="p">]</span><span class="o">.</span><span class="n">ugrid</span><span class="o">.</span><span class="n">to_dataset</span><span class="p">(</span>
                                 <span class="n">optional_attributes</span><span class="o">=</span><span class="kc">True</span>
                             <span class="p">)</span>
@@ -847,7 +847,7 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataset</span><span class="p">(</span><span class="n">grids</span><span class="p">)</span>
             <span class="c1"># Check again mesh_names, could have changed if overwrite_grid=True</span>
             <span class="k">if</span> <span class="n">grid_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_names</span><span class="p">:</span>
-                <span class="n">grids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">grids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">mesh_datasets</span><span class="p">[</span><span class="n">g</span><span class="p">]</span><span class="o">.</span><span class="n">ugrid</span><span class="o">.</span><span class="n">to_dataset</span><span class="p">(</span><span class="n">optional_attributes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                     <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_names</span>
                 <span class="p">]</span>
@@ -883,7 +883,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_ugrid</span><span class="p">(</span>
-        <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xu</span><span class="o">.</span><span class="n">UgridDataArray</span><span class="p">,</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataset</span><span class="p">],</span> <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataArray</span> <span class="o">|</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataset</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataset</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="n">xu</span><span class="o">.</span><span class="n">UgridDataArray</span><span class="p">,</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataset</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -900,7 +900,7 @@
             <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">to_dataset</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">data</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_get_mesh_grid_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xu</span><span class="o">.</span><span class="n">Ugrid1d</span><span class="p">,</span> <span class="n">xu</span><span class="o">.</span><span class="n">Ugrid2d</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_mesh_grid_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xu</span><span class="o">.</span><span class="n">Ugrid1d</span> <span class="o">|</span> <span class="n">xu</span><span class="o">.</span><span class="n">Ugrid2d</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_region_component</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">reference_component</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_component</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_region_component</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_check_mesh_component</span><span class="p">(</span><span class="n">grid_name</span><span class="p">,</span> <span class="n">reference_component</span><span class="p">)</span>
