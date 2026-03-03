@@ -110,4 +110,8 @@ jobs:
             echo "This failure IS A RELEASE BLOCKER."
             echo "Dependency resolution or runtime compatibility is broken."
             echo "Action: must be fixed before release."
-          fi
+            fi
+          echo ""
+          echo "For more information, please review the docs:"
+          echo "- https://deltares.github.io/hydromt/stable/dev/core_dev/release.html"
+          echo "- https://deltares.github.io/hydromt/stable/dev/plugin_dev/testing.html"
