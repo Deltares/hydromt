@@ -29,6 +29,11 @@ Fixed
 Deprecated
 ----------
 
+Removed
+-------
+- Support for Python 3.11
+
+
 v1.3.0 (2025-12-18)
 ===================
 
