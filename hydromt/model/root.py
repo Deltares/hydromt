@@ -2,8 +2,8 @@
 
 import logging
 from pathlib import Path
-from typing import Optional
 
+from hydromt._utils.path import _check_directory
 from hydromt.model.mode import ModelMode
 
 logger = logging.getLogger(__name__)
@@ -46,11 +46,6 @@ class ModelRoot:
         if not self.mode.is_reading_mode():
             raise IOError("Model opened in write-only mode")
 
-    def _check_root_exists(self, path: Optional[Path] = None) -> None:
-        path = path or self.path
-        if not path.exists():
-            raise IOError(f'model root not found at "{path}"')
-
     ## Properties
     @property
     def mode(self) -> ModelMode:
@@ -73,9 +68,9 @@ class ModelRoot:
         """Set the path of the model."""
         path = Path(path).resolve()
         if self.is_reading_mode():
-            self._check_root_exists(path)
+            _check_directory(path=path, fail=True)
         if self.is_writing_mode():
-            path.mkdir(parents=True, exist_ok=True)
+            _check_directory(path=path, fail=False)
         self._path = path
 
     ## Checks
