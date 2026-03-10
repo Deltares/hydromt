@@ -11,7 +11,6 @@ from hydromt._utils.deep_merge import _deep_merge
 from hydromt._utils.dictionaries import _partition_dictionaries
 from hydromt._utils.elevation import _elevation2rgba, _rgba2elevation
 from hydromt._utils.format import CatalogDumper
-from hydromt._utils.log import initialize_logging, to_file
 from hydromt._utils.nodata import _has_no_data, _set_raster_nodata, _set_vector_nodata
 from hydromt._utils.path import _make_config_paths_absolute, _make_config_paths_relative
 from hydromt._utils.rgetattr import _rgetattr
@@ -27,8 +26,6 @@ __all__ = [
     "_deep_merge",
     "_rename_vars",
     "_set_metadata",
-    "initialize_logging",
-    "to_file",
     "_shift_dataset_time",
     "_single_var_as_array",
     "_partition_dictionaries",

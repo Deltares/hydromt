@@ -1,6 +1,6 @@
 import gc
 from os import sep
-from os.path import abspath, dirname, join
+from os.path import abspath
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, Generator, Iterator, List, Union, cast
@@ -23,6 +23,7 @@ from hydromt import Model, vector
 from hydromt.config import SETTINGS, Settings
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis.raster_utils import _affine_to_coords, full_from_transform
+from hydromt.log import initialize_logging, to_file
 from hydromt.model.components.config import ConfigComponent
 from hydromt.model.components.geoms import GeomsComponent
 from hydromt.model.components.spatial import SpatialModelComponent
@@ -42,10 +43,48 @@ if Version(pd.__version__) < Version("3.0.0"):
 
 xr.set_options(use_new_combine_kwarg_defaults=True)
 
-CURRENT_DIR = Path(__file__).parent
-DATA_DIR = join(dirname(abspath(__file__)), "..", "data")
-TEST_DATA_DIR = join(dirname(abspath(__file__)), "data")
-DC_PARAM_PATH = join(TEST_DATA_DIR, "parameters_data.yml")
+
+@pytest.fixture(scope="session")
+def test_data_dir() -> Path:
+    data_dir = Path(__file__).parent / "data"
+    if not data_dir.is_dir():
+        raise FileNotFoundError(f"Test data directory not found at {data_dir}")
+    return data_dir
+
+
+@pytest.fixture(scope="session")
+def data_dir() -> Path:
+    data_dir = Path(__file__).parents[1] / "data"
+    if not data_dir.is_dir():
+        raise FileNotFoundError(f"Hydromt data directory not found at {data_dir}")
+    return data_dir
+
+
+@pytest.fixture(scope="session")
+def catalog_dir(data_dir: Path) -> Path:
+    catalog_dir = data_dir / "catalogs"
+    if not catalog_dir.is_dir():
+        raise FileNotFoundError(
+            f"Hydromt data catalog directory not found at {catalog_dir}"
+        )
+    return catalog_dir
+
+
+@pytest.fixture(scope="session")
+def dc_param_path(test_data_dir: Path) -> Path:
+    param_path = test_data_dir / "parameters_data.yml"
+    if not param_path.is_file():
+        raise FileNotFoundError(f"Parameters data file not found at {param_path}")
+    return param_path
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _setup_logging(test_data_dir: Path):
+    """Set up logging for tests."""
+    initialize_logging()
+    filename = f"test_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.log"
+    with to_file(test_data_dir / "logs" / filename):
+        yield
 
 
 def get_open_xarray_objects() -> List[tuple[Union[xr.Dataset, xr.DataArray], Path]]:
@@ -66,14 +105,6 @@ def PLUGINS() -> Plugins:
     return Plugins()
 
 
-@pytest.fixture(scope="session")
-def data_dir() -> Path:
-    p = Path(CURRENT_DIR, "data")
-    assert p.is_dir()
-    assert Path(p, "parameters_data.yml").is_file()
-    return p
-
-
 @pytest.fixture
 def test_settings(tmp_path: Path) -> Generator[Settings, None, None]:
     """Temporary sets settings for testing."""
@@ -89,9 +120,9 @@ def test_settings(tmp_path: Path) -> Generator[Settings, None, None]:
 
 
 @pytest.fixture(autouse=True)
-def _local_catalog_eps(monkeypatch, PLUGINS):
+def _local_catalog_eps(monkeypatch, PLUGINS, data_dir):
     """Set entrypoints to local predefined catalogs."""
-    cat_root = Path(DATA_DIR) / "catalogs"
+    cat_root = data_dir / "catalogs"
     for name, cls in PLUGINS.catalog_plugins.items():
         monkeypatch.setattr(
             f"hydromt.data_catalog.predefined_catalog.{cls.__name__}.base_url",
@@ -161,14 +192,14 @@ def data_catalog(_local_catalog_eps) -> DataCatalog:
 
 
 @pytest.fixture
-def dd_v0_catalog():
-    cat_root = Path(DATA_DIR) / "catalogs" / "artifact_data"
+def dd_v0_catalog(catalog_dir: Path):
+    cat_root = catalog_dir / "artifact_data"
     return cat_root / "v0.0.9" / "data_catalog.yml"
 
 
 @pytest.fixture(scope="session")
-def latest_dd_version_uri():
-    cat_root = Path(DATA_DIR) / "catalogs" / "deltares_data"
+def latest_dd_version_uri(catalog_dir: Path):
+    cat_root = catalog_dir / "deltares_data"
     versions = [d.name for d in cat_root.iterdir() if d.is_dir()]
     latest_version = sorted(versions)[-1]
     return cat_root / latest_version / "data_catalog.yml"
@@ -318,8 +349,8 @@ def geodf(df):
 
 
 @pytest.fixture(scope="session")
-def world() -> gpd.GeoDataFrame:
-    return gpd.read_file(Path(TEST_DATA_DIR) / "world.gpkg")
+def world(test_data_dir) -> gpd.GeoDataFrame:
+    return gpd.read_file(test_data_dir / "world.gpkg")
 
 
 @pytest.fixture
@@ -491,10 +522,10 @@ def bbox():
 
 
 @pytest.fixture
-def grid_model(demda, world, obsda, tmp_path: Path):
+def grid_model(demda, world, obsda, tmp_path: Path, dc_param_path: Path):
     mod = Model(
         root=tmp_path,
-        data_libs=["artifact_data", DC_PARAM_PATH],
+        data_libs=["artifact_data", dc_param_path.as_posix()],
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
     )
@@ -523,10 +554,10 @@ def grid_model(demda, world, obsda, tmp_path: Path):
 
 
 @pytest.fixture
-def mesh_model(tmp_path: Path):
+def mesh_model(tmp_path: Path, dc_param_path: Path):
     mesh_model = Model(
         root=tmp_path,
-        data_libs=["artifact_data", DC_PARAM_PATH],
+        data_libs=["artifact_data", dc_param_path.as_posix()],
         components={"mesh": {"type": "MeshComponent"}},
         region_component="mesh",
     )

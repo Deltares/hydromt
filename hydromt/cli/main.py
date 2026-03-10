@@ -12,8 +12,8 @@ import click
 import numpy as np
 from pydantic import ValidationError
 
-from hydromt import __version__
-from hydromt._utils import CatalogDumper, log
+from hydromt import __version__, log
+from hydromt._utils import CatalogDumper
 from hydromt._validators import Format
 from hydromt._validators.data_catalog_v0x import DataCatalogV0Validator
 from hydromt._validators.data_catalog_v1x import DataCatalogV1Validator
@@ -235,8 +235,7 @@ def build(
     hydromt build sfincs /path/to/model_root  -i /path/to/sfincs_config.yml
     -d /path/to/data_catalog.yml -v
     """  # noqa: E501
-    log_level = max(10, 30 - 10 * (verbose - quiet))
-    log.set_log_level(log_level=log_level)
+    log.initialize_logging(level=max(10, 30 - 10 * (verbose - quiet)))
     log.log_version()
     # Model.build will manage the filehandlers and logging
 
@@ -317,8 +316,7 @@ def update(
     hydromt update wflow_sbm /path/to/model_root  -o /path/to/model_out  -i /path/to/wflow_config.yml  -d /path/to/data_catalog.yml -v
     """  # noqa: E501
     # logger
-    log_level = max(10, 30 - 10 * (verbose - quiet))
-    log.set_log_level(log_level=log_level)
+    log.initialize_logging(level=max(10, 30 - 10 * (verbose - quiet)))
     log.log_version()
     # Model.update will manage the filehandlers and logging
 
@@ -448,10 +446,8 @@ def check(
     With region:
     >>> hydromt check -m grid_model -d /path/to/data_catalog.yml -i /path/to/model_config.yml -r '{"bbox": [-1,-1,1,1]}' -v
     """
-    # Configure logging
-    log_level = max(10, 30 - 10 * (verbose - quiet))
+    log.initialize_logging(level=max(10, 30 - 10 * (verbose - quiet)))
     log_path = Path.cwd() / "hydromt_check.log"
-    log.set_log_level(log_level=log_level)
     with log.to_file(log_path):
         log.log_version()
         results = []
@@ -526,8 +522,7 @@ def export(
     hydromt export -i /path/to/export_config.yaml path/to/output_dir
     """  # noqa: E501
     # logger
-    log_level = max(10, 30 - 10 * (verbose - quiet))
-    log.set_log_level(log_level=log_level)
+    log.initialize_logging(level=max(10, 30 - 10 * (verbose - quiet)))
     log_path = Path(export_dest_path, "hydromt_export.log")
     with log.to_file(log_path):
         log.log_version()
