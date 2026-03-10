@@ -15,7 +15,7 @@ from rasterio import gdal_version
 from shapely.geometry.base import BaseGeometry
 from xarray.core.types import DataVars
 
-from hydromt.gis import raster
+from hydromt.gis import _normalize, raster
 from hydromt.gis.vector_utils import _filter_gdf
 
 logger = logging.getLogger(__name__)
@@ -658,13 +658,12 @@ class GeoBase(raster.XGeoBase):
             Any additional arguments to be passed down to the driver.
         """
         if ogr_compliant:
-            self.ogr_compliant(reducer=reducer).to_netcdf(
-                path, engine="netcdf4", **kwargs
-            )
+            obj = self.ogr_compliant(reducer=reducer)
         else:
             obj = self.update_geometry(geom_format="wkt", geom_name="ogc_wkt")
-            obj.to_netcdf(path, engine="netcdf4", **kwargs)
-            del obj
+        obj = _normalize.normalize_xarray_dtypes(obj)
+        obj.to_netcdf(path, engine="netcdf4", **kwargs)
+        del obj
 
     def to_zarr(
         self,
@@ -691,11 +690,12 @@ class GeoBase(raster.XGeoBase):
         """
         kwargs.setdefault("zarr_format", 2)
         if ogr_compliant:
-            self.ogr_compliant(reducer=reducer).to_zarr(path, **kwargs)
+            obj = self.ogr_compliant(reducer=reducer)
         else:
             obj = self.update_geometry(geom_format="wkt", geom_name="ogc_wkt")
-            obj.to_zarr(path, **kwargs)
-            del obj
+        obj = _normalize.normalize_xarray_dtypes(obj)
+        obj.to_zarr(path, **kwargs)
+        del obj
 
 
 @xr.register_dataarray_accessor("vector")

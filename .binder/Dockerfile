@@ -12,7 +12,7 @@ COPY ./hydromt ./hydromt
 COPY ./docs ./docs
 COPY examples ./examples
 
-RUN pixi install --locked -e slim-latest \
+RUN pixi install --locked -e binder \
     && rm -rf .cache \
     && find .pixi -type f -name "*.pyc" -delete
 
@@ -23,5 +23,5 @@ ENV HOME=/home/deltares \
     PYDEVD_DISABLE_FILE_VALIDATION=1
 WORKDIR ${HOME}
 
-ENTRYPOINT ["pixi", "run", "-e", "slim-latest"]
-CMD ["pixi", "run", "-e", "slim-latest" , "jupyter", "notebook", "--no-browser", "--port=8888", "--ip=0.0.0.0"]
+ENTRYPOINT ["pixi", "run", "-e", "binder"]
+CMD ["pixi", "run", "-e", "binder" , "jupyter", "notebook", "--no-browser", "--port=8888", "--ip=0.0.0.0"]

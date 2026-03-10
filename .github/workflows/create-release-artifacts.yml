@@ -14,6 +14,10 @@ on:
   #   types:
   #     - completed
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   safeguard:
     runs-on: ubuntu-latest
@@ -61,7 +65,7 @@ jobs:
           verbose: true
           skip-existing: true
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         id: upload-pypi-release-artifacts
         with:
           name: pypi-release-artifacts
@@ -84,7 +88,7 @@ jobs:
       - name: Generate docs
         run: pixi run --locked doc
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         id: upload-docs-release-artifacts
         with:
           name: docs-release-artifacts

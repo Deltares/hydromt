@@ -438,6 +438,19 @@ def mesh2d_from_raster_reclass(
     if fill_method is not None:
         da = da.raster.interpolate_na(method=fill_method)
 
+    # Enforce numeric reclass outputs
+    for var in reclass_variables:
+        if var not in df_vars.columns:
+            raise ValueError(f"Reclass variable '{var}' not found in reclass table")
+
+        if not pd.api.types.is_numeric_dtype(df_vars[var]):
+            try:
+                df_vars[var] = pd.to_numeric(df_vars[var])
+            except Exception as e:
+                raise TypeError(
+                    f"Reclass variable '{var}' must be numeric for mesh resampling"
+                ) from e
+
     # Mapping function
     ds_vars = da.raster.reclassify(reclass_table=df_vars, method="exact")
 

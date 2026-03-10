@@ -3,9 +3,7 @@ name: Tests
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
-      - v1
+    branches: [main, release/**]
     paths:
       - tests/**/*
       - hydromt/**/*
@@ -14,9 +12,7 @@ on:
       - pixi.lock
       - .github/workflows/tests.yml
   pull_request:
-    branches:
-      - main
-      - v1
+    branches: [main, release/**]
     paths:
       - tests/**/*
       - hydromt/**/*
@@ -39,7 +35,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['311','312','313']
+        python-version: ['312','313','314']
         dependencies: ['min', 'full']
 
     name: pytest ${{ matrix.dependencies }}-${{ matrix.python-version }} (${{ matrix.os }})

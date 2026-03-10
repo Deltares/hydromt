@@ -3,13 +3,13 @@ name: Test Docker images and Binder integration
 
 on:
   push:
-    branches: [main]
+    branches: [main, release/**]
     paths:
       - .github/workflows/test-docker.yml
       - .binder/**
       - pyproject.toml
   pull_request:
-    branches: [main]
+    branches: [main, release/**]
     paths:
       - .github/workflows/test-docker.yml
       - .binder/**

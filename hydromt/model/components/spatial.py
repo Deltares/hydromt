@@ -155,8 +155,8 @@ class SpatialModelComponent(ModelComponent, ABC):
             # empty components are still equal
             if self.region is not None or other.region is not None:
                 gpd.testing.assert_geodataframe_equal(
-                    self.region,
-                    other_region.region,
+                    self.region.copy(),
+                    other_region.region.copy(),
                     check_like=True,
                     check_less_precise=True,
                 )
