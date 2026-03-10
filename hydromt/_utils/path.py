@@ -5,24 +5,9 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 __all__ = [
-    "_check_directory",
     "_make_config_paths_relative",
     "_make_config_paths_absolute",
 ]
-
-
-def _check_directory(
-    path: Path | str,
-    root: Path | str | None = None,
-    fail: bool = True,
-) -> Path:
-    """Very simple check whether a directory exists."""
-    root = root or Path.cwd()
-    path = Path(root, path)
-    if not path.exists() and fail:
-        raise IOError(f"{path.as_posix()} does not exist")
-    path.mkdir(parents=True, exist_ok=True)
-    return path
 
 
 def _make_config_paths_relative(cfdict: Dict[str, Any], root: Path) -> Dict[str, Any]:

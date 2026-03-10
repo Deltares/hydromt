@@ -3,7 +3,6 @@
 import logging
 from pathlib import Path
 
-from hydromt._utils.path import _check_directory
 from hydromt.model.mode import ModelMode
 
 logger = logging.getLogger(__name__)
@@ -34,6 +33,9 @@ class ModelRoot:
         # Set the Root
         self.set(path=path, mode=mode)
 
+    def __del__(self):
+        self._cleanup()
+
     def __repr__(self):
         return f"ModelRoot(path={self.path}, mode={self._mode})"
 
@@ -45,6 +47,14 @@ class ModelRoot:
     def _assert_read_mode(self) -> None:
         if not self.mode.is_reading_mode():
             raise IOError("Model opened in write-only mode")
+
+    def _cleanup(self) -> None:
+        """Clean up the afterwards."""
+        if self.path is None:
+            return
+        items = list(self.path.iterdir())
+        if len(items) == 0:
+            self.path.rmdir()
 
     ## Properties
     @property
@@ -67,10 +77,11 @@ class ModelRoot:
     def path(self, path: Path | str):
         """Set the path of the model."""
         path = Path(path).resolve()
-        if self.is_reading_mode():
-            _check_directory(path=path, fail=True)
+        if self.is_reading_mode() and not path.exists():
+            raise IOError(f"{path.as_posix()} does not exist")
         if self.is_writing_mode():
-            _check_directory(path=path, fail=False)
+            path.mkdir(parents=True, exist_ok=True)
+        self._cleanup()
         self._path = path
 
     ## Checks
