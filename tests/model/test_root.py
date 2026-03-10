@@ -56,6 +56,19 @@ def test_model_root__assert_append(tmp_path: Path):
     root._assert_write_mode()
 
 
+def test_model_root__clean_up(tmp_path: Path):
+    # Set up the root
+    p = Path(tmp_path, "foo")
+    root = ModelRoot(path=p, mode="w")
+    # Assert it's there
+    assert p.exists()
+
+    # Call the method
+    root._cleanup()
+    # Assert the directory is gone
+    assert not p.exists()
+
+
 def test_model_root_read_check(tmp_path: Path):
     # Set up the root
     root = ModelRoot(path=tmp_path, mode="r")
@@ -111,6 +124,24 @@ def test_model_root_set(tmp_path: Path):
     # Assert new root
     assert root.path == p
     assert root.mode == ModelMode("r")
+
+
+def test_model_root_set_clean(tmp_path: Path):
+    # Create a new directory
+    p1 = Path(tmp_path, "foo")
+    # Set up the root
+    root = ModelRoot(path=p1, mode="w")
+    # Assert it's there
+    assert root.path == p1
+    assert p1.exists()
+
+    # Change while foo is still empty
+    p2 = Path(tmp_path, "bar")
+    root.set(path=p2, mode="w")
+    # Assert p2 exists but p1 is deleted
+    assert root.path == p2
+    assert p2.exists()
+    assert not p1.exists()
 
 
 def test_model_root_set_mode(tmp_path: Path):
