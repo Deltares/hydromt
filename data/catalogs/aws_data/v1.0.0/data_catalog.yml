@@ -2,7 +2,7 @@ meta:
   version: v1.0.0
   name: aws_data
   hydromt_version: '>1.0a,<2'
-esa_worldcover_2020_v100:
+esa_worldcover:
   data_type: RasterDataset
   uri: s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt
   driver:

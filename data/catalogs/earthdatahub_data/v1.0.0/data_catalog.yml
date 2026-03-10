@@ -1,0 +1,200 @@
+# The DestinE Earth Data Hub datasets require an authentication token.
+# Please follow the instructions at https://earthdatahub.destine.eu/getting-started#configuring-netrc to set up.
+
+meta:
+  version: v1.0.0
+  name: earthdatahub_data
+  hydromt_version: '>1.0a,<2'
+
+era5_land:
+  data_type: RasterDataset
+  uri: "https://data.earthdatahub.destine.eu/era5/era5-land-daily-utc-v1.zarr"
+  driver:
+    name: raster_xarray
+    filesystem:
+      protocol: https
+    options:
+      decode_times: true
+      storage_options:
+        client_kwargs:
+          trust_env: true
+  metadata:
+    category: meteo
+    notes: Extracted from Copernicus Climate Data Store; resampled by Deltares to
+      daily frequency using right label for time.
+    paper_doi: 10.1002/qj.3803
+    paper_ref: Hersbach et al. (2019)
+    processing_script: https://github.com/Deltares/hydromt/blob/main/data/src/era5_download_resample_convert.py
+    url: https://doi.org/10.24381/cds.bd0915c6
+    license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+    extent:
+      bbox:
+        West: -0.125
+        South: -90.125
+        East: 359.875
+        North: 90.125
+      time_range:
+        start: '1950-01-02'
+        end: '2025-12-31'
+    crs: 4326
+  data_adapter:
+    unit_mult:
+      kin: 0.000277778
+      kout: 0.000277778
+      ssr: 0.000277778
+      press_msl: 0.01
+    rename:
+      d2m: temp_dew
+      msl: press_msl
+      ssrd: kin
+      t2m: temp
+      tisr: kout
+      tmax: temp_max
+      tmin: temp_min
+      tp: precip
+      u10: wind10_u
+      v10: wind10_v
+      valid_time: time
+    unit_add:
+      temp: -273.15
+      temp_dew: -273.15
+      temp_max: -273.15
+      temp_min: -273.15
+
+era5_land_hourly:
+  data_type: RasterDataset
+  uri: https://data.earthdatahub.destine.eu/era5/reanalysis-era5-land-no-antartica-v0.zarr
+  driver:
+    name: raster_xarray
+    filesystem:
+      protocol: https
+    options:
+      decode_times: true
+      storage_options:
+        client_kwargs:
+          trust_env: true
+  metadata:
+    category: meteo
+    notes: Extracted from Copernicus Climate Data Store
+    paper_doi: 10.1002/qj.3803
+    paper_ref: Hersbach et al. (2019)
+    url: https://doi.org/10.24381/cds.adbb2d47
+    license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+    extent:
+      bbox:
+        West: -0.125
+        South: -90.125
+        East: 359.875
+        North: 90.125
+      time_range:
+        start: '1950-01-01'
+        end: 'present'
+    crs: 4326
+  data_adapter:
+    unit_mult:
+      kin: 0.000277778
+      kout: 0.000277778
+      ssr: 0.000277778
+      precip: 1000
+      press_msl: 0.01
+    rename:
+      valid_time: time
+      d2m: temp_dew
+      msl: press_msl
+      ssrd: kin
+      t2m: temp
+      tisr: kout
+      tp: precip
+      u10: wind10_u
+      v10: wind10_v
+    unit_add:
+      temp: -273.15
+      temp_dew: -273.15
+
+era5_hourly:
+  data_type: RasterDataset
+  uri: https://data.earthdatahub.destine.eu/era5/reanalysis-era5-single-levels-v0.zarr
+  driver:
+    name: raster_xarray
+    filesystem:
+      protocol: https
+    options:
+      decode_times: true
+      storage_options:
+        client_kwargs:
+          trust_env: true
+  metadata:
+    category: meteo
+    notes: Extracted from Copernicus Climate Data Store
+    paper_doi: 10.1002/qj.3803
+    paper_ref: Hersbach et al. (2019)
+    url: https://doi.org/10.24381/cds.adbb2d47
+    license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+    extent:
+      bbox:
+        West: -0.125
+        South: -90.125
+        East: 359.875
+        North: 90.125
+      time_range:
+        start: '1950-01-01'
+        end: '2023-03-01'
+    crs: 4326
+  data_adapter:
+    unit_mult:
+      kin: 0.000277778
+      kout: 0.000277778
+      ssr: 0.000277778
+      precip: 1000
+      e: 1000
+      pev: 1000
+      ro: 1000
+      press_msl: 0.01
+    rename:
+      valid_time: time
+      d2m: temp_dew
+      msl: press_msl
+      pev: pet
+      ssrd: kin
+      t2m: temp
+      tisr: kout
+      tp: precip
+      u10: wind10_u
+      v10: wind10_v
+    unit_add:
+      temp: -273.15
+      temp_dew: -273.15
+
+
+era5_ocean:
+  data_type: RasterDataset
+  uri: https://data.earthdatahub.destine.eu/era5/reanalysis-era5-single-levels-ocean-v0.zarr
+  driver:
+    name: raster_xarray
+    filesystem:
+      protocol: https
+    options:
+      decode_times: true
+      storage_options:
+        client_kwargs:
+          trust_env: true
+  metadata:
+    category: ocean
+    notes: Extracted from Copernicus Climate Data Store
+    paper_doi: 10.1002/qj.3803
+    paper_ref: Hersbach et al. (2019)
+    url: https://doi.org/10.24381/cds.bd0915c6
+    license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+    extent:
+      bbox:
+        West: -0.25
+        South: -90.25
+        East: 359.75
+        North: 90.25
+      time_range:
+        start: '1940-01-01'
+        end: 'present'
+    crs: 4326
+  data_adapter:
+    rename:
+        valid_time: time

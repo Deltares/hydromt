@@ -2,6 +2,7 @@
 
 import glob
 import os
+import warnings
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from logging import WARNING
@@ -17,6 +18,7 @@ import pandas as pd
 import pytest
 import requests
 import xarray as xr
+import zarr
 from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
@@ -24,6 +26,7 @@ from shapely import box
 from yaml import dump
 
 from hydromt._compat import HAS_GCSFS, HAS_GDAL, HAS_OPENPYXL, HAS_S3FS
+from hydromt._utils import temp_env
 from hydromt.config import Settings
 from hydromt.data_catalog.adapters import (
     GeoDataFrameAdapter,
@@ -1042,7 +1045,7 @@ class TestGetRasterDataset:
             cache_dir=test_settings.cache_root.as_posix(),
         )
         da = data_catalog.get_rasterdataset(
-            "esa_worldcover_2020_v100",
+            "esa_worldcover",
             bbox=[12.0, 46.0, 12.5, 46.50],
         )
         assert da.name == "landuse"
@@ -1906,3 +1909,47 @@ def test_get_rasterdataset_with_unit_add(data_catalog: DataCatalog):
     # assert that the ds goes from 2010-02-02 to 2010-02-10, because of unit_add time (+1 day) in the data catalog
     assert ds["time"].values[0] == np.datetime64("2010-02-02T00:00:00")
     assert ds["time"].values[-1] == np.datetime64("2010-02-10T00:00:00")
+
+
+@pytest.fixture(scope="module")
+def require_earthdatahub_credentials():
+    import netrc
+
+    try:
+        netrc.netrc()
+        if "data.earthdatahub.destine.eu" not in netrc.netrc().hosts:
+            pytest.skip("No Earth Data Hub credentials found in .netrc file.")
+    except FileNotFoundError:
+        pytest.skip("No .netrc file found for Earth Data Hub mirror authentication.")
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("datasource", ["era5_land", "era5_land_hourly", "era5_ocean"])
+def test_era5_earthdatahub_datasources(
+    datasource: str, require_earthdatahub_credentials
+):
+    warnings.filterwarnings("ignore", category=zarr.errors.ZarrUserWarning)
+    datacatalog = DataCatalog(data_libs=["earthdatahub_data"])
+    if datasource == "era5_ocean":  # Dataset only covers oceans
+        bbox = [-4.49901, 46.750592, -3.999132, 47.034009]
+    else:
+        bbox = [4.2715461044, 52.0537179493, 4.3550421814, 52.1043572932]
+    time_range = ("2010-02-02T00:00:00", "2010-02-10T00:00:00")
+    data = datacatalog.get_rasterdataset(datasource, bbox=bbox, time_range=time_range)
+    assert isinstance(data, xr.Dataset)
+    assert data["time"].values[0] == np.datetime64("2010-02-02T00:00:00")
+    assert data["time"].values[-1] == np.datetime64("2010-02-10T00:00:00")
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(not HAS_S3FS, reason="s3fs is not installed")
+def test_esa_world_cover_aws(tmp_path: Path):
+    datacatalog = DataCatalog(data_libs=["aws_data"])
+    bbox = [4.2715461044, 52.0537179493, 4.3550421814, 52.1043572932]
+    data = datacatalog.get_rasterdataset("esa_worldcover", bbox=bbox)
+    assert isinstance(data, xr.DataArray)
+    output_path = tmp_path / "esa_worldcover_export"
+
+    with temp_env(**{"AWS_NO_SIGN_REQUEST": "true"}):
+        data.raster.to_raster(output_path)
+    assert output_path.exists()
