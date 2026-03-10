@@ -1,5 +1,7 @@
 import gc
-from os import sep
+import logging
+from datetime import datetime
+from os import environ, sep
 from os.path import abspath
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -15,6 +17,7 @@ import xugrid as xu
 import zarr
 import zarr.storage
 from dask import config as dask_config
+from dotenv import find_dotenv, load_dotenv
 from packaging.version import Version
 from pytest_mock import MockerFixture
 from shapely.geometry import box
@@ -79,10 +82,21 @@ def dc_param_path(test_data_dir: Path) -> Path:
 
 
 @pytest.fixture(scope="session", autouse=True)
-def _setup_logging(test_data_dir: Path):
+def _load_dotenv():
+    path = find_dotenv()
+    if path:
+        load_dotenv(path)
+        print(f"Loading environment variables from {path}")
+    else:
+        print("No .env file found, skipping loading environment variables.")
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _setup_logging(test_data_dir: Path, _load_dotenv):
     """Set up logging for tests."""
-    initialize_logging()
-    filename = f"test_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.log"
+    level = logging._nameToLevel.get(environ.get("LOG_LEVEL"), logging.INFO)
+    initialize_logging(level=level)
+    filename = f"test_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
     with to_file(test_data_dir / "logs" / filename):
         yield
 
