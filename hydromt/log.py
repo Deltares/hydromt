@@ -11,6 +11,7 @@ __all__ = [
     "initialize_logging",
     "set_log_level",
     "to_file",
+    "add_filehandler",
 ]
 
 _ROOT_LOGGER = logging.getLogger("hydromt")
@@ -18,21 +19,62 @@ _LOG_FORMAT = "%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s
 _DEFAULT_FORMATTER = logging.Formatter(_LOG_FORMAT)
 
 
-def initialize_logging() -> None:
-    """Initialize the hydromt root logger with a formatter, a log level and an optional console handler.
+def initialize_logging(
+    *,
+    file_path: Path | None = None,
+    console: bool = True,
+    level: int | None = None,
+    capture_warnings: bool = True,
+    formatter: logging.Formatter = _DEFAULT_FORMATTER,
+    logger: logging.Logger = _ROOT_LOGGER,
+) -> logging.FileHandler | None:
+    """Initialize the logging configuration for the hydromt root logger or a custom logger.
 
-    This function should be called once, at the start of the program.
-    For HydroMT, this is achieved by calling it in the `hydromt.__init__.py` file, so it is
-    automatically called when importing the hydromt package.
-    If the root logger has a handler before hydromt is imported, no new handler will be added.
+    If you want logging statements to appear in the console, call this function at the start of your script or application with the ``console`` parameter set to True.
+    If you want to write all log messages to a file, provide a path to the log file via the ``file_path`` argument.
+
+    Parameters
+    ----------
+    file_path : Path, optional
+        Optional path to a log file. If provided, a file handler will be added that writes
+        log messages to this file, by default None.
+        Note that if you provide a file path, you are responsible for ensuring that the file
+        is properly closed when your application exits. You can use the ``to_file``
+        context manager to automatically handle this.
+    console : bool, optional
+        Whether to add a console handler that writes log messages to the console, by default True
+    level : int, optional
+        Log level to set for the logger, by default logging.INFO
+    formatter : logging.Formatter, optional
+        Log formatter to use for the handlers, by default _DEFAULT_FORMATTER
+    logger : logging.Logger, optional
+        Logger to initialize, by default _ROOT_LOGGER
+    capture_warnings : bool, optional
+        Whether to capture warnings issued by the warnings module and redirect them to the logging system, by default True
+
+    Returns
+    -------
+    logging.FileHandler | None
+        The file handler that was added if a file path was provided, otherwise None.
     """
-    logging.captureWarnings(True)
-    _ROOT_LOGGER.setLevel(logging.INFO)
-    if not _ROOT_LOGGER.hasHandlers():
-        console = logging.StreamHandler(sys.stdout)
-        console.setLevel(logging.INFO)
-        console.setFormatter(_DEFAULT_FORMATTER)
-        _ROOT_LOGGER.addHandler(console)
+    logging.captureWarnings(capture_warnings)
+
+    if level is not None:
+        logger.setLevel(level)
+
+    file_handler = None
+    if file_path is not None:
+        file_handler = add_filehandler(
+            file_path, log_level=level, formatter=formatter, logger=logger
+        )
+
+    if console:
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setLevel(level)
+        console_handler.setFormatter(formatter)
+        logger.addHandler(console_handler)
+
+    return file_handler
 
 
 def set_log_level(log_level: int) -> None:
@@ -40,6 +82,11 @@ def set_log_level(log_level: int) -> None:
 
     This also affects all child loggers (e.g., ``hydromt.core``),
     unless they have their own log level explicitly set.
+
+    Parameters
+    ----------
+    log_level : int
+        Log level to set (e.g., logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR, etc)
 
     Example
     -------
@@ -52,7 +99,7 @@ def set_log_level(log_level: int) -> None:
     _ROOT_LOGGER.setLevel(log_level)
 
 
-def _add_filehandler(
+def add_filehandler(
     path: Path,
     *,
     log_level: int | None = None,
@@ -91,6 +138,7 @@ def _add_filehandler(
 
 
 def log_version() -> None:
+    """Log the current version of HydroMT at INFO level."""
     _ROOT_LOGGER.info(f"HydroMT version: {__version__}")
 
 
@@ -134,7 +182,7 @@ def to_file(
     path.parent.mkdir(parents=True, exist_ok=True)
     if not append and path.exists():
         path.unlink()
-    handler = _add_filehandler(
+    handler = add_filehandler(
         path, log_level=log_level, formatter=formatter, logger=logger
     )
     try:

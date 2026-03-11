@@ -105,13 +105,15 @@ def test_grid_from_rasterdataset(demda):
     assert all([x in ds.data_vars.keys() for x in dvars_expected])
 
 
-def test_grid_from_raster_reclass(demda: xr.DataArray, tmp_path: Path, data_dir: Path):
+def test_grid_from_raster_reclass(
+    demda: xr.DataArray, tmp_path: Path, test_data_dir: Path
+):
     demda.name = "name"
     reclass_variables = ["roughness_manning"]
     model = Model(root=tmp_path, data_libs=["artifact_data"], mode="w")
 
     raster_data = "vito_2015"
-    reclass_table_data = data_dir / "vito_mapping.csv"
+    reclass_table_data = test_data_dir / "vito_mapping.csv"
     variable = "roughness_manning"
 
     # Read raster data and remapping table

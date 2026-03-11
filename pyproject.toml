@@ -82,6 +82,7 @@ dev = [
 	"pandas-stubs",    # type hints for pandas
 	"pre-commit",      # linting
 	"ruff",            # linting
+	"python-dotenv",   # find and load .env file
 	"twine",           # needed to publish to pypi
 	"types-openpyxl",  # type hints for openpyxl
 	"types-PyYAML",    # type hints for pyyaml

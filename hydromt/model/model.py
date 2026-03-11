@@ -14,7 +14,8 @@ from typing import Any, Dict, List, Optional, TypeVar, Union, cast
 import geopandas as gdp
 from pyproj import CRS
 
-from hydromt._utils import _rgetattr, _validate_steps, log
+from hydromt import log
+from hydromt._utils import _rgetattr, _validate_steps
 from hydromt.data_catalog import DataCatalog
 from hydromt.model.components import (
     ModelComponent,
