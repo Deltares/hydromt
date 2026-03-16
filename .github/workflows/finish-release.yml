@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: download-artifact
-        uses: dawidd6/action-download-artifact@v16
+        uses: dawidd6/action-download-artifact@v18
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: create-release-artifacts.yml
@@ -39,7 +39,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - id: download-artifact
-      uses: dawidd6/action-download-artifact@v16
+      uses: dawidd6/action-download-artifact@v18
       with:
         github_token: ${{secrets.GITHUB_TOKEN}}
         workflow: create-release-artifacts.yml
