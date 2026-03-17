@@ -11,7 +11,6 @@ __all__ = [
     "initialize_logging",
     "set_log_level",
     "to_file",
-    "add_filehandler",
 ]
 
 _ROOT_LOGGER = logging.getLogger("hydromt")
@@ -23,12 +22,10 @@ def initialize_logging(
     *,
     file_path: Path | None = None,
     console: bool = True,
-    level: int | None = None,
+    level: int = logging.INFO,
     capture_warnings: bool = True,
-    formatter: logging.Formatter = _DEFAULT_FORMATTER,
-    logger: logging.Logger = _ROOT_LOGGER,
 ) -> logging.FileHandler | None:
-    """Initialize the logging configuration for the hydromt root logger or a custom logger.
+    """Initialize the logging configuration for the hydromt root logger.
 
     If you want logging statements to appear in the console, call this function at the start of your script or application with the ``console`` parameter set to True.
     If you want to write all log messages to a file, provide a path to the log file via the ``file_path`` argument.
@@ -45,10 +42,6 @@ def initialize_logging(
         Whether to add a console handler that writes log messages to the console, by default True
     level : int, optional
         Log level to set for the logger, by default logging.INFO
-    formatter : logging.Formatter, optional
-        Log formatter to use for the handlers, by default _DEFAULT_FORMATTER
-    logger : logging.Logger, optional
-        Logger to initialize, by default _ROOT_LOGGER
     capture_warnings : bool, optional
         Whether to capture warnings issued by the warnings module and redirect them to the logging system, by default True
 
@@ -58,21 +51,21 @@ def initialize_logging(
         The file handler that was added if a file path was provided, otherwise None.
     """
     logging.captureWarnings(capture_warnings)
-
-    if level is not None:
-        logger.setLevel(level)
-
+    _ROOT_LOGGER.setLevel(level)
     file_handler = None
     if file_path is not None:
-        file_handler = add_filehandler(
-            file_path, log_level=level, formatter=formatter, logger=logger
+        file_handler = _add_filehandler(
+            file_path,
+            log_level=level,
+            formatter=_DEFAULT_FORMATTER,
+            logger=_ROOT_LOGGER,
         )
 
     if console:
         console_handler = logging.StreamHandler(sys.stdout)
         console_handler.setLevel(level)
-        console_handler.setFormatter(formatter)
-        logger.addHandler(console_handler)
+        console_handler.setFormatter(_DEFAULT_FORMATTER)
+        _ROOT_LOGGER.addHandler(console_handler)
 
     return file_handler
 
@@ -99,10 +92,10 @@ def set_log_level(log_level: int) -> None:
     _ROOT_LOGGER.setLevel(log_level)
 
 
-def add_filehandler(
+def _add_filehandler(
     path: Path,
     *,
-    log_level: int | None = None,
+    log_level: int = logging.INFO,
     formatter: logging.Formatter = _DEFAULT_FORMATTER,
     logger: logging.Logger = _ROOT_LOGGER,
 ) -> logging.FileHandler:
@@ -113,7 +106,7 @@ def add_filehandler(
     path : Path
         Path to the log file.
     log_level : int, optional
-        Log level for the file handler, by default None (inherits from logger)
+        Log level for the file handler, by default logging.INFO
     formatter : logging.Formatter, optional
         Log formatter, by default _DEFAULT_FORMATTER
     logger : logging.Logger, optional
@@ -127,8 +120,7 @@ def add_filehandler(
     path.parent.mkdir(parents=True, exist_ok=True)
     filehandler = logging.FileHandler(path)
     filehandler.setFormatter(formatter)
-    if log_level is not None:
-        filehandler.setLevel(log_level)
+    filehandler.setLevel(log_level)
     logger.addHandler(filehandler)
     if path.exists():
         logger.debug(f"Appending log messages to file {path}.")
@@ -182,7 +174,7 @@ def to_file(
     path.parent.mkdir(parents=True, exist_ok=True)
     if not append and path.exists():
         path.unlink()
-    handler = add_filehandler(
+    handler = _add_filehandler(
         path, log_level=log_level, formatter=formatter, logger=logger
     )
     try:

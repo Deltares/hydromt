@@ -493,7 +493,7 @@ def test_maps_setup(dc_param_path: Path):
 def test_gridmodel(demda, tmp_path: Path, dc_param_path: Path):
     grid_model = Model(
         root=tmp_path,
-        data_libs=["artifact_data", dc_param_path.as_posix()],
+        data_libs=["artifact_data", dc_param_path],
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
         mode="w",
@@ -1061,7 +1061,7 @@ def test_setup_mesh_from_geom(tmp_path: Path, dc_param_path: Path):
     bbox = [12.00, 45.00, 12.25, 45.25]
     dummy_mesh_model = Model(
         root=tmp_path,
-        data_libs=["artifact_data", dc_param_path.as_posix()],
+        data_libs=["artifact_data", dc_param_path],
         components={"mesh": {"type": "MeshComponent"}},
         region_component="mesh",
     )

@@ -539,7 +539,7 @@ def bbox():
 def grid_model(demda, world, obsda, tmp_path: Path, dc_param_path: Path):
     mod = Model(
         root=tmp_path,
-        data_libs=["artifact_data", dc_param_path.as_posix()],
+        data_libs=["artifact_data", dc_param_path],
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
     )
@@ -571,7 +571,7 @@ def grid_model(demda, world, obsda, tmp_path: Path, dc_param_path: Path):
 def mesh_model(tmp_path: Path, dc_param_path: Path):
     mesh_model = Model(
         root=tmp_path,
-        data_libs=["artifact_data", dc_param_path.as_posix()],
+        data_libs=["artifact_data", dc_param_path],
         components={"mesh": {"type": "MeshComponent"}},
         region_component="mesh",
     )
