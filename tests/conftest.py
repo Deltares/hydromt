@@ -92,12 +92,13 @@ def _load_dotenv():
 
 
 @pytest.fixture(scope="session", autouse=True)
-def _setup_logging(test_data_dir: Path, _load_dotenv):
+def _setup_logging(_load_dotenv):
     """Set up logging for tests."""
+    test_root = Path(__file__).parent
     level = logging._nameToLevel.get(environ.get("LOG_LEVEL"), logging.INFO)
     initialize_logging(level=level)
     filename = f"test_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
-    with to_file(test_data_dir / "logs" / filename):
+    with to_file(test_root / "logs" / filename):
         yield
 
 
