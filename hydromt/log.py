@@ -183,6 +183,7 @@ def to_file(
     try:
         yield
     except Exception:
+        # This also logs the stack trace + exception
         logger.exception("Unhandled exception occured.")
         raise
     finally:

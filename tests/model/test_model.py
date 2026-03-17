@@ -46,7 +46,7 @@ from hydromt.model.processes.mesh import (
 def vito_2015(tmp_path_factory, dc_param_path: Path):
     mesh_model = Model(
         root=str(tmp_path_factory.mktemp("mesh_model_vito")),
-        data_libs=["artifact_data", dc_param_path.as_posix()],
+        data_libs=["artifact_data", dc_param_path],
         components={"mesh": {"type": "MeshComponent"}},
         region_component="mesh",
     )
@@ -449,7 +449,7 @@ def test_setup_region_basin(model):
 @pytest.mark.integration
 def test_maps_setup(dc_param_path: Path):
     mod = Model(
-        data_libs=["artifact_data", dc_param_path.as_posix()],
+        data_libs=["artifact_data", dc_param_path],
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
         mode="w",
@@ -525,7 +525,7 @@ def test_gridmodel(demda, tmp_path: Path, dc_param_path: Path):
     # read model
     model1 = Model(
         root=tmp_path,
-        data_libs=["artifact_data", dc_param_path.as_posix()],
+        data_libs=["artifact_data", dc_param_path],
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
         mode="r",
@@ -542,7 +542,7 @@ def test_gridmodel(demda, tmp_path: Path, dc_param_path: Path):
 
     model1 = Model(
         root=update_root,
-        data_libs=["artifact_data", dc_param_path.as_posix()],
+        data_libs=["artifact_data", dc_param_path],
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
         mode="r+",
@@ -595,7 +595,7 @@ def test_setup_grid_from_bbox_aligned(grid_model):
 def test_setup_grid_from_wrong_kind_no_mask(grid_model, dc_param_path: Path):
     bbox = [12.00, 45.00, 12.25, 45.25]
     grid_model_tmp = Model(
-        data_libs=["artifact_data", dc_param_path.as_posix()],
+        data_libs=["artifact_data", dc_param_path],
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
     )
@@ -642,7 +642,7 @@ def test_setup_grid_from_wrong_kind_no_mask(grid_model, dc_param_path: Path):
 def test_setup_grid_from_geodataframe(grid_model, dc_param_path: Path):
     bbox = [12.00, 45.00, 12.25, 45.25]
     grid_model_tmp = Model(
-        data_libs=["artifact_data", dc_param_path.as_posix()],
+        data_libs=["artifact_data", dc_param_path],
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
     )

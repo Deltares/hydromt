@@ -94,7 +94,7 @@ def test_add_raster_data_from_rasterdataset(
 def test_add_raster_data_from_raster_reclass(
     tmp_path: Path, dc_param_path: Path, demda, lulcda
 ):
-    model = Model(root=tmp_path, data_libs=[dc_param_path.as_posix()], mode="w")
+    model = Model(root=tmp_path, data_libs=[dc_param_path], mode="w")
 
     # add a grid and spatial component
     model.add_component("grid", GridComponent(model))
