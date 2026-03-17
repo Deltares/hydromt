@@ -95,7 +95,7 @@ def set_log_level(log_level: int) -> None:
 def _add_filehandler(
     path: Path,
     *,
-    log_level: int = logging.INFO,
+    log_level: int | None = None,
     formatter: logging.Formatter = _DEFAULT_FORMATTER,
     logger: logging.Logger = _ROOT_LOGGER,
 ) -> logging.FileHandler:
@@ -106,7 +106,7 @@ def _add_filehandler(
     path : Path
         Path to the log file.
     log_level : int, optional
-        Log level for the file handler, by default logging.INFO
+        Log level for the file handler, by default None
     formatter : logging.Formatter, optional
         Log formatter, by default _DEFAULT_FORMATTER
     logger : logging.Logger, optional
@@ -120,7 +120,8 @@ def _add_filehandler(
     path.parent.mkdir(parents=True, exist_ok=True)
     filehandler = logging.FileHandler(path)
     filehandler.setFormatter(formatter)
-    filehandler.setLevel(log_level)
+    if log_level is not None:
+        filehandler.setLevel(log_level)
     logger.addHandler(filehandler)
     if path.exists():
         logger.debug(f"Appending log messages to file {path}.")
@@ -179,6 +180,10 @@ def to_file(
     )
     try:
         yield
+    except Exception:
+        logger.exception("Unhandled exception occured.")
+        raise
     finally:
+        handler.flush()
         logger.removeHandler(handler)
         handler.close()
