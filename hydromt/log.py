@@ -67,6 +67,7 @@ def initialize_logging(
         console_handler.setFormatter(_DEFAULT_FORMATTER)
         _ROOT_LOGGER.addHandler(console_handler)
 
+    log_version()
     return file_handler
 
 
@@ -130,9 +131,9 @@ def _add_filehandler(
     return filehandler
 
 
-def log_version() -> None:
+def log_version(logger: logging.Logger = _ROOT_LOGGER) -> None:
     """Log the current version of HydroMT at INFO level."""
-    _ROOT_LOGGER.info(f"HydroMT version: {__version__}")
+    logger.info(f"HydroMT version: {__version__}")
 
 
 @contextmanager
@@ -178,6 +179,7 @@ def to_file(
     handler = _add_filehandler(
         path, log_level=log_level, formatter=formatter, logger=logger
     )
+    log_version(logger=logger)
     try:
         yield
     except Exception:

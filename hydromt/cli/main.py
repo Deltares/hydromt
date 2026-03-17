@@ -236,9 +236,8 @@ def build(
     -d /path/to/data_catalog.yml -v
     """  # noqa: E501
     log.initialize_logging(level=max(10, 30 - 10 * (verbose - quiet)))
-    log.log_version()
-    # Model.build will manage the filehandlers and logging
 
+    # Model.build will manage the filehandlers and logging
     modeltype, kwargs, steps = read_workflow_yaml(config, modeltype=model)
     # parse data catalog options from global section in config and cli options
     data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
@@ -312,9 +311,8 @@ def update(
     """  # noqa: E501
     # logger
     log.initialize_logging(level=max(10, 30 - 10 * (verbose - quiet)))
-    log.log_version()
-    # Model.update will manage the filehandlers and logging
 
+    # Model.update will manage the filehandlers and logging
     mode = "r+" if model_root == model_out else "r"
     modeltype, kwargs, steps = read_workflow_yaml(config, modeltype=model)
 
@@ -440,7 +438,6 @@ def check(
     log.initialize_logging(level=max(10, 30 - 10 * (verbose - quiet)))
     log_path = Path.cwd() / "hydromt_check.log"
     with log.to_file(path=log_path):
-        log.log_version()
         results = []
         for cat_path in data:
             results.append(_validate_catalog(Path(cat_path), format, upgrade))
@@ -516,7 +513,6 @@ def export(
     log.initialize_logging(level=max(10, 30 - 10 * (verbose - quiet)))
     log_path = Path(export_dest_path, "hydromt_export.log")
     with log.to_file(path=log_path):
-        log.log_version()
         if error_on_empty:
             handle_nodata = NoDataStrategy.RAISE
         else:
