@@ -187,7 +187,9 @@ def to_file(
         handler.close()
 
 
-def flags_to_level(verbose: int = 0, quiet: int = 0) -> int:
+def flags_to_level(
+    verbose: int = 0, quiet: int = 0, default: int = logging.WARNING
+) -> int:
     """Compute the log level based on the number of verbose and quiet flags.
 
     Each ``-v`` (verbose) flag decreases the log level by 10 (e.g., from WARNING to INFO to DEBUG),
@@ -199,6 +201,8 @@ def flags_to_level(verbose: int = 0, quiet: int = 0) -> int:
         Number of verbose flags (e.g., -v)
     quiet : int, optional
         Number of quiet flags (e.g., -q)
+    default : int, optional
+        Default log level, by default logging.WARNING
 
     Returns
     -------
@@ -207,5 +211,5 @@ def flags_to_level(verbose: int = 0, quiet: int = 0) -> int:
     """
     return max(
         logging.DEBUG,
-        min(logging.CRITICAL, logging.WARNING - 10 * verbose + 10 * quiet),
+        min(logging.CRITICAL, default - 10 * verbose + 10 * quiet),
     )
