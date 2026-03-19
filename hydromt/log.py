@@ -7,11 +7,7 @@ from pathlib import Path
 
 from hydromt import __version__
 
-__all__ = [
-    "initialize_logging",
-    "set_log_level",
-    "to_file",
-]
+__all__ = ["initialize_logging", "set_log_level", "to_file", "flags_to_level"]
 
 _ROOT_LOGGER = logging.getLogger("hydromt")
 _LOG_FORMAT = "%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s"
@@ -179,7 +175,6 @@ def to_file(
     handler = _add_filehandler(
         path, log_level=log_level, formatter=formatter, logger=logger
     )
-    log_version(logger=logger)
     try:
         yield
     except Exception:
@@ -190,3 +185,27 @@ def to_file(
         handler.flush()
         logger.removeHandler(handler)
         handler.close()
+
+
+def flags_to_level(verbose: int = 0, quiet: int = 0) -> int:
+    """Compute the log level based on the number of verbose and quiet flags.
+
+    Each ``-v`` (verbose) flag decreases the log level by 10 (e.g., from WARNING to INFO to DEBUG),
+    while each ``-q`` (quiet) flag increases the log level by 10 (e.g., from WARNING to ERROR to CRITICAL).
+
+    Parameters
+    ----------
+    verbose : int, optional
+        Number of verbose flags (e.g., -v)
+    quiet : int, optional
+        Number of quiet flags (e.g., -q)
+
+    Returns
+    -------
+    int
+        The computed log level. Guaranteed to be between logging.DEBUG and logging.CRITICAL.
+    """
+    return max(
+        logging.DEBUG,
+        min(logging.CRITICAL, logging.WARNING - 10 * verbose + 10 * quiet),
+    )

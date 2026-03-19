@@ -235,7 +235,7 @@ def build(
     hydromt build sfincs /path/to/model_root  -i /path/to/sfincs_config.yml
     -d /path/to/data_catalog.yml -v
     """  # noqa: E501
-    log.initialize_logging(level=max(10, 30 - 10 * (verbose - quiet)))
+    log.initialize_logging(level=log.flags_to_level(verbose, quiet))
 
     # Model.build will manage the filehandlers and logging
     modeltype, kwargs, steps = read_workflow_yaml(config, modeltype=model)
@@ -310,7 +310,7 @@ def update(
     hydromt update wflow_sbm /path/to/model_root  -o /path/to/model_out  -i /path/to/wflow_config.yml  -d /path/to/data_catalog.yml -v
     """  # noqa: E501
     # logger
-    log.initialize_logging(level=max(10, 30 - 10 * (verbose - quiet)))
+    log.initialize_logging(level=log.flags_to_level(verbose, quiet))
 
     # Model.update will manage the filehandlers and logging
     mode = "r+" if model_root == model_out else "r"
@@ -435,9 +435,11 @@ def check(
     With region:
     >>> hydromt check -m grid_model -d /path/to/data_catalog.yml -i /path/to/model_config.yml -r '{"bbox": [-1,-1,1,1]}' -v
     """
-    log.initialize_logging(level=max(10, 30 - 10 * (verbose - quiet)))
+    log.initialize_logging(level=log.flags_to_level(verbose, quiet))
+
     log_path = Path.cwd() / "hydromt_check.log"
     with log.to_file(path=log_path):
+        log.log_version()
         results = []
         for cat_path in data:
             results.append(_validate_catalog(Path(cat_path), format, upgrade))
@@ -510,9 +512,11 @@ def export(
     hydromt export -i /path/to/export_config.yaml path/to/output_dir
     """  # noqa: E501
     # logger
-    log.initialize_logging(level=max(10, 30 - 10 * (verbose - quiet)))
+    log.initialize_logging(level=log.flags_to_level(verbose, quiet))
+
     log_path = Path(export_dest_path, "hydromt_export.log")
     with log.to_file(path=log_path):
+        log.log_version()
         if error_on_empty:
             handle_nodata = NoDataStrategy.RAISE
         else:

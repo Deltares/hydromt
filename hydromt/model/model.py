@@ -299,6 +299,7 @@ class Model(object, metaclass=ABCMeta):
 
         """
         with log.to_file(Path(self.root.path) / "hydromt.log"):
+            log.log_version()
             steps = steps or []
             _validate_steps(self, steps)
 
@@ -381,6 +382,7 @@ class Model(object, metaclass=ABCMeta):
         with log.to_file(
             self.root.path / "hydromt.log", append=self.root.is_reading_mode()
         ):
+            log.log_version()
             steps = steps or []
             _validate_steps(self, steps)
             if not self.root.is_writing_mode():
