@@ -505,8 +505,11 @@ Command Line Interface (CLI)</label><div class="sd-tab-content docutils">
 <label class="sd-tab-label" for="sd-tab-item-1">
 Python API</label><div class="sd-tab-content docutils">
 <p>For the hydromt core <code class="docutils literal notranslate"><span class="pre">example_model</span></code> plugin using the pre-defined <code class="docutils literal notranslate"><span class="pre">artifact_data</span></code> catalog:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleModel</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleModel</span><span class="p">,</span> <span class="n">log</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_workflow_yaml</span>
+
+<span class="c1"># Configure logging</span>
+<span class="n">log</span><span class="o">.</span><span class="n">initialize_logging</span><span class="p">()</span>
 
 <span class="c1"># Instantiate model</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">ExampleModel</span><span class="p">(</span>
@@ -522,8 +525,12 @@ Python API</label><div class="sd-tab-content docutils">
 </pre></div>
 </div>
 <p>For HydroMT Wflow SBM plugin <code class="docutils literal notranslate"><span class="pre">wflow_sbm</span></code> with a user-defined data catalog:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt_wflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">WflowSbmModel</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt</span><span class="w"> </span><span class="kn">import</span> <span class="n">log</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt_wflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">WflowSbmModel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_workflow_yaml</span>
+
+<span class="c1"># Configure logging</span>
+<span class="n">log</span><span class="o">.</span><span class="n">initialize_logging</span><span class="p">()</span>
 
 <span class="c1"># Instantiate model</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">WflowSbmModel</span><span class="p">(</span>
@@ -540,7 +547,10 @@ Python API</label><div class="sd-tab-content docutils">
 </div>
 <p>Additionally, in Python, you can also build the model step-by step by calling each of the
 model steps as methods instead of using a workflow file. For example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleModel</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleModel</span><span class="p">,</span> <span class="n">log</span>
+
+<span class="c1"># Configure logging</span>
+<span class="n">log</span><span class="o">.</span><span class="n">initialize_logging</span><span class="p">()</span>
 
 <span class="c1"># Instantiate model</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">ExampleModel</span><span class="p">(</span>

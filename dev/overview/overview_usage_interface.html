@@ -434,8 +434,12 @@ Command Line Interface (CLI)</label><div class="sd-tab-content docutils">
 <input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
 <label class="sd-tab-label" for="sd-tab-item-1">
 Python API</label><div class="sd-tab-content docutils">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt_wflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">WflowSbmModel</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt</span><span class="w"> </span><span class="kn">import</span> <span class="n">log</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt_wflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">WflowSbmModel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_workflow_yaml</span>
+
+<span class="c1"># Configure logging</span>
+<span class="n">log</span><span class="o">.</span><span class="n">initialize_logging</span><span class="p">()</span>
 
 <span class="c1"># Instantiate model</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">WflowSbmModel</span><span class="p">(</span>

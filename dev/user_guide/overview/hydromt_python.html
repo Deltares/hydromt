@@ -486,6 +486,21 @@ and their documentation in the <a class="reference external" href="../api.rst">A
 <p>HydroMT is here to read and harmonize <strong>input data</strong>, and to process it via its
 <strong>methods and (GIS) processes</strong> in order to prepare ready to run <strong>models</strong>. So HydroMT’s
 methods are organized around these main objects.</p>
+<section id="logging-configuration">
+<h2>Logging configuration<a class="headerlink" href="#logging-configuration" title="Link to this heading">#</a></h2>
+<p>When using HydroMT as a Python library, logging is not configured automatically.
+This is different from the CLI, where logging is initialized for you.</p>
+<p>If you do not explicitly configure logging in your script, HydroMT will not emit log messages to the terminal, even if functions are executed successfully.
+This can make it difficult to understand what the library is doing internally or to debug issues.</p>
+<p>To enable logging, you can call:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt</span><span class="w"> </span><span class="kn">import</span> <span class="n">log</span>
+
+<span class="n">log</span><span class="o">.</span><span class="n">initialize_logging</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This sets up a default logging configuration and ensures that messages are printed to the console.
+If you need more advanced logging behavior (for example logging to a file or integrating with an existing application logger),
+review the module <code class="docutils literal notranslate"><span class="pre">hydromt.log</span></code> for your options or you should configure the Python <code class="docutils literal notranslate"><span class="pre">logging</span></code> module yourself before using HydroMT.</p>
 <details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
 <summary class="sd-summary-title sd-card-header">
 <span class="sd-summary-text"><strong>Model functions</strong></span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
@@ -511,7 +526,8 @@ methods are organized around these main objects.</p>
 <li><p class="sd-card-text"><a class="reference internal" href="#hydromt-processes-python"><span class="std std-ref">processes</span></a></p></li>
 </ul>
 </div>
-</details><section id="model-functions">
+</details></section>
+<section id="model-functions">
 <h2>Model functions<a class="headerlink" href="#model-functions" title="Link to this heading">#</a></h2>
 <p>You can use HydroMT to build or update a model in Python instead of the CLI. Additionally
 with Python, you can also load an existing model to read or analyze its inputs or results.</p>
@@ -520,8 +536,11 @@ with Python, you can also load an existing model to read or analyze its inputs o
 <p>The <code class="docutils literal notranslate"><span class="pre">build</span></code> function is used to build models from scratch. In Python, you can also
 use the build function in combination with the build workflow file to build a model. Here
 is a small example of how to use the build function in Python:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleModel</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleModel</span><span class="p">,</span> <span class="n">log</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_workflow_yaml</span>
+
+<span class="c1"># Configure logging</span>
+<span class="n">log</span><span class="o">.</span><span class="n">initialize_logging</span><span class="p">()</span>
 
 <span class="c1"># Instantiate model</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">ExampleModel</span><span class="p">(</span>
@@ -538,7 +557,10 @@ is a small example of how to use the build function in Python:</p>
 </div>
 <p>Additionally, in Python, you can also build the model step-by step by calling each of the
 model steps as methods, instead of using a workflow file. For example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleModel</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleModel</span><span class="p">,</span> <span class="n">log</span>
+
+<span class="c1"># Configure logging</span>
+<span class="n">log</span><span class="o">.</span><span class="n">initialize_logging</span><span class="p">()</span>
 
 <span class="c1"># Instantiate model</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">ExampleModel</span><span class="p">(</span>
@@ -576,8 +598,11 @@ model steps as methods, instead of using a workflow file. For example:</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">update</span></code> function is used to update an existing model. In Python, you can also
 use the update function in combination with the workflow file to update a model. Here
 is a small example of how to use the update function in Python:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleModel</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleModel</span><span class="p">,</span> <span class="n">log</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_workflow_yaml</span>
+
+<span class="c1"># Configure logging</span>
+<span class="n">log</span><span class="o">.</span><span class="n">initialize_logging</span><span class="p">()</span>
 
 <span class="c1"># Instantiate model</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">ExampleModel</span><span class="p">(</span>
@@ -598,7 +623,10 @@ is a small example of how to use the update function in Python:</p>
 </div>
 <p>Similarly to build, you can also update the model step by step by calling each of the
 model steps as methods, instead of using a workflow file. For example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleModel</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleModel</span><span class="p">,</span> <span class="n">log</span>
+
+<span class="c1"># Configure logging</span>
+<span class="n">log</span><span class="o">.</span><span class="n">initialize_logging</span><span class="p">()</span>
 
 <span class="c1"># Instantiate model</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">ExampleModel</span><span class="p">(</span>
@@ -638,7 +666,9 @@ is accessible via the <code class="docutils literal notranslate"><span class="pr
 etc.).</p>
 <p>Here is a small example of how to use the <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code> class in python to plot
 or analyze your model:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleModel</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleModel</span><span class="p">,</span> <span class="n">log</span>
+<span class="c1"># Configure logging</span>
+<span class="n">log</span><span class="o">.</span><span class="n">initialize_logging</span><span class="p">()</span>
 <span class="c1"># create a ExampleModel instance for an existing model saved in &quot;example_model&quot; folder</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">hydromt</span><span class="o">.</span><span class="n">ExampleModel</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s2">&quot;example_model&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>
 <span class="c1"># read/get the grid data</span>
@@ -674,7 +704,10 @@ their properties. You can find more information on the DataCatalog in the
 via its <code class="docutils literal notranslate"><span class="pre">get_&lt;data_type&gt;</span></code> methods, for example: <code class="docutils literal notranslate"><span class="pre">get_rasterdataset</span></code>,
 <code class="docutils literal notranslate"><span class="pre">get_geodataframe</span></code>, <code class="docutils literal notranslate"><span class="pre">get_geodataset</span></code>, <code class="docutils literal notranslate"><span class="pre">get_dataframe</span></code>, <code class="docutils literal notranslate"><span class="pre">get_dataset</span></code>.</p>
 <p>Here is a small example of how to use the DataCatalog to read data in Python:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataCatalog</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataCatalog</span><span class="p">,</span> <span class="n">log</span>
+
+<span class="c1"># Configure logging</span>
+<span class="n">log</span><span class="o">.</span><span class="n">initialize_logging</span><span class="p">()</span>
 
 <span class="c1"># create a data catalog from a local data_catalog file</span>
 <span class="n">cat</span> <span class="o">=</span> <span class="n">DataCatalog</span><span class="p">(</span><span class="s2">&quot;data_catalog.yml&quot;</span><span class="p">)</span>
@@ -841,6 +874,7 @@ landuse-landcover to model parameter maps, etc.</p>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#logging-configuration">Logging configuration</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#model-functions">Model functions</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#building-a-model">Building a model</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#updating-a-model">Updating a model</a></li>

@@ -571,7 +571,10 @@ For example it could be that a specific method actually updates several componen
 pages, if you are using hydromt in Python, you can also use the worfklow file and the <code class="docutils literal notranslate"><span class="pre">build</span></code>
 and <code class="docutils literal notranslate"><span class="pre">update</span></code> methods, or just prepare your model step by step by calling the methods directly.</p>
 <p>For example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleModel</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleModel</span><span class="p">,</span> <span class="n">log</span>
+
+<span class="c1"># Configure logging</span>
+<span class="n">log</span><span class="o">.</span><span class="n">initialize_logging</span><span class="p">()</span>
 
 <span class="c1"># Instantiate model</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">ExampleModel</span><span class="p">(</span>

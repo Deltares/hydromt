@@ -476,7 +476,9 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataCatalog</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataCatalog</span><span class="p">,</span> <span class="n">log</span>
+
+<span class="n">log</span><span class="o">.</span><span class="n">initialize_logging</span><span class="p">()</span>
 
 <span class="n">data_catalog</span> <span class="o">=</span> <span class="n">DataCatalog</span><span class="p">(</span><span class="s2">&quot;data/tabular_data_catalog.yml&quot;</span><span class="p">)</span>
 </pre></div>
@@ -487,7 +489,8 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-03-10 16:18:26,435 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from data/tabular_data_catalog.yml
+2026-03-23 14:13:46,715 - hydromt - log - INFO - HydroMT version: 1.4.0.dev0
+2026-03-23 14:13:46,716 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from data/tabular_data_catalog.yml
 </pre></div></div>
 </div>
 <section id="Pandas-driver">
@@ -530,7 +533,7 @@ DataFrameSource(name=&#39;example_csv_data&#39;, uri=&#39;example_csv_data.csv&#
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-03-10 16:18:26,470 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading example_csv_data DataFrame data from /home/runner/work/hydromt/hydromt/docs/_examples/data/example_csv_data.csv
+2026-03-23 14:13:46,752 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading example_csv_data DataFrame data from /home/runner/work/hydromt/hydromt/docs/_examples/data/example_csv_data.csv
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -639,9 +642,9 @@ DataFrameSource(name=&#39;example_csv_data&#39;, uri=&#39;example_csv_data.csv&#
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-03-10 16:18:26,868 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from data/vito_reclass.yml
-2026-03-10 16:18:26,886 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data latest
-2026-03-10 16:18:26,887 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
+2026-03-23 14:13:47,153 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from data/vito_reclass.yml
+2026-03-23 14:13:47,172 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data latest
+2026-03-23 14:13:47,172 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -667,7 +670,7 @@ DataFrameSource(name=&#39;vito_reclass&#39;, uri=&#39;vito_reclass.csv&#39;, dat
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-03-10 16:18:27,458 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading vito_reclass DataFrame data from /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
+2026-03-23 14:13:47,742 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading vito_reclass DataFrame data from /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -754,7 +757,7 @@ DataFrameSource(name=&#39;vito_reclass&#39;, uri=&#39;vito_reclass.csv&#39;, dat
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-03-10 16:18:27,470 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading vito_2015 RasterDataset data from /home/runner/.hydromt/artifact_data/latest/vito.tif
+2026-03-23 14:13:47,754 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading vito_2015 RasterDataset data from /home/runner/.hydromt/artifact_data/latest/vito.tif
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -763,7 +766,7 @@ DataFrameSource(name=&#39;vito_reclass&#39;, uri=&#39;vito_reclass.csv&#39;, dat
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7f91a68a3770&gt;
+&lt;matplotlib.image.AxesImage at 0x7fbe1cab7770&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
