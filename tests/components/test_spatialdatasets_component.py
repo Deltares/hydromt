@@ -8,7 +8,6 @@ from pytest_mock import MockerFixture
 from hydromt.model import Model
 from hydromt.model.components.grid import GridComponent
 from hydromt.model.components.spatialdatasets import SpatialDatasetsComponent
-from tests.conftest import DC_PARAM_PATH
 
 
 def test_model_spatialdataset_key_error(tmp_path: Path):
@@ -92,8 +91,10 @@ def test_add_raster_data_from_rasterdataset(
     xr.testing.assert_equal(model.maps.data["elevation"], demda)
 
 
-def test_add_raster_data_from_raster_reclass(tmp_path: Path, demda, lulcda):
-    model = Model(root=tmp_path, data_libs=[DC_PARAM_PATH], mode="w")
+def test_add_raster_data_from_raster_reclass(
+    tmp_path: Path, dc_param_path: Path, demda, lulcda
+):
+    model = Model(root=tmp_path, data_libs=[dc_param_path], mode="w")
 
     # add a grid and spatial component
     model.add_component("grid", GridComponent(model))

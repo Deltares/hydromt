@@ -16,9 +16,11 @@ New
 
 Changed
 -------
+- ``log.initialize_logging()`` is no longer called when hydromt is imported. It is now the users responsibility to configure logging at the start of their scripts. (#1399)
 
 Fixed
 -----
+- properly log unhandled errors to ``hydromt.log`` (#1399)
 
 Deprecated
 ----------

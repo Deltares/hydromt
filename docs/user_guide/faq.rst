@@ -47,6 +47,22 @@ called by default at the end of a ``build`` or ``update``. If you however add a 
 (e.g. ``grid.write`` for a Grid model, ``forcing.write``, ``config.write``, etc.) to the .yaml file the call to the
 general write method is disabled and only the selected model data attributes are written.
 
+ | **Q**: Why is there no logging output in my terminal when I run my Python hydromt scripts?
+
+HydroMT does not configure logging automatically when used as a Python library. This is different from the command line interface (CLI), where logging is initialized for you.
+If you run HydroMT from a Python script without configuring logging, no log messages will be shown in the terminal, even though the code is executing correctly.
+To enable logging output, you need to explicitly initialize logging in your script:
+
+.. code-block:: python
+
+    from hydromt import log
+
+    log.initialize_logging()
+
+This sets up a default logging configuration and ensures that messages are printed to the console.
+If you need more advanced logging behavior (for example logging to a file or integrating with an existing application logger),
+review the module hydromt.log for your options or you should configure the Python logging module yourself before using HydroMT.
+
 Working with data in HydroMT
 ----------------------------
 

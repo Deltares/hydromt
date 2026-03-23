@@ -123,7 +123,10 @@ For example:
 
 .. code-block:: python
 
-        from hydromt import ExampleModel
+        from hydromt import ExampleModel, log
+
+        # Configure logging
+        log.initialize_logging()
 
         # Instantiate model
         model = ExampleModel(
