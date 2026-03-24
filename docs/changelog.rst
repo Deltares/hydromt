@@ -13,6 +13,7 @@ Unreleased
 
 New
 ---
+- Added earthdatahub_data predefined catalog for accessing ERA5_land, ERA5_land_hourly, ERA5_ocean (#1357).
 
 Changed
 -------
