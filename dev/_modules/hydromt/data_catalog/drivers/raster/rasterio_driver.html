@@ -652,12 +652,7 @@
                     <span class="k">raise</span>
 
         <span class="c1"># rasterio uses specific environment variable for s3 access.</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">anon</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filesystem</span><span class="o">.</span><span class="n">get_fs</span><span class="p">()</span><span class="o">.</span><span class="n">anon</span>
-        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="n">anon</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="n">anon</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">anon_aws_request</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">temp_env</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="s2">&quot;AWS_NO_SIGN_REQUEST&quot;</span><span class="p">:</span> <span class="s2">&quot;true&quot;</span><span class="p">}):</span>
                 <span class="n">ds</span> <span class="o">=</span> <span class="n">_open</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
@@ -790,6 +785,15 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;IO error while detecting zoom levels: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">zoom_levels</span><span class="p">,</span> <span class="n">crs</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">anon_aws_request</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the filesystem is set to anonymous AWS requests.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">anon</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filesystem</span><span class="o">.</span><span class="n">get_fs</span><span class="p">()</span><span class="o">.</span><span class="n">anon</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">anon</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">anon</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_write_raster</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">driver</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="o">**</span><span class="n">write_kwargs</span><span class="p">:</span> <span class="n">Any</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -805,7 +809,12 @@
             <span class="k">raise</span> <span class="n">NoDataException</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Cannot write raster data with insufficient spatial dimensions: </span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">y_dim</span><span class="si">}</span><span class="s2"> size </span><span class="si">{</span><span class="n">y_coords</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">x_dim</span><span class="si">}</span><span class="s2"> size </span><span class="si">{</span><span class="n">x_coords</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="n">driver</span><span class="p">,</span> <span class="o">**</span><span class="n">write_kwargs</span><span class="p">)</span></div>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">anon_aws_request</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">temp_env</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="s2">&quot;AWS_NO_SIGN_REQUEST&quot;</span><span class="p">:</span> <span class="s2">&quot;true&quot;</span><span class="p">}):</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="n">driver</span><span class="p">,</span> <span class="o">**</span><span class="n">write_kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="n">driver</span><span class="p">,</span> <span class="o">**</span><span class="n">write_kwargs</span><span class="p">)</span></div>
 
 </pre></div>
 

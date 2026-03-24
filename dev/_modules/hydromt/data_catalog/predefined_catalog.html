@@ -455,6 +455,7 @@
     <span class="s2">&quot;AWSDataCatalog&quot;</span><span class="p">,</span>
     <span class="s2">&quot;GCSCMIP6DataCatalog&quot;</span><span class="p">,</span>
     <span class="s2">&quot;create_registry_file&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;EarthDataHubDataCatalog&quot;</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="n">__hydromt_eps__</span> <span class="o">=</span> <span class="p">[</span>
@@ -462,6 +463,7 @@
     <span class="s2">&quot;ArtifactDataCatalog&quot;</span><span class="p">,</span>
     <span class="s2">&quot;AWSDataCatalog&quot;</span><span class="p">,</span>
     <span class="s2">&quot;GCSCMIP6DataCatalog&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;EarthDataHubDataCatalog&quot;</span><span class="p">,</span>
 <span class="p">]</span>
 
 
@@ -692,6 +694,13 @@
 
     <span class="n">base_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CATALOG_ROOT</span><span class="si">}</span><span class="s2">/gcs_cmip6_data&quot;</span>
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;gcs_cmip6_data&quot;</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">EarthDataHubDataCatalog</span><span class="p">(</span><span class="n">PredefinedCatalog</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Earth Data Hub data catalog.&quot;&quot;&quot;</span>
+
+    <span class="n">base_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CATALOG_ROOT</span><span class="si">}</span><span class="s2">/earthdatahub_data&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;earthdatahub_data&quot;</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_replace_line_endings</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>

@@ -636,7 +636,6 @@
 <span class="sd">    data : DataArray</span>
 <span class="sd">        DataArray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">chunks</span> <span class="o">=</span> <span class="n">chunks</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">masked</span><span class="o">=</span><span class="n">mask_nodata</span><span class="p">,</span> <span class="n">default_name</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">mask_nodata</span><span class="p">:</span>  <span class="c1"># if mask_and_scale by default True in xarray ?</span>
         <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mask_and_scale</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -723,7 +722,6 @@
 <span class="sd">    data : DataSet</span>
 <span class="sd">        The newly created DataSet.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">chunks</span> <span class="o">=</span> <span class="n">chunks</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="n">mosaic_kwargs</span> <span class="o">=</span> <span class="n">mosaic_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">concat</span> <span class="ow">and</span> <span class="n">mosaic</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Only one of &#39;mosaic&#39; or &#39;concat&#39; can be True.&quot;</span><span class="p">)</span>
