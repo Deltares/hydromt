@@ -1,5 +1,8 @@
 """URIResolvers obtain multiple URIs before being passed to Drivers."""
 
+from hydromt.data_catalog.uri_resolvers.azure_blob_resolver import (
+    AzureBlobResolver,
+)
 from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
 from hydromt.data_catalog.uri_resolvers.raster_tindex_resolver import (
     RasterTindexResolver,
@@ -7,6 +10,7 @@ from hydromt.data_catalog.uri_resolvers.raster_tindex_resolver import (
 from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
 
 __all__ = [
+    "AzureBlobResolver",
     "ConventionResolver",
     "URIResolver",
     "RasterTindexResolver",
@@ -15,6 +19,7 @@ __all__ = [
 # define hydromt uri resolver entry points
 # see also hydromt.uri_resolver group in pyproject.toml
 __hydromt_eps__ = [
+    "AzureBlobResolver",
     "ConventionResolver",
     "RasterTindexResolver",
 ]

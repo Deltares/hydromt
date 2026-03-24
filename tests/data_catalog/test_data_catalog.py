@@ -25,7 +25,7 @@ from pystac import Item as StacItem
 from shapely import box
 from yaml import dump
 
-from hydromt._compat import HAS_GCSFS, HAS_GDAL, HAS_OPENPYXL, HAS_S3FS
+from hydromt._compat import HAS_ADLFS, HAS_GCSFS, HAS_GDAL, HAS_OPENPYXL, HAS_S3FS
 from hydromt._utils import temp_env
 from hydromt.config import Settings
 from hydromt.data_catalog.adapters import (
@@ -340,6 +340,86 @@ def test_catalog_entry_merging_round_trip(aws_worldcover, legacy_aws_worldcover)
 
     aws_and_legacy_catalog2 = DataCatalog().from_dict(d)
     assert aws_and_legacy_catalog2 == aws_and_legacy_catalog
+
+
+# ---------------------------------------------------------------------------
+# Azure Blob Storage catalog tests
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def azure_catalog(test_data_dir: Path) -> DataCatalog:
+    azure_yml_path = test_data_dir / "azure_planetary_computer.yml"
+    return DataCatalog(data_libs=[azure_yml_path])
+
+
+@pytest.mark.skipif(not HAS_ADLFS, reason="adlfs is not installed")
+def test_azure_catalog_loads(azure_catalog: DataCatalog):
+    assert len(azure_catalog) == 3
+
+
+@pytest.mark.skipif(not HAS_ADLFS, reason="adlfs is not installed")
+def test_azure_catalog_filesystem_source(azure_catalog: DataCatalog):
+    source = azure_catalog.get_source("esa_worldcover_azure", provider="azure")
+    assert source.uri.endswith("ESA_WorldCover_10m_2021_v200_N51E003_Map.tif")
+    assert source.uri_resolver.name == "azure_blob"
+    assert source.uri_resolver.options.get("account_name") == "ai4edataeuwest"
+    assert "sas_token_url" in source.uri_resolver.options
+
+
+@pytest.mark.skipif(not HAS_ADLFS, reason="adlfs is not installed")
+def test_azure_catalog_resolver_source(azure_catalog: DataCatalog):
+    source = azure_catalog.get_source("esa_worldcover_azure_resolver", provider="azure")
+    assert source.uri.startswith("https://ai4edataeuwest.blob.core.windows.net/")
+    assert source.uri_resolver.name == "azure_blob"
+    assert "sas_token_url" in source.uri_resolver.options
+
+
+@pytest.mark.skipif(not HAS_ADLFS, reason="adlfs is not installed")
+def test_azure_catalog_https_source(azure_catalog: DataCatalog):
+    source = azure_catalog.get_source("esa_worldcover_azure_https", provider="azure")
+    assert source.uri.endswith("ESA_WorldCover_10m_2021_v200_N51E003_Map.tif")
+    assert source.uri_resolver.name == "azure_blob"
+    assert source.uri_resolver.options.get("account_name") == "ai4edataeuwest"
+
+
+@pytest.mark.skipif(not HAS_ADLFS, reason="adlfs is not installed")
+def test_azure_catalog_round_trip(azure_catalog: DataCatalog):
+    catalog_read = DataCatalog().from_dict(
+        azure_catalog.to_dict(), root=azure_catalog.root
+    )
+    assert catalog_read == azure_catalog
+
+
+@pytest.mark.skipif(not HAS_ADLFS, reason="adlfs is not installed")
+def test_azure_catalog_unknown_provider(azure_catalog: DataCatalog):
+    with pytest.raises(KeyError):
+        azure_catalog.get_source("esa_worldcover_azure", provider="nonexistent")
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(not HAS_ADLFS, reason="adlfs is not installed")
+@pytest.mark.parametrize(
+    "source_name",
+    [
+        "esa_worldcover_azure",
+        "esa_worldcover_azure_resolver",
+        "esa_worldcover_azure_https",
+    ],
+)
+def test_azure_get_rasterdataset(azure_catalog: DataCatalog, source_name: str):
+    """Read a raster tile from ESA WorldCover on Azure (Planetary Computer).
+
+    Parameterized over all three catalog flavours (abfs filesystem,
+    azure_blob resolver, HTTPS blob URL).
+    """
+    da = azure_catalog.get_rasterdataset(
+        source_name,
+        bbox=[3.5, 51.5, 3.6, 51.6],
+        provider="azure",
+    )
+    assert isinstance(da, xr.DataArray)
+    assert da.size > 0
 
 
 def test_versioned_catalogs_no_version(data_catalog):
