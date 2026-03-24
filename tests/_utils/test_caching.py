@@ -14,10 +14,10 @@ from hydromt._utils.caching import (
 )
 
 
-def test__copy_to_local(tmp_path: Path, data_dir: Path):
+def test__copy_to_local(tmp_path: Path, test_data_dir: Path):
     # Call the function
     copy_to_local(
-        str(Path(data_dir, "parameters_data.yml")),
+        str(Path(test_data_dir, "parameters_data.yml")),
         tmp_path,
     )
 

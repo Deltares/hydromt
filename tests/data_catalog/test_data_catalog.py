@@ -50,9 +50,6 @@ from hydromt.error import NoDataException, NoDataStrategy
 from hydromt.gis.gis_utils import _to_geographic_bbox
 from hydromt.typing import Bbox, TimeRange
 from hydromt.writers import write_xy
-from tests.conftest import DATA_DIR, TEST_DATA_DIR
-
-_CATALOG_DIR = join(DATA_DIR, "catalogs")
 
 
 def test_errors_on_no_root_found(tmp_path: Path):
@@ -221,22 +218,22 @@ def test_catalog_entry_single_variant(aws_worldcover):
 
 
 @pytest.fixture
-def aws_worldcover():
-    aws_yml_path = join(TEST_DATA_DIR, "aws_esa_worldcover.yml")
+def aws_worldcover(test_data_dir: Path):
+    aws_yml_path = test_data_dir / "aws_esa_worldcover.yml"
     aws_data_catalog = DataCatalog(data_libs=[aws_yml_path])
     return (aws_yml_path, aws_data_catalog)
 
 
 @pytest.fixture
-def merged_aws_worldcover():
-    merged_yml_path = join(TEST_DATA_DIR, "merged_esa_worldcover.yml")
+def merged_aws_worldcover(test_data_dir: Path):
+    merged_yml_path = test_data_dir / "merged_esa_worldcover.yml"
     merged_catalog = DataCatalog(data_libs=[merged_yml_path])
     return (merged_yml_path, merged_catalog)
 
 
 @pytest.fixture
-def legacy_aws_worldcover():
-    legacy_yml_path = join(TEST_DATA_DIR, "legacy_esa_worldcover.yml")
+def legacy_aws_worldcover(test_data_dir: Path):
+    legacy_yml_path = test_data_dir / "legacy_esa_worldcover.yml"
     legacy_data_catalog = DataCatalog(data_libs=[legacy_yml_path])
     return (legacy_yml_path, legacy_data_catalog)
 
@@ -395,8 +392,8 @@ def test_data_catalog_hydromt_version(tmp_path: Path):
 
 
 @pytest.mark.skipif(not HAS_S3FS, reason="s3fs is not installed")
-def test_used_sources():
-    merged_yml_path = join(TEST_DATA_DIR, "merged_esa_worldcover.yml")
+def test_used_sources(test_data_dir: Path):
+    merged_yml_path = test_data_dir / "merged_esa_worldcover.yml"
     data_catalog = DataCatalog(merged_yml_path)
     source = data_catalog.get_source("esa_worldcover")
     source._mark_as_used()
@@ -1037,8 +1034,8 @@ class TestGetRasterDataset:
 
     @pytest.mark.skipif(not HAS_GDAL, reason="GDAL not installed.")
     @pytest.mark.skipif(not HAS_S3FS, reason="S3FS not installed.")
-    def test_aws_worldcover(self, test_settings: Settings):
-        catalog_fn = join(_CATALOG_DIR, "aws_data", "v1.0.0", "data_catalog.yml")
+    def test_aws_worldcover(self, test_settings: Settings, catalog_dir: Path):
+        catalog_fn = catalog_dir / "aws_data" / "v1.0.0" / "data_catalog.yml"
         data_catalog = DataCatalog(
             data_libs=[catalog_fn],
             cache=True,
@@ -1074,8 +1071,8 @@ class TestGetRasterDataset:
         reason="Waiting for: https://github.com/Deltares/hydromt/issues/492"
     )
     @pytest.mark.skipif(not HAS_GCSFS, reason="GCSFS not installed.")
-    def test_gcs_cmip6(self):
-        catalog_fn = join(_CATALOG_DIR, "gcs_cmip6_data", "v1.0.0", "data_catalog.yml")
+    def test_gcs_cmip6(self, catalog_dir: Path):
+        catalog_fn = catalog_dir / "gcs_cmip6_data" / "v1.0.0" / "data_catalog.yml"
         data_catalog = DataCatalog(data_libs=[catalog_fn])
         ds = data_catalog.get_rasterdataset(
             "cmip6_NOAA-GFDL/GFDL-ESM4_historical_r1i1p1f1_Amon",
@@ -1088,10 +1085,10 @@ class TestGetRasterDataset:
 
     @pytest.mark.integration
     @pytest.mark.skipif(not HAS_GDAL, reason="GDAL not installed.")
-    def test_reads_slippy_map_output(self):
+    def test_reads_slippy_map_output(self, test_data_dir: Path):
         # write vrt data
         name = "tiled"
-        root = join(TEST_DATA_DIR, "rioda_tiled")
+        root = test_data_dir / "rioda_tiled"
         cat = DataCatalog(join(root, f"{name}.yml"), cache=True)
         cat.get_rasterdataset(name)
         assert len(glob.glob(join(root, "*", "*", "*.tif"))) == 16

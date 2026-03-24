@@ -20,8 +20,6 @@ from shapely.geometry.base import BaseGeometry
 from typing_extensions import Annotated
 from xarray import DataArray, Dataset
 
-from hydromt.typing.model_mode import ModelMode
-
 
 def _validate_bbox(
     bbox: tuple[float, float, float, float],
@@ -74,8 +72,6 @@ Data = Union[Dataset, DataArray]
 Variables = Union[str, List[str]]
 
 GeomBuffer = int
-
-ModeLike = Union[ModelMode, str]
 
 DATETIME_FORMAT: str = "%Y-%m-%d_%H:%M:%S"
 

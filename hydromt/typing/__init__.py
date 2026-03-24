@@ -3,7 +3,6 @@
 from hydromt.typing.crs import CRS
 from hydromt.typing.fsspec_types import FSSpecFileSystem
 from hydromt.typing.metadata import SourceMetadata
-from hydromt.typing.model_mode import ModelMode
 from hydromt.typing.type_def import (
     Bbox,
     Crs,
@@ -15,7 +14,6 @@ from hydromt.typing.type_def import (
     Geom,
     GeomBuffer,
     GpdShapeGeom,
-    ModeLike,
     Number,
     Predicate,
     RasterDatasetSource,
@@ -37,14 +35,12 @@ __all__ = [
     "FSSpecFileSystem",
     "GeoDataframeSource",
     "GeoDatasetSource",
-    "ModeLike",
     "Number",
     "RasterDatasetSource",
     "SourceSpecDict",
     "TimeRange",
     "TotalBounds",
     "XArrayDict",
-    "ModelMode",
     "Variables",
     "Geom",
     "GpdShapeGeom",

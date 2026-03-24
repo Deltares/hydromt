@@ -4,7 +4,10 @@ from os.path import abspath, exists, join
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-__all__ = ["_make_config_paths_relative", "_make_config_paths_absolute"]
+__all__ = [
+    "_make_config_paths_relative",
+    "_make_config_paths_absolute",
+]
 
 
 def _make_config_paths_relative(cfdict: Dict[str, Any], root: Path) -> Dict[str, Any]:

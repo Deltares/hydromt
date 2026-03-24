@@ -17,14 +17,11 @@ import netCDF4  # noqa: F401
 from hydromt import data_catalog, gis, model, stats
 
 # high-level methods
-from hydromt._utils.log import initialize_logging
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis import raster, vector
 from hydromt.model import Model
 from hydromt.model.steps import hydromt_step
 from hydromt.plugins import PLUGINS
-
-initialize_logging()
 
 __all__ = [
     # high-level classes
