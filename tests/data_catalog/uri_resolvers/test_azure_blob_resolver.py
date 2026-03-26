@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from hydromt._compat import HAS_AZURE
 from hydromt.data_catalog.uri_resolvers.azure_blob_resolver import (
     AzureBlobResolver,
     _abfs_to_https,
@@ -546,6 +547,9 @@ class TestAbfsToHttps:
         assert _abfs_to_https("s3://bucket/key", "acct", "sv=2021") == "s3://bucket/key"
 
 
+@pytest.mark.skipif(
+    not HAS_AZURE, reason="Requires azure-identity and azure-ai-ml packages"
+)
 class TestAzuremlIntegration:
     """End-to-end test for azureml:// URIs.
 

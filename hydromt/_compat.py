@@ -9,6 +9,7 @@ HAS_GDAL = False
 HAS_OPENPYXL = False
 HAS_PYET = False
 HAS_S3FS = False
+HAS_AZURE = False
 
 try:
     import gcsfs
@@ -49,6 +50,13 @@ try:
     import adlfs
 
     HAS_ADLFS = True
+except ImportError:
+    pass
+
+try:
+    import azure
+
+    HAS_AZURE = True
 except ImportError:
     pass
 
