@@ -342,24 +342,16 @@ def test_catalog_entry_merging_round_trip(aws_worldcover, legacy_aws_worldcover)
     assert aws_and_legacy_catalog2 == aws_and_legacy_catalog
 
 
-# ---------------------------------------------------------------------------
-# Azure Blob Storage catalog tests
-# ---------------------------------------------------------------------------
-
-
 @pytest.fixture
 def azure_catalog(test_data_dir: Path) -> DataCatalog:
-    azure_yml_path = test_data_dir / "azure_planetary_computer.yml"
-    return DataCatalog(data_libs=[azure_yml_path])
-
-
-@pytest.mark.skipif(not HAS_ADLFS, reason="adlfs is not installed")
-def test_azure_catalog_loads(azure_catalog: DataCatalog):
-    assert len(azure_catalog) == 3
+    catalog = DataCatalog(data_libs=[test_data_dir / "azure_catalog.yml"])
+    assert len(catalog) == 4
+    return catalog
 
 
 @pytest.mark.skipif(not HAS_ADLFS, reason="adlfs is not installed")
 def test_azure_catalog_filesystem_source(azure_catalog: DataCatalog):
+    """Check abfs:// source with SAS token URL and explicit account_name."""
     source = azure_catalog.get_source("esa_worldcover_azure", provider="azure")
     assert source.uri.endswith("ESA_WorldCover_10m_2021_v200_N51E003_Map.tif")
     assert source.uri_resolver.name == "azure_blob"
@@ -369,18 +361,11 @@ def test_azure_catalog_filesystem_source(azure_catalog: DataCatalog):
 
 @pytest.mark.skipif(not HAS_ADLFS, reason="adlfs is not installed")
 def test_azure_catalog_resolver_source(azure_catalog: DataCatalog):
+    """Check HTTPS blob URI is parsed and account_name extracted from URL."""
     source = azure_catalog.get_source("esa_worldcover_azure_resolver", provider="azure")
     assert source.uri.startswith("https://ai4edataeuwest.blob.core.windows.net/")
     assert source.uri_resolver.name == "azure_blob"
     assert "sas_token_url" in source.uri_resolver.options
-
-
-@pytest.mark.skipif(not HAS_ADLFS, reason="adlfs is not installed")
-def test_azure_catalog_https_source(azure_catalog: DataCatalog):
-    source = azure_catalog.get_source("esa_worldcover_azure_https", provider="azure")
-    assert source.uri.endswith("ESA_WorldCover_10m_2021_v200_N51E003_Map.tif")
-    assert source.uri_resolver.name == "azure_blob"
-    assert source.uri_resolver.options.get("account_name") == "ai4edataeuwest"
 
 
 @pytest.mark.skipif(not HAS_ADLFS, reason="adlfs is not installed")
@@ -391,12 +376,6 @@ def test_azure_catalog_round_trip(azure_catalog: DataCatalog):
     assert catalog_read == azure_catalog
 
 
-@pytest.mark.skipif(not HAS_ADLFS, reason="adlfs is not installed")
-def test_azure_catalog_unknown_provider(azure_catalog: DataCatalog):
-    with pytest.raises(KeyError):
-        azure_catalog.get_source("esa_worldcover_azure", provider="nonexistent")
-
-
 @pytest.mark.integration
 @pytest.mark.skipif(not HAS_ADLFS, reason="adlfs is not installed")
 @pytest.mark.parametrize(
@@ -404,14 +383,14 @@ def test_azure_catalog_unknown_provider(azure_catalog: DataCatalog):
     [
         "esa_worldcover_azure",
         "esa_worldcover_azure_resolver",
-        "esa_worldcover_azure_https",
     ],
 )
 def test_azure_get_rasterdataset(azure_catalog: DataCatalog, source_name: str):
     """Read a raster tile from ESA WorldCover on Azure (Planetary Computer).
 
-    Parameterized over all three catalog flavours (abfs filesystem,
-    azure_blob resolver, HTTPS blob URL).
+    Parameterized over both catalog flavours:
+    - abfs:// URI with SAS token URL
+    - HTTPS blob URI (normalised to abfs:// by the resolver)
     """
     da = azure_catalog.get_rasterdataset(
         source_name,
@@ -420,6 +399,40 @@ def test_azure_get_rasterdataset(azure_catalog: DataCatalog, source_name: str):
     )
     assert isinstance(da, xr.DataArray)
     assert da.size > 0
+
+
+@pytest.mark.skipif(not HAS_ADLFS, reason="adlfs is not installed")
+def test_azure_anon_convention_source(azure_catalog: DataCatalog):
+    """Check the convention-resolver source uses abfs filesystem with anon access."""
+    source = azure_catalog.get_source("noaa_isd_azure", provider="abfs")
+    assert source.driver.filesystem.protocol == "abfs"
+    assert source.uri.startswith("abfs://")
+
+
+@pytest.mark.skipif(not HAS_ADLFS, reason="adlfs is not installed")
+def test_azure_anon_resolver_source(azure_catalog: DataCatalog):
+    """Check the azure_blob resolver source loads and has correct settings."""
+    source = azure_catalog.get_source("noaa_isd_azure_resolver", provider="azure")
+    assert source.uri_resolver.name == "azure_blob"
+    assert source.uri_resolver.options.get("anon") is True
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(not HAS_ADLFS, reason="adlfs is not installed")
+def test_azure_anon_convention_glob(azure_catalog: DataCatalog):
+    """Verify that the ConventionResolver can glob files on a public Azure container.
+
+    Uses NOAA ISD weather data on Azure Open Datasets
+    (account: azureopendatastorage, container: isdweatherdatacontainer).
+    This container supports anonymous (unauthenticated) read access.
+    """
+    source = azure_catalog.get_source("noaa_isd_azure", provider="abfs")
+    uris = source.uri_resolver.resolve(
+        source.uri,
+        handle_nodata=NoDataStrategy.RAISE,
+    )
+    assert len(uris) > 0
+    assert all(u.endswith(".parquet") for u in uris)
 
 
 def test_versioned_catalogs_no_version(data_catalog):

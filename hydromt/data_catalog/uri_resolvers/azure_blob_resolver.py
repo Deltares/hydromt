@@ -1,8 +1,10 @@
 """URIResolver for Azure Blob Storage and Azure Data Lake Storage Gen2 URIs."""
 
+import json
 import logging
 import os
 import re
+import urllib.request
 from itertools import product
 from typing import Any, Iterable
 
@@ -56,54 +58,56 @@ class AzureBlobResolver(URIResolver):
 
     Handles three URI styles:
 
-    * **ADLS Gen2 / fsspec** — ``abfs://container/path/to/data.zarr``
-    * **HTTPS Blob endpoint** — ``https://<account>.blob.core.windows.net/<container>/path``
-    * **AzureML datastore** — ``azureml://subscriptions/<sub>/resourcegroups/<rg>/workspaces/<ws>/datastores/<ds>/paths/<path>``
+    * ``abfs://container/path/to/data.zarr`` (ADLS Gen2 / fsspec)
+    * ``https://<account>.blob.core.windows.net/<container>/path`` (HTTPS Blob)
+    * ``azureml://subscriptions/<sub>/resourcegroups/<rg>/workspaces/<ws>/datastores/<ds>/paths/<path>`` (AzureML datastore)
 
     All styles are normalised to ``abfs://`` internally and passed on to
-    ``adlfs.AzureBlobFileSystem`` (which is fsspec-compatible and therefore
-    works transparently with xarray, rasterio, and geopandas back-ends).
-
-    For ``azureml://`` URIs the ``azure-ai-ml`` package is required.  The
-    resolver looks up the datastore via the AzureML SDK, extracts the
-    underlying storage account and container, and builds an ``abfs://`` path.
-    Authentication re-uses ``DefaultAzureCredential`` (the same credential
-    chain used for blob-level access).
-
-    Authentication
-    --------------
-    Credentials are resolved in the following order of precedence:
-
-    1. Explicit values supplied via ``driver_kwargs`` / ``storage_options`` in the
-       data catalog YAML (``account_name``, ``account_key``, ``sas_token``,
-       ``connection_string``).
-    2. Environment variables recognised by ``adlfs`` and ``azure-storage-blob``:
-       ``AZURE_STORAGE_ACCOUNT_NAME``, ``AZURE_STORAGE_ACCOUNT_KEY``,
-       ``AZURE_STORAGE_SAS_TOKEN``, ``AZURE_STORAGE_CONNECTION_STRING``.
-    3. ``azure.identity.DefaultAzureCredential`` — covers Managed Identity,
-       Azure CLI login, VS Code login, environment-variable service principals, etc.
-
-    Time-templated URIs
-    -------------------
-    Placeholders such as ``{year}``, ``{month}``, ``{variable}`` are expanded
-    using the same ``_expand_uri_placeholders`` utility as ``ConventionResolver``.
+    ``adlfs.AzureBlobFileSystem`` (fsspec-compatible).  For ``azureml://``
+    URIs the ``azure-ai-ml`` package is required.
 
     Parameters
     ----------
     options : dict, optional
-        Arbitrary key/value options forwarded to ``adlfs.AzureBlobFileSystem``
+        Key/value options forwarded to ``adlfs.AzureBlobFileSystem``
         (e.g. ``account_name``, ``account_key``, ``sas_token``,
         ``connection_string``, ``tenant_id``, ``client_id``, ``client_secret``).
-
-        **Special option** – ``sas_token_url``: a URL that returns JSON with
-        a ``"token"`` key (e.g. the Planetary Computer SAS API).  When set
-        and no explicit ``sas_token`` is provided, the resolver fetches a
-        fresh token automatically before each ``resolve()`` call.
+        The special key ``sas_token_url`` points to a URL that returns JSON
+        with a ``"token"`` key (e.g. the Planetary Computer SAS API).  When
+        set and no explicit ``sas_token`` is provided, a fresh token is
+        fetched automatically before each ``resolve()`` call.
     filesystem : FSSpecFileSystem, optional
-        Pre-constructed fsspec filesystem.  When supplied it is used as-is and
-        ``options`` are ignored for filesystem construction (they may still be
-        read for other purposes).  Propagated to/from ``DataSource.driver`` by
-        ``DataSource._validate_fs_equal_if_not_set``.
+        Pre-constructed fsspec filesystem.  When supplied it is used as-is
+        and ``options`` are ignored for filesystem construction.
+
+    Notes
+    -----
+    **Authentication**
+
+    Credentials are resolved in the following order of precedence:
+
+    1. Explicit values in the catalog YAML (``account_name``, ``account_key``,
+       ``sas_token``, ``connection_string``).
+    2. Environment variables: ``AZURE_STORAGE_ACCOUNT_NAME``,
+       ``AZURE_STORAGE_ACCOUNT_KEY``, ``AZURE_STORAGE_SAS_TOKEN``,
+       ``AZURE_STORAGE_CONNECTION_STRING``.
+    3. ``azure.identity.DefaultAzureCredential`` (Managed Identity, Azure CLI,
+       VS Code, environment-variable service principals, etc.).
+
+    **Time-templated URIs**
+
+    Placeholders ``{year}``, ``{month}``, ``{variable}`` are expanded using the
+    same ``_expand_uri_placeholders`` utility as ``ConventionResolver``.
+
+    **ABFS to HTTPS conversion**
+
+    rasterio and GDAL do not natively understand the ``abfs://`` scheme.  When
+    a SAS token is available the resolver converts resolved ``abfs://`` URIs to
+    HTTPS blob URLs
+    (``https://<account>.blob.core.windows.net/<container>/<path>?<sas_token>``)
+    so that rasterio / GDAL can open the data via their built-in HTTPS /
+    vsicurl handler.  For drivers that go through fsspec (e.g. xarray with
+    zarr), ``abfs://`` URIs work as-is via ``adlfs``.
 
     Examples
     --------
@@ -143,16 +147,26 @@ class AzureBlobResolver(URIResolver):
 
     name = "azure_blob"
 
-    # ------------------------------------------------------------------
-    # Time-range helpers  (mirrors ConventionResolver._get_dates)
-    # ------------------------------------------------------------------
-
     @staticmethod
     def _get_dates(
         keys: list[str],
         time_range: TimeRange,
     ) -> pd.PeriodIndex:
-        """Return a period index covering *time_range* at month or year granularity."""
+        """Return a PeriodIndex covering *time_range* at the required granularity.
+
+        Parameters
+        ----------
+        keys : list[str]
+            Placeholder names found in the URI (e.g. ``["year", "month"]``).
+        time_range : TimeRange
+            Start and end of the requested time window.
+
+        Returns
+        -------
+        pd.PeriodIndex
+            Period index with daily, monthly, or yearly frequency depending
+            on whether ``"day"``, ``"month"``, or only ``"year"`` is in *keys*.
+        """
         t_range = pd.to_datetime([time_range.start, time_range.end])
         freq = "D" if "day" in keys else ("M" if "month" in keys else "Y")
         return pd.period_range(*t_range, freq=freq)
@@ -178,44 +192,43 @@ class AzureBlobResolver(URIResolver):
             * ``abfs://container/path/to/file.tif``
             * ``abfs://container/path/{year}/{month}/file.nc``  (time template)
             * ``https://<account>.blob.core.windows.net/<container>/path``
-            * ``azureml://subscriptions/<sub>/resourcegroups/<rg>/workspaces/<ws>/datastores/<ds>/paths/<path>``
-        time_range : TimeRange, optional
-            Left-inclusive start/end time of the data.
+            * ``azureml://subscriptions/…/datastores/…/paths/…``
+        time_range : TimeRange | None, optional
+            Left-inclusive start/end time of the data, by default None.
             Required when *uri* contains ``{year}`` or ``{month}`` placeholders.
-        zoom : Zoom, optional
-            Ignored — included for interface compatibility.
-        mask : GeoDataFrame, optional
-            Ignored — included for interface compatibility.
-        variables : list[str], optional
-            Variable names used to expand ``{variable}`` placeholders.
-        metadata : SourceMetadata, optional
-            Ignored — included for interface compatibility.
-        handle_nodata : NoDataStrategy
-            What to do when no URIs can be resolved; default is to raise.
+        zoom : Zoom | None, optional
+            Ignored — included for interface compatibility, by default None.
+        mask : gpd.GeoDataFrame | None, optional
+            Ignored — included for interface compatibility, by default None.
+        variables : list[str] | None, optional
+            Variable names used to expand ``{variable}`` placeholders,
+            by default None.
+        metadata : SourceMetadata | None, optional
+            DataSource metadata, by default None.
+        handle_nodata : NoDataStrategy, optional
+            How to react when no data is found,
+            by default ``NoDataStrategy.RAISE``.
 
         Returns
         -------
         list[str]
             Concrete URIs that downstream drivers can open.  When a SAS
-            token is available (via ``sas_token`` or ``sas_token_url``),
-            ``abfs://`` paths are converted to HTTPS blob URLs with the
-            token appended so that rasterio / GDAL can read them directly.
+            token is available, ``abfs://`` paths are converted to HTTPS blob
+            URLs so that rasterio / GDAL can read them directly (see Notes
+            in the class docstring).
 
         Raises
         ------
         ValueError
             If the URI scheme is not recognised as an Azure path.
         NoDataException
-            When no URIs resolve and ``handle_nodata`` is ``NoDataStrategy.RAISE``.
+            When no data is found and ``handle_nodata`` is
+            ``NoDataStrategy.RAISE``.
         """
         logger.debug(f"AzureBlobResolver: resolving uri '{uri}'")
 
-        # ------------------------------------------------------------------
-        # 1. Normalise the URI to abfs:// form and extract the account name
-        #    when it is embedded in an HTTPS URL.
-        # ------------------------------------------------------------------
+        # Normalise URI
         normalised_uri, account_from_uri = _normalise_uri(uri)
-
         effective_options: dict[str, Any] = dict(self.options or {})
         if account_from_uri and "account_name" not in effective_options:
             effective_options["account_name"] = account_from_uri
@@ -225,10 +238,7 @@ class AzureBlobResolver(URIResolver):
         if sas_token_url and "sas_token" not in effective_options:
             effective_options["sas_token"] = _fetch_sas_token(sas_token_url)
 
-        # ------------------------------------------------------------------
-        # 2. Expand placeholders using the shared naming-convention utility.
-        #    _expand_uri_placeholders returns (uri_with_wildcards, keys, regex).
-        # ------------------------------------------------------------------
+        # Expand placeholders
         uri_expanded, keys, _ = _expand_uri_placeholders(
             normalised_uri,
             placeholders=list(_AZURE_PLACEHOLDERS),
@@ -259,9 +269,7 @@ class AzureBlobResolver(URIResolver):
             )
         )
 
-        # ------------------------------------------------------------------
-        # 3. Resolve wildcards and verify existence on the filesystem.
-        # ------------------------------------------------------------------
+        # Resolve wildcards and verify existence on the filesystem.
         self._ensure_azure_filesystem(effective_options)
         fs = self.filesystem.get_fs()
 
@@ -274,11 +282,9 @@ class AzureBlobResolver(URIResolver):
             )
             return []
 
-        # ------------------------------------------------------------------
-        # 4. Convert to HTTPS blob URLs when credentials are available so
-        #    that rasterio/GDAL (which do not understand abfs://) can open
-        #    the files directly.
-        # ------------------------------------------------------------------
+        # Convert to HTTPS blob URLs when credentials are available so
+        # that rasterio/GDAL (which do not understand abfs://) can open
+        # the files directly.
         account_name = effective_options.get("account_name") or account_from_uri
         sas_token = effective_options.get("sas_token")
         if account_name and sas_token:
@@ -287,15 +293,21 @@ class AzureBlobResolver(URIResolver):
         logger.debug(f"AzureBlobResolver: resolved {len(uris)} URI(s)")
         return uris
 
-    # ------------------------------------------------------------------
-    # Private helpers
-    # ------------------------------------------------------------------
-
     def _ensure_azure_filesystem(self, effective_options: dict[str, Any]) -> None:
         """Build an ``abfs`` filesystem from *effective_options* if needed.
 
-        Uses ``FSSpecFileSystem`` so that the resolver participates in the
-        same fsspec abstraction layer as every other HydroMT component.
+        Parameters
+        ----------
+        effective_options : dict[str, Any]
+            Merged resolver options including account name, credentials, and
+            any user-supplied kwargs.  Passed to
+            ``_resolve_azure_credentials`` and then to
+            ``FSSpecFileSystem(protocol='abfs', ...)``.
+
+        Raises
+        ------
+        PermissionError
+            If authentication with Azure Blob Storage fails.
         """
         if self.filesystem.protocol != "file":
             # Already configured (injected by DataSource or a previous call).
@@ -319,7 +331,20 @@ class AzureBlobResolver(URIResolver):
 
     @staticmethod
     def _resolve_wildcards(uris: Iterable[str], fs: AbstractFileSystem) -> set[str]:
-        """Expand wildcards and return the set of existing paths."""
+        """Expand wildcards and return the set of existing paths.
+
+        Parameters
+        ----------
+        uris : Iterable[str]
+            URIs to expand; may contain glob patterns (``*``, ``?``).
+        fs : AbstractFileSystem
+            fsspec filesystem used for globbing.
+
+        Returns
+        -------
+        set[str]
+            Deduplicated set of concrete URIs that exist on *fs*.
+        """
 
         def _glob_one(uri: str) -> list[str]:
             protocol, _ = split_protocol(uri)
@@ -339,19 +364,25 @@ class AzureBlobResolver(URIResolver):
         return result
 
 
-# ---------------------------------------------------------------------------
-# Module-level helpers (not part of the public API)
-# ---------------------------------------------------------------------------
-
-
 def _fetch_sas_token(url: str) -> str:
-    """Fetch a SAS token from a token endpoint (e.g. Planetary Computer).
+    """Fetch a SAS token from a token endpoint.
 
-    Expects the endpoint to return JSON with a ``"token"`` key.
+    Parameters
+    ----------
+    url : str
+        URL of the token endpoint (e.g. the Planetary Computer SAS API).
+        Must return JSON with a ``"token"`` key.
+
+    Returns
+    -------
+    str
+        The SAS token string.
+
+    Raises
+    ------
+    PermissionError
+        If the request fails or the response cannot be parsed.
     """
-    import json
-    import urllib.request
-
     try:
         with urllib.request.urlopen(url, timeout=10) as resp:  # noqa: S310
             data = json.loads(resp.read())
@@ -364,7 +395,29 @@ def _fetch_sas_token(url: str) -> str:
 
 
 def _abfs_to_https(uri: str, account_name: str, sas_token: str) -> str:
-    """Convert an ``abfs://`` URI to an HTTPS blob URL with SAS token."""
+    """Convert an ``abfs://`` URI to an HTTPS blob URL with SAS token.
+
+    rasterio and GDAL do not natively understand the ``abfs://`` scheme.
+    By rewriting the URI to
+    ``https://<account>.blob.core.windows.net/<container>/<path>?<sas_token>``
+    the data can be opened via rasterio / GDAL's built-in HTTPS (vsicurl)
+    handler without requiring ``adlfs`` at the driver level.
+
+    Parameters
+    ----------
+    uri : str
+        URI to convert.  If it does not start with ``abfs://`` or already
+        contains a query string it is returned unchanged.
+    account_name : str
+        Azure Storage account name.
+    sas_token : str
+        Shared Access Signature token (without leading ``?``).
+
+    Returns
+    -------
+    str
+        HTTPS blob URL with the SAS token appended as a query string.
+    """
     if uri.startswith("abfs://"):
         path = uri[len("abfs://") :]
         return f"https://{account_name}.blob.core.windows.net/{path}?{sas_token}"
@@ -374,14 +427,24 @@ def _abfs_to_https(uri: str, account_name: str, sas_token: str) -> str:
 
 
 def _normalise_uri(uri: str) -> tuple[str, str | None]:
-    """Return *(normalised_uri, account_name_from_uri)*.
+    """Normalise an Azure URI to ``abfs://`` form.
 
-    * ``abfs://…`` URIs are returned unchanged.
-    * ``https://<account>.blob.core.windows.net/…`` URIs are converted to
-      ``abfs://container/path`` and the account name is extracted.
-    * ``azureml://…`` URIs are resolved via the AzureML SDK and
-      converted to ``abfs://container/path``.
-    * All other schemes raise ``ValueError``.
+    Parameters
+    ----------
+    uri : str
+        One of the supported Azure URI styles (``abfs://``, HTTPS blob, or
+        ``azureml://``).
+
+    Returns
+    -------
+    tuple[str, str | None]
+        ``(normalised_uri, account_name)``.  *account_name* is ``None``
+        when using ``abfs://`` (the account is not embedded in the URI).
+
+    Raises
+    ------
+    ValueError
+        If the URI scheme is not recognised.
     """
     if _ABFS_RE.match(uri):
         return uri, None
@@ -424,7 +487,31 @@ def _resolve_azureml_uri(
 ) -> tuple[str, str]:
     """Resolve an AzureML datastore URI to ``(abfs_uri, account_name)``.
 
-    Requires the ``azure-ai-ml`` package.
+    Uses the AzureML SDK (``azure-ai-ml``) to look up the datastore and
+    extract the underlying storage account and container.
+
+    Parameters
+    ----------
+    subscription_id : str
+        Azure subscription ID.
+    resource_group : str
+        Azure resource group name.
+    workspace_name : str
+        AzureML workspace name.
+    datastore_name : str
+        Name of the registered datastore.
+    path : str
+        Blob path beneath the datastore container.
+
+    Returns
+    -------
+    tuple[str, str]
+        ``(abfs_uri, account_name)``.
+
+    Raises
+    ------
+    ImportError
+        If ``azure-ai-ml`` or ``azure-identity`` is not installed.
     """
     try:
         from azure.ai.ml import MLClient
@@ -462,12 +549,29 @@ def _resolve_azureml_uri(
 
 
 def _resolve_azure_credentials(options: dict[str, Any]) -> dict[str, Any]:
-    """Build storage_options for ``FSSpecFileSystem(protocol='abfs', ...)``.
+    """Build ``storage_options`` for ``FSSpecFileSystem(protocol='abfs', ...)``.
 
+    Parameters
+    ----------
+    options : dict[str, Any]
+        User-supplied options.  Recognised credential keys are
+        ``account_name``, ``account_key``, ``sas_token``,
+        ``connection_string``, ``client_id``, ``client_secret``,
+        ``tenant_id``, and ``anon``.
+
+    Returns
+    -------
+    dict[str, Any]
+        ``storage_options`` dict ready to pass to
+        ``FSSpecFileSystem(protocol='abfs', ...)``.
+
+    Notes
+    -----
     Credential resolution order:
 
-    1. Explicit values in *options* (account_key, sas_token, connection_string,
-       client_id / client_secret / tenant_id for service principal).
+    1. Explicit values in *options* (``account_key``, ``sas_token``,
+       ``connection_string``, ``client_id`` / ``client_secret`` /
+       ``tenant_id`` for service principal).
     2. Environment variables (``AZURE_STORAGE_ACCOUNT_NAME``,
        ``AZURE_STORAGE_ACCOUNT_KEY``, ``AZURE_STORAGE_SAS_TOKEN``,
        ``AZURE_STORAGE_CONNECTION_STRING``).

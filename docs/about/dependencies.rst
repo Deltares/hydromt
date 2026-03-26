@@ -25,7 +25,7 @@ HydroMT builds on the latest packages in the scientific and geospatial python ec
 HydroMT also comes with additional optional dependencies that can be installed
 to enable extra functionality:
 
-- **io**: gcsfs, fastparquet, openpyxl, pillow, s3fs
+- **io**: adlfs, azure-identity, azure-ai-ml, gcsfs, fastparquet, openpyxl, pillow, s3fs
 - **gdal**: gdal
 - **extra**: matplotlib, pyet
 - **examples**: cartopy, jupyterlab, notebook

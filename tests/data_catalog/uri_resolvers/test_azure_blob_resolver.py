@@ -17,12 +17,10 @@ from hydromt.error import NoDataException, NoDataStrategy
 from hydromt.typing.fsspec_types import FSSpecFileSystem
 from hydromt.typing.type_def import TimeRange
 
-# ---------------------------------------------------------------------------
-# _normalise_uri
-# ---------------------------------------------------------------------------
-
 
 class TestNormaliseUri:
+    """_normalise_uri."""
+
     def test_abfs_uri_returned_unchanged(self):
         uri = "abfs://mycontainer/path/to/file.tif"
         normalised, account = _normalise_uri(uri)
@@ -96,12 +94,9 @@ class TestNormaliseUri:
             mock_resolve.assert_called_once()
 
 
-# ---------------------------------------------------------------------------
-# _resolve_azureml_uri
-# ---------------------------------------------------------------------------
-
-
 class TestResolveAzuremlUri:
+    """_resolve_azureml_uri."""
+
     _ML_CLIENT_PATH = "hydromt.data_catalog.uri_resolvers.azure_blob_resolver.MLClient"
     _DEFAULT_CRED_PATH = (
         "hydromt.data_catalog.uri_resolvers.azure_blob_resolver.DefaultAzureCredential"
@@ -167,12 +162,9 @@ class TestResolveAzuremlUri:
         mock_ml_client_instance.datastores.get.assert_called_once_with("ds1")
 
 
-# ---------------------------------------------------------------------------
-# _resolve_azure_credentials
-# ---------------------------------------------------------------------------
-
-
 class TestResolveAzureCredentials:
+    """_resolve_azure_credentials."""
+
     def test_connection_string(self):
         opts = _resolve_azure_credentials(
             {"connection_string": "DefaultEndpointsProtocol=https;..."}
@@ -270,12 +262,9 @@ class TestResolveAzureCredentials:
         assert "sas_token" not in opts
 
 
-# ---------------------------------------------------------------------------
-# AzureBlobResolver._get_dates
-# ---------------------------------------------------------------------------
-
-
 class TestGetDates:
+    """AzureBlobResolver._get_dates."""
+
     def test_yearly(self):
         tr = TimeRange(start=datetime(2020, 1, 1), end=datetime(2022, 12, 31))
         dates = AzureBlobResolver._get_dates(["year"], tr)
@@ -301,11 +290,6 @@ class TestGetDates:
         assert len(dates) == 1
 
 
-# ---------------------------------------------------------------------------
-# AzureBlobResolver._ensure_azure_filesystem
-# ---------------------------------------------------------------------------
-
-
 _RESOLVE_CREDS_PATH = (
     "hydromt.data_catalog.uri_resolvers.azure_blob_resolver._resolve_azure_credentials"
 )
@@ -315,6 +299,8 @@ _FSSPEC_FS_PATH = (
 
 
 class TestEnsureAzureFilesystem:
+    """AzureBlobResolver._ensure_azure_filesystem."""
+
     def test_skips_when_already_configured(self):
         resolver = AzureBlobResolver()
         mock_fs = MagicMock(spec=FSSpecFileSystem)
@@ -347,12 +333,9 @@ class TestEnsureAzureFilesystem:
                     resolver._ensure_azure_filesystem({"account_name": "acct"})
 
 
-# ---------------------------------------------------------------------------
-# AzureBlobResolver.resolve  (integration-level tests with mocked filesystem)
-# ---------------------------------------------------------------------------
-
-
 class TestAzureBlobResolverResolve:
+    """AzureBlobResolver.resolve  (integration-level tests with mocked filesystem)."""
+
     def _make_resolver(self, glob_results=None, options=None):
         """Create an AzureBlobResolver with a mocked FSSpecFileSystem.
 
@@ -561,3 +544,40 @@ class TestAbfsToHttps:
 
     def test_other_scheme_unchanged(self):
         assert _abfs_to_https("s3://bucket/key", "acct", "sv=2021") == "s3://bucket/key"
+
+
+class TestAzuremlIntegration:
+    """End-to-end test for azureml:// URIs.
+
+    The AzureML SDK lookup (MLClient.datastores.get) is mocked to return
+    the public ``azureopendatastorage`` account and ``isdweatherdatacontainer``
+    container, so no AzureML workspace is needed.  Everything after the
+    lookup — filesystem creation, glob, and URI resolution — hits Azure
+    for real.
+    """
+
+    @pytest.mark.integration
+    def test_azureml_uri_resolves_to_real_blobs(self):
+        """An azureml:// URI resolves to real parquet files on Azure."""
+        resolver = AzureBlobResolver(
+            options={"anon": True},
+        )
+
+        azureml_uri = (
+            "azureml://subscriptions/00000000-0000-0000-0000-000000000000"
+            "/resourcegroups/rg/workspaces/ws"
+            "/datastores/noaa_isd/paths/ISDWeather/year=2020/month=1/*.parquet"
+        )
+
+        # Mock only the AzureML SDK lookup; blob access is real.
+        with patch(
+            "hydromt.data_catalog.uri_resolvers.azure_blob_resolver._resolve_azureml_uri",
+            return_value=(
+                "abfs://isdweatherdatacontainer/ISDWeather/year=2020/month=1/*.parquet",
+                "azureopendatastorage",
+            ),
+        ):
+            uris = resolver.resolve(azureml_uri)
+
+        assert len(uris) > 0
+        assert all(u.endswith(".parquet") for u in uris)
