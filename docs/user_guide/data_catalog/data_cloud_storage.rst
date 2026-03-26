@@ -320,16 +320,17 @@ Examples
 
 .. code-block:: yaml
 
-   uk_compass_flood:
+   flood_hazard_maps:
      data_type: RasterDataset
-     uri: azureml://subscriptions/d1d42766-9d6a-4571-8b38-bbc3e60604bb/resourcegroups/rg-ukcrcollab-ukcrcompassflood/workspaces/mlw-ukcrcompassflood-uksouth-01/datastores/large_datastore/paths/default/bucket
+     uri: azureml://subscriptions/00000000-aaaa-bbbb-cccc-123456789abc/resourcegroups/rg-my-project/workspaces/mlw-my-workspace/datastores/project_datastore/paths/hazard/flood_depth_100yr.tif
      driver:
        name: raster_xarray
      uri_resolver:
        name: azure_blob
 
-The AzureML SDK will look up the datastore, extract the storage account and
-container, and authentication is handled via ``DefaultAzureCredential``.
+The AzureML SDK will look up the datastore, extract the underlying storage
+account and container, and build an ``abfs://`` path automatically.
+Authentication is handled via ``DefaultAzureCredential``.
 
 **HTTPS blob URL with explicit SAS token**
 
