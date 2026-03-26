@@ -40,14 +40,13 @@ from hydromt.model.processes.mesh import (
     mesh2d_from_raster_reclass,
     mesh2d_from_rasterdataset,
 )
-from tests.conftest import DC_PARAM_PATH
 
 
 @pytest.fixture(scope="module")
-def vito_2015(tmp_path_factory):
+def vito_2015(tmp_path_factory, dc_param_path: Path):
     mesh_model = Model(
         root=str(tmp_path_factory.mktemp("mesh_model_vito")),
-        data_libs=["artifact_data", DC_PARAM_PATH],
+        data_libs=["artifact_data", dc_param_path],
         components={"mesh": {"type": "MeshComponent"}},
         region_component="mesh",
     )
@@ -448,9 +447,9 @@ def test_setup_region_basin(model):
 
 
 @pytest.mark.integration
-def test_maps_setup():
+def test_maps_setup(dc_param_path: Path):
     mod = Model(
-        data_libs=["artifact_data", DC_PARAM_PATH],
+        data_libs=["artifact_data", dc_param_path],
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
         mode="w",
@@ -491,10 +490,10 @@ def test_maps_setup():
 
 
 @pytest.mark.integration
-def test_gridmodel(demda, tmp_path: Path):
+def test_gridmodel(demda, tmp_path: Path, dc_param_path: Path):
     grid_model = Model(
         root=tmp_path,
-        data_libs=["artifact_data", DC_PARAM_PATH],
+        data_libs=["artifact_data", dc_param_path],
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
         mode="w",
@@ -526,7 +525,7 @@ def test_gridmodel(demda, tmp_path: Path):
     # read model
     model1 = Model(
         root=tmp_path,
-        data_libs=["artifact_data", DC_PARAM_PATH],
+        data_libs=["artifact_data", dc_param_path],
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
         mode="r",
@@ -543,7 +542,7 @@ def test_gridmodel(demda, tmp_path: Path):
 
     model1 = Model(
         root=update_root,
-        data_libs=["artifact_data", DC_PARAM_PATH],
+        data_libs=["artifact_data", dc_param_path],
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
         mode="r+",
@@ -593,10 +592,10 @@ def test_setup_grid_from_bbox_aligned(grid_model):
     assert np.all(np.round(grid_model.grid.data.raster.bounds, 2) == bbox)
 
 
-def test_setup_grid_from_wrong_kind_no_mask(grid_model):
+def test_setup_grid_from_wrong_kind_no_mask(grid_model, dc_param_path: Path):
     bbox = [12.00, 45.00, 12.25, 45.25]
     grid_model_tmp = Model(
-        data_libs=["artifact_data", DC_PARAM_PATH],
+        data_libs=["artifact_data", dc_param_path],
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
     )
@@ -640,10 +639,10 @@ def test_setup_grid_from_wrong_kind_no_mask(grid_model):
 
 
 @pytest.mark.skip("utm is not a valid crs?")
-def test_setup_grid_from_geodataframe(grid_model):
+def test_setup_grid_from_geodataframe(grid_model, dc_param_path: Path):
     bbox = [12.00, 45.00, 12.25, 45.25]
     grid_model_tmp = Model(
-        data_libs=["artifact_data", DC_PARAM_PATH],
+        data_libs=["artifact_data", dc_param_path],
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
     )
@@ -817,7 +816,7 @@ def test_grid_model_raster_dataset_vito(grid_model, vito_2015):
     assert "landuse" in grid_model.grid.data
 
 
-def test_grid_model_raster_reclass(grid_model, data_dir, vito_2015):
+def test_grid_model_raster_reclass(grid_model, test_data_dir, vito_2015):
     bbox = [12.00, 45.00, 12.25, 45.25]
     ds = create_grid_from_region(
         region={"bbox": bbox},
@@ -830,7 +829,7 @@ def test_grid_model_raster_reclass(grid_model, data_dir, vito_2015):
 
     da = vito_2015.to_dataarray()
     df_vars = grid_model.data_catalog.get_dataframe(
-        data_dir / "vito_mapping.csv",
+        test_data_dir / "vito_mapping.csv",
         variables=["roughness_manning"],
     )
 
@@ -1058,11 +1057,11 @@ def test_setup_mesh_from_bbox(mesh_model):
     assert np.all(np.round(mesh_model.mesh.data.ugrid.total_bounds, 3) == bbox)
 
 
-def test_setup_mesh_from_geom(tmp_path: Path):
+def test_setup_mesh_from_geom(tmp_path: Path, dc_param_path: Path):
     bbox = [12.00, 45.00, 12.25, 45.25]
     dummy_mesh_model = Model(
         root=tmp_path,
-        data_libs=["artifact_data", DC_PARAM_PATH],
+        data_libs=["artifact_data", dc_param_path],
         components={"mesh": {"type": "MeshComponent"}},
         region_component="mesh",
     )
@@ -1135,7 +1134,7 @@ def test_mesh_model_setup_grid(mesh_model, world):
 
 
 def test_mesh_model_setup_from_raster_dataset_and_reclass(
-    mesh_model, griduda, vito_2015, data_dir
+    mesh_model, griduda, vito_2015, test_data_dir
 ):
     # Part 1: from raster dataset
     mesh = create_mesh2d_from_region(
@@ -1155,7 +1154,7 @@ def test_mesh_model_setup_from_raster_dataset_and_reclass(
     # Part 2: reclass
     da = vito_2015.to_dataarray(name="vito")
     df_vars = mesh_model.data_catalog.get_dataframe(
-        data_dir / "vito_mapping.csv",
+        test_data_dir / "vito_mapping.csv",
     )
     df_vars = df_vars.set_index("vito")
     df_vars.index = df_vars.index.astype(da.dtype)

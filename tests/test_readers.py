@@ -25,7 +25,6 @@ from hydromt.readers import (
     read_workflow_yaml,
 )
 from hydromt.writers import write_xy
-from tests.conftest import TEST_DATA_DIR
 
 
 def test_open_vector(tmp_path: Path, df, geodf, world):
@@ -260,9 +259,9 @@ def test_open_nc_geo_map_coord_sets_close(tmpdir):
     assert ds2._close is not None
 
 
-def test_read_workflow_yaml():
+def test_read_workflow_yaml(test_data_dir: Path):
     model_type, model_init, steps = read_workflow_yaml(
-        Path(TEST_DATA_DIR, "build_config.yml"),
+        test_data_dir / "build_config.yml",
         skip_abspath_sections=["global"],
     )
 
@@ -275,9 +274,9 @@ def test_read_workflow_yaml():
     assert config_filename == "run_config.toml"
 
 
-def test_read_workflow_yaml_extended_all_absolute():
+def test_read_workflow_yaml_extended_all_absolute(test_data_dir: Path):
     model_type, model_init, steps = read_workflow_yaml(
-        Path(TEST_DATA_DIR, "build_config_extended.yml"),
+        test_data_dir / "build_config_extended.yml",
         skip_abspath_sections=None,
     )
 
@@ -288,20 +287,20 @@ def test_read_workflow_yaml_extended_all_absolute():
     # Check relative paths in global section were made absolute, and step paths were also made absolute
     # global
     config_filename = model_init["components"]["config"]["filename"]
-    assert config_filename == Path(TEST_DATA_DIR, "run_config.toml")
+    assert config_filename == test_data_dir / "run_config.toml"
     assert model_init["data_libs"] == [
         "deltares_data",
-        Path(TEST_DATA_DIR, "aws_esa_worldcover.yml"),
+        test_data_dir / "aws_esa_worldcover.yml",
     ]
 
     # steps
     config_template = steps[0]["config.create"]["template"]
-    assert config_template == Path(TEST_DATA_DIR, "run_config.toml")
+    assert config_template == test_data_dir / "run_config.toml"
 
 
-def test_read_workflow_yaml_extended_keep_relative():
+def test_read_workflow_yaml_extended_keep_relative(test_data_dir: Path):
     model_type, model_init, steps = read_workflow_yaml(
-        Path(TEST_DATA_DIR, "build_config_extended.yml"),
+        test_data_dir / "build_config_extended.yml",
         skip_abspath_sections=["global"],
     )
 
@@ -317,4 +316,4 @@ def test_read_workflow_yaml_extended_keep_relative():
 
     # steps
     config_template = steps[0]["config.create"]["template"]
-    assert config_template == Path(TEST_DATA_DIR, "run_config.toml")
+    assert config_template == test_data_dir / "run_config.toml"

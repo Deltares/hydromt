@@ -17,8 +17,12 @@ how to use both interfaces to build a model from a configuration file.
 
         .. code-block:: python
 
+            from hydromt import log
             from hydromt_wflow import WflowSbmModel
             from hydromt.readers import read_workflow_yaml
+
+            # Configure logging
+            log.initialize_logging()
 
             # Instantiate model
             model = WflowSbmModel(

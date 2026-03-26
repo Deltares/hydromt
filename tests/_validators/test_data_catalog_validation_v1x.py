@@ -12,7 +12,6 @@ from hydromt._validators.data_catalog_v1x import (
     DataCatalogV1Validator,
 )
 from hydromt.readers import _yml_from_uri_or_path
-from tests.conftest import TEST_DATA_DIR
 
 
 def test_deltares_data_catalog_v1(latest_dd_version_uri):
@@ -226,12 +225,12 @@ def test_data_invalid_crs_v1():
         _ = DataCatalogV1Item.from_dict(d, name="chelsa_v1.2")
 
 
-def test_upgrade_v0_data_catalog():
+def test_upgrade_v0_data_catalog(test_data_dir: Path):
     expected_upgraded_data_catalog = DataCatalogV1Validator.from_yml(
-        Path(TEST_DATA_DIR) / "test_v0_data_catalog_upgraded.yml"
+        test_data_dir / "test_v0_data_catalog_upgraded.yml"
     )
     v0_catalog = DataCatalogV0Validator.from_yml(
-        Path(TEST_DATA_DIR) / "test_v0_data_catalog.yml"
+        test_data_dir / "test_v0_data_catalog.yml"
     )
 
     upgraded_catalog = DataCatalogV1Validator.from_v0(v0_catalog)

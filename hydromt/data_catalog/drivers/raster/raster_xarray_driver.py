@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, ClassVar
 
 import xarray as xr
+from aiohttp.client_exceptions import ClientResponseError
 from pydantic import Field
 
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
@@ -119,8 +120,8 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         # Read and merge
         if io_format == XarrayIOFormat.ZARR:
             datasets = [
-                preprocessor(xr.open_zarr(_uri, **self.options.get_kwargs()))
-                for _uri in filtered_uris
+                preprocessor(ds)
+                for ds in self._open_zarrs(filtered_uris, self.options.get_kwargs())
             ]
             ds: xr.Dataset = xr.merge(datasets)
         elif io_format == XarrayIOFormat.NETCDF4:
@@ -193,3 +194,19 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
             data.to_netcdf(path, **write_kwargs)
 
         return Path(path)
+
+    @staticmethod
+    def _open_zarrs(uris: list[str], read_kwargs: dict[str, Any]) -> list[xr.Dataset]:
+        """Open multiple zarr datasets with error handling."""
+        datasets = []
+        for _uri in uris:
+            try:
+                ds = xr.open_zarr(_uri, **read_kwargs)
+                datasets.append(ds)
+            except ClientResponseError as e:
+                if e.status == 401:
+                    raise PermissionError(
+                        f"Unauthorized access to {_uri}. Check your credentials."
+                    ) from e
+                raise
+        return datasets

@@ -12,8 +12,8 @@ import click
 import numpy as np
 from pydantic import ValidationError
 
-from hydromt import __version__
-from hydromt._utils import CatalogDumper, log
+from hydromt import __version__, log
+from hydromt._utils import CatalogDumper
 from hydromt._validators import Format
 from hydromt._validators.data_catalog_v0x import DataCatalogV0Validator
 from hydromt._validators.data_catalog_v1x import DataCatalogV1Validator
@@ -235,35 +235,28 @@ def build(
     hydromt build sfincs /path/to/model_root  -i /path/to/sfincs_config.yml
     -d /path/to/data_catalog.yml -v
     """  # noqa: E501
-    log_level = max(10, 30 - 10 * (verbose - quiet))
-    log.set_log_level(log_level=log_level)
-    log.log_version()
-    # Model.build will manage the filehandlers and logging
+    log.initialize_logging(level=log.flags_to_level(verbose, quiet))
 
+    # Model.build will manage the filehandlers and logging
     modeltype, kwargs, steps = read_workflow_yaml(config, modeltype=model)
     # parse data catalog options from global section in config and cli options
     data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
     data_libs += list(data)  # add data catalogs from cli
     if dd and "deltares_data" not in data_libs:  # deltares_data from cli
         data_libs = ["deltares_data"] + data_libs  # prepend!
-    try:
-        # initialize model and create folder structure
-        mode = "w+" if fo else "w"
-        if modeltype not in PLUGINS.model_plugins:
-            raise ValueError("Unknown model")
-        mod = PLUGINS.model_plugins[modeltype](
-            root=model_root,
-            mode=mode,
-            data_libs=data_libs,
-            **kwargs,
-        )
-        mod.data_catalog.cache = cache
-        # build model
-        mod.build(steps=steps)
-
-    except Exception as e:
-        logger.exception(e)  # catch and log errors
-        raise
+    # initialize model and create folder structure
+    mode = "w+" if fo else "w"
+    if modeltype not in PLUGINS.model_plugins:
+        raise ValueError("Unknown model")
+    mod = PLUGINS.model_plugins[modeltype](
+        root=model_root,
+        mode=mode,
+        data_libs=data_libs,
+        **kwargs,
+    )
+    mod.data_catalog.cache = cache
+    # build model
+    mod.build(steps=steps)
 
 
 ## UPDATE
@@ -317,11 +310,9 @@ def update(
     hydromt update wflow_sbm /path/to/model_root  -o /path/to/model_out  -i /path/to/wflow_config.yml  -d /path/to/data_catalog.yml -v
     """  # noqa: E501
     # logger
-    log_level = max(10, 30 - 10 * (verbose - quiet))
-    log.set_log_level(log_level=log_level)
-    log.log_version()
-    # Model.update will manage the filehandlers and logging
+    log.initialize_logging(level=log.flags_to_level(verbose, quiet))
 
+    # Model.update will manage the filehandlers and logging
     mode = "r+" if model_root == model_out else "r"
     modeltype, kwargs, steps = read_workflow_yaml(config, modeltype=model)
 
@@ -332,19 +323,15 @@ def update(
     data_libs += list(data)  # add data catalogs from cli
     if dd and "deltares_data" not in data_libs:  # deltares_data from cli
         data_libs = ["deltares_data"] + data_libs  # prepend!
-    try:
-        # initialize model and create folder structure
-        mod = PLUGINS.model_plugins[modeltype](
-            root=model_root,
-            mode=mode,
-            data_libs=data_libs,
-            **kwargs,
-        )
-        mod.data_catalog.cache = cache
-        mod.update(model_out=model_out, steps=steps, forceful_overwrite=fo)
-    except Exception as e:
-        logger.exception(e)  # catch and log errors
-        raise
+    # initialize model and create folder structure
+    mod = PLUGINS.model_plugins[modeltype](
+        root=model_root,
+        mode=mode,
+        data_libs=data_libs,
+        **kwargs,
+    )
+    mod.data_catalog.cache = cache
+    mod.update(model_out=model_out, steps=steps, forceful_overwrite=fo)
 
 
 def _validate_catalog(cat_path: Path, fmt: Format, upgrade: bool) -> bool:
@@ -448,11 +435,10 @@ def check(
     With region:
     >>> hydromt check -m grid_model -d /path/to/data_catalog.yml -i /path/to/model_config.yml -r '{"bbox": [-1,-1,1,1]}' -v
     """
-    # Configure logging
-    log_level = max(10, 30 - 10 * (verbose - quiet))
+    log.initialize_logging(level=log.flags_to_level(verbose, quiet))
+
     log_path = Path.cwd() / "hydromt_check.log"
-    log.set_log_level(log_level=log_level)
-    with log.to_file(log_path):
+    with log.to_file(path=log_path):
         log.log_version()
         results = []
         for cat_path in data:
@@ -526,10 +512,10 @@ def export(
     hydromt export -i /path/to/export_config.yaml path/to/output_dir
     """  # noqa: E501
     # logger
-    log_level = max(10, 30 - 10 * (verbose - quiet))
-    log.set_log_level(log_level=log_level)
+    log.initialize_logging(level=log.flags_to_level(verbose, quiet))
+
     log_path = Path(export_dest_path, "hydromt_export.log")
-    with log.to_file(log_path):
+    with log.to_file(path=log_path):
         log.log_version()
         if error_on_empty:
             handle_nodata = NoDataStrategy.RAISE
@@ -584,21 +570,17 @@ def export(
             if isinstance(bbox, str):
                 bbox = literal_eval(bbox)
 
-        try:
-            data_catalog.export_data(
-                export_dest_path,
-                source_names=sources,
-                bbox=bbox,
-                time_range=time_range,
-                unit_conversion=unit_conversion,
-                metadata=meta,
-                append=append,
-                handle_nodata=handle_nodata,
-                force_overwrite=fo,
-            )
-        except Exception as e:
-            logger.exception(e)  # catch and log errors
-            raise
+        data_catalog.export_data(
+            export_dest_path,
+            source_names=sources,
+            bbox=bbox,
+            time_range=time_range,
+            unit_conversion=unit_conversion,
+            metadata=meta,
+            append=append,
+            handle_nodata=handle_nodata,
+            force_overwrite=fo,
+        )
 
 
 if __name__ == "__main__":

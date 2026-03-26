@@ -2,6 +2,7 @@
 
 import glob
 import os
+import warnings
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from logging import WARNING
@@ -17,6 +18,7 @@ import pandas as pd
 import pytest
 import requests
 import xarray as xr
+import zarr
 from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
@@ -24,6 +26,7 @@ from shapely import box
 from yaml import dump
 
 from hydromt._compat import HAS_GCSFS, HAS_GDAL, HAS_OPENPYXL, HAS_S3FS
+from hydromt._utils import temp_env
 from hydromt.config import Settings
 from hydromt.data_catalog.adapters import (
     GeoDataFrameAdapter,
@@ -47,9 +50,6 @@ from hydromt.error import NoDataException, NoDataStrategy
 from hydromt.gis.gis_utils import _to_geographic_bbox
 from hydromt.typing import Bbox, TimeRange
 from hydromt.writers import write_xy
-from tests.conftest import DATA_DIR, TEST_DATA_DIR
-
-_CATALOG_DIR = join(DATA_DIR, "catalogs")
 
 
 def test_errors_on_no_root_found(tmp_path: Path):
@@ -218,22 +218,22 @@ def test_catalog_entry_single_variant(aws_worldcover):
 
 
 @pytest.fixture
-def aws_worldcover():
-    aws_yml_path = join(TEST_DATA_DIR, "aws_esa_worldcover.yml")
+def aws_worldcover(test_data_dir: Path):
+    aws_yml_path = test_data_dir / "aws_esa_worldcover.yml"
     aws_data_catalog = DataCatalog(data_libs=[aws_yml_path])
     return (aws_yml_path, aws_data_catalog)
 
 
 @pytest.fixture
-def merged_aws_worldcover():
-    merged_yml_path = join(TEST_DATA_DIR, "merged_esa_worldcover.yml")
+def merged_aws_worldcover(test_data_dir: Path):
+    merged_yml_path = test_data_dir / "merged_esa_worldcover.yml"
     merged_catalog = DataCatalog(data_libs=[merged_yml_path])
     return (merged_yml_path, merged_catalog)
 
 
 @pytest.fixture
-def legacy_aws_worldcover():
-    legacy_yml_path = join(TEST_DATA_DIR, "legacy_esa_worldcover.yml")
+def legacy_aws_worldcover(test_data_dir: Path):
+    legacy_yml_path = test_data_dir / "legacy_esa_worldcover.yml"
     legacy_data_catalog = DataCatalog(data_libs=[legacy_yml_path])
     return (legacy_yml_path, legacy_data_catalog)
 
@@ -392,8 +392,8 @@ def test_data_catalog_hydromt_version(tmp_path: Path):
 
 
 @pytest.mark.skipif(not HAS_S3FS, reason="s3fs is not installed")
-def test_used_sources():
-    merged_yml_path = join(TEST_DATA_DIR, "merged_esa_worldcover.yml")
+def test_used_sources(test_data_dir: Path):
+    merged_yml_path = test_data_dir / "merged_esa_worldcover.yml"
     data_catalog = DataCatalog(merged_yml_path)
     source = data_catalog.get_source("esa_worldcover")
     source._mark_as_used()
@@ -1034,15 +1034,15 @@ class TestGetRasterDataset:
 
     @pytest.mark.skipif(not HAS_GDAL, reason="GDAL not installed.")
     @pytest.mark.skipif(not HAS_S3FS, reason="S3FS not installed.")
-    def test_aws_worldcover(self, test_settings: Settings):
-        catalog_fn = join(_CATALOG_DIR, "aws_data", "v1.0.0", "data_catalog.yml")
+    def test_aws_worldcover(self, test_settings: Settings, catalog_dir: Path):
+        catalog_fn = catalog_dir / "aws_data" / "v1.0.0" / "data_catalog.yml"
         data_catalog = DataCatalog(
             data_libs=[catalog_fn],
             cache=True,
             cache_dir=test_settings.cache_root.as_posix(),
         )
         da = data_catalog.get_rasterdataset(
-            "esa_worldcover_2020_v100",
+            "esa_worldcover",
             bbox=[12.0, 46.0, 12.5, 46.50],
         )
         assert da.name == "landuse"
@@ -1071,8 +1071,8 @@ class TestGetRasterDataset:
         reason="Waiting for: https://github.com/Deltares/hydromt/issues/492"
     )
     @pytest.mark.skipif(not HAS_GCSFS, reason="GCSFS not installed.")
-    def test_gcs_cmip6(self):
-        catalog_fn = join(_CATALOG_DIR, "gcs_cmip6_data", "v1.0.0", "data_catalog.yml")
+    def test_gcs_cmip6(self, catalog_dir: Path):
+        catalog_fn = catalog_dir / "gcs_cmip6_data" / "v1.0.0" / "data_catalog.yml"
         data_catalog = DataCatalog(data_libs=[catalog_fn])
         ds = data_catalog.get_rasterdataset(
             "cmip6_NOAA-GFDL/GFDL-ESM4_historical_r1i1p1f1_Amon",
@@ -1085,10 +1085,10 @@ class TestGetRasterDataset:
 
     @pytest.mark.integration
     @pytest.mark.skipif(not HAS_GDAL, reason="GDAL not installed.")
-    def test_reads_slippy_map_output(self):
+    def test_reads_slippy_map_output(self, test_data_dir: Path):
         # write vrt data
         name = "tiled"
-        root = join(TEST_DATA_DIR, "rioda_tiled")
+        root = test_data_dir / "rioda_tiled"
         cat = DataCatalog(join(root, f"{name}.yml"), cache=True)
         cat.get_rasterdataset(name)
         assert len(glob.glob(join(root, "*", "*", "*.tif"))) == 16
@@ -1906,3 +1906,47 @@ def test_get_rasterdataset_with_unit_add(data_catalog: DataCatalog):
     # assert that the ds goes from 2010-02-02 to 2010-02-10, because of unit_add time (+1 day) in the data catalog
     assert ds["time"].values[0] == np.datetime64("2010-02-02T00:00:00")
     assert ds["time"].values[-1] == np.datetime64("2010-02-10T00:00:00")
+
+
+@pytest.fixture(scope="module")
+def require_earthdatahub_credentials():
+    import netrc
+
+    try:
+        netrc.netrc()
+        if "data.earthdatahub.destine.eu" not in netrc.netrc().hosts:
+            pytest.skip("No Earth Data Hub credentials found in .netrc file.")
+    except FileNotFoundError:
+        pytest.skip("No .netrc file found for Earth Data Hub mirror authentication.")
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("datasource", ["era5_land", "era5_land_hourly", "era5_ocean"])
+def test_era5_earthdatahub_datasources(
+    datasource: str, require_earthdatahub_credentials
+):
+    warnings.filterwarnings("ignore", category=zarr.errors.ZarrUserWarning)
+    datacatalog = DataCatalog(data_libs=["earthdatahub_data"])
+    if datasource == "era5_ocean":  # Dataset only covers oceans
+        bbox = [-4.49901, 46.750592, -3.999132, 47.034009]
+    else:
+        bbox = [4.2715461044, 52.0537179493, 4.3550421814, 52.1043572932]
+    time_range = ("2010-02-02T00:00:00", "2010-02-10T00:00:00")
+    data = datacatalog.get_rasterdataset(datasource, bbox=bbox, time_range=time_range)
+    assert isinstance(data, xr.Dataset)
+    assert data["time"].values[0] == np.datetime64("2010-02-02T00:00:00")
+    assert data["time"].values[-1] == np.datetime64("2010-02-10T00:00:00")
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(not HAS_S3FS, reason="s3fs is not installed")
+def test_esa_world_cover_aws(tmp_path: Path):
+    datacatalog = DataCatalog(data_libs=["aws_data"])
+    bbox = [4.2715461044, 52.0537179493, 4.3550421814, 52.1043572932]
+    data = datacatalog.get_rasterdataset("esa_worldcover", bbox=bbox)
+    assert isinstance(data, xr.DataArray)
+    output_path = tmp_path / "esa_worldcover_export"
+
+    with temp_env(**{"AWS_NO_SIGN_REQUEST": "true"}):
+        data.raster.to_raster(output_path)
+    assert output_path.exists()
