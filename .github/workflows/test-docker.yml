@@ -26,7 +26,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
       - name: Build the image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           push: false
           tags: hydromt-binder
