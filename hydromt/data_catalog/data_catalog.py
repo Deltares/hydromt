@@ -537,7 +537,9 @@ class DataCatalog(object):
                 return False
             for name, source in self.list_sources():
                 try:
-                    version = str(source.version) if source.version is not None else None
+                    version = (
+                        str(source.version) if source.version is not None else None
+                    )
                     other_source = other.get_source(
                         name, provider=source.provider, version=version
                     )
