@@ -22,6 +22,27 @@ HydroMT is here to read and harmonize **input data**, and to process it via its
 **methods and (GIS) processes** in order to prepare ready to run **models**. So HydroMT's
 methods are organized around these main objects.
 
+Logging configuration
+---------------------
+
+When using HydroMT as a Python library, logging is not configured automatically.
+This is different from the CLI, where logging is initialized for you.
+
+If you do not explicitly configure logging in your script, HydroMT will not emit log messages to the terminal, even if functions are executed successfully.
+This can make it difficult to understand what the library is doing internally or to debug issues.
+
+To enable logging, you can call:
+
+.. code-block:: python
+
+    from hydromt import log
+
+    log.initialize_logging()
+
+This sets up a default logging configuration and ensures that messages are printed to the console.
+If you need more advanced logging behavior (for example logging to a file or integrating with an existing application logger),
+review the module ``hydromt.log`` for your options or you should configure the Python ``logging`` module yourself before using HydroMT.
+
 .. dropdown:: **Model functions**
 
    - :ref:`build a model <hydromt_build_python>`
@@ -54,8 +75,11 @@ is a small example of how to use the build function in Python:
 
 .. code-block:: python
 
-    from hydromt import ExampleModel
+    from hydromt import ExampleModel, log
     from hydromt.readers import read_workflow_yaml
+
+    # Configure logging
+    log.initialize_logging()
 
     # Instantiate model
     model = ExampleModel(
@@ -74,7 +98,10 @@ model steps as methods, instead of using a workflow file. For example:
 
 .. code-block:: python
 
-    from hydromt import ExampleModel
+    from hydromt import ExampleModel, log
+
+    # Configure logging
+    log.initialize_logging()
 
     # Instantiate model
     model = ExampleModel(
@@ -115,8 +142,11 @@ is a small example of how to use the update function in Python:
 
 .. code-block:: python
 
-    from hydromt import ExampleModel
+    from hydromt import ExampleModel, log
     from hydromt.readers import read_workflow_yaml
+
+    # Configure logging
+    log.initialize_logging()
 
     # Instantiate model
     model = ExampleModel(
@@ -139,7 +169,10 @@ model steps as methods, instead of using a workflow file. For example:
 
 .. code-block:: python
 
-    from hydromt import ExampleModel
+    from hydromt import ExampleModel, log
+
+    # Configure logging
+    log.initialize_logging()
 
     # Instantiate model
     model = ExampleModel(
@@ -183,7 +216,9 @@ or analyze your model:
 
 .. code-block:: python
 
-    from hydromt import ExampleModel
+    from hydromt import ExampleModel, log
+    # Configure logging
+    log.initialize_logging()
     # create a ExampleModel instance for an existing model saved in "example_model" folder
     model = hydromt.ExampleModel(root="example_model", mode="r")
     # read/get the grid data
@@ -226,7 +261,10 @@ Here is a small example of how to use the DataCatalog to read data in Python:
 
 .. code-block:: python
 
-    from hydromt import DataCatalog
+    from hydromt import DataCatalog, log
+
+    # Configure logging
+    log.initialize_logging()
 
     # create a data catalog from a local data_catalog file
     cat = DataCatalog("data_catalog.yml")

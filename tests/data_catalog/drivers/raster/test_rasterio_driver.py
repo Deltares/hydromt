@@ -18,16 +18,15 @@ from hydromt.data_catalog.drivers.raster.rasterio_driver import (
 from hydromt.gis.raster_utils import full_from_transform
 from hydromt.readers import open_mfraster, open_raster
 from hydromt.typing import SourceMetadata
-from tests.conftest import TEST_DATA_DIR
 
 
 class TestRasterioDriver:
     @pytest.fixture
-    def vrt_tiled_raster_ds(self, tmp_path: Path) -> str:
+    def vrt_tiled_raster_ds(self, tmp_path: Path, test_data_dir: Path) -> str:
         # copy vrt data to test folder
         name = "test_vrt_tiled_raster_ds"
         root = tmp_path / name
-        shutil.copytree(join(TEST_DATA_DIR, "rioda_tiled"), root)
+        shutil.copytree(test_data_dir / "rioda_tiled", root)
         return str(root)
 
     @pytest.mark.skipif(not HAS_GDAL, reason="GDAL not installed.")

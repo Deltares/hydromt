@@ -7,12 +7,6 @@ from hydromt.data_catalog.predefined_catalog import (
     PredefinedCatalog,
     create_registry_file,
 )
-from tests.conftest import DATA_DIR
-
-
-@pytest.fixture
-def cat_root() -> Path:
-    return Path(DATA_DIR) / "catalogs"
 
 
 @pytest.fixture
@@ -91,11 +85,11 @@ def test_get_versions_artifacts():
     assert "v0.0.8" in versions
 
 
-def test_catalog_versions(cat_root: Path, tmp_path: Path):
+def test_catalog_versions(catalog_dir: Path, tmp_path: Path):
     # assert all subdirs are catalogs and have a versions.yml file
     catalogs = filter(
         lambda dir: "__pycache__" not in str(dir),
-        filter(lambda dir: dir.is_dir(), cat_root.iterdir()),
+        filter(lambda dir: dir.is_dir(), catalog_dir.iterdir()),
     )
     for cat_dir in catalogs:
         registry_file = cat_dir / "registry.txt"

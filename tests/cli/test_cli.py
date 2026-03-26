@@ -2,7 +2,6 @@
 
 import logging
 from datetime import date
-from os.path import join
 from pathlib import Path
 from typing import Generator
 
@@ -14,10 +13,22 @@ from hydromt.cli.main import main as hydromt_cli
 from hydromt.error import NoDataException
 from hydromt.model.components.grid import GridComponent
 from hydromt.readers import read_toml
-from tests.conftest import TEST_DATA_DIR
 
-BUILD_CONFIG_PATH = join(TEST_DATA_DIR, "build_config.yml")
-UPDATE_CONFIG_PATH = join(TEST_DATA_DIR, "update_config.yml")
+
+@pytest.fixture(scope="session")
+def build_config_path(test_data_dir: Path) -> Path:
+    path = test_data_dir / "build_config.yml"
+    if not path.exists():
+        raise FileNotFoundError(f"Test build config file not found at {path}")
+    return path
+
+
+@pytest.fixture(scope="session")
+def update_config_path(test_data_dir: Path) -> Path:
+    path = test_data_dir / "update_config.yml"
+    if not path.exists():
+        raise FileNotFoundError(f"Test update config file not found at {path}")
+    return path
 
 
 def test_cli_version():
@@ -67,14 +78,14 @@ def _reset_log_level() -> Generator[None, None, None]:
 
 
 def test_cli_build_missing_arg_workflow(
-    tmp_path: Path, caplog: pytest.LogCaptureFixture
+    tmp_path: Path, test_data_dir: Path, caplog: pytest.LogCaptureFixture
 ):
     cmd = [
         "build",
         "model",
         str(tmp_path),
         "-i",
-        str(join(TEST_DATA_DIR, "missing_data_workflow.yml")),
+        str(test_data_dir / "missing_data_workflow.yml"),
         "-vv",
     ]
     with caplog.at_level(logging.NOTSET):
@@ -87,13 +98,15 @@ def test_cli_build_missing_arg_workflow(
     )
 
 
-def test_cli_build_v0x_workflow(tmp_path: Path, caplog: pytest.LogCaptureFixture):
+def test_cli_build_v0x_workflow(
+    tmp_path: Path, test_data_dir: Path, caplog: pytest.LogCaptureFixture
+):
     cmd = [
         "build",
         "model",
         str(tmp_path),
         "-i",
-        str(join(TEST_DATA_DIR, "v0x_workflow.yml")),
+        str(test_data_dir / "v0x_workflow.yml"),
         "-vv",
     ]
     with caplog.at_level(logging.NOTSET):
@@ -106,13 +119,15 @@ def test_cli_build_v0x_workflow(tmp_path: Path, caplog: pytest.LogCaptureFixture
     )
 
 
-def test_cli_update_missing_arg(tmp_path: Path, caplog: pytest.LogCaptureFixture):
+def test_cli_update_missing_arg(
+    tmp_path: Path, test_data_dir: Path, caplog: pytest.LogCaptureFixture
+):
     cmd = [
         "update",
         "model",
         str(tmp_path),
         "-i",
-        str(join(TEST_DATA_DIR, "missing_data_workflow.yml")),
+        str(test_data_dir / "missing_data_workflow.yml"),
         "-vv",
     ]
     with caplog.at_level(logging.NOTSET):
@@ -125,13 +140,15 @@ def test_cli_update_missing_arg(tmp_path: Path, caplog: pytest.LogCaptureFixture
     )
 
 
-def test_cli_update_v0x_workflow(tmp_path: Path, caplog: pytest.LogCaptureFixture):
+def test_cli_update_v0x_workflow(
+    tmp_path: Path, test_data_dir: Path, caplog: pytest.LogCaptureFixture
+):
     cmd = [
         "update",
         "model",
         str(tmp_path),
         "-i",
-        str(join(TEST_DATA_DIR, "v0x_workflow.yml")),
+        str(test_data_dir / "v0x_workflow.yml"),
         "-vv",
     ]
     with caplog.at_level(logging.NOTSET):
@@ -145,14 +162,19 @@ def test_cli_update_v0x_workflow(tmp_path: Path, caplog: pytest.LogCaptureFixtur
 
 
 @pytest.mark.usefixtures("_reset_log_level")
-def test_cli_build_update_model(tmp_path: Path, caplog: pytest.LogCaptureFixture):
+def test_cli_build_update_model(
+    tmp_path: Path,
+    caplog: pytest.LogCaptureFixture,
+    build_config_path: Path,
+    update_config_path: Path,
+):
     root = tmp_path / "model_region"
     cmd = [
         "build",
         "model",
         str(root),
         "-i",
-        BUILD_CONFIG_PATH,
+        build_config_path.as_posix(),
         "-d",
         "artifact_data",
         "-vv",
@@ -177,7 +199,7 @@ def test_cli_build_update_model(tmp_path: Path, caplog: pytest.LogCaptureFixture
         "-o",
         str(root_out),
         "-i",
-        UPDATE_CONFIG_PATH,
+        update_config_path.as_posix(),
         "-vv",
     ]
     r = CliRunner().invoke(hydromt_cli, cmd)
@@ -226,7 +248,7 @@ def test_cli_build_unknown_option(tmp_path: Path):
 
 
 @pytest.mark.usefixtures("_reset_log_level")
-def test_cli_build_unknown_model(tmp_path: Path):
+def test_cli_build_unknown_model(tmp_path: Path, build_config_path: Path):
     with pytest.raises(ValueError, match="Unknown model"):
         _ = CliRunner().invoke(
             hydromt_cli,
@@ -235,14 +257,14 @@ def test_cli_build_unknown_model(tmp_path: Path):
                 "test_model",
                 str(tmp_path),
                 "-i",
-                BUILD_CONFIG_PATH,
+                build_config_path.as_posix(),
             ],
             catch_exceptions=False,
         )
 
 
 @pytest.mark.usefixtures("_reset_log_level")
-def test_cli_update_unknown_model(tmp_path: Path):
+def test_cli_update_unknown_model(tmp_path: Path, update_config_path: Path):
     with pytest.raises(ValueError, match="Unknown model"):
         _ = CliRunner().invoke(
             hydromt_cli,
@@ -251,7 +273,7 @@ def test_cli_update_unknown_model(tmp_path: Path):
                 "test_model",
                 str(tmp_path),
                 "-i",
-                UPDATE_CONFIG_PATH,
+                update_config_path.as_posix(),
             ],
             catch_exceptions=False,
         )
@@ -339,7 +361,7 @@ def test_export_does_not_warn_on_forced_overwrite(
 
 
 @pytest.mark.usefixtures("_reset_log_level")
-def test_export_cli_catalog(tmp_path: Path):
+def test_export_cli_catalog(tmp_path: Path, test_data_dir: Path):
     r = CliRunner().invoke(
         hydromt_cli,
         [
@@ -348,7 +370,7 @@ def test_export_cli_catalog(tmp_path: Path):
             "-s",
             "hydro_lakes",
             "-d",
-            str(join(TEST_DATA_DIR, "test_sources1.yml")),
+            str(test_data_dir / "test_sources1.yml"),
         ],
         catch_exceptions=False,
     )
@@ -422,11 +444,11 @@ def test_validate_v0_catalog():
 
 
 @pytest.mark.usefixtures("_reset_log_level")
-def test_cli_check_v0x_workflow_format_v0(caplog):
+def test_cli_check_v0x_workflow_format_v0(caplog, test_data_dir: Path):
     cmd = [
         "check",
         "-i",
-        Path(TEST_DATA_DIR) / "v0x_workflow.yml",
+        str(test_data_dir / "v0x_workflow.yml"),
         "-vvv",
         "--format",
         "v0",
@@ -439,16 +461,16 @@ def test_cli_check_v0x_workflow_format_v0(caplog):
 
 
 @pytest.mark.usefixtures("_reset_log_level")
-def test_cli_check_v0x_workflow(caplog):
+def test_cli_check_v0x_workflow(caplog, test_data_dir: Path):
     cmd = [
         "check",
         "-i",
-        Path(TEST_DATA_DIR) / "v0x_workflow.yml",
+        str(test_data_dir / "v0x_workflow.yml"),
         "-vv",
     ]
 
     r = CliRunner().invoke(hydromt_cli, cmd, catch_exceptions=False)
 
     assert r.exit_code == 1
-    error_msg = f"It seems your workflow file at {Path(TEST_DATA_DIR) / 'v0x_workflow.yml'} does not contain a `steps` section. Perhaps you're using a v0.x format?"
+    error_msg = f"It seems your workflow file at {test_data_dir / 'v0x_workflow.yml'} does not contain a `steps` section. Perhaps you're using a v0.x format?"
     assert error_msg.lower() in caplog.text.lower()

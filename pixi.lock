@@ -11104,7 +11104,7 @@ packages:
 - pypi: ./
   name: hydromt
   version: 1.4.0.dev0
-  sha256: d7add9f2c1ff2cf3d2a87727c53d03559883f4cdb3a6d760b3f59e169fb84c9d
+  sha256: 1a0f7b0b78d1c7db193d99e273a85e19231a7b85205c027ec003aaf3660a548b
   requires_dist:
   - affine
   - bottleneck
@@ -11145,6 +11145,7 @@ packages:
   - pandas-stubs ; extra == 'dev'
   - pre-commit ; extra == 'dev'
   - ruff ; extra == 'dev'
+  - python-dotenv ; extra == 'dev'
   - twine ; extra == 'dev'
   - types-openpyxl ; extra == 'dev'
   - types-pyyaml ; extra == 'dev'

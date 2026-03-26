@@ -14,7 +14,8 @@ from typing import Any, Dict, List, Optional, TypeVar, Union, cast
 import geopandas as gdp
 from pyproj import CRS
 
-from hydromt._utils import _rgetattr, _validate_steps, log
+from hydromt import log
+from hydromt._utils import _rgetattr, _validate_steps
 from hydromt.data_catalog import DataCatalog
 from hydromt.model.components import (
     ModelComponent,
@@ -403,7 +404,6 @@ class Model(object, metaclass=ABCMeta):
 
         # No need to clear the log file here since we did that already if needed above
         with log.to_file(self.root.path / "hydromt.log", append=True):
-            log.log_version()
             # check if model has a region
             if self._region_component_name is not None and self.region is None:
                 raise ValueError(
