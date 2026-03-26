@@ -168,7 +168,12 @@ class AzureBlobResolver(URIResolver):
             on whether ``"day"``, ``"month"``, or only ``"year"`` is in *keys*.
         """
         t_range = pd.to_datetime([time_range.start, time_range.end])
-        freq = "D" if "day" in keys else ("M" if "month" in keys else "Y")
+        if "day" in keys:
+            freq = "D"
+        elif "month" in keys:
+            freq = "M"
+        else:
+            freq = "Y"
         return pd.period_range(*t_range, freq=freq)
 
     def resolve(
@@ -318,6 +323,8 @@ class AzureBlobResolver(URIResolver):
             self.filesystem = FSSpecFileSystem(
                 protocol="abfs", storage_options=storage_options
             )
+        except ImportError:
+            raise
         except Exception as exc:
             raise PermissionError(
                 "AzureBlobResolver: failed to authenticate with Azure Blob Storage. "
