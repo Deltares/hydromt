@@ -17,7 +17,7 @@ __all__ = [
 ]
 
 # define hydromt uri resolver entry points
-# see also hydromt.uri_resolver group in pyproject.toml
+# see also hydromt.uri_resolvers group in pyproject.toml
 __hydromt_eps__ = [
     "AzureBlobResolver",
     "ConventionResolver",

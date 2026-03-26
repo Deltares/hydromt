@@ -43,12 +43,5 @@
     "sonarlint.connectedMode.project": {
         "connectionId": "deltares",
         "projectKey": "Deltares_hydromt"
-    },
-    "python-envs.pythonProjects": [
-        {
-            "path": ".",
-            "envManager": "renan-r-santos.pixi-code:pixi",
-            "packageManager": "renan-r-santos.pixi-code:pixi"
-        }
-    ]
+    }
 }

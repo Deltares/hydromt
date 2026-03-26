@@ -96,8 +96,8 @@ class AzureBlobResolver(URIResolver):
 
     **Time-templated URIs**
 
-    Placeholders ``{year}``, ``{month}``, ``{variable}`` are expanded using the
-    same ``_expand_uri_placeholders`` utility as ``ConventionResolver``.
+    Placeholders ``{year}``, ``{month}``, ``{day}``, ``{variable}`` are expanded
+    using the same ``_expand_uri_placeholders`` utility as ``ConventionResolver``.
 
     **ABFS to HTTPS conversion**
 
@@ -425,10 +425,12 @@ def _abfs_to_https(uri: str, account_name: str, sas_token: str) -> str:
     str
         HTTPS blob URL with the SAS token appended as a query string.
     """
-    if uri.startswith("abfs://"):
-        path = uri[len("abfs://") :]
+    scheme, path = split_protocol(uri)
+    # Handle ABFS URIs (case-insensitive scheme)
+    if scheme and scheme.lower() == "abfs":
         return f"https://{account_name}.blob.core.windows.net/{path}?{sas_token}"
-    if uri.startswith("https://") and "?" not in uri:
+    # Handle HTTPS URIs (case-insensitive scheme) that do not yet have a query string
+    if scheme and scheme.lower() == "https" and "?" not in uri:
         return f"{uri}?{sas_token}"
     return uri
 
