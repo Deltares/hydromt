@@ -26,4 +26,5 @@ Resolver Implementations
    :nosignatures:
 
    ConventionResolver
+   AzureBlobResolver
    RasterTindexResolver
