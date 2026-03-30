@@ -141,13 +141,8 @@ Use it when you need any of:
   ``abfs://`` scheme).
 
 
-When *not* to use it
-^^^^^^^^^^^^^^^^^^^^
-
-If you only have ``abfs://`` URIs and can pass credentials via the
-``filesystem:`` block (or environment variables), the simpler
-:ref:`generic approach <cloud_simple>` is sufficient and keeps your catalog
-entries provider-agnostic.
+See :ref:`choosing_resolver` for guidance on when the Convention Resolver is
+sufficient instead.
 
 
 Configuration
@@ -332,23 +327,18 @@ The AzureML SDK will look up the datastore, extract the underlying storage
 account and container, and build an ``abfs://`` path automatically.
 Authentication is handled via ``DefaultAzureCredential``.
 
-**HTTPS blob URL with explicit SAS token**
-
-.. code-block:: yaml
-
-   coastal_dem:
-     data_type: RasterDataset
-     uri: https://myaccount.blob.core.windows.net/public-data/dem/uk_2m.tif
-     driver:
-       name: rasterio
-     uri_resolver:
-       name: azure_blob
-       options:
-         sas_token: "sv=2022-11-02&ss=b&srt=co&sp=rl&se=..."
+For examples with explicit SAS tokens, see :ref:`azure_sas_quickstart`.
 
 
-Decision guide
---------------
+.. _choosing_resolver:
+
+Choosing between resolvers
+--------------------------
+
+Start with the Convention Resolver for simple, public, or
+environment-variable-authenticated ``abfs://`` access.  Switch to the Azure
+Blob Resolver the moment you need SAS tokens, non-``abfs://`` URIs, or
+GDAL/rasterio compatibility with private data.
 
 .. list-table::
    :widths: 55 22 23
@@ -381,3 +371,116 @@ Decision guide
    * - S3 or GCS data
      - **Yes**
      - No (Azure only)
+
+
+.. _azure_sas_quickstart:
+
+Step-by-step: accessing private Azure Blob Storage with a SAS token
+-------------------------------------------------------------------
+
+This section walks through the steps to access data stored in a **private**
+Azure storage account.  The workflow is: sign in to Azure, generate a SAS
+token with the required permissions, and reference that token in your data
+catalog.
+
+1 — Generate a SAS token
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A SAS (Shared Access Signature) token grants time-limited, scoped access to a
+container or blob.  You can create one from the Azure CLI, the Azure Portal,
+or Azure Storage Explorer.
+
+**Azure Portal**
+
+1. Navigate to **Storage accounts** → your storage account.
+2. Open **Containers** → select the container → **Shared access tokens**
+   (or use **Shared access signature** from the storage account menu for
+   account-level tokens).
+3. Set **Allowed permissions** to *Read* and *List*, choose an expiry
+   date/time, and click **Generate SAS token and URL**.
+4. Copy the **SAS token** value (starts with ``sp=`` or ``sv=``).
+
+
+2 — Add the SAS token to your data catalog
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Open your data catalog YAML file and add a source that uses the
+``azure_blob`` resolver.  Below are examples for each supported URI style.
+
+**``abfs://`` URI**
+
+.. code-block:: yaml
+
+   my_dataset:
+     data_type: RasterDataset
+     uri: abfs://<container>/<path-to-data>/*.tif
+     driver:
+       name: rasterio
+     uri_resolver:
+       name: azure_blob
+       options:
+         account_name: <storage-account-name>
+         sas_token: <paste-your-sas-token-here>
+
+**AzureML datastore URI**
+
+.. code-block:: yaml
+
+   my_dataset:
+     data_type: RasterDataset
+     uri: azureml://subscriptions/<sub-id>/resourcegroups/<rg>/workspaces/<ws>/datastores/<datastore>/paths/<path>.tif
+     driver:
+       name: rasterio
+     uri_resolver:
+       name: azure_blob
+       options:
+         sas_token: <paste-your-sas-token-here>
+
+**HTTPS blob URL**
+
+.. code-block:: yaml
+
+   my_dataset:
+     data_type: RasterDataset
+     uri: https://<account>.blob.core.windows.net/<container>/<path>.tif
+     driver:
+       name: rasterio
+     uri_resolver:
+       name: azure_blob
+       options:
+         sas_token: "<paste-your-sas-token-here>"
+
+With HTTPS blob URLs the ``account_name`` is extracted from the URL
+automatically, so you do not need to specify it separately.  You can also
+append the SAS token directly to the URL as a query string
+(``https://…/<path>.tif?sp=rl&st=…``) and omit the ``sas_token`` option.
+
+.. tip::
+
+   To keep credentials out of version control, set the
+   ``AZURE_STORAGE_SAS_TOKEN`` environment variable instead.  The resolver
+   picks it up automatically when no explicit ``sas_token`` is provided:
+
+   .. code-block:: bash
+
+      export AZURE_STORAGE_SAS_TOKEN="sp=rl&st=2026-03-30T09:00:00Z&se=..."
+
+   On Windows (PowerShell):
+
+   .. code-block:: powershell
+
+      $env:AZURE_STORAGE_SAS_TOKEN = "sp=rl&st=2026-03-30T09:00:00Z&se=..."
+
+
+3 — Verify access
+^^^^^^^^^^^^^^^^^^
+
+Test that HydroMT can read the data:
+
+.. code-block:: python
+
+   import hydromt
+
+   cat = hydromt.DataCatalog("path/to/my_catalog.yml")
+   ds = cat.get_rasterdataset("my_dataset")
+   print(ds)
