@@ -10,6 +10,10 @@ from hydromt.data_catalog.drivers.raster.rasterio_driver import (
     RasterioDriver,
     RasterioOptions,
 )
+from hydromt.data_catalog.drivers.raster.slippy_tile_driver import (
+    SlippyTileDriver,
+    SlippyTileOptions,
+)
 from hydromt.data_catalog.drivers.xarray_options import XarrayDriverOptions
 
 __all__ = [
@@ -18,4 +22,6 @@ __all__ = [
     "RasterioDriver",
     "XarrayDriverOptions",
     "RasterioOptions",
+    "SlippyTileDriver",
+    "SlippyTileOptions",
 ]
