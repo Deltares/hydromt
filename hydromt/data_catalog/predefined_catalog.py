@@ -160,7 +160,7 @@ class PredefinedCatalog(object):
             registry_path.unlink()
         try:  # try to retrieve and cache the registry file
             copy_to_local(f"{self.base_url}/registry.txt", registry_path)
-        except (ConnectionError, FileNotFoundError):
+        except ConnectionError, FileNotFoundError:
             logger.warning(
                 f"Failed to retrieve {self.name} versions file from {self.base_url}."
                 " Creating registry file from cached catalog files."
@@ -207,7 +207,7 @@ def _valid_key(v: str, format_version: Optional[str] = None) -> bool:
     try:
         packaging.version.parse(v.split("/")[0])
         return v.startswith(format_version) if format_version else True
-    except (packaging.version.InvalidVersion, AttributeError):
+    except packaging.version.InvalidVersion, AttributeError:
         return False
 
 
