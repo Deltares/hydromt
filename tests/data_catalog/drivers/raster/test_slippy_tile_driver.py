@@ -12,6 +12,7 @@ from PIL import Image
 from shapely.geometry import box
 
 from hydromt.data_catalog.drivers.raster.slippy_tile_driver import (
+    _HAS_BOTO3,
     SlippyTileDriver,
     SlippyTileOptions,
     _download_missing_tiles,
@@ -297,6 +298,7 @@ class TestS3Download:
         )
         assert result == 0
 
+    @pytest.mark.skipif(not _HAS_BOTO3, reason="boto3 not installed")
     @patch("hydromt.data_catalog.drivers.raster.slippy_tile_driver._HAS_BOTO3", True)
     @patch("hydromt.data_catalog.drivers.raster.slippy_tile_driver.boto3")
     def test_download_missing_tiles_downloads(self, mock_boto3, tmp_path):
@@ -309,11 +311,11 @@ class TestS3Download:
         assert result == 1
         mock_client.download_file.assert_called_once()
 
+    @pytest.mark.skipif(not _HAS_BOTO3, reason="boto3 not installed")
     @patch("hydromt.data_catalog.drivers.raster.slippy_tile_driver._HAS_BOTO3", True)
     @patch("hydromt.data_catalog.drivers.raster.slippy_tile_driver.boto3")
     def test_download_skips_existing_tiles(self, mock_boto3, tmp_path):
         """Tiles that already exist locally should not be downloaded."""
-        # Create the tile file so it already exists
         tile_path = tmp_path / "1" / "0"
         tile_path.mkdir(parents=True)
         (tile_path / "0.png").touch()
