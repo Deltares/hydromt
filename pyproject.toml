@@ -141,7 +141,7 @@ description = { file = "hydromt/__init__.py" }
 
 [tool.ruff]
 line-length = 88
-target-version = "py314"
+target-version = "py311"                        # keep as the lowest for backwards compatible changes.
 exclude = ["docs", "hydromt/model/__init__.py"]
 
 [tool.ruff.lint]
