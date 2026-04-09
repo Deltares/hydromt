@@ -8,6 +8,7 @@ import geopandas as gpd
 import pytest
 import xarray as xr
 import xugrid as xu
+from pyproj import CRS
 from pytest_mock import MockerFixture
 
 from hydromt.model import Model
@@ -44,10 +45,10 @@ def test_add_mesh_errors(mock_model, mocker: MockerFixture):
     data = xu.data.elevation_nl().to_dataset()
     with pytest.raises(ValueError, match="Data should have CRS."):
         mesh_component._add_mesh(data=data, grid_name="", overwrite_grid=False)
-    data.grid.crs = 28992
+    data.grid.crs = CRS.from_user_input(28992)
     mesh_component._data = data
     data4326 = xu.data.elevation_nl().to_dataset()
-    data4326.grid.crs = 4326
+    data4326.grid.crs = CRS.from_user_input(4326)
     with pytest.raises(ValueError, match="Data and Mesh should have the same CRS."):
         mesh_component._add_mesh(data=data4326, grid_name="", overwrite_grid=False)
     grid_name = "mesh2d"
@@ -87,10 +88,10 @@ def test_add_mesh_logging(
 def test_add_mesh(mock_model):
     mesh_component = MeshComponent(mock_model)
     data = xu.data.elevation_nl().to_dataset()
-    data.grid.crs = 28992
+    data.grid.crs = CRS.from_user_input(28992)
     mesh_component._data = data
     mesh_component._add_mesh(data=data, grid_name="", overwrite_grid=False)
-    assert mesh_component.crs == 28992
+    assert mesh_component.crs == CRS.from_user_input(28992)
     assert data.grid.name in mesh_component.mesh_names
 
 
@@ -115,7 +116,7 @@ def test_model_mesh_sets_correctly(tmp_path: Path):
     m.add_component("mesh", MeshComponent(m))
     component = cast(MeshComponent, m.mesh)
     uds = xu.data.elevation_nl().to_dataset()
-    uds.grid.crs = 28992
+    uds.grid.crs = CRS.from_user_input(28992)
     component.set(data=uds)
     assert component.data == uds
 
@@ -134,7 +135,7 @@ def test_write(mock_model, caplog: pytest.LogCaptureFixture, tmp_path: Path):
 
     mock_model.root.set(path=tmp_path, mode="w")
     write_path = "mesh/fake_mesh.nc"
-    mesh_component._data.grid.crs = 28992
+    mesh_component._data.grid.crs = CRS.from_user_input(28992)
     mesh_component.write(filename=write_path)
     file_path = tmp_path / write_path
     assert file_path.parent.is_dir()
@@ -149,13 +150,13 @@ def test_model_mesh_read_plus(tmp_path: Path):
     m = Model(root=tmp_path, mode="w")
     m.add_component("mesh", MeshComponent(m))
     data = xu.data.elevation_nl().to_dataset()
-    data.grid.crs = 28992
+    data.grid.crs = CRS.from_user_input(28992)
     cast(MeshComponent, m.mesh).set(data=data, grid_name="elevation_mesh")
     m.write()
     m2 = Model(root=tmp_path, mode="r+")
     m2.add_component("mesh", MeshComponent(m2))
     data = xu.data.elevation_nl().to_dataset()
-    data.grid.crs = 28992
+    data.grid.crs = CRS.from_user_input(28992)
     data = data.rename({"elevation": "elevation_v2"})
     mesh2_component = cast(MeshComponent, m2.mesh)
     mesh2_component.set(data=data, grid_name="elevation_mesh")
@@ -245,7 +246,7 @@ def test_model_mesh_workflow(tmp_path: Path):
     mesh._data = None
     # Test with sample data
     data = xu.data.elevation_nl().to_dataset()
-    data.grid.crs = 28992
+    data.grid.crs = CRS.from_user_input(28992)
     component.set(data=data, grid_name="elevation_mesh")
     assert "elevation_mesh" in component.mesh_names
     assert component.data == data
