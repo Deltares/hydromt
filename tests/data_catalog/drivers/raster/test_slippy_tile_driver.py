@@ -1,9 +1,7 @@
 """Tests for the SlippyTile raster driver."""
 
-import math
 import os
 from pathlib import Path
-from unittest.mock import MagicMock, patch
 
 import geopandas as gpd
 import numpy as np
@@ -24,7 +22,6 @@ from hydromt.data_catalog.drivers.raster.slippy_tile_driver import (
     _xy2num,
 )
 from hydromt.error import NoDataStrategy
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -197,14 +194,10 @@ class TestSlippyTileDriver:
     @pytest.fixture
     def mask_global(self):
         """Bounding box covering most of the world in EPSG:3857."""
-        return _make_mask_gdf(
-            -15000000, -15000000, 15000000, 15000000, crs=3857
-        )
+        return _make_mask_gdf(-15000000, -15000000, 15000000, 15000000, crs=3857)
 
     def test_read_returns_dataset(self, tile_dir, mask_global):
-        driver = SlippyTileDriver(
-            options=SlippyTileOptions(tile_size=4)
-        )
+        driver = SlippyTileDriver(options=SlippyTileOptions(tile_size=4))
         ds = driver.read([tile_dir], mask=mask_global, zoom=1)
         assert isinstance(ds, xr.Dataset)
         assert "elevation" in ds
@@ -218,17 +211,13 @@ class TestSlippyTileDriver:
         assert "elevation" not in ds
 
     def test_read_has_xy_coords(self, tile_dir, mask_global):
-        driver = SlippyTileDriver(
-            options=SlippyTileOptions(tile_size=4)
-        )
+        driver = SlippyTileDriver(options=SlippyTileOptions(tile_size=4))
         ds = driver.read([tile_dir], mask=mask_global, zoom=1)
         assert "x" in ds.coords
         assert "y" in ds.coords
 
     def test_read_crs_is_3857(self, tile_dir, mask_global):
-        driver = SlippyTileDriver(
-            options=SlippyTileOptions(tile_size=4)
-        )
+        driver = SlippyTileDriver(options=SlippyTileOptions(tile_size=4))
         ds = driver.read([tile_dir], mask=mask_global, zoom=1)
         assert ds.rio.crs.to_epsg() == 3857
 
@@ -241,9 +230,7 @@ class TestSlippyTileDriver:
         """Empty tile directory with RAISE strategy."""
         empty_dir = str(tmp_path / "empty")
         os.makedirs(os.path.join(empty_dir, "1", "0"), exist_ok=True)
-        driver = SlippyTileDriver(
-            options=SlippyTileOptions(tile_size=4, max_zoom=1)
-        )
+        driver = SlippyTileDriver(options=SlippyTileOptions(tile_size=4, max_zoom=1))
         with pytest.raises(IOError, match="No tiles found"):
             driver.read([empty_dir], mask=mask_global, zoom=1)
 
@@ -251,9 +238,7 @@ class TestSlippyTileDriver:
         """Empty tile directory with IGNORE strategy should warn, not raise."""
         empty_dir = str(tmp_path / "empty")
         os.makedirs(os.path.join(empty_dir, "1", "0"), exist_ok=True)
-        driver = SlippyTileDriver(
-            options=SlippyTileOptions(tile_size=4, max_zoom=1)
-        )
+        driver = SlippyTileDriver(options=SlippyTileOptions(tile_size=4, max_zoom=1))
         ds = driver.read(
             [empty_dir],
             mask=mask_global,
@@ -263,13 +248,9 @@ class TestSlippyTileDriver:
         assert isinstance(ds, xr.Dataset)
 
     def test_read_zoom_as_tuple(self, tile_dir, mask_global):
-        driver = SlippyTileDriver(
-            options=SlippyTileOptions(tile_size=4, max_zoom=1)
-        )
+        driver = SlippyTileDriver(options=SlippyTileOptions(tile_size=4, max_zoom=1))
         # Pass zoom as (resolution_in_metres, unit) — pick a value that resolves to zoom 1
-        ds = driver.read(
-            [tile_dir], mask=mask_global, zoom=(50000, "metre")
-        )
+        ds = driver.read([tile_dir], mask=mask_global, zoom=(50000, "metre"))
         assert isinstance(ds, xr.Dataset)
 
     def test_write_raises(self, tile_dir):
