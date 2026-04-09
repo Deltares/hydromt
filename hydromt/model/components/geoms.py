@@ -186,6 +186,7 @@ class GeomsComponent(SpatialModelComponent):
         filename: str | None = None,
         *,
         to_wgs84: bool = False,
+        precision: int | None = None,
         **kwargs,
     ) -> None:
         r"""Write model geometries to a vector file (by default GeoJSON) at <root>/<filename>.
@@ -201,6 +202,9 @@ class GeomsComponent(SpatialModelComponent):
             Can be a relative path.
         to_wgs84: bool, optional
             If True, the geoms will be reprojected to WGS84(EPSG:4326) before they are written.
+        precision: int, optional
+            The number of decimal places to use for the geometry coordinates. By default None.
+            If None, no rounding will be applied.
         **kwargs:
             Additional keyword arguments that are passed to the
             `geopandas.to_file` function.
@@ -212,6 +216,7 @@ class GeomsComponent(SpatialModelComponent):
                 f"{self.model.name}.{self.name_in_model}: No geoms data found, skip writing."
             )
             return
+
         placeholder_filename = str(filename or self._filename).replace("*", "{name}")
         for name, gdf in self.data.items():
             if len(gdf) == 0:
@@ -231,6 +236,12 @@ class GeomsComponent(SpatialModelComponent):
                 or write_path.suffix.lower() == ".geojson"
             ):
                 gdf.to_crs(epsg=4326, inplace=True)
+
+            if precision is not None:
+                grid_size = 10 ** (-precision)
+                gdf.geometry = gdf.geometry.set_precision(
+                    grid_size=grid_size,
+                )
 
             gdf.to_file(write_path, **kwargs)
 
@@ -254,12 +265,14 @@ class GeomsComponent(SpatialModelComponent):
         for name, gdf in self.data.items():
             if name not in other_geoms.data:
                 errors[name] = "Geom not found in other component."
+
             try:
                 assert_geodataframe_equal(
                     gdf,
                     other_geoms.data[name],
                     check_like=True,
                     check_less_precise=True,
+                    normalize=True,
                 )
             except AssertionError as e:
                 errors[name] = str(e)
