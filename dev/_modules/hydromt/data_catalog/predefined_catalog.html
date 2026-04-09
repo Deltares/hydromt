@@ -591,7 +591,7 @@
             <span class="n">registry_path</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>  <span class="c1"># try to retrieve and cache the registry file</span>
             <span class="n">copy_to_local</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_url</span><span class="si">}</span><span class="s2">/registry.txt&quot;</span><span class="p">,</span> <span class="n">registry_path</span><span class="p">)</span>
-        <span class="k">except</span> <span class="p">(</span><span class="ne">ConnectionError</span><span class="p">,</span> <span class="ne">FileNotFoundError</span><span class="p">):</span>
+        <span class="k">except</span> <span class="ne">ConnectionError</span><span class="p">,</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Failed to retrieve </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> versions file from </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_url</span><span class="si">}</span><span class="s2">.&quot;</span>
                 <span class="s2">&quot; Creating registry file from cached catalog files.&quot;</span>
@@ -642,7 +642,7 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">packaging</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">v</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">format_version</span><span class="p">)</span> <span class="k">if</span> <span class="n">format_version</span> <span class="k">else</span> <span class="kc">True</span>
-    <span class="k">except</span> <span class="p">(</span><span class="n">packaging</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">InvalidVersion</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+    <span class="k">except</span> <span class="n">packaging</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">InvalidVersion</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
 
 
