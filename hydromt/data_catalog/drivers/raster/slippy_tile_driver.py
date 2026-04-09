@@ -309,8 +309,12 @@ def _download_missing_tiles(
     if not to_download:
         return 0
 
-    logger.info(f"Downloading {len(to_download)} missing tiles from s3://{s3_bucket}/{s3_key}/ ...")
-    s3_client = boto3.client("s3", region_name=s3_region, config=BotoConfig(signature_version=UNSIGNED))
+    logger.info(
+        f"Downloading {len(to_download)} missing tiles from s3://{s3_bucket}/{s3_key}/ ..."
+    )
+    s3_client = boto3.client(
+        "s3", region_name=s3_region, config=BotoConfig(signature_version=UNSIGNED)
+    )
 
     downloaded = 0
     with ThreadPoolExecutor() as pool:
@@ -358,7 +362,9 @@ class SlippyTileOptions(DriverOptions):
     encoder: str = Field(default="terrarium", description="PNG encoding scheme")
     encoder_vmin: float = Field(default=0.0, description="Min value for float encoders")
     encoder_vmax: float = Field(default=1.0, description="Max value for float encoders")
-    max_zoom: Optional[int] = Field(default=None, description="Max available zoom level")
+    max_zoom: Optional[int] = Field(
+        default=None, description="Max available zoom level"
+    )
     variable_name: str = Field(default="elevation", description="Output variable name")
     tile_size: int = Field(default=256, description="Tile pixel size")
     s3_bucket: Optional[str] = Field(default=None, description="S3 bucket name")
@@ -434,9 +440,7 @@ class SlippyTileDriver(RasterDatasetDriver):
 
         # --- resolve bounding box in EPSG:3857 --------------------------------
         if mask is None:
-            raise ValueError(
-                "SlippyTileDriver requires a spatial mask (bounding box)."
-            )
+            raise ValueError("SlippyTileDriver requires a spatial mask (bounding box).")
         bbox_3857 = self._mask_to_bbox_3857(mask)
         xmin, ymin, xmax, ymax = bbox_3857
 
@@ -472,9 +476,7 @@ class SlippyTileDriver(RasterDatasetDriver):
         for i in range(ix0, ix1 + 1):
             itile = i % ntiles  # wrap around dateline
             for j in range(iy0, iy1 + 1):
-                png_file = os.path.join(
-                    tile_root, str(izoom), str(itile), f"{j}.png"
-                )
+                png_file = os.path.join(tile_root, str(izoom), str(itile), f"{j}.png")
                 if not os.path.exists(png_file):
                     continue
                 tile_data = _png2elevation(
@@ -495,8 +497,7 @@ class SlippyTileDriver(RasterDatasetDriver):
                     f"for bbox {bbox_3857}"
                 )
             logger.warning(
-                f"No tiles found in {tile_root} at zoom {izoom} "
-                f"for bbox {bbox_3857}"
+                f"No tiles found in {tile_root} at zoom {izoom} for bbox {bbox_3857}"
             )
 
         # --- compute coordinates ----------------------------------------------
