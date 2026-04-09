@@ -34,7 +34,7 @@ import math
 import os
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from typing import Any, ClassVar, List, Optional, Tuple, Union
+from typing import Any, ClassVar, List, Optional, Tuple
 
 import numpy as np
 import xarray as xr
@@ -82,7 +82,7 @@ def _get_zoom_level_for_resolution(dx: float) -> int:
         Zoom level (0-23).
     """
     dxy = _ZOOM0_PIXEL_SIZE / 2 ** np.arange(24)
-    izoom = np.where(dxy < dx)[0]
+    izoom = np.nonzero(dxy < dx)[0]
     if len(izoom) == 0:
         return 23
     return int(izoom[0])
@@ -165,7 +165,7 @@ def _num2xy(xtile: int, ytile: int, zoom: int) -> Tuple[float, float]:
 
 
 def _png2elevation(
-    png_file: Union[str, Path],
+    png_file: str | Path,
     encoder: str = "terrarium",
     encoder_vmin: float = 0.0,
     encoder_vmax: float = 1.0,
