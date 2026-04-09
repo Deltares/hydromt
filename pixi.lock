@@ -11436,7 +11436,7 @@ packages:
 - pypi: ./
   name: hydromt
   version: 1.4.0.dev0
-  sha256: 1a0f7b0b78d1c7db193d99e273a85e19231a7b85205c027ec003aaf3660a548b
+  sha256: 36589c8c102736fdaa09e3fe78c049fbbca8e40d6f230685bf2590ea54660a4b
   requires_dist:
   - affine
   - bottleneck
