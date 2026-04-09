@@ -252,7 +252,7 @@ class GeoDatasetSource(DataSource):
                 raise RuntimeError(
                     f"Unknown extension: {ext} cannot determine media type"
                 )
-        except IndexError, KeyError, CRSError:
+        except (IndexError, KeyError, CRSError):
             exec_nodata_strat(
                 f"Skipping {self.name} during stac conversion because detecting spacial extent failed.",
                 strategy=handle_nodata,
