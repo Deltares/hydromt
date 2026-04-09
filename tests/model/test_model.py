@@ -397,7 +397,7 @@ def test_setup_region_geom(grid_model, bbox):
     grid_model.grid.set(data=ds)
 
     gpd.testing.assert_geodataframe_equal(
-        bbox, grid_model.region, check_less_precise=True
+        bbox, grid_model.region, check_less_precise=True, normalize=True
     )
 
 
@@ -420,7 +420,7 @@ def test_setup_region_geom_catalog(grid_model, bbox, tmp_path: Path):
     grid_model.grid.set(data=ds)
 
     gpd.testing.assert_geodataframe_equal(
-        bbox, grid_model.region, check_less_precise=True
+        bbox, grid_model.region, check_less_precise=True, normalize=True
     )
 
 

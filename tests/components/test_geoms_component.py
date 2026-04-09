@@ -98,3 +98,32 @@ def test_model_write_geoms(tmp_path: Path):
     region_geom = gpd.read_file(write_path)
 
     assert region_geom.crs.to_epsg() == 3857
+
+
+def test_model_write_geoms_precision_wgs84(tmp_path: Path):
+    model = Model(root=tmp_path, mode="w")
+    geom_component = GeomsComponent(model, region_component="foo")
+    model.add_component("geom", geom_component)
+    coords = [4.221067, 51.949474, 4.471006, 52.073727]
+    precision = 2
+    bbox = box(*coords, ccw=True)
+    geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
+    geom.to_crs(3857, inplace=True)
+    assert geom.crs.to_epsg() == 3857
+
+    write_path = tmp_path / "geoms" / "test_geom.geojson"
+    geom_component.set(geom, "test_geom")
+    geom_component.write(
+        precision=precision,
+        to_wgs84=True,
+    )
+
+    written_geom = gpd.read_file(write_path)
+    assert written_geom.crs.to_epsg() == 4326
+
+    # assert that the coordinates are rounded to 2 decimal places
+    written_geom_coords = written_geom.geometry.iloc[0].bounds
+    for coord in written_geom_coords:
+        assert round(coord, precision) == coord, (
+            f"Coordinate {coord} is not rounded to {precision} decimal places."
+        )
