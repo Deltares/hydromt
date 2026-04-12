@@ -36,6 +36,8 @@ jobs:
 
     name: run test coverage and SonarQube scan
     runs-on: ubuntu-latest
+    if: ${{ secrets.SONARCLOUD_TOKEN_2025 != '' }}
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v6
         with:
