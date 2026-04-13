@@ -11436,7 +11436,7 @@ packages:
 - pypi: ./
   name: hydromt
   version: 1.4.0.dev0
-  sha256: 36589c8c102736fdaa09e3fe78c049fbbca8e40d6f230685bf2590ea54660a4b
+  sha256: 9b88e704b1d84819a1bb861a595dd10ac1ab69d56ce0f302402eafee53463719
   requires_dist:
   - affine
   - bottleneck
@@ -11486,7 +11486,7 @@ packages:
   - types-xmltodict ; extra == 'dev'
   - hydromt[examples,extra] ; extra == 'doc'
   - nbsphinx ; extra == 'doc'
-  - pydata-sphinx-theme>=0.15.2 ; extra == 'doc'
+  - pydata-sphinx-theme>=0.17.0 ; extra == 'doc'
   - sphinx-autosummary-accessors ; extra == 'doc'
   - sphinx<9 ; extra == 'doc'
   - sphinx-design ; extra == 'doc'
