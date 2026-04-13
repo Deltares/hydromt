@@ -2,6 +2,7 @@
 
 import geopandas as gpd
 import numpy as np
+import pandas as pd
 import pytest
 from shapely.geometry import LineString, MultiPolygon, Point, Polygon
 
@@ -145,6 +146,13 @@ def gdf_mixed() -> gpd.GeoDataFrame:
 class TestNearestMergeBasic:
     """Basic merge behaviour."""
 
+    def test_returns_gdf_with_correct_crs(
+        self, gdf_points: gpd.GeoDataFrame, gdf_targets: gpd.GeoDataFrame
+    ):
+        result = vector_utils.nearest_merge(gdf_points, gdf_targets)
+        assert isinstance(result, gpd.GeoDataFrame)
+        assert result.crs == gdf_points.crs
+
     def test_returns_geodataframe(
         self, gdf_points: gpd.GeoDataFrame, gdf_targets: gpd.GeoDataFrame
     ):
@@ -225,7 +233,7 @@ class TestNearestMergeMaxDist:
         self, gdf_points: gpd.GeoDataFrame, gdf_targets: gpd.GeoDataFrame
     ):
         result = vector_utils.nearest_merge(gdf_points, gdf_targets)
-        assert np.all(result["index_right"] != -1)
+        assert result["index_right"].notna().all()
 
     def test_max_dist_filters_far_features(
         self, gdf_points: gpd.GeoDataFrame, gdf_far_targets: gpd.GeoDataFrame
@@ -234,13 +242,13 @@ class TestNearestMergeMaxDist:
         # The first two points should match (close), but the third shouldn't
         close_mask = result["distance_right"] < 1.0
         assert close_mask.sum() == 2
-        assert np.all(result.loc[~close_mask, "index_right"] == -1)
+        assert result.loc[~close_mask, "index_right"].isna().all()
 
     def test_max_dist_zero_filters_everything(
         self, gdf_points: gpd.GeoDataFrame, gdf_targets: gpd.GeoDataFrame
     ):
         result = vector_utils.nearest_merge(gdf_points, gdf_targets, max_dist=0.0)
-        assert np.all(result["index_right"] == -1)
+        assert result["index_right"].isna().all()
 
 
 class TestNearestMergeOverwrite:
@@ -307,7 +315,7 @@ class TestNearestMergeIndexRight:
         self, gdf_points: gpd.GeoDataFrame, gdf_targets: gpd.GeoDataFrame
     ):
         result = vector_utils.nearest_merge(gdf_points, gdf_targets)
-        valid = result["index_right"] != -1
+        valid = result["index_right"].notna()
         # Every index_right value should be a valid gdf2 index
         for idx in result.loc[valid, "index_right"]:
             assert idx in gdf_targets.index.values
@@ -353,14 +361,14 @@ class TestNearestMergeGeometryTypes:
         self, gdf_polys: gpd.GeoDataFrame, gdf_far_target: gpd.GeoDataFrame
     ):
         result = vector_utils.nearest_merge(gdf_polys, gdf_far_target, max_dist=1.0)
-        assert np.all(result["index_right"] == -1)
+        assert result["index_right"].isna().all()
 
     def test_multipolygon_merge(
         self, gdf_multipolygon: gpd.GeoDataFrame, gdf_targets: gpd.GeoDataFrame
     ):
         result = vector_utils.nearest_merge(gdf_multipolygon, gdf_targets)
         assert "distance_right" in result.columns
-        assert result.loc[0, "index_right"] != -1
+        assert pd.notna(result.loc[0, "index_right"])
 
     def test_mixed_geometry_raises(
         self, gdf_mixed: gpd.GeoDataFrame, gdf_targets: gpd.GeoDataFrame

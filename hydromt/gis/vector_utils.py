@@ -62,7 +62,7 @@ def nearest_merge(
     valid = dst < max_dist if max_dist is not None else np.ones_like(idx_nn, dtype=bool)
     columns = gdf2.columns if columns is None else columns
     gdf1["distance_right"] = dst
-    gdf1["index_right"] = -1
+    gdf1["index_right"] = None
     gdf1.loc[valid, "index_right"] = idx_nn[valid]
     skip = ["geometry"]
     for col in columns:
