@@ -11436,7 +11436,7 @@ packages:
 - pypi: ./
   name: hydromt
   version: 1.4.0.dev0
-  sha256: 36589c8c102736fdaa09e3fe78c049fbbca8e40d6f230685bf2590ea54660a4b
+  sha256: b7d0d1d0c2e9c02ac96bb4ccff0c325f4e4467b7446d943a3f7638357cea1970
   requires_dist:
   - affine
   - bottleneck
@@ -11464,7 +11464,7 @@ packages:
   - requests
   - rioxarray
   - scipy
-  - shapely>=2.1.0
+  - shapely>=2.1.2
   - tomli
   - tomli-w
   - universal-pathlib>=0.2
