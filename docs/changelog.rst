@@ -22,6 +22,7 @@ Changed
 Fixed
 -----
 - properly log unhandled errors to ``hydromt.log`` (#1399)
+- ``gis.vector_utils.nearest_merge`` now correctly respects ``max_dist`` filtering and ``overwrite`` flag when merging columns. (#1414)
 
 Deprecated
 ----------

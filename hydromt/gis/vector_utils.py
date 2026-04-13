@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional, Tuple
+from typing import Tuple
 
 import geopandas as gpd
 import numpy as np
@@ -26,8 +26,8 @@ def nearest_merge(
     gdf1: gpd.GeoDataFrame,
     gdf2: gpd.GeoDataFrame,
     *,
-    columns: Optional[list] = None,
-    max_dist: Optional[float] = None,
+    columns: list | None = None,
+    max_dist: float | None = None,
     overwrite: bool = False,
     inplace: bool = False,
 ) -> gpd.GeoDataFrame:
@@ -56,32 +56,33 @@ def nearest_merge(
     gpd.GeoDataFrame
         Merged GeoDataFrames
     """
-    # Get nearest index right
     idx_nn, dst = nearest(gdf1, gdf2)
     if not inplace:
         gdf1 = gdf1.copy()
     valid = dst < max_dist if max_dist is not None else np.ones_like(idx_nn, dtype=bool)
-    # gdf2 column selection
     columns = gdf2.columns if columns is None else columns
-    for c in columns:
-        if c not in gdf2.columns:
-            logger.warning(f"Column {c} not in gdf2, skipping.")
-            columns.remove(c)
-
     gdf1["distance_right"] = dst
-    gdf1["index_right"] = -1
+    gdf1["index_right"] = None
     gdf1.loc[valid, "index_right"] = idx_nn[valid]
 
-    if not overwrite:
-        new_cols = [c for c in columns if c not in gdf1.columns]
-        gdf1.loc[:, new_cols] = np.nan
-        return gdf1.combine_first(gdf2)
-    else:
-        # Keep only columns selection in gdf2 before join
-        gdf2 = gdf2[columns]
-        # Keep only left only columns in gdf1 before join
-        left_only_cols = [c for c in gdf1.columns if c not in gdf2.columns]
-        return gdf1[:, left_only_cols].join(gdf2, join="left")
+    missing_columns = [col for col in columns if col not in gdf2]
+    if missing_columns:
+        logger.warning(
+            f"Columns: '{', '.join(missing_columns)}' are not found in gdf2 and will be skipped."
+        )
+        columns = [col for col in columns if col in gdf2]
+
+    for col in columns:
+        if col == "geometry":
+            continue
+        new_vals = gdf2.loc[idx_nn[valid], col].values
+        if col in gdf1 and not overwrite:
+            old_vals = gdf1.loc[valid, col]
+            replace = np.logical_or(old_vals.isnull(), old_vals.eq(""))
+            new_vals = np.where(replace, new_vals, old_vals)
+        gdf1.loc[valid, col] = new_vals
+
+    return gdf1
 
 
 def nearest(
