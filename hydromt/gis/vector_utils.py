@@ -64,11 +64,16 @@ def nearest_merge(
     gdf1["distance_right"] = dst
     gdf1["index_right"] = None
     gdf1.loc[valid, "index_right"] = idx_nn[valid]
-    skip = ["geometry"]
+
+    missing_columns = [col for col in columns if col not in gdf2]
+    if missing_columns:
+        logger.warning(
+            f"Columns: '{', '.join(missing_columns)}' are not found in gdf2 and will be skipped."
+        )
+        columns = [col for col in columns if col in gdf2]
+
     for col in columns:
-        if col in skip or col not in gdf2:
-            if col not in gdf2:
-                logger.warning(f"Column {col} not found in gdf2 and skipped.")
+        if col == "geometry":
             continue
         new_vals = gdf2.loc[idx_nn[valid], col].values
         if col in gdf1 and not overwrite:
