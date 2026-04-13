@@ -11436,7 +11436,7 @@ packages:
 - pypi: ./
   name: hydromt
   version: 1.4.0.dev0
-  sha256: 36589c8c102736fdaa09e3fe78c049fbbca8e40d6f230685bf2590ea54660a4b
+  sha256: b8d83668bf31e2c4afc4c5c14f4f7fa2e4b798128345cb2e41c7bd55d76496f6
   requires_dist:
   - affine
   - bottleneck
@@ -11470,7 +11470,7 @@ packages:
   - universal-pathlib>=0.2
   - xarray
   - xmltodict
-  - xugrid>=0.9.0
+  - xugrid>=0.15.1
   - zarr>=3.1,<4
   - flit ; extra == 'dev'
   - mypy ; extra == 'dev'
