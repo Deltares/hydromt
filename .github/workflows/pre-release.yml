@@ -7,7 +7,6 @@ on:
       description:
         description: "Description for this pre-release"
         required: true
-        default: "test pre-release"
         type: string
 
 permissions:
