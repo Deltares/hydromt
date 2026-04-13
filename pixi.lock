@@ -11430,7 +11430,7 @@ packages:
 - pypi: ./
   name: hydromt
   version: 1.4.0.dev0
-  sha256: 8d076c2b87da84e6b0cb4bfe2f18d9f3896f3d72395c2133af354ab037be2216
+  sha256: 8f51906ab8410e34fc63eb1b6d3ada8337bffc3ed67b1c9f713d2839ab66bb35
   requires_dist:
   - affine
   - bottleneck
@@ -11449,7 +11449,7 @@ packages:
   - pyarrow
   - pydantic~=2.4
   - pydantic-settings~=2.2
-  - pyflwdir>=0.5.4
+  - pyflwdir>=0.5.10
   - pyogrio>=0.6
   - pyproj
   - pystac
