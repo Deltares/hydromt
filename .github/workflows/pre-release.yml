@@ -2,10 +2,6 @@ name: Pre-release
 description: Create a pre-release from any branch, publish it to pypi and GitHub to allow for easier testing.
 
 on:
-  # TODO: remove push trigger before merging to main
-  push:
-    branches:
-      - feat/add-prerelease-workflow
   workflow_dispatch:
     inputs:
       description:
