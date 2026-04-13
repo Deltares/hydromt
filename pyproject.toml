@@ -27,7 +27,7 @@ dependencies = [
 	"pyarrow",                # Apache Arrow bindings
 	"pydantic~=2.4",          # Validation
 	"pydantic-settings~=2.2", # Settings Management
-	"pyflwdir>=0.5.4",        # Hight models and derivatives
+	"pyflwdir>=0.5.10",        # Hight models and derivatives
 	"pyogrio>=0.6",           # io for geopandas dataframes
 	"pyproj",                 # projections for Coordinate reference systems
 	"pystac",                 # STAC integration
@@ -36,7 +36,7 @@ dependencies = [
 	"requests",               # donwload stuff
 	"rioxarray",              # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
 	"scipy",                  # scientific utilities
-	"shapely>=2.1.0",         # geometry transforms
+	"shapely>=2.1.2",         # geometry transforms
 	"tomli",                  # parsing toml files
 	"tomli-w",                # writing toml files
 	"universal_pathlib>=0.2", # provides path compatability between different filesystems
@@ -91,7 +91,7 @@ dev = [
 	"types-xmltodict", # type hints for xmltodict
 ]
 test = [
-	"pytest>=8",      # testing framework
+	"pytest>=9.0.3",      # testing framework
 	"pytest-cov",     # test coverage
 	"pytest-mock",    # mocking
 	"pytest-timeout", # darn hanging tests
