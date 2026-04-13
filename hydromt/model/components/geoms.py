@@ -171,7 +171,7 @@ class GeomsComponent(SpatialModelComponent):
         # Verify if a geom is set to model crs and if not sets geom to model crs
         model_crs = self.model.crs or self.crs
         if model_crs and model_crs != geom.crs:
-            logger.error(
+            logger.debug(
                 f"Reprojecting geom {name} from {geom.crs.to_epsg()} to model CRS {model_crs.to_epsg()}."
             )
             geom.to_crs(model_crs.to_epsg(), inplace=True)
@@ -182,7 +182,7 @@ class GeomsComponent(SpatialModelComponent):
         resolved_precision = self._resolve_precision(precision, geom.crs)
         if resolved_precision is not None:
             grid_size = 10 ** (-resolved_precision)
-            logger.error(
+            logger.debug(
                 f"Setting precision of geom {name} to {resolved_precision} decimals."
             )
             geom.geometry = geom.geometry.set_precision(grid_size=grid_size)
