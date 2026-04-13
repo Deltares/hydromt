@@ -23,6 +23,7 @@ Changed
 Fixed
 -----
 - Properly log unhandled errors to ``hydromt.log`` (#1399)
+- ``gis.vector_utils.nearest_merge`` now correctly respects ``max_dist`` filtering and ``overwrite`` flag when merging columns. (#1414)
 - Normalize geometries before comparing them in ``test_equal`` for ``SpatialModelComponent``, ``GeomsComponent`` and ``VectorComponent`` (#1415)
 
 Deprecated
