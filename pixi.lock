@@ -11436,7 +11436,7 @@ packages:
 - pypi: ./
   name: hydromt
   version: 1.4.0.dev0
-  sha256: 36589c8c102736fdaa09e3fe78c049fbbca8e40d6f230685bf2590ea54660a4b
+  sha256: 5f9b1d207725342a7c99bb958918f97a56172be19573f29ee195558df902eedb
   requires_dist:
   - affine
   - bottleneck
@@ -11504,7 +11504,7 @@ packages:
   - pillow ; extra == 'io'
   - s3fs ; extra == 'io'
   - hydromt[io,extra,examples] ; extra == 'slim'
-  - pytest>=8 ; extra == 'test'
+  - pytest>=9.0.3 ; extra == 'test'
   - pytest-cov ; extra == 'test'
   - pytest-mock ; extra == 'test'
   - pytest-timeout ; extra == 'test'
