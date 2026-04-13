@@ -99,7 +99,7 @@ test = [
 doc = [
 	"hydromt[examples,extra]",      # examples are included in the docs
 	"nbsphinx",                     # build notebooks in docs
-	"pydata-sphinx-theme>=0.15.2",  # theme
+	"pydata-sphinx-theme>=0.17.0",  # theme
 	"sphinx_autosummary_accessors", # doc layout
 	"sphinx<9",                     # build docs, v9 is not compatible with sphinx_autosummary_accessors: https://github.com/xarray-contrib/sphinx-autosummary-accessors/issues/165
 	"sphinx_design",                # doc layout
