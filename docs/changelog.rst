@@ -14,7 +14,7 @@ Unreleased
 New
 ---
 - Added earthdatahub_data predefined catalog for accessing ERA5_land, ERA5_land_hourly, ERA5_ocean (#1357).
-- Added ``precision`` parameter to ``GeomsComponent.write`` to set the number of decimals used when writing (#1415)
+- Added ``precision`` parameter to ``GeomsComponent.set`` to set the number of decimals used when writing (#1415)
 
 Changed
 -------
