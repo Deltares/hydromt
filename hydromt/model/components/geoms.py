@@ -51,6 +51,7 @@ class GeomsComponent(SpatialModelComponent):
             ``geoms/geoms_region.geojson``.
         """
         self._data: dict[str, GeoDataFrame | GeoSeries] = None
+        self._precision: dict[str, int | None] = {}
         self._filename: str = filename
         super().__init__(
             model=model,
@@ -127,7 +128,24 @@ class GeomsComponent(SpatialModelComponent):
         union_geom = gpd.GeoSeries(all_geoms, crs=self.crs).union_all()
         return gpd.GeoDataFrame(geometry=[union_geom], crs=self.crs)
 
-    def set(self, geom: GeoDataFrame | GeoSeries, name: str):
+    @staticmethod
+    def _resolve_precision(precision: int | None, crs: CRS | None) -> int | None:
+        """Resolve precision value based on CRS.
+
+        Returns the resolved precision as a positive int, or None if no rounding.
+        """
+        if precision is None:
+            return None
+        if precision < 0:
+            if crs is not None and crs.is_geographic:
+                return 6  # ~0.1m precision for lat/lon
+            else:
+                return 1  # default to 1 decimal for projected CRS
+        return precision
+
+    def set(
+        self, geom: GeoDataFrame | GeoSeries, name: str, precision: int | None = -1
+    ) -> None:
         """Add data to the geom component.
 
         Arguments
@@ -136,6 +154,10 @@ class GeomsComponent(SpatialModelComponent):
             New geometry data to add
         name: str
             Geometry name.
+        precision: int, optional
+            The number of decimal places to use for the geometry coordinates. By default -1.
+            If negative, the crs will be used to determine the number of decimals.
+            If None, no rounding will be applied.
         """
         self._initialize()
         assert self._data is not None
@@ -145,10 +167,26 @@ class GeomsComponent(SpatialModelComponent):
         if isinstance(geom, GeoSeries):
             geom = cast(GeoDataFrame, geom.to_frame())
 
+        geom = geom.copy()  # avoid modifying the original gdf
         # Verify if a geom is set to model crs and if not sets geom to model crs
         model_crs = self.model.crs or self.crs
         if model_crs and model_crs != geom.crs:
+            logger.error(
+                f"Reprojecting geom {name} from {geom.crs.to_epsg()} to model CRS {model_crs.to_epsg()}."
+            )
             geom.to_crs(model_crs.to_epsg(), inplace=True)
+
+        # Store the original precision value so write() can resolve it
+        self._precision[name] = precision
+
+        resolved_precision = self._resolve_precision(precision, geom.crs)
+        if resolved_precision is not None:
+            grid_size = 10 ** (-resolved_precision)
+            logger.error(
+                f"Setting precision of geom {name} to {resolved_precision} decimals."
+            )
+            geom.geometry = geom.geometry.set_precision(grid_size=grid_size)
+
         self._data[name] = geom
 
     @hydromt_step
@@ -178,7 +216,7 @@ class GeomsComponent(SpatialModelComponent):
         ).items():
             geom = cast(GeoDataFrame, gpd.read_file(path, **kwargs))
             logger.debug(f"Reading model file {name} at {path}.")
-            self.set(geom=geom, name=name)
+            self.set(geom=geom, name=name, precision=None)
 
     @hydromt_step
     def write(
@@ -186,7 +224,6 @@ class GeomsComponent(SpatialModelComponent):
         filename: str | None = None,
         *,
         to_wgs84: bool = False,
-        precision: int | None = None,
         **kwargs,
     ) -> None:
         r"""Write model geometries to a vector file (by default GeoJSON) at <root>/<filename>.
@@ -202,9 +239,6 @@ class GeomsComponent(SpatialModelComponent):
             Can be a relative path.
         to_wgs84: bool, optional
             If True, the geoms will be reprojected to WGS84(EPSG:4326) before they are written.
-        precision: int, optional
-            The number of decimal places to use for the geometry coordinates. By default None.
-            If None, no rounding will be applied.
         **kwargs:
             Additional keyword arguments that are passed to the
             `geopandas.to_file` function.
@@ -224,7 +258,6 @@ class GeomsComponent(SpatialModelComponent):
                     f"{self.model.name}.{self.name_in_model}: {name} is empty. Skipping..."
                 )
                 continue
-
             write_path = self.root.path / placeholder_filename.format(name=name)
             write_path.parent.mkdir(parents=True, exist_ok=True)
             logger.info(
@@ -235,15 +268,20 @@ class GeomsComponent(SpatialModelComponent):
                 kwargs.get("driver") == "GeoJSON"
                 or write_path.suffix.lower() == ".geojson"
             ):
-                gdf.to_crs(epsg=4326, inplace=True)
+                _gdf = gdf.copy()  # avoid modifying the original gdf
+                _gdf.to_crs(epsg=4326, inplace=True)
 
-            if precision is not None:
-                grid_size = 10 ** (-precision)
-                gdf.geometry = gdf.geometry.set_precision(
-                    grid_size=grid_size,
+                # reapply precision after CRS conversion
+                resolved_precision = self._resolve_precision(
+                    self._precision.get(name), _gdf.crs
                 )
+                if resolved_precision is not None:
+                    grid_size = 10 ** (-resolved_precision)
+                    _gdf.geometry = _gdf.geometry.set_precision(grid_size=grid_size)
+            else:
+                _gdf = gdf
 
-            gdf.to_file(write_path, **kwargs)
+            _gdf.to_file(write_path, **kwargs)
 
     def test_equal(self, other: ModelComponent) -> tuple[bool, dict[str, str]]:
         """Test if two GeomsComponents are equal.

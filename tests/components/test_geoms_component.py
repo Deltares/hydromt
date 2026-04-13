@@ -24,7 +24,8 @@ def test_model_set_geoms(tmp_path: Path):
     geom_component.set(geom, "geom_wgs84")
 
     assert list(geom_component.data.keys()) == ["geom_wgs84"]
-    assert list(geom_component.data.values())[0].equals(geom)
+    component_geom = list(geom_component.data.values())[0]
+    assert component_geom.geometry.iloc[0].equals(geom.geometry.iloc[0])
     expected_bounds = np.array([bbox_list])
     assert np.allclose(geom_component._region_data.bounds.values, expected_bounds)
 
@@ -71,7 +72,7 @@ def test_model_write_geoms_wgs84_with_model_crs(tmp_path: Path, mocker: MockerFi
     model = FakeModel()
 
     geom_component = cast(GeomsComponent, model.test_geom)
-    geom_component.set(geom_4326, "test_geom")
+    geom_component.set(geom_4326, "test_geom", precision=None)
 
     assert geom_component.data["test_geom"].equals(geom_3857)
     write_path = tmp_path / "geoms" / "test_geom.geojson"
@@ -112,11 +113,8 @@ def test_model_write_geoms_precision_wgs84(tmp_path: Path):
     assert geom.crs.to_epsg() == 3857
 
     write_path = tmp_path / "geoms" / "test_geom.geojson"
-    geom_component.set(geom, "test_geom")
-    geom_component.write(
-        precision=precision,
-        to_wgs84=True,
-    )
+    geom_component.set(geom, "test_geom", precision=precision)
+    geom_component.write(to_wgs84=True)
 
     written_geom = gpd.read_file(write_path)
     assert written_geom.crs.to_epsg() == 4326
