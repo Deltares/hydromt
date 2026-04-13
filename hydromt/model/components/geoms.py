@@ -144,7 +144,12 @@ class GeomsComponent(SpatialModelComponent):
         return precision
 
     def set(
-        self, geom: GeoDataFrame | GeoSeries, name: str, precision: int | None = -1
+        self,
+        geom: GeoDataFrame | GeoSeries,
+        name: str,
+        precision: int | None = -1,
+        *,
+        _apply_precision: bool = True,
     ) -> None:
         """Add data to the geom component.
 
@@ -156,8 +161,11 @@ class GeomsComponent(SpatialModelComponent):
             Geometry name.
         precision: int, optional
             The number of decimal places to use for the geometry coordinates. By default -1.
-            If negative, the crs will be used to determine the number of decimals.
+            If negative, the crs will be used to determine the number of decimals, where
+            geographic crs will get a higher precision than projected crs.
+            If a positive integer is provided, that number of decimals will be used.
             If None, no rounding will be applied.
+            Only used if _apply_precision is True.
         """
         self._initialize()
         assert self._data is not None
@@ -176,16 +184,17 @@ class GeomsComponent(SpatialModelComponent):
             )
             geom.to_crs(model_crs.to_epsg(), inplace=True)
 
-        # Store the original precision value so write() can resolve it
-        self._precision[name] = precision
+        if _apply_precision:
+            # Store the original precision value so write() can resolve it
+            self._precision[name] = precision
 
-        resolved_precision = self._resolve_precision(precision, geom.crs)
-        if resolved_precision is not None:
-            grid_size = 10 ** (-resolved_precision)
-            logger.debug(
-                f"Setting precision of geom {name} to {resolved_precision} decimals."
-            )
-            geom.geometry = geom.geometry.set_precision(grid_size=grid_size)
+            resolved_precision = self._resolve_precision(precision, geom.crs)
+            if resolved_precision is not None:
+                grid_size = 10 ** (-resolved_precision)
+                logger.debug(
+                    f"Setting precision of geom {name} to {resolved_precision} decimals."
+                )
+                geom.geometry = geom.geometry.set_precision(grid_size=grid_size)
 
         self._data[name] = geom
 
@@ -216,7 +225,7 @@ class GeomsComponent(SpatialModelComponent):
         ).items():
             geom = cast(GeoDataFrame, gpd.read_file(path, **kwargs))
             logger.debug(f"Reading model file {name} at {path}.")
-            self.set(geom=geom, name=name, precision=None)
+            self.set(geom=geom, name=name, _apply_precision=False)
 
     @hydromt_step
     def write(
