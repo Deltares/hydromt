@@ -299,6 +299,12 @@ class TestS3Download:
         assert result == 0
 
     @patch("hydromt.data_catalog.drivers.raster.slippy_tile_driver._HAS_BOTO3", True)
+    @patch(
+        "hydromt.data_catalog.drivers.raster.slippy_tile_driver.UNSIGNED", "UNSIGNED"
+    )
+    @patch(
+        "hydromt.data_catalog.drivers.raster.slippy_tile_driver.BotoConfig", MagicMock()
+    )
     @patch("hydromt.data_catalog.drivers.raster.slippy_tile_driver.boto3")
     def test_download_missing_tiles_downloads(self, mock_boto3, tmp_path):
         """Missing tiles should be downloaded."""
@@ -311,6 +317,12 @@ class TestS3Download:
         mock_client.download_file.assert_called_once()
 
     @patch("hydromt.data_catalog.drivers.raster.slippy_tile_driver._HAS_BOTO3", True)
+    @patch(
+        "hydromt.data_catalog.drivers.raster.slippy_tile_driver.UNSIGNED", "UNSIGNED"
+    )
+    @patch(
+        "hydromt.data_catalog.drivers.raster.slippy_tile_driver.BotoConfig", MagicMock()
+    )
     @patch("hydromt.data_catalog.drivers.raster.slippy_tile_driver.boto3")
     def test_download_skips_existing_tiles(self, mock_boto3, tmp_path):
         """Tiles that already exist locally should not be downloaded."""
