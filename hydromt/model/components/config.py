@@ -340,28 +340,36 @@ class ConfigComponent(ModelComponent):
         """
         eq, errors = super().test_equal(other)
         if not eq:
-            return eq, {"config": errors}
+            return eq, errors
         other_config = cast(ConfigComponent, other)
 
         # not enough details in python recursion
-        errors.update(**_check_equal(self.data, other_config.data, "config"))
-        return len(errors) == 0, {"config": errors}
+        config_errors = _check_equal(self.data, other_config.data, "config")
+        return len(config_errors) == 0, config_errors
 
 
-def _check_equal(a: Any, b: Any, name: str = "") -> dict[str, str]:
+def _check_equal(a: Any, b: Any, name: str = "") -> dict[str, Any]:
     """Recursive test of model components.
 
     Returns dict with component name and associated error message.
     """
     errors = {}
-    try:
-        assert isinstance(b, type(a)), "property types do not match"
-        if isinstance(a, dict):
-            for key in a:
-                assert key in b, f"{key} missing"
-                errors.update(**_check_equal(a[key], b[key], f"{name}.{key}"))
-        else:
-            assert a == b, "values not equal"
-    except AssertionError as e:
-        errors.update({name: str(e)})
+    if not isinstance(b, type(a)):
+        errors[name] = "property types do not match"
+        return errors
+
+    if isinstance(a, dict):
+        all_keys = a.keys() | b.keys()
+        for key in all_keys:
+            child_name = f"{name}.{key}"
+            if key not in a:
+                errors[child_name] = f"{key} missing from self"
+            elif key not in b:
+                errors[child_name] = f"{key} missing from other"
+            else:
+                errors.update(_check_equal(a[key], b[key], child_name))
+    else:
+        if a != b:
+            errors[name] = "values not equal"
+
     return errors
