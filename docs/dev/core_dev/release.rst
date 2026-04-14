@@ -1,3 +1,38 @@
+.. _create_pre_release:
+
+Creating a pre-release
+----------------------
+
+A pre-release allows you to publish a timestamped development build from any branch to PyPI and GitHub,
+making it easy to share and test changes before a full release.
+
+1. Go to the `actions` tab on GitHub, select `Pre-release` from the actions list on the left, then use
+   the `Run workflow` button.
+2. You will be prompted to enter a **description** for the pre-release (e.g. ``"Fix broken reader API"``
+   or ``"amazing untested feature"``). This description appears in the GitHub release title and body.
+3. The workflow will automatically compute a version number of the form
+   ``<BASE_VERSION>.dev<TIMESTAMP>`` (for example ``1.2.3.dev20260414153000``), set it in the source,
+   and build the package.
+4. The built artifacts are uploaded to the repository's internal artifact cache and published to PyPI.
+   Anyone can then install the pre-release with::
+
+       pip install hydromt==<PRE_VERSION>
+
+   The exact install command is shown in the body of the GitHub release that is created automatically.
+5. A GitHub pre-release is created and tagged as ``v<PRE_VERSION>``, linked to the commit on the branch
+   you ran the workflow from.
+
+.. note::
+   Pre-releases are built from whatever branch you select when running the workflow — they are not
+   restricted to ``main`` or ``release/*`` branches. This makes them suitable for sharing in-progress
+   work or testing a hotfix branch before it is merged.
+
+.. warning::
+   Pre-release versions are marked as pre-releases on GitHub and are not promoted as the latest
+   stable release. They are intended for testing purposes only. Do not use a pre-release version as
+   the basis for a full release; follow the :ref:`create_release` process instead.
+
+
 .. _create_release:
 
 
