@@ -159,6 +159,7 @@ class SpatialModelComponent(ModelComponent, ABC):
                     other_region.region.copy(),
                     check_like=True,
                     check_less_precise=True,
+                    normalize=True,
                 )
         except AssertionError as e:
             errors["data"] = str(e)
