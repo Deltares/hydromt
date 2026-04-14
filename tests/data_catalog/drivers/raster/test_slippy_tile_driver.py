@@ -388,10 +388,12 @@ class TestSlippyTileDriver:
             driver.read([tile_dir])
 
     def test_read_no_tiles_raises(self, tmp_path, mask_global):
+        from hydromt.error import NoDataException
+
         empty_dir = str(tmp_path / "empty")
         os.makedirs(os.path.join(empty_dir, "1", "0"), exist_ok=True)
         driver = SlippyTileDriver(options=SlippyTileOptions(tile_size=4, max_zoom=1))
-        with pytest.raises(IOError, match="No tiles found"):
+        with pytest.raises(NoDataException, match="No tiles found"):
             driver.read([empty_dir], mask=mask_global, zoom=1)
 
     def test_read_no_tiles_ignore(self, tmp_path, mask_global):
@@ -404,7 +406,7 @@ class TestSlippyTileDriver:
             zoom=1,
             handle_nodata=NoDataStrategy.IGNORE,
         )
-        assert isinstance(ds, xr.Dataset)
+        assert ds is None
 
     def test_read_zoom_as_tuple(self, tile_dir, mask_global):
         driver = SlippyTileDriver(options=SlippyTileOptions(tile_size=4, max_zoom=1))

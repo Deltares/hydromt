@@ -58,6 +58,11 @@ try:
 
     _HAS_BOTO3 = True
 except ImportError:
+    # Bind the names to None so tests can ``mock.patch(..., 'boto3')`` and
+    # downstream code can do a single ``if not _HAS_BOTO3`` guard.
+    boto3 = None
+    UNSIGNED = None
+    BotoConfig = None
     _HAS_BOTO3 = False
 
 # ---------------------------------------------------------------------------
