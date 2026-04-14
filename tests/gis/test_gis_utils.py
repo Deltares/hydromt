@@ -110,7 +110,7 @@ def test_nearest(world, geodf):
     gdf0 = geodf.copy()
     gdf0["iso_a3"] = ""
     gdf1 = vector_utils.nearest_merge(geodf, world.drop(idx), max_dist=1e6)
-    assert np.all(gdf1.loc[gdf1["distance_right"] > 1e6, "index_right"] == -1)
+    assert gdf1.loc[gdf1["distance_right"] > 1e6, "index_right"].isna().all()
     assert np.all(gdf1.loc[gdf1["distance_right"] > 1e6, "iso_a3"] != "")
 
 
