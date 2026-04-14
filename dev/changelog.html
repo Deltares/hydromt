@@ -439,6 +439,7 @@
 <h3>New<a class="headerlink" href="#new" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Added earthdatahub_data predefined catalog for accessing ERA5_land, ERA5_land_hourly, ERA5_ocean (#1357).</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">precision</span></code> parameter to <code class="docutils literal notranslate"><span class="pre">GeomsComponent.write</span></code> to set the number of decimals used when writing (#1415)</p></li>
 </ul>
 </section>
 <section id="changed">
@@ -450,8 +451,9 @@
 <section id="fixed">
 <h3>Fixed<a class="headerlink" href="#fixed" title="Link to this heading">#</a></h3>
 <ul class="simple">
-<li><p>properly log unhandled errors to <code class="docutils literal notranslate"><span class="pre">hydromt.log</span></code> (#1399)</p></li>
+<li><p>Properly log unhandled errors to <code class="docutils literal notranslate"><span class="pre">hydromt.log</span></code> (#1399)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">gis.vector_utils.nearest_merge</span></code> now correctly respects <code class="docutils literal notranslate"><span class="pre">max_dist</span></code> filtering and <code class="docutils literal notranslate"><span class="pre">overwrite</span></code> flag when merging columns. (#1414)</p></li>
+<li><p>Normalize geometries before comparing them in <code class="docutils literal notranslate"><span class="pre">test_equal</span></code> for <code class="docutils literal notranslate"><span class="pre">SpatialModelComponent</span></code>, <code class="docutils literal notranslate"><span class="pre">GeomsComponent</span></code> and <code class="docutils literal notranslate"><span class="pre">VectorComponent</span></code> (#1415)</p></li>
 </ul>
 </section>
 <section id="deprecated">
