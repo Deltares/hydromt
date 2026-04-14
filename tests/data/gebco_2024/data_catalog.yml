@@ -1,0 +1,19 @@
+gebco_2024:
+  data_type: RasterDataset
+  driver:
+    name: slippy_tile
+    options:
+      encoder: terrarium16
+      max_zoom: 8
+      variable_name: elevation
+      s3_bucket: deltares-ddb
+      s3_key: data/bathymetry/gebco_2024
+      s3_region: eu-west-1
+  uri: .
+  metadata:
+    crs: 3857
+    category: bathymetry
+    unit: m
+    long_name: GEBCO 2024
+    source: BODC
+    difference_with_msl: 0.0

@@ -45,7 +45,7 @@ from hydromt.data_catalog.drivers.base_driver import DriverOptions
 from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
     RasterDatasetDriver,
 )
-from hydromt.error import NoDataStrategy
+from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.typing import Geom, SourceMetadata, Variables, Zoom
 
 logger = logging.getLogger(__name__)
@@ -66,6 +66,34 @@ except ImportError:
 
 # Pixel size at zoom 0 in metres (at the equator)
 _ZOOM0_PIXEL_SIZE = 156543.03
+
+# Half the Web Mercator (EPSG:3857) extent in metres — i.e. the x/y coordinate
+# at ±180° longitude / ±~85.0511° latitude.
+_WEBMERCATOR_HALF_EXTENT = 20037508.34
+
+# Powers of two used by the PNG elevation decoders below. Precomputed once
+# so the inner loops don't recompute them per call / per tile.
+_TWO_POW_8 = 256  # 2**8 — byte
+_TWO_POW_15 = 32768  # 2**15 — terrarium zero offset
+_TWO_POW_16 = 65536  # 2**16 — two-byte word
+_TWO_POW_24 = 16777216  # 2**24 — three-byte word
+
+# Max packed integer value at each bit-depth — reserved as NoData sentinel.
+_MAX_UINT8 = 255  # 2**8 - 1
+_MAX_UINT16 = 65535  # 2**16 - 1
+_MAX_UINT24 = 16777215  # 2**24 - 1
+_MAX_UINT32 = 4294967295  # 2**32 - 1
+
+# Divisors for float encoders: both 0 and the max value are reserved, so the
+# number of usable levels is 2**N - 2.
+_FLOAT8_RANGE = 254  # 2**8 - 2
+_FLOAT16_RANGE = 65534  # 2**16 - 2
+_FLOAT24_RANGE = 16777214  # 2**24 - 2
+_FLOAT32_RANGE = 4294967294  # 2**32 - 2
+
+# Terrarium lower bound: the packed value 0 encodes the minimum (-32768); any
+# decoded value below -(2**15 - 1) came from a NoData tile pixel.
+_TERRARIUM_NODATA_THRESHOLD = -32767  # -(2**15 - 1)
 
 
 def _get_zoom_level_for_resolution(dx: float) -> int:
@@ -90,17 +118,20 @@ def _get_zoom_level_for_resolution(dx: float) -> int:
 
 def _webmercator_to_latlon(easting: float, northing: float) -> Tuple[float, float]:
     """Convert Web Mercator (EPSG:3857) to latitude/longitude (degrees)."""
-    lon = (easting / 20037508.34) * 180.0
+    lon = (easting / _WEBMERCATOR_HALF_EXTENT) * 180.0
     lat = (180.0 / math.pi) * (
-        2.0 * math.atan(math.exp(northing / 20037508.34 * math.pi)) - (math.pi / 2.0)
+        2.0 * math.atan(math.exp(northing / _WEBMERCATOR_HALF_EXTENT * math.pi))
+        - (math.pi / 2.0)
     )
     return lat, lon
 
 
 def _latlon_to_webmercator(lat: float, lon: float) -> Tuple[float, float]:
     """Convert latitude/longitude (degrees) to Web Mercator (EPSG:3857)."""
-    x = lon * 20037508.34 / 180.0
-    y = (math.log(math.tan((90.0 + lat) * math.pi / 360.0)) / math.pi) * 20037508.34
+    x = lon * _WEBMERCATOR_HALF_EXTENT / 180.0
+    y = (
+        math.log(math.tan((90.0 + lat) * math.pi / 360.0)) / math.pi
+    ) * _WEBMERCATOR_HALF_EXTENT
     return x, y
 
 
@@ -190,64 +221,75 @@ def _png2elevation(
         2-D elevation array (npix x npix).  NoData pixels are ``np.nan``
         for float encoders and terrarium, or ``-1`` for uint encoders.
     """
-    img = Image.open(png_file)
-
-    if encoder == "terrarium":
-        rgb = np.array(img.convert("RGB")).astype(float)
-        elevation = (rgb[:, :, 0] * 256 + rgb[:, :, 1] + rgb[:, :, 2] / 256) - 32768.0
-        elevation[elevation < -32767.0] = np.nan
-    elif encoder == "terrarium16":
-        rgb = np.array(img.convert("RGB")).astype(float)
-        elevation = (rgb[:, :, 0] * 256 + rgb[:, :, 1]) - 32768.0
-        elevation[elevation < -32767.0] = np.nan
-    elif encoder == "uint8":
-        rgb = np.array(img.convert("RGB")).astype(int)
-        elevation = rgb[:, :, 0]
-        elevation[elevation == 255] = -1
-    elif encoder == "uint16":
-        rgb = np.array(img.convert("RGB")).astype(int)
-        elevation = rgb[:, :, 0] * 256 + rgb[:, :, 1]
-        elevation[elevation == 65535] = -1
-    elif encoder == "uint24":
-        rgb = np.array(img.convert("RGB")).astype(int)
-        elevation = rgb[:, :, 0] * 65536 + rgb[:, :, 1] * 256 + rgb[:, :, 2]
-        elevation[elevation == 16777215] = -1
-    elif encoder == "uint32":
-        rgb = np.array(img.convert("RGBA")).astype(int)
-        elevation = (
-            rgb[:, :, 0] * 16777216
-            + rgb[:, :, 1] * 65536
-            + rgb[:, :, 2] * 256
-            + rgb[:, :, 3]
-        )
-        elevation[elevation == 4294967295] = -1
-    elif encoder == "float8":
-        rgb = np.array(img.convert("RGB")).astype(float)
-        idx = rgb[:, :, 0]
-        elevation = encoder_vmin + (encoder_vmax - encoder_vmin) * idx / 254
-        elevation[idx == 0] = np.nan
-    elif encoder == "float16":
-        rgb = np.array(img.convert("RGB")).astype(float)
-        idx = rgb[:, :, 0] * 256 + rgb[:, :, 1]
-        elevation = encoder_vmin + (encoder_vmax - encoder_vmin) * idx / 65534
-        elevation[idx == 0] = np.nan
-    elif encoder == "float24":
-        rgb = np.array(img.convert("RGB")).astype(float)
-        idx = rgb[:, :, 0] * 65536 + rgb[:, :, 1] * 256 + rgb[:, :, 2]
-        elevation = encoder_vmin + (encoder_vmax - encoder_vmin) * idx / 16777214
-        elevation[idx == 0] = np.nan
-    elif encoder == "float32":
-        rgb = np.array(img.convert("RGBA")).astype(float)
-        idx = (
-            rgb[:, :, 0] * 16777216
-            + rgb[:, :, 1] * 65536
-            + rgb[:, :, 2] * 256
-            + rgb[:, :, 3]
-        )
-        elevation = encoder_vmin + (encoder_vmax - encoder_vmin) * idx / 4294967294
-        elevation[idx == 0] = np.nan
-    else:
-        raise ValueError(f"Unknown encoder: {encoder!r}")
+    with Image.open(png_file) as img:
+        if encoder == "terrarium":
+            rgb = np.array(img.convert("RGB")).astype(float)
+            elevation = (
+                rgb[:, :, 0] * _TWO_POW_8 + rgb[:, :, 1] + rgb[:, :, 2] / _TWO_POW_8
+            ) - _TWO_POW_15
+            elevation[elevation < _TERRARIUM_NODATA_THRESHOLD] = np.nan
+        elif encoder == "terrarium16":
+            rgb = np.array(img.convert("RGB")).astype(float)
+            elevation = (rgb[:, :, 0] * _TWO_POW_8 + rgb[:, :, 1]) - _TWO_POW_15
+            elevation[elevation < _TERRARIUM_NODATA_THRESHOLD] = np.nan
+        elif encoder == "uint8":
+            rgb = np.array(img.convert("RGB")).astype(int)
+            elevation = rgb[:, :, 0]
+            elevation[elevation == _MAX_UINT8] = -1
+        elif encoder == "uint16":
+            rgb = np.array(img.convert("RGB")).astype(int)
+            elevation = rgb[:, :, 0] * _TWO_POW_8 + rgb[:, :, 1]
+            elevation[elevation == _MAX_UINT16] = -1
+        elif encoder == "uint24":
+            rgb = np.array(img.convert("RGB")).astype(int)
+            elevation = (
+                rgb[:, :, 0] * _TWO_POW_16 + rgb[:, :, 1] * _TWO_POW_8 + rgb[:, :, 2]
+            )
+            elevation[elevation == _MAX_UINT24] = -1
+        elif encoder == "uint32":
+            rgb = np.array(img.convert("RGBA")).astype(int)
+            elevation = (
+                rgb[:, :, 0] * _TWO_POW_24
+                + rgb[:, :, 1] * _TWO_POW_16
+                + rgb[:, :, 2] * _TWO_POW_8
+                + rgb[:, :, 3]
+            )
+            elevation[elevation == _MAX_UINT32] = -1
+        elif encoder == "float8":
+            rgb = np.array(img.convert("RGB")).astype(float)
+            idx = rgb[:, :, 0]
+            elevation = (
+                encoder_vmin + (encoder_vmax - encoder_vmin) * idx / _FLOAT8_RANGE
+            )
+            elevation[idx == 0] = np.nan
+        elif encoder == "float16":
+            rgb = np.array(img.convert("RGB")).astype(float)
+            idx = rgb[:, :, 0] * _TWO_POW_8 + rgb[:, :, 1]
+            elevation = (
+                encoder_vmin + (encoder_vmax - encoder_vmin) * idx / _FLOAT16_RANGE
+            )
+            elevation[idx == 0] = np.nan
+        elif encoder == "float24":
+            rgb = np.array(img.convert("RGB")).astype(float)
+            idx = rgb[:, :, 0] * _TWO_POW_16 + rgb[:, :, 1] * _TWO_POW_8 + rgb[:, :, 2]
+            elevation = (
+                encoder_vmin + (encoder_vmax - encoder_vmin) * idx / _FLOAT24_RANGE
+            )
+            elevation[idx == 0] = np.nan
+        elif encoder == "float32":
+            rgb = np.array(img.convert("RGBA")).astype(float)
+            idx = (
+                rgb[:, :, 0] * _TWO_POW_24
+                + rgb[:, :, 1] * _TWO_POW_16
+                + rgb[:, :, 2] * _TWO_POW_8
+                + rgb[:, :, 3]
+            )
+            elevation = (
+                encoder_vmin + (encoder_vmax - encoder_vmin) * idx / _FLOAT32_RANGE
+            )
+            elevation[idx == 0] = np.nan
+        else:
+            raise ValueError(f"Unknown encoder: {encoder!r}")
 
     return elevation
 
@@ -263,7 +305,8 @@ def _download_tile(s3_client: Any, bucket: str, key: str, filename: str) -> bool
         Path(filename).parent.mkdir(parents=True, exist_ok=True)
         s3_client.download_file(Bucket=bucket, Key=key, Filename=filename)
         return True
-    except Exception:
+    except Exception as e:
+        logger.debug(f"Failed to download {key}: {e}")
         return False
 
 
@@ -491,14 +534,11 @@ class SlippyTileDriver(RasterDatasetDriver):
                 tiles_read += 1
 
         if tiles_read == 0:
-            if handle_nodata == NoDataStrategy.RAISE:
-                raise IOError(
-                    f"No tiles found in {tile_root} at zoom {izoom} "
-                    f"for bbox {bbox_3857}"
-                )
-            logger.warning(
-                f"No tiles found in {tile_root} at zoom {izoom} for bbox {bbox_3857}"
+            exec_nodata_strat(
+                f"No tiles found in {tile_root} at zoom {izoom} for bbox {bbox_3857}",
+                handle_nodata,
             )
+            return None
 
         # --- compute coordinates ----------------------------------------------
         x0_m, y0_m = _num2xy(ix0, iy1 + 1, izoom)  # lower-left corner

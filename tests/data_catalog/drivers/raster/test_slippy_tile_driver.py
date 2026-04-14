@@ -298,7 +298,6 @@ class TestS3Download:
         )
         assert result == 0
 
-    @pytest.mark.skipif(not _HAS_BOTO3, reason="boto3 not installed")
     @patch("hydromt.data_catalog.drivers.raster.slippy_tile_driver._HAS_BOTO3", True)
     @patch("hydromt.data_catalog.drivers.raster.slippy_tile_driver.boto3")
     def test_download_missing_tiles_downloads(self, mock_boto3, tmp_path):
@@ -311,7 +310,6 @@ class TestS3Download:
         assert result == 1
         mock_client.download_file.assert_called_once()
 
-    @pytest.mark.skipif(not _HAS_BOTO3, reason="boto3 not installed")
     @patch("hydromt.data_catalog.drivers.raster.slippy_tile_driver._HAS_BOTO3", True)
     @patch("hydromt.data_catalog.drivers.raster.slippy_tile_driver.boto3")
     def test_download_skips_existing_tiles(self, mock_boto3, tmp_path):
@@ -521,3 +519,105 @@ class TestSlippyTileOptions:
         assert opts.variable_name == "depth"
         assert opts.tile_size == 512
         assert opts.s3_bucket == "my-bucket"
+
+
+# ---------------------------------------------------------------------------
+# Integration tests against a real S3 bucket
+# ---------------------------------------------------------------------------
+
+
+# Path to the checked-in GEBCO 2024 catalog used for the integration tests.
+# The catalog points at the public Deltares S3 bucket; tiles already cached
+# under the catalog directory are reused, anything missing is downloaded.
+# See tests/data/gebco_2024/data_catalog.yml.
+_GEBCO_2024_CATALOG_PATH = (
+    Path(__file__).parents[3] / "data" / "gebco_2024" / "data_catalog.yml"
+)
+
+# Bounding box over the southern North Sea / Wadden region (lon, lat, WGS84).
+# Tiles for this bbox are checked in alongside the catalog, so the test
+# covers the cache-hit path and runs offline.
+_NORTH_SEA_BBOX = (5.0, 52.0, 6.0, 56.0)
+
+# Bounding box off the US south-east coast (Atlantic, near Florida/Georgia).
+# Tiles for this bbox are NOT checked in, so the test exercises the actual
+# S3 download path. Downloads are redirected to a temp directory so the
+# repository stays clean.
+_FLORIDA_BBOX = (-80.0, 30.0, -78.0, 32.0)
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(not _HAS_BOTO3, reason="boto3 required for S3 integration")
+class TestSlippyTileDriverS3Integration:
+    """End-to-end tests against the public deltares-ddb GEBCO 2024 tile set.
+
+    These tests exercise the full DataCatalog + SlippyTileDriver path
+    described in the module docstring. They require network access and
+    AWS-unsigned read access to
+    ``s3://deltares-ddb/data/bathymetry/gebco_2024/``.
+    """
+
+    def test_load_catalog(self):
+        """The checked-in catalog YAML loads and exposes the expected source."""
+        from hydromt.data_catalog import DataCatalog
+
+        cat = DataCatalog(data_libs=[str(_GEBCO_2024_CATALOG_PATH)])
+        assert "gebco_2024" in cat.sources
+
+    def test_get_rasterdataset_cached_north_sea(self):
+        """Reading a bbox whose tiles are already cached should not hit S3.
+
+        Tiles for the North-Sea bbox are committed under
+        ``tests/data/gebco_2024/`` so this test runs without network access.
+        """
+        from hydromt.data_catalog import DataCatalog
+
+        cat = DataCatalog(data_libs=[str(_GEBCO_2024_CATALOG_PATH)])
+        ds = cat.get_rasterdataset(
+            "gebco_2024",
+            bbox=_NORTH_SEA_BBOX,
+            zoom=(2000, "metre"),
+        )
+
+        assert isinstance(ds, (xr.Dataset, xr.DataArray))
+        assert ds.rio.crs.to_epsg() == 3857
+        values = ds.values if isinstance(ds, xr.DataArray) else ds["elevation"].values
+        finite = np.isfinite(values)
+        assert finite.any(), "Expected at least some finite elevation values"
+        assert np.nanmin(values) < 0, "Expected negative bathymetry in the North Sea"
+        assert np.nanmax(np.abs(values[finite])) < 5000
+
+    def test_get_rasterdataset_downloads_florida(self, tmp_path):
+        """Reading an uncached bbox should download tiles from S3.
+
+        The catalog YAML is copied to ``tmp_path`` so its resolved root sits
+        in the temp directory and the downloaded tiles vanish at the end of
+        the test, keeping the repo clean.
+        """
+        import shutil
+
+        from hydromt.data_catalog import DataCatalog
+
+        local_catalog = tmp_path / "data_catalog.yml"
+        shutil.copy(_GEBCO_2024_CATALOG_PATH, local_catalog)
+
+        cat = DataCatalog(data_libs=[str(local_catalog)])
+        ds = cat.get_rasterdataset(
+            "gebco_2024",
+            bbox=_FLORIDA_BBOX,
+            zoom=(2000, "metre"),
+        )
+
+        assert isinstance(ds, (xr.Dataset, xr.DataArray))
+        assert ds.rio.crs.to_epsg() == 3857
+        values = ds.values if isinstance(ds, xr.DataArray) else ds["elevation"].values
+        finite = np.isfinite(values)
+        assert finite.any(), "Expected at least some finite elevation values"
+        # The Florida bbox is mostly open Atlantic, so we expect deep
+        # negative bathymetry to dominate.
+        assert np.nanmin(values) < -100, "Expected deep ocean bathymetry off Florida"
+        assert np.nanmax(np.abs(values[finite])) < 10000
+
+        # Confirm tiles were actually downloaded to the temp catalog dir.
+        downloaded = list(tmp_path.rglob("*.png"))
+        assert downloaded, "Expected at least one tile downloaded to tmp_path"
