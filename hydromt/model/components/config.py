@@ -3,7 +3,7 @@
 import logging
 from os.path import isfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union, cast
 
 from hydromt._utils.path import _make_config_paths_relative
 from hydromt.model.components.base import ModelComponent
@@ -324,7 +324,7 @@ class ConfigComponent(ModelComponent):
         for k, v in data.items():
             self.set(k, v)
 
-    def test_equal(self, other: ModelComponent) -> Tuple[bool, Dict[str, str]]:
+    def test_equal(self, other: ModelComponent) -> tuple[bool, dict[str, str]]:
         """Test if two components are equal.
 
         Parameters
@@ -335,15 +335,33 @@ class ConfigComponent(ModelComponent):
         Returns
         -------
         tuple[bool, Dict[str, str]]
-            True if the components are equal, and a dict with the associated errors per property checked.
+            True if the components are equal, and a dict with the associated errors per
+            property checked.
         """
         eq, errors = super().test_equal(other)
         if not eq:
-            return eq, errors
+            return eq, {"config": errors}
         other_config = cast(ConfigComponent, other)
 
-        # for once python does the recursion for us
-        if self.data == other_config.data:
-            return True, {}
+        # not enough details in python recursion
+        errors.update(**_check_equal(self.data, other_config.data, "config"))
+        return len(errors) == 0, {"config": errors}
+
+
+def _check_equal(a: Any, b: Any, name: str = "") -> dict[str, str]:
+    """Recursive test of model components.
+
+    Returns dict with component name and associated error message.
+    """
+    errors = {}
+    try:
+        assert isinstance(b, type(a)), "property types do not match"
+        if isinstance(a, dict):
+            for key in a:
+                assert key in b, f"{key} missing"
+                errors.update(**_check_equal(a[key], b[key], f"{name}.{key}"))
         else:
-            return False, {"config": "Configs are not equal"}
+            assert a == b, "values not equal"
+    except AssertionError as e:
+        errors.update({name: str(e)})
+    return errors
