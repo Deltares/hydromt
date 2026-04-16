@@ -14,6 +14,7 @@ Unreleased
 New
 ---
 - Added earthdatahub_data predefined catalog for accessing ERA5_land, ERA5_land_hourly, ERA5_ocean (#1357).
+- Added ``precision`` parameter to ``GeomsComponent.write`` to set the number of decimals used when writing (#1415)
 
 Changed
 -------
@@ -21,7 +22,9 @@ Changed
 
 Fixed
 -----
-- properly log unhandled errors to ``hydromt.log`` (#1399)
+- Properly log unhandled errors to ``hydromt.log`` (#1399)
+- ``gis.vector_utils.nearest_merge`` now correctly respects ``max_dist`` filtering and ``overwrite`` flag when merging columns. (#1414)
+- Normalize geometries before comparing them in ``test_equal`` for ``SpatialModelComponent``, ``GeomsComponent`` and ``VectorComponent`` (#1415)
 
 Deprecated
 ----------

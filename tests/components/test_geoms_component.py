@@ -24,7 +24,8 @@ def test_model_set_geoms(tmp_path: Path):
     geom_component.set(geom, "geom_wgs84")
 
     assert list(geom_component.data.keys()) == ["geom_wgs84"]
-    assert list(geom_component.data.values())[0].equals(geom)
+    component_geom = list(geom_component.data.values())[0]
+    assert component_geom.geometry.iloc[0].equals(geom.geometry.iloc[0])
     expected_bounds = np.array([bbox_list])
     assert np.allclose(geom_component._region_data.bounds.values, expected_bounds)
 
@@ -75,7 +76,7 @@ def test_model_write_geoms_wgs84_with_model_crs(tmp_path: Path, mocker: MockerFi
 
     assert geom_component.data["test_geom"].equals(geom_3857)
     write_path = tmp_path / "geoms" / "test_geom.geojson"
-    geom_component.write(to_wgs84=True)
+    geom_component.write(to_wgs84=True, precision=None)
 
     gdf = gpd.read_file(write_path)
     assert gdf is not None
@@ -98,3 +99,29 @@ def test_model_write_geoms(tmp_path: Path):
     region_geom = gpd.read_file(write_path)
 
     assert region_geom.crs.to_epsg() == 3857
+
+
+def test_model_write_geoms_precision_wgs84(tmp_path: Path):
+    model = Model(root=tmp_path, mode="w")
+    geom_component = GeomsComponent(model, region_component="foo")
+    model.add_component("geom", geom_component)
+    coords = [4.221067, 51.949474, 4.471006, 52.073727]
+    precision = 2
+    bbox = box(*coords, ccw=True)
+    geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
+    geom.to_crs(3857, inplace=True)
+    assert geom.crs.to_epsg() == 3857
+
+    write_path = tmp_path / "geoms" / "test_geom.geojson"
+    geom_component.set(geom, "test_geom")
+    geom_component.write(to_wgs84=True, precision=precision)
+
+    written_geom = gpd.read_file(write_path)
+    assert written_geom.crs.to_epsg() == 4326
+
+    # assert that the coordinates are rounded to 2 decimal places
+    written_geom_coords = written_geom.geometry.iloc[0].bounds
+    for coord in written_geom_coords:
+        assert round(coord, precision) == coord, (
+            f"Coordinate {coord} is not rounded to {precision} decimal places."
+        )
