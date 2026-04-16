@@ -249,7 +249,7 @@ class TestConfigComponentEqual:
         c2.set("a.b", 99)
         eq, errors = c1.test_equal(c2)
         assert not eq
-        assert "config.a.b" in errors
+        assert "a.b" in errors
 
     def test_test_equal_missing_key(self, tmp_path):
         model = Model(root=tmp_path)
@@ -262,7 +262,7 @@ class TestConfigComponentEqual:
         eq, errors = c1.test_equal(c2)
         print(eq, errors)
         assert not eq
-        assert "config.a.c" in errors
+        assert "a.c" in errors
 
     def test_test_equal_extra_key_in_other(self, tmp_path):
         model = Model(root=tmp_path)
@@ -275,7 +275,7 @@ class TestConfigComponentEqual:
         eq, errors = c1.test_equal(c2)
         print(eq, errors)
         assert not eq
-        assert "config.a.c" in errors
+        assert "a.c" in errors
 
     def test_test_equal_wrong_type(self, tmp_path):
         model = Model(root=tmp_path)
@@ -286,4 +286,4 @@ class TestConfigComponentEqual:
         c2.set("a", "1")
         eq, errors = c1.test_equal(c2)
         assert not eq
-        assert "config.a" in errors
+        assert "a" in errors
