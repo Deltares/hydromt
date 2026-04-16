@@ -1,7 +1,7 @@
 """Implementation for grid based workflows."""
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 import geopandas as gpd
 import numpy as np
@@ -35,19 +35,21 @@ __all__ = [
 
 
 def create_grid_from_region(
-    region: Dict[str, Any],
+    region: dict[str, Any],
     *,
-    data_catalog: Optional[DataCatalog] = None,
-    res: Optional[Number] = None,
-    crs: Optional[Union[int, str]] = None,
+    data_catalog: DataCatalog | None = None,
+    res: Number | None = None,
+    crs: int | str | None = None,
     region_crs: int = 4326,
     rotated: bool = False,
-    hydrography_path: Optional[str] = None,
-    basin_index_path: Optional[str] = None,
+    hydrography_path: str | None = None,
+    basin_index_path: str | None = None,
     add_mask: bool = True,
     align: bool = True,
     dec_origin: int = 0,
     dec_rotation: int = 3,
+    nodata: int | float | None = 1,
+    dtype: type = np.uint8,
 ) -> xr.DataArray:
     """Create a 2D regular grid or reads an existing grid.
 
@@ -57,7 +59,7 @@ def create_grid_from_region(
     Parameters
     ----------
     region : dict
-        Dictionary describing region of interest, e.g.:
+        dictionary describing region of interest, e.g.:
         * {'bbox': [xmin, ymin, xmax, ymax]}
         * {'geom': 'path/to/polygon_geometry'}
         * {'grid': 'path/to/grid_file'}
@@ -100,8 +102,10 @@ def create_grid_from_region(
         number of decimals to round the origin coordinates, by default 0
     dec_rotation : int, optional
         number of decimals to round the rotation angle, by default 3
-    logger : Logger
-        Logger object, by default a module level logger is used.
+    nodata : int, float, optional
+        The nodata value to use for the grid. By default 1.
+    dtype : type, optional
+        The data type of the grid, by default np.uint8.
 
     Returns
     -------
@@ -139,11 +143,17 @@ def create_grid_from_region(
 
         if rotated:
             grid = create_rotated_grid_from_geom(
-                geom, res=res, dec_origin=dec_origin, dec_rotation=dec_rotation
+                geom,
+                res=res,
+                dec_origin=dec_origin,
+                dec_rotation=dec_rotation,
+                nodata=nodata,
             )
         else:
             xcoords, ycoords = _extract_coords_from_geom(geom, res=res, align=align)
-            grid = _create_non_rotated_grid(xcoords, ycoords, crs=geom.crs)
+            grid = _create_non_rotated_grid(
+                xcoords, ycoords, crs=geom.crs, nodata=nodata, dtype=dtype
+            )
     elif kind == "grid":
         if rotated:
             logger.warning(
@@ -160,7 +170,9 @@ def create_grid_from_region(
         xcoords = da.raster.xcoords.values
         ycoords = da.raster.ycoords.values
         geom = da.raster.box
-        grid = _create_non_rotated_grid(xcoords, ycoords, crs=da.raster.crs)
+        grid = _create_non_rotated_grid(
+            xcoords, ycoords, crs=da.raster.crs, nodata=nodata
+        )
     elif kind in ["basin", "interbasin", "subbasin"]:
         if rotated:
             logger.warning("Cannot create a rotated grid from a basin region")
@@ -179,7 +191,7 @@ def create_grid_from_region(
             align=align,
             data_catalog=data_catalog,
         )
-        grid = _create_non_rotated_grid(xcoords, ycoords, crs=crs)
+        grid = _create_non_rotated_grid(xcoords, ycoords, crs=crs, nodata=nodata)
     else:
         raise ValueError(
             f"Region for grid must be of kind [grid, bbox, geom, basin, subbasin,"
@@ -196,7 +208,12 @@ def create_grid_from_region(
 
 
 def _create_non_rotated_grid(
-    xcoords: np.typing.ArrayLike, ycoords: np.typing.ArrayLike, *, crs: int
+    xcoords: np.typing.ArrayLike,
+    ycoords: np.typing.ArrayLike,
+    *,
+    crs: int,
+    dtype: type = np.uint8,
+    nodata: int | float | None = 1,
 ) -> xr.DataArray:
     """Create a grid that is not rotated based on x and y coordinates.
 
@@ -208,6 +225,10 @@ def _create_non_rotated_grid(
         An array of y coordinates.
     crs : int
         The crs that the coordinates are in.
+    dtype : type
+        The data type of the grid, by default np.uint8.
+    nodata: int, float, optional
+        The nodata value to use for the grid. By default 1.
 
     Returns
     -------
@@ -217,8 +238,8 @@ def _create_non_rotated_grid(
     coords = {"x": xcoords, "y": ycoords}
     return raster_utils.full(
         coords=coords,
-        nodata=1,
-        dtype=np.uint8,
+        nodata=nodata,
+        dtype=dtype,
         name="mask",
         attrs={},
         crs=crs,
@@ -227,7 +248,13 @@ def _create_non_rotated_grid(
 
 
 def create_rotated_grid_from_geom(
-    geom: gpd.GeoDataFrame, *, res: float, dec_origin: int, dec_rotation: int
+    geom: gpd.GeoDataFrame,
+    *,
+    res: float,
+    dec_origin: int,
+    dec_rotation: int,
+    nodata: int | float | None = 1,
+    dtype: type = np.uint8,
 ) -> xr.DataArray:
     """Create a rotated grid based on a geometry.
 
@@ -241,6 +268,10 @@ def create_rotated_grid_from_geom(
         The number of significant numbers to round the origin points to.
     dec_rotation : int
         The number of significant numbers to round the rotation to.
+    nodata: int, float, None
+        The nodata value to use for the grid. by default 1
+    dtype: type
+        The data type of the grid, by default np.uint8.
 
     Returns
     -------
@@ -257,8 +288,8 @@ def create_rotated_grid_from_geom(
     return raster_utils.full_from_transform(
         transform,
         shape=(nmax, mmax),
-        nodata=1,
-        dtype=np.uint8,
+        nodata=nodata,
+        dtype=dtype,
         name="mask",
         attrs={},
         crs=geom.crs,
@@ -267,12 +298,12 @@ def create_rotated_grid_from_geom(
 
 
 def grid_from_constant(
-    grid_like: Union[xr.DataArray, xr.Dataset],
-    constant: Union[int, float],
+    grid_like: xr.DataArray | xr.Dataset,
+    constant: int | float,
     name: str,
-    dtype: Optional[str] = "float32",
-    nodata: Optional[Union[int, float]] = None,
-    mask_name: Optional[str] = "mask",
+    dtype: type = np.float32,
+    nodata: int | float = None,
+    mask_name: str = "mask",
 ) -> xr.DataArray:
     """Prepare a grid based on a constant value.
 
@@ -284,8 +315,8 @@ def grid_from_constant(
         Constant value to fill grid with.
     name: str
         Name of grid.
-    dtype: str, optional
-        Data type of grid. By default 'float32'.
+    dtype: type, optional
+        Data type of grid. By default np.float32.
     nodata: int, float, optional
         Nodata value. By default infered from dtype.
     mask_name: str, optional
@@ -316,13 +347,13 @@ def grid_from_constant(
 
 
 def grid_from_rasterdataset(
-    grid_like: Union[xr.DataArray, xr.Dataset],
-    ds: Union[xr.DataArray, xr.Dataset],
-    variables: Optional[List[str]] = None,
-    fill_method: Optional[str] = None,
-    reproject_method: Optional[Union[List[str], str]] = "nearest",
-    mask_name: Optional[str] = "mask",
-    rename: Optional[Dict[str, str]] = None,
+    grid_like: xr.DataArray | xr.Dataset,
+    ds: xr.DataArray | xr.Dataset,
+    variables: list[str] | None = None,
+    fill_method: str | None = None,
+    reproject_method: list[str] | str | None = "nearest",
+    mask_name: str | None = "mask",
+    rename: dict[str, str] | None = None,
 ) -> xr.Dataset:
     """Prepare data by resampling ds to grid_like.
 
@@ -347,7 +378,7 @@ def grid_from_rasterdataset(
         Name of mask in self.grid to use for masking raster_data. By default 'mask'.
         Use None to disable masking.
     rename: dict, optional
-        Dictionary to rename variable names in raster_data before adding to grid
+        dictionary to rename variable names in raster_data before adding to grid
         {'name_in_raster_data': 'name_in_grid'}. By default empty.
 
     Returns
@@ -384,14 +415,14 @@ def grid_from_rasterdataset(
 
 
 def grid_from_raster_reclass(
-    grid_like: Union[xr.DataArray, xr.Dataset],
+    grid_like: xr.DataArray | xr.Dataset,
     da: xr.DataArray,
     reclass_table: pd.DataFrame,
-    reclass_variables: List,
-    fill_method: Optional[str] = None,
-    reproject_method: Optional[Union[List, str]] = "nearest",
-    mask_name: Optional[str] = "mask",
-    rename: Optional[Dict] = None,
+    reclass_variables: list,
+    fill_method: str | None = None,
+    reproject_method: list[str] | str | None = "nearest",
+    mask_name: str | None = "mask",
+    rename: dict | None = None,
 ) -> xr.Dataset:
     """Prepare data variable(s) resampled to grid_like object by reclassifying the data in ``da`` based on ``reclass_table``.
 
@@ -417,7 +448,7 @@ def grid_from_raster_reclass(
         Name of mask in self.grid to use for masking raster_data. By default 'mask'.
         Use None to disable masking.
     rename: dict, optional
-        Dictionary to rename variable names in reclass_variables before adding to grid
+        dictionary to rename variable names in reclass_variables before adding to grid
         {'name_in_reclass_table': 'name_in_grid'}. By default empty.
 
     Returns
@@ -458,14 +489,14 @@ def grid_from_raster_reclass(
 
 
 def grid_from_geodataframe(
-    grid_like: Union[xr.DataArray, xr.Dataset],
+    grid_like: xr.DataArray | xr.Dataset,
     gdf: gpd.GeoDataFrame,
-    variables: Optional[Union[List[str], str]] = None,
-    nodata: Optional[Union[List[Union[int, float]], int, float]] = -1,
-    rasterize_method: Optional[str] = "value",
-    mask_name: Optional[str] = "mask",
-    rename: Optional[Union[Dict[str, str], str]] = None,
-    all_touched: Optional[bool] = True,
+    variables: list[str] | str | None = None,
+    nodata: list[int | float] | int | float | None = -1,
+    rasterize_method: str | None = "value",
+    mask_name: str | None = "mask",
+    rename: dict[str, str] | str | None = None,
+    all_touched: bool | None = True,
 ) -> xr.Dataset:
     """Prepare data variable(s) resampled to grid_like object by rasterizing the data from ``gdf``.
 
@@ -481,10 +512,10 @@ def grid_from_geodataframe(
         Grid to copy metadata from.
     gdf : gpd.GeoDataFrame
         geopandas object to rasterize.
-    variables : List, str, optional
+    variables : list[str] | str, optional
         List of variables to add to grid from vector_data. Required if
         rasterize_method is "value", by default None.
-    nodata : List, int, float, optional
+    nodata : float or int or list, optional
         No data value to use for rasterization, by default -1. If a list is provided,
         it should have the same length has variables.
     rasterize_method : str, optional
@@ -497,7 +528,7 @@ def grid_from_geodataframe(
         Name of mask in self.grid to use for masking raster_data. By default 'mask'.
         Use None to disable masking.
     rename: dict or str, optional
-        Dictionary to rename variable names in variables before adding to grid
+        dictionary to rename variable names in variables before adding to grid
         {'name_in_variables': 'name_in_grid'}. To rename with method fraction
         or area give directly 'name_in_grid' string. By default empty.
     all_touched : bool, optional
@@ -569,7 +600,7 @@ def grid_from_geodataframe(
 
 def rotated_grid(
     pol: Polygon, res: float, dec_origin=0, dec_rotation=3
-) -> Tuple[float, float, int, int, float]:
+) -> tuple[float, float, int, int, float]:
     """Return the origin (x0, y0), shape (mmax, nmax) and rotation of the rotated grid.
 
     The grid is fitted to the minimum rotated rectangle around the
@@ -625,7 +656,7 @@ def rotated_grid(
 
 def _extract_coords_from_geom(
     geom: gpd.GeoDataFrame, *, res: float, align: bool
-) -> Tuple[np.typing.ArrayLike, np.typing.ArrayLike]:
+) -> tuple[np.typing.ArrayLike, np.typing.ArrayLike]:
     xmin, ymin, xmax, ymax = geom.total_bounds
     res = abs(res)
     if align:
@@ -654,11 +685,11 @@ def _extract_coords_from_basin(
     geom: gpd.GeoDataFrame,
     *,
     hydrography_fn: str,
-    res: Optional[float],
-    crs: Optional[int],
+    res: float | None,
+    crs: int | None,
     align: bool,
     data_catalog: DataCatalog,
-) -> Tuple[np.typing.ArrayLike, np.typing.ArrayLike, CRS]:
+) -> tuple[np.typing.ArrayLike, np.typing.ArrayLike, CRS]:
     da_hyd = data_catalog.get_rasterdataset(hydrography_fn, geom=geom)
 
     if not res:
