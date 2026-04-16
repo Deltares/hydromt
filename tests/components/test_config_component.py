@@ -174,58 +174,58 @@ def test_get_config_abs_path(tmp_path: Path):
 
 class TestCheckEqual:
     def test_check_equal_identical(self, test_config_dict: dict):
-        errors = _check_equal(test_config_dict, test_config_dict, "config")
+        errors = _check_equal(test_config_dict, test_config_dict)
         assert errors == {}
 
     def test_check_equal_simple_value_mismatch(self):
         data = {"section1": {"int": 1}}
         other = {"section1": {"int": 2}}
-        errors = _check_equal(data, other, "config")
-        assert "config.section1.int" in errors
-        assert "values not equal" in errors["config.section1.int"]
+        errors = _check_equal(data, other)
+        assert "section1.int" in errors
+        assert "values not equal" in errors["section1.int"]
 
     def test_check_equal_type_mismatch(self):
         data = {"section1": {"int": 1}}
         other = {"section1": {"int": "1"}}  # type mismatch
-        errors = _check_equal(data, other, "config")
-        assert "config.section1.int" in errors
-        assert "types do not match" in errors["config.section1.int"]
+        errors = _check_equal(data, other)
+        assert "section1.int" in errors
+        assert "types do not match" in errors["section1.int"]
 
     def test_check_equal_key_missing_from_other(self):
         data = {"section1": {"int": 1}}
         other = {"section1": {}}
-        errors = _check_equal(data, other, "config")
-        assert "config.section1.int" in errors
-        assert "missing from other" in errors["config.section1.int"]
+        errors = _check_equal(data, other)
+        assert "section1.int" in errors
+        assert "missing from other" in errors["section1.int"]
 
     def test_check_equal_key_missing_from_self(self):
         data = {"section1": {"int": 1}}
         other = {"section1": {"int": 1, "extra": 2}}
-        errors = _check_equal(data, other, "config")
-        assert "config.section1.extra" in errors
-        assert "missing from self" in errors["config.section1.extra"]
+        errors = _check_equal(data, other)
+        assert "section1.extra" in errors
+        assert "missing from self" in errors["section1.extra"]
 
     def test_check_equal_collects_all_errors(self):
         """All mismatches are reported, not just the first one."""
         data = {"a": 1, "b": 2, "c": 3}
         other = {k: 9 for k in data}
-        errors = _check_equal(data, other, "config")
-        assert "config.a" in errors
-        assert "config.b" in errors
-        assert "config.c" in errors
+        errors = _check_equal(data, other)
+        assert "a" in errors
+        assert "b" in errors
+        assert "c" in errors
 
     def test_check_equal_nested_mismatch(self):
         a = {"section": {"key": 1}}
         b = {"section": {"key": 2}}
-        errors = _check_equal(a, b, "config")
-        assert "config.section.key" in errors
+        errors = _check_equal(a, b)
+        assert "section.key" in errors
 
     def test_check_equal_nested_missing_key(self):
         a = {"section": {"key1": 1, "key2": 2}}
         b = {"section": {"key1": 1}}
-        errors = _check_equal(a, b, "config")
-        assert "config.section.key2" in errors
-        assert "config.section.key1" not in errors
+        errors = _check_equal(a, b)
+        assert "section.key2" in errors
+        assert "section.key1" not in errors
 
 
 class TestConfigComponentEqual:

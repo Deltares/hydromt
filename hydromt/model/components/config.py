@@ -344,14 +344,27 @@ class ConfigComponent(ModelComponent):
         other_config = cast(ConfigComponent, other)
 
         # not enough details in python recursion
-        config_errors = _check_equal(self.data, other_config.data, "config")
+        config_errors = _check_equal(self.data, other_config.data)
         return len(config_errors) == 0, config_errors
 
 
 def _check_equal(a: Any, b: Any, name: str = "") -> dict[str, Any]:
-    """Recursive test of model components.
+    """Recursively check if two values are equal, and return a dict of errors if not.
 
-    Returns dict with component name and associated error message.
+    Parameters
+    ----------
+    a: Any
+        The first value to compare.
+    b: Any
+        The second value to compare.
+    name: str
+        The name of the property being compared, used for error reporting.
+        Should be empty when called by the user, and will be populated with the nested keys when called recursively.
+
+    Returns
+    -------
+    dict[str, str]
+        A dict of errors, where the keys are the property names and the values are the error messages.
     """
     errors = {}
     if not isinstance(b, type(a)):
@@ -361,7 +374,7 @@ def _check_equal(a: Any, b: Any, name: str = "") -> dict[str, Any]:
     if isinstance(a, dict):
         all_keys = a.keys() | b.keys()
         for key in all_keys:
-            child_name = f"{name}.{key}"
+            child_name = f"{name}.{key}" if name else key
             if key not in a:
                 errors[child_name] = f"{key} missing from self"
             elif key not in b:
