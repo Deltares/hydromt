@@ -149,20 +149,31 @@ class SpatialModelComponent(ModelComponent, ABC):
         eq, errors = super().test_equal(other)
         if not eq:
             return eq, errors
-        other_region = cast(SpatialModelComponent, other)
 
-        try:
-            # empty components are still equal
-            if self.region is not None or other.region is not None:
-                gpd.testing.assert_geodataframe_equal(
-                    self.region.copy(),
-                    other_region.region.copy(),
-                    check_like=True,
-                    check_less_precise=True,
-                    normalize=True,
-                )
-        except AssertionError as e:
-            errors["data"] = str(e)
+        other = cast(SpatialModelComponent, other)
+        if self.region is None and other.region is None:
+            pass
+        elif self.region is None:
+            errors["data"] = (
+                "Region data is missing in this component but not in the other."
+            )
+        elif other.region is None:
+            errors["data"] = (
+                "Region data is missing in the other component but not in this one."
+            )
+        else:
+            try:
+                # empty components are still equal
+                if self.region is not None or other.region is not None:
+                    gpd.testing.assert_geodataframe_equal(
+                        self.region.copy(),
+                        other.region.copy(),
+                        check_like=True,
+                        check_less_precise=True,
+                        normalize=True,
+                    )
+            except AssertionError as e:
+                errors["data"] = str(e)
 
         return len(errors) == 0, errors
 

@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import geopandas as gpd
 import numpy as np
@@ -10,6 +10,13 @@ from pytest_mock import MockerFixture
 
 from hydromt.model.components.grid import (
     GridComponent,
+)
+
+_TEST_EQUAL_GRID_DATA_IMPORT_PATH = (
+    "hydromt.model.components.grid._test_equal_grid_data"
+)
+_SUPER_TEST_EQUAL_IN_SPATIAL = (
+    "hydromt.model.components.spatial.SpatialModelComponent.test_equal"
 )
 
 
@@ -293,3 +300,61 @@ def test_set_with_flipud(
     grid_component.set(data_array, force_sn=force_sn)
 
     assert (grid_component.data["test_var"].values == expected_data).all()
+
+
+def test_gridcomponent_test_equal_identical(mock_model, hydds):
+    # Identical grid components should be equal
+    grid1 = GridComponent(mock_model)
+    grid2 = GridComponent(mock_model)
+    grid1.set(hydds, name="test")
+    grid2.set(hydds.copy(deep=True), name="test")
+    with patch(_TEST_EQUAL_GRID_DATA_IMPORT_PATH, return_value=(True, {})):
+        eq, errors = grid1.test_equal(grid2)
+    assert eq
+    assert errors == {}
+
+
+def test_gridcomponent_test_equal_class_mismatch(mock_model):
+    grid = GridComponent(mock_model)
+
+    class Dummy:
+        pass
+
+    dummy = Dummy()
+    eq, errors = grid.test_equal(dummy)
+    assert not eq
+    assert "__class__" in errors
+
+
+def test_gridcomponent_test_equal_missing_key(mock_model, hydds):
+    grid1 = GridComponent(mock_model)
+    grid2 = GridComponent(mock_model)
+    grid1.set(hydds, name="test")
+    # grid2 has no data
+    grid2._initialize_grid()
+    with (
+        patch(_TEST_EQUAL_GRID_DATA_IMPORT_PATH, return_value=(True, {})),
+        patch(_SUPER_TEST_EQUAL_IN_SPATIAL, return_value=(True, {})),
+    ):
+        eq, errors = grid1.test_equal(grid2)
+    assert not eq, (
+        f"Expected components to be not equal due to missing data, but got equal. Errors: {errors}"
+    )
+    assert list(errors.values())[0].startswith("Grid not found in other component.")
+
+
+def test_gridcomponent_test_equal_grid_not_equal(mock_model, hydds):
+    grid1 = GridComponent(mock_model)
+    grid2 = GridComponent(mock_model)
+    grid1.set(hydds)
+    grid2.set(hydds.copy(deep=True))
+    # Simulate grid data not equal
+    with patch(
+        _TEST_EQUAL_GRID_DATA_IMPORT_PATH,
+        return_value=(False, {"err": "fail"}),
+    ):
+        eq, errors = grid1.test_equal(grid2)
+    assert not eq, (
+        f"Expected components to be not equal due to grid data mismatch, but got equal. Errors: {errors}"
+    )
+    assert any("Grid is not equal" in v for v in errors.values())
