@@ -15,6 +15,7 @@ New
 ---
 - Added earthdatahub_data predefined catalog for accessing ERA5_land, ERA5_land_hourly, ERA5_ocean (#1357).
 - Added ``precision`` parameter to ``GeomsComponent.write`` to set the number of decimals used when writing (#1415)
+- Added ``SlippyTileDriver`` for reading XYZ/slippy map tiles stored in ``{zoom}/{x}/{y}.png`` (#1417)
 
 Changed
 -------
