@@ -6,6 +6,7 @@ from hydromt._utils.dataset import (
     _set_metadata,
     _shift_dataset_time,
     _single_var_as_array,
+    _test_equal_grid_data,
 )
 from hydromt._utils.deep_merge import _deep_merge
 from hydromt._utils.dictionaries import _partition_dictionaries
