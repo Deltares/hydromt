@@ -3,7 +3,7 @@
 import os
 import shutil
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import geopandas as gpd
 import numpy as np
@@ -281,6 +281,7 @@ class TestS3Download:
         )
         assert result == 0
 
+    @patch("hydromt.data_catalog.drivers.raster.slippy_tile_driver.boto3")
     def test_download_missing_tiles_downloads(self, mock_boto3, tmp_path):
         """Missing tiles should be downloaded."""
         mock_client = MagicMock()
@@ -291,6 +292,7 @@ class TestS3Download:
         assert result == 1
         mock_client.download_file.assert_called_once()
 
+    @patch("hydromt.data_catalog.drivers.raster.slippy_tile_driver.boto3")
     def test_download_skips_existing_tiles(self, mock_boto3, tmp_path):
         """Tiles that already exist locally should not be downloaded."""
         tile_path = tmp_path / "1" / "0"
