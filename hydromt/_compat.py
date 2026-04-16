@@ -1,15 +1,13 @@
 import sys
-from typing import List
 
-from packaging.version import Version
-
-__all__: List[str] = []
+__all__: list[str] = []
 
 HAS_GCSFS = False
 HAS_GDAL = False
 HAS_OPENPYXL = False
 HAS_PYET = False
 HAS_S3FS = False
+HAS_BOTO3 = False
 
 try:
     import gcsfs
@@ -43,6 +41,13 @@ try:
     import s3fs
 
     HAS_S3FS = True
+except ImportError:
+    pass
+
+try:
+    import boto3
+
+    HAS_BOTO3 = True
 except ImportError:
     pass
 

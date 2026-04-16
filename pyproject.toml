@@ -68,6 +68,7 @@ io = [
 	"openpyxl",         # excel IO
 	"pillow",           # image IO
 	"s3fs",             # S3 file system
+	"boto3"				# Slippy tile driver
 ]
 vrt = [
 	"gdal>=3.5.0", # vrt for caching of mosaic raster

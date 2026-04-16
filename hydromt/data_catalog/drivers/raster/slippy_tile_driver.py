@@ -34,13 +34,14 @@ import math
 import os
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from typing import Any, ClassVar, List, Optional, Tuple
+from typing import Any, ClassVar
 
 import numpy as np
 import xarray as xr
 from PIL import Image
 from pydantic import Field
 
+from hydromt._compat import HAS_BOTO3
 from hydromt.data_catalog.drivers.base_driver import DriverOptions
 from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
     RasterDatasetDriver,
@@ -48,22 +49,12 @@ from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.typing import Geom, SourceMetadata, Variables, Zoom
 
-logger = logging.getLogger(__name__)
-
-# Optional S3 dependency
-try:
+if HAS_BOTO3:
     import boto3
     from botocore import UNSIGNED
     from botocore.client import Config as BotoConfig
 
-    _HAS_BOTO3 = True
-except ImportError:
-    # Bind the names to None so tests can ``mock.patch(..., 'boto3')`` and
-    # downstream code can do a single ``if not _HAS_BOTO3`` guard.
-    boto3 = None
-    UNSIGNED = None
-    BotoConfig = None
-    _HAS_BOTO3 = False
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Tile utilities (adapted from cht_tiling.utils)
@@ -76,8 +67,7 @@ _ZOOM0_PIXEL_SIZE = 156543.03
 # at ±180° longitude / ±~85.0511° latitude.
 _WEBMERCATOR_HALF_EXTENT = 20037508.34
 
-# Powers of two used by the PNG elevation decoders below. Precomputed once
-# so the inner loops don't recompute them per call / per tile.
+# Powers of two used by the PNG elevation decoders below.
 _TWO_POW_8 = 256  # 2**8 — byte
 _TWO_POW_15 = 32768  # 2**15 — terrarium zero offset
 _TWO_POW_16 = 65536  # 2**16 — two-byte word
@@ -121,7 +111,7 @@ def _get_zoom_level_for_resolution(dx: float) -> int:
     return int(izoom[0])
 
 
-def _webmercator_to_latlon(easting: float, northing: float) -> Tuple[float, float]:
+def _webmercator_to_latlon(easting: float, northing: float) -> tuple[float, float]:
     """Convert Web Mercator (EPSG:3857) to latitude/longitude (degrees)."""
     lon = (easting / _WEBMERCATOR_HALF_EXTENT) * 180.0
     lat = (180.0 / math.pi) * (
@@ -131,7 +121,7 @@ def _webmercator_to_latlon(easting: float, northing: float) -> Tuple[float, floa
     return lat, lon
 
 
-def _latlon_to_webmercator(lat: float, lon: float) -> Tuple[float, float]:
+def _latlon_to_webmercator(lat: float, lon: float) -> tuple[float, float]:
     """Convert latitude/longitude (degrees) to Web Mercator (EPSG:3857)."""
     x = lon * _WEBMERCATOR_HALF_EXTENT / 180.0
     y = (
@@ -140,7 +130,7 @@ def _latlon_to_webmercator(lat: float, lon: float) -> Tuple[float, float]:
     return x, y
 
 
-def _latlon_to_tile_indices(lat: float, lon: float, zoom: int) -> Tuple[int, int]:
+def _latlon_to_tile_indices(lat: float, lon: float, zoom: int) -> tuple[int, int]:
     """Convert latitude/longitude to tile column and row indices."""
     tile_x = int((lon + 180.0) / 360.0 * (2**zoom))
     tile_y = int(
@@ -159,7 +149,7 @@ def _latlon_to_tile_indices(lat: float, lon: float, zoom: int) -> Tuple[int, int
     return tile_x, tile_y
 
 
-def _xy2num(easting: float, northing: float, zoom: int) -> Tuple[int, int]:
+def _xy2num(easting: float, northing: float, zoom: int) -> tuple[int, int]:
     """Convert Web Mercator coordinates to tile indices.
 
     Parameters
@@ -178,7 +168,7 @@ def _xy2num(easting: float, northing: float, zoom: int) -> Tuple[int, int]:
     return _latlon_to_tile_indices(lat, lon, zoom)
 
 
-def _num2xy(xtile: int, ytile: int, zoom: int) -> Tuple[float, float]:
+def _num2xy(xtile: int, ytile: int, zoom: int) -> tuple[float, float]:
     """Convert tile indices to the upper-left Web Mercator coordinates.
 
     Parameters
@@ -320,7 +310,7 @@ def _download_missing_tiles(
     s3_bucket: str,
     s3_key: str,
     s3_region: str,
-    tile_indices: List[Tuple[int, int, int]],
+    tile_indices: list[tuple[int, int, int]],
 ) -> int:
     """Download missing tiles from S3 in parallel.
 
@@ -342,12 +332,12 @@ def _download_missing_tiles(
     int
         Number of tiles downloaded.
     """
-    if not _HAS_BOTO3:
+    if not HAS_BOTO3:
         logger.warning("boto3 not installed — cannot download missing tiles from S3.")
         return 0
 
     # Collect missing tiles
-    to_download: List[Tuple[str, str]] = []  # (s3_key, local_path)
+    to_download: list[tuple[str, str]] = []  # (s3_key, local_path)
     for izoom, itile, j in tile_indices:
         png_file = os.path.join(tile_root, str(izoom), str(itile), f"{j}.png")
         if not os.path.exists(png_file):
@@ -410,14 +400,12 @@ class SlippyTileOptions(DriverOptions):
     encoder: str = Field(default="terrarium", description="PNG encoding scheme")
     encoder_vmin: float = Field(default=0.0, description="Min value for float encoders")
     encoder_vmax: float = Field(default=1.0, description="Max value for float encoders")
-    max_zoom: Optional[int] = Field(
-        default=None, description="Max available zoom level"
-    )
+    max_zoom: int | None = Field(default=None, description="Max available zoom level")
     variable_name: str = Field(default="elevation", description="Output variable name")
     tile_size: int = Field(default=256, description="Tile pixel size")
-    s3_bucket: Optional[str] = Field(default=None, description="S3 bucket name")
-    s3_key: Optional[str] = Field(default=None, description="S3 key prefix")
-    s3_region: Optional[str] = Field(default=None, description="AWS region")
+    s3_bucket: str | None = Field(default=None, description="S3 bucket name")
+    s3_key: str | None = Field(default=None, description="S3 key prefix")
+    s3_region: str | None = Field(default=None, description="AWS region")
 
 
 class SlippyTileDriver(RasterDatasetDriver):
@@ -608,7 +596,7 @@ class SlippyTileDriver(RasterDatasetDriver):
         return max_zoom
 
     @staticmethod
-    def _mask_to_bbox_3857(mask: Geom) -> Tuple[float, float, float, float]:
+    def _mask_to_bbox_3857(mask: Geom) -> tuple[float, float, float, float]:
         """Convert a mask geometry to a bounding box in EPSG:3857."""
         gdf = mask.to_crs(3857)
         return tuple(gdf.total_bounds)

@@ -1,8 +1,9 @@
 """Tests for the SlippyTile raster driver."""
 
 import os
+import shutil
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import geopandas as gpd
 import numpy as np
@@ -11,8 +12,9 @@ import xarray as xr
 from PIL import Image
 from shapely.geometry import box
 
+from hydromt._compat import HAS_BOTO3
+from hydromt.data_catalog import DataCatalog
 from hydromt.data_catalog.drivers.raster.slippy_tile_driver import (
-    _HAS_BOTO3,
     SlippyTileDriver,
     SlippyTileOptions,
     _download_missing_tiles,
@@ -26,10 +28,6 @@ from hydromt.data_catalog.drivers.raster.slippy_tile_driver import (
     _xy2num,
 )
 from hydromt.error import NoDataStrategy
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
 
 
 def _elevation2terrarium(val: np.ndarray) -> np.ndarray:
@@ -83,11 +81,6 @@ def _make_mask_gdf(xmin: float, ymin: float, xmax: float, ymax: float, crs: int 
     return gpd.GeoDataFrame(geometry=[box(xmin, ymin, xmax, ymax)], crs=crs)
 
 
-# ---------------------------------------------------------------------------
-# Tile utility tests
-# ---------------------------------------------------------------------------
-
-
 class TestTileUtilities:
     """Tests for the tile-math helper functions."""
 
@@ -137,11 +130,6 @@ class TestTileUtilities:
         x, y = _num2xy(0, 0, 0)
         assert x == pytest.approx(-20037508.34, rel=1e-4)
         assert y == pytest.approx(20037508.34, rel=1e-4)
-
-
-# ---------------------------------------------------------------------------
-# PNG encoding / decoding tests
-# ---------------------------------------------------------------------------
 
 
 class TestPng2Elevation:
@@ -266,11 +254,7 @@ class TestPng2Elevation:
             _png2elevation(str(path), encoder="bogus")
 
 
-# ---------------------------------------------------------------------------
-# S3 download tests (mocked)
-# ---------------------------------------------------------------------------
-
-
+@pytest.mark.skipif(not HAS_BOTO3, reason="Requires boto3 for S3 download tests")
 class TestS3Download:
     """Tests for S3 tile download functions with mocked boto3."""
 
@@ -290,7 +274,6 @@ class TestS3Download:
         )
         assert result is False
 
-    @patch("hydromt.data_catalog.drivers.raster.slippy_tile_driver._HAS_BOTO3", False)
     def test_download_missing_tiles_no_boto3(self, tmp_path):
         """Without boto3, download should return 0."""
         result = _download_missing_tiles(
@@ -298,14 +281,6 @@ class TestS3Download:
         )
         assert result == 0
 
-    @patch("hydromt.data_catalog.drivers.raster.slippy_tile_driver._HAS_BOTO3", True)
-    @patch(
-        "hydromt.data_catalog.drivers.raster.slippy_tile_driver.UNSIGNED", "UNSIGNED"
-    )
-    @patch(
-        "hydromt.data_catalog.drivers.raster.slippy_tile_driver.BotoConfig", MagicMock()
-    )
-    @patch("hydromt.data_catalog.drivers.raster.slippy_tile_driver.boto3")
     def test_download_missing_tiles_downloads(self, mock_boto3, tmp_path):
         """Missing tiles should be downloaded."""
         mock_client = MagicMock()
@@ -316,14 +291,6 @@ class TestS3Download:
         assert result == 1
         mock_client.download_file.assert_called_once()
 
-    @patch("hydromt.data_catalog.drivers.raster.slippy_tile_driver._HAS_BOTO3", True)
-    @patch(
-        "hydromt.data_catalog.drivers.raster.slippy_tile_driver.UNSIGNED", "UNSIGNED"
-    )
-    @patch(
-        "hydromt.data_catalog.drivers.raster.slippy_tile_driver.BotoConfig", MagicMock()
-    )
-    @patch("hydromt.data_catalog.drivers.raster.slippy_tile_driver.boto3")
     def test_download_skips_existing_tiles(self, mock_boto3, tmp_path):
         """Tiles that already exist locally should not be downloaded."""
         tile_path = tmp_path / "1" / "0"
@@ -337,11 +304,6 @@ class TestS3Download:
         )
         assert result == 0
         mock_client.download_file.assert_not_called()
-
-
-# ---------------------------------------------------------------------------
-# SlippyTileDriver tests
-# ---------------------------------------------------------------------------
 
 
 class TestSlippyTileDriver:
@@ -535,33 +497,44 @@ class TestSlippyTileOptions:
         assert opts.s3_bucket == "my-bucket"
 
 
-# ---------------------------------------------------------------------------
-# Integration tests against a real S3 bucket
-# ---------------------------------------------------------------------------
+@pytest.fixture(scope="module")
+def gebco_2024_catalog_path(test_data_dir):
+    """Return the path to the checked-in GEBCO 2024 catalog YAML file.
+
+    This fixture is used by the S3 integration tests to load the catalog YAML
+    that points to the public Deltares S3 bucket. The catalog YAML is checked in
+    under tests/data/gebco_2024/data_catalog.yml and includes some pre-cached
+    tiles for the North Sea region, allowing tests to run offline for that area.
+    """
+    path = test_data_dir / "gebco_2024" / "data_catalog.yml"
+    assert path.is_file(), f"Expected catalog YAML at {path}"
+    return path
 
 
-# Path to the checked-in GEBCO 2024 catalog used for the integration tests.
-# The catalog points at the public Deltares S3 bucket; tiles already cached
-# under the catalog directory are reused, anything missing is downloaded.
-# See tests/data/gebco_2024/data_catalog.yml.
-_GEBCO_2024_CATALOG_PATH = (
-    Path(__file__).parents[3] / "data" / "gebco_2024" / "data_catalog.yml"
-)
+@pytest.fixture(scope="module")
+def north_sea_bbox():
+    """Return a bounding box over the southern North Sea / Wadden region (lon, lat, WGS84).
 
-# Bounding box over the southern North Sea / Wadden region (lon, lat, WGS84).
-# Tiles for this bbox are checked in alongside the catalog, so the test
-# covers the cache-hit path and runs offline.
-_NORTH_SEA_BBOX = (5.0, 52.0, 6.0, 56.0)
+    Tiles for this bbox are checked in alongside the catalog, so the test
+    covers the cache-hit path and runs offline.
+    """
+    return (5.0, 52.0, 6.0, 56.0)
 
-# Bounding box off the US south-east coast (Atlantic, near Florida/Georgia).
-# Tiles for this bbox are NOT checked in, so the test exercises the actual
-# S3 download path. Downloads are redirected to a temp directory so the
-# repository stays clean.
-_FLORIDA_BBOX = (-80.0, 30.0, -78.0, 32.0)
+
+@pytest.fixture(scope="module")
+def florida_bbox():
+    """Return a bounding box off the US south-east coast (lon, lat, WGS84).
+
+    Tiles for this bbox are NOT checked in, so the test exercises the actual
+    S3 download path. Downloads are redirected to a temp directory so the
+    repository stays clean.
+
+    """
+    return (-80.0, 30.0, -78.0, 32.0)
 
 
 @pytest.mark.integration
-@pytest.mark.skipif(not _HAS_BOTO3, reason="boto3 required for S3 integration")
+@pytest.mark.skipif(not HAS_BOTO3, reason="boto3 required for S3 integration")
 class TestSlippyTileDriverS3Integration:
     """End-to-end tests against the public deltares-ddb GEBCO 2024 tile set.
 
@@ -571,14 +544,16 @@ class TestSlippyTileDriverS3Integration:
     ``s3://deltares-ddb/data/bathymetry/gebco_2024/``.
     """
 
-    def test_load_catalog(self):
+    def test_load_catalog(self, gebco_2024_catalog_path):
         """The checked-in catalog YAML loads and exposes the expected source."""
         from hydromt.data_catalog import DataCatalog
 
-        cat = DataCatalog(data_libs=[str(_GEBCO_2024_CATALOG_PATH)])
+        cat = DataCatalog(data_libs=[str(gebco_2024_catalog_path)])
         assert "gebco_2024" in cat.sources
 
-    def test_get_rasterdataset_cached_north_sea(self):
+    def test_get_rasterdataset_cached_north_sea(
+        self, gebco_2024_catalog_path, north_sea_bbox
+    ):
         """Reading a bbox whose tiles are already cached should not hit S3.
 
         Tiles for the North-Sea bbox are committed under
@@ -586,10 +561,10 @@ class TestSlippyTileDriverS3Integration:
         """
         from hydromt.data_catalog import DataCatalog
 
-        cat = DataCatalog(data_libs=[str(_GEBCO_2024_CATALOG_PATH)])
+        cat = DataCatalog(data_libs=[str(gebco_2024_catalog_path)])
         ds = cat.get_rasterdataset(
             "gebco_2024",
-            bbox=_NORTH_SEA_BBOX,
+            bbox=north_sea_bbox,
             zoom=(2000, "metre"),
         )
 
@@ -601,24 +576,21 @@ class TestSlippyTileDriverS3Integration:
         assert np.nanmin(values) < 0, "Expected negative bathymetry in the North Sea"
         assert np.nanmax(np.abs(values[finite])) < 5000
 
-    def test_get_rasterdataset_downloads_florida(self, tmp_path):
+    def test_get_rasterdataset_downloads_florida(
+        self, tmp_path, gebco_2024_catalog_path, florida_bbox
+    ):
         """Reading an uncached bbox should download tiles from S3.
 
         The catalog YAML is copied to ``tmp_path`` so its resolved root sits
         in the temp directory and the downloaded tiles vanish at the end of
         the test, keeping the repo clean.
         """
-        import shutil
-
-        from hydromt.data_catalog import DataCatalog
-
-        local_catalog = tmp_path / "data_catalog.yml"
-        shutil.copy(_GEBCO_2024_CATALOG_PATH, local_catalog)
-
-        cat = DataCatalog(data_libs=[str(local_catalog)])
+        tmp_data_catalog = tmp_path / "data_catalog.yml"
+        shutil.copy2(str(gebco_2024_catalog_path), str(tmp_data_catalog))
+        cat = DataCatalog(data_libs=[str(tmp_data_catalog)])
         ds = cat.get_rasterdataset(
             "gebco_2024",
-            bbox=_FLORIDA_BBOX,
+            bbox=florida_bbox,
             zoom=(2000, "metre"),
         )
 
@@ -633,5 +605,5 @@ class TestSlippyTileDriverS3Integration:
         assert np.nanmax(np.abs(values[finite])) < 10000
 
         # Confirm tiles were actually downloaded to the temp catalog dir.
-        downloaded = list(tmp_path.rglob("*.png"))
+        downloaded = list(tmp_data_catalog.parent.rglob("*.png"))
         assert downloaded, "Expected at least one tile downloaded to tmp_path"
