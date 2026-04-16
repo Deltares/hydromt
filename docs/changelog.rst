@@ -14,18 +14,19 @@ Unreleased
 New
 ---
 - Added earthdatahub_data predefined catalog for accessing ERA5_land, ERA5_land_hourly, ERA5_ocean (#1357).
-- Added ``precision`` parameter to ``GeomsComponent.write`` to set the number of decimals used when writing (#1415)
-- Added ``SlippyTileDriver`` for reading XYZ/slippy map tiles stored in ``{zoom}/{x}/{y}.png`` (#1417)
+- Added ``precision`` parameter to ``GeomsComponent.write`` to set the number of decimals used when writing (#1415).
+- More informative error messages when calling ``test_equal`` on ConfigComponent (#1430).
+- Added ``SlippyTileDriver`` for reading XYZ/slippy map tiles stored in ``{zoom}/{x}/{y}.png`` (#1417).
 
 Changed
 -------
-- ``log.initialize_logging()`` is no longer called when hydromt is imported. It is now the users responsibility to configure logging at the start of their scripts. (#1399)
+- ``log.initialize_logging()`` is no longer called when hydromt is imported. It is now the users responsibility to configure logging at the start of their scripts (#1399).
 
 Fixed
 -----
-- Properly log unhandled errors to ``hydromt.log`` (#1399)
-- ``gis.vector_utils.nearest_merge`` now correctly respects ``max_dist`` filtering and ``overwrite`` flag when merging columns. (#1414)
-- Normalize geometries before comparing them in ``test_equal`` for ``SpatialModelComponent``, ``GeomsComponent`` and ``VectorComponent`` (#1415)
+- Properly log unhandled errors to ``hydromt.log`` (#1399).
+- ``gis.vector_utils.nearest_merge`` now correctly respects ``max_dist`` filtering and ``overwrite`` flag when merging columns (#1414).
+- Normalize geometries before comparing them in ``test_equal`` for ``SpatialModelComponent``, ``GeomsComponent`` and ``VectorComponent`` (#1415).
 
 Deprecated
 ----------

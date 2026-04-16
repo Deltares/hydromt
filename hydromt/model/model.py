@@ -559,8 +559,9 @@ class Model(object, metaclass=ABCMeta):
         is_equal = True
         for name, c in self.components.items():
             component_equal, component_errors = c.test_equal(other.components[name])
-            is_equal &= component_equal
-            errors.update(**component_errors)
+            if not component_equal:
+                is_equal = False
+                errors[name] = component_errors
         return is_equal, errors
 
 
