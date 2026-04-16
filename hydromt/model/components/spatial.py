@@ -153,14 +153,8 @@ class SpatialModelComponent(ModelComponent, ABC):
         other = cast(SpatialModelComponent, other)
         if self.region is None and other.region is None:
             pass
-        elif self.region is None:
-            errors["data"] = (
-                "Region data is missing in this component but not in the other."
-            )
-        elif other.region is None:
-            errors["data"] = (
-                "Region data is missing in the other component but not in this one."
-            )
+        elif self.region is None or other.region is None:
+            errors["data"] = "Region data is missing in one of the components"
         else:
             try:
                 # empty components are still equal
@@ -173,7 +167,7 @@ class SpatialModelComponent(ModelComponent, ABC):
                         normalize=True,
                     )
             except AssertionError as e:
-                errors["data"] = str(e)
+                errors["data"] = f"Not equal: {e}"
 
         return len(errors) == 0, errors
 

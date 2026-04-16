@@ -422,10 +422,10 @@ class SpatialDatasetsComponent(SpatialModelComponent):
             try:
                 eq, grid_errors = _test_equal_grid_data(ds, other.data[name])
                 if not eq:
-                    errors[name] = f"Grid is not equal: {grid_errors}"
+                    errors[name] = f"Not equal: {grid_errors}"
             except KeyError:
-                errors[name] = "Grid not found in other component."
+                errors[name] = "Not found in other component."
             except Exception as e:
-                errors[name] = f"Error comparing grids: {str(e)}"
+                errors[name] = f"Error comparing: {str(e)}"
 
         return len(errors) == 0, errors

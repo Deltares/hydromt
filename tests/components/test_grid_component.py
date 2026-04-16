@@ -340,7 +340,7 @@ def test_gridcomponent_test_equal_missing_key(mock_model, hydds):
     assert not eq, (
         f"Expected components to be not equal due to missing data, but got equal. Errors: {errors}"
     )
-    assert list(errors.values())[0].startswith("Grid not found in other component.")
+    assert list(errors.values())[0].startswith("Not found in other component.")
 
 
 def test_gridcomponent_test_equal_grid_not_equal(mock_model, hydds):
@@ -357,4 +357,4 @@ def test_gridcomponent_test_equal_grid_not_equal(mock_model, hydds):
     assert not eq, (
         f"Expected components to be not equal due to grid data mismatch, but got equal. Errors: {errors}"
     )
-    assert any("Grid is not equal" in v for v in errors.values())
+    assert any("Not equal" in v for v in errors.values())

@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 import xarray as xr
@@ -8,6 +9,13 @@ from pytest_mock import MockerFixture
 from hydromt.model import Model
 from hydromt.model.components.grid import GridComponent
 from hydromt.model.components.spatialdatasets import SpatialDatasetsComponent
+
+_SUPER_TEST_EQUAL_IN_SPATIAL = (
+    "hydromt.model.components.spatial.SpatialModelComponent.test_equal"
+)
+_TEST_EQUAL_GRID_DATA_IMPORT_PATH = (
+    "hydromt.model.components.spatialdatasets._test_equal_grid_data"
+)
 
 
 def test_model_spatialdataset_key_error(tmp_path: Path):
@@ -19,10 +27,9 @@ def test_model_spatialdataset_key_error(tmp_path: Path):
         component.data["1"]
 
 
-def test_model_spatialdataset_sets_correctly(raster_ds, tmp_path: Path):
-    m = Model(root=tmp_path, mode="r+")
-    component = SpatialDatasetsComponent(m, region_component="fake")
-    m.add_component("test_spatialdataset", component)
+def test_model_spatialdataset_sets_correctly(raster_ds, mock_model):
+    component = SpatialDatasetsComponent(mock_model, region_component="fake")
+    mock_model.add_component("test_spatialdataset", component)
 
     component.set(data=raster_ds, name="climate")
     xr.testing.assert_equal(raster_ds, component.data["climate"])
@@ -134,3 +141,58 @@ def test_spatialdataset_updates_netcdf(raster_ds, tmp_path: Path, caplog):
 
     # Check that there were no more permission errors during cleanup and files have been updated.
     assert not any(log_record.levelno == logging.ERROR for log_record in caplog.records)
+
+
+def test_spatialdatasetscomponent_test_equal_identical(mock_model, raster_ds):
+    comp1 = SpatialDatasetsComponent(mock_model, region_component="fake")
+    comp2 = SpatialDatasetsComponent(mock_model, region_component="fake")
+    comp1.set(raster_ds, name="test")
+    comp2.set(raster_ds.copy(deep=True), name="test")
+    with (
+        patch(_SUPER_TEST_EQUAL_IN_SPATIAL, return_value=(True, {})),
+        patch(_TEST_EQUAL_GRID_DATA_IMPORT_PATH, return_value=(True, {})),
+    ):
+        eq, errors = comp1.test_equal(comp2)
+    assert eq
+    assert errors == {}
+
+
+def test_spatialdatasetscomponent_test_equal_class_mismatch(mock_model):
+    comp = SpatialDatasetsComponent(mock_model, region_component="fake")
+
+    class Dummy:
+        pass
+
+    dummy = Dummy()
+    eq, errors = comp.test_equal(dummy)
+    assert not eq
+    assert "__class__" in errors
+
+
+def test_spatialdatasetscomponent_test_equal_missing_key(mock_model, raster_ds):
+    comp1 = SpatialDatasetsComponent(mock_model, region_component="fake")
+    comp2 = SpatialDatasetsComponent(mock_model, region_component="fake")
+    comp1.set(raster_ds, name="test")
+    # comp2 has no data
+    with (
+        patch(_SUPER_TEST_EQUAL_IN_SPATIAL, return_value=(True, {})),
+        patch(_TEST_EQUAL_GRID_DATA_IMPORT_PATH, return_value=(True, {})),
+    ):
+        eq, errors = comp1.test_equal(comp2)
+    assert not eq
+    assert list(errors.values())[0].startswith("Not found in other component.")
+
+
+def test_spatialdatasetscomponent_test_equal_data_not_equal(mock_model, raster_ds):
+    comp1 = SpatialDatasetsComponent(mock_model, region_component="fake")
+    comp2 = SpatialDatasetsComponent(mock_model, region_component="fake")
+    comp1.set(raster_ds, name="test")
+    comp2.set(raster_ds.copy(deep=True), name="test")
+    # Simulate data not equal
+    with (
+        patch(_SUPER_TEST_EQUAL_IN_SPATIAL, return_value=(True, {})),
+        patch(_TEST_EQUAL_GRID_DATA_IMPORT_PATH, return_value=(False, {"err": "fail"})),
+    ):
+        eq, errors = comp1.test_equal(comp2)
+    assert not eq
+    assert any("Not equal" in v for v in errors.values()), errors
