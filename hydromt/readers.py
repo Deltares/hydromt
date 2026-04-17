@@ -199,9 +199,6 @@ def open_raster(
     **kwargs:
         key-word arguments are passed to :py:meth:`xarray.open_dataset` with
         "rasterio" engine.
-    logger : logger object, optional
-        The logger object used for logging messages. If not provided, the default
-        logger will be used.
 
     Returns
     -------
@@ -489,9 +486,6 @@ def open_geodataset(
         Cannot be used with bbox.
     **kwargs:
         Key-word argument
-    logger : logger object, optional
-        The logger object used for logging messages. If not provided, the default
-        logger will be used.
 
     Returns
     -------

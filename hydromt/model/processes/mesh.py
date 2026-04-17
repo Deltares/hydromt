@@ -74,8 +74,6 @@ def create_mesh2d_from_region(
     align : bool, default True
         Align the mesh to the resolution.
         Required for 'bbox' and 'geom' region types.
-    logger : logging.Logger
-        Logger object, a default module logger is used if not specified.
     data_catalog : DataCatalog, optional
         Optional data catalog to use for reading data.
         Required if region is based on 'geom'.
@@ -140,8 +138,6 @@ def create_mesh2d_from_mesh(
         Optional EPSG code of the mesh if cannot be found.
     bounds : tuple, optional
         Bounding box to clip the mesh.
-    logger : logging.Logger
-        Logger object, a default module logger is used if not specified.
 
     Returns
     -------
