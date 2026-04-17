@@ -12,7 +12,7 @@ from scipy import ndimage
 
 from hydromt.gis.raster_utils import spread2d
 
-logger = logging.Logger(__name__)
+logger = logging.getLogger(__name__)
 
 __all__ = ["river_width", "river_depth"]
 

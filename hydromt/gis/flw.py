@@ -52,9 +52,6 @@ def flwdir_from_da(
     mask : xr.DataArray, bool, optional
         Mask for gridded flow direction data, by default None.
         If True, use the mask coordinate of `da`.
-    logger : logger object, optional
-        The logger object used for logging messages. If not provided, the default
-        logger will be used.
 
     Returns
     -------
@@ -223,22 +220,19 @@ def upscale_flwdir(
         Flow direction raster object.
     scale_ratio: int
         Size of upscaled (coarse) grid cells.
+    method : {'com2', 'com', 'eam', 'dmm'}
+        Upscaling method for flow direction data, by default 'com2'.
     uparea_name : str, optional
         Name of upstream area DataArray, by default None and derived on the fly.
     flwdir_name : str, optional
         Name of upscaled flow direction raster DataArray, by default "flwdir"
-    method : {'com2', 'com', 'eam', 'dmm'}
-        Upscaling method for flow direction data, by default 'com2'.
-    logger : logger object, optional
-        The logger object used for logging messages. If not provided, the default
-        logger will be used.
     **kwargs:
         Additional keyword arguments that are passed to the `flwdir.upscale`
         function.
 
     Returns
     -------
-    da_flwdir = xarray.DataArray
+    da_flwdir : xarray.DataArray
         Upscaled D8 flow direction grid.
     flwdir_out : pyflwdir.FlwdirRaster
         Upscaled pyflwdir flow direction raster object.
@@ -338,9 +332,6 @@ def reproject_hydrography_like(
         in `ds_hydro`.
     kwargs: key-word arguments
         key-word arguments are passed to `d8_from_dem`
-    logger : logger object, optional
-        The logger object used for logging messages. If not provided, the default
-        logger will be used.
 
     Returns
     -------
@@ -476,9 +467,6 @@ def gauge_map(
     max_dist: float, optional
         Maximum distance between original and snapped point location.
         A warning is logged if exceeded. By default 10 km.
-    logger : logger object, optional
-        The logger object used for logging messages. If not provided, the default
-        logger will be used.
 
     Returns
     -------
@@ -729,9 +717,6 @@ def dem_adjust(
     river_d8 : bool
         If True and `connectivity==4`, additionally condition river cells to D8.
         Requires `da_rivmsk`.
-    logger : logger object, optional
-        The logger object used for logging messages. If not provided, the default
-        logger will be used.
 
     Returns
     -------

@@ -105,9 +105,6 @@ class DataCatalog(object):
             By default False.
         cache_dir: str, Path, optional
             Directory root path to cache data to, by default ~/.hydromt
-        logger : logger object, optional
-            The logger object used for logging messages. If not provided, the default
-            logger will be used.
         """
         if data_libs is None:
             data_libs = []

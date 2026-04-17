@@ -100,8 +100,6 @@ def create_grid_from_region(
         number of decimals to round the origin coordinates, by default 0
     dec_rotation : int, optional
         number of decimals to round the rotation angle, by default 3
-    logger : Logger
-        Logger object, by default a module level logger is used.
 
     Returns
     -------
