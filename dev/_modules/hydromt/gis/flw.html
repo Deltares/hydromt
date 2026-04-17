@@ -472,9 +472,6 @@
 <span class="sd">    mask : xr.DataArray, bool, optional</span>
 <span class="sd">        Mask for gridded flow direction data, by default None.</span>
 <span class="sd">        If True, use the mask coordinate of `da`.</span>
-<span class="sd">    logger : logger object, optional</span>
-<span class="sd">        The logger object used for logging messages. If not provided, the default</span>
-<span class="sd">        logger will be used.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -649,22 +646,19 @@
 <span class="sd">        Flow direction raster object.</span>
 <span class="sd">    scale_ratio: int</span>
 <span class="sd">        Size of upscaled (coarse) grid cells.</span>
+<span class="sd">    method : {&#39;com2&#39;, &#39;com&#39;, &#39;eam&#39;, &#39;dmm&#39;}</span>
+<span class="sd">        Upscaling method for flow direction data, by default &#39;com2&#39;.</span>
 <span class="sd">    uparea_name : str, optional</span>
 <span class="sd">        Name of upstream area DataArray, by default None and derived on the fly.</span>
 <span class="sd">    flwdir_name : str, optional</span>
 <span class="sd">        Name of upscaled flow direction raster DataArray, by default &quot;flwdir&quot;</span>
-<span class="sd">    method : {&#39;com2&#39;, &#39;com&#39;, &#39;eam&#39;, &#39;dmm&#39;}</span>
-<span class="sd">        Upscaling method for flow direction data, by default &#39;com2&#39;.</span>
-<span class="sd">    logger : logger object, optional</span>
-<span class="sd">        The logger object used for logging messages. If not provided, the default</span>
-<span class="sd">        logger will be used.</span>
 <span class="sd">    **kwargs:</span>
 <span class="sd">        Additional keyword arguments that are passed to the `flwdir.upscale`</span>
 <span class="sd">        function.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    da_flwdir = xarray.DataArray</span>
+<span class="sd">    da_flwdir : xarray.DataArray</span>
 <span class="sd">        Upscaled D8 flow direction grid.</span>
 <span class="sd">    flwdir_out : pyflwdir.FlwdirRaster</span>
 <span class="sd">        Upscaled pyflwdir flow direction raster object.</span>
@@ -767,9 +761,6 @@
 <span class="sd">        in `ds_hydro`.</span>
 <span class="sd">    kwargs: key-word arguments</span>
 <span class="sd">        key-word arguments are passed to `d8_from_dem`</span>
-<span class="sd">    logger : logger object, optional</span>
-<span class="sd">        The logger object used for logging messages. If not provided, the default</span>
-<span class="sd">        logger will be used.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -908,9 +899,6 @@
 <span class="sd">    max_dist: float, optional</span>
 <span class="sd">        Maximum distance between original and snapped point location.</span>
 <span class="sd">        A warning is logged if exceeded. By default 10 km.</span>
-<span class="sd">    logger : logger object, optional</span>
-<span class="sd">        The logger object used for logging messages. If not provided, the default</span>
-<span class="sd">        logger will be used.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -1176,9 +1164,6 @@
 <span class="sd">    river_d8 : bool</span>
 <span class="sd">        If True and `connectivity==4`, additionally condition river cells to D8.</span>
 <span class="sd">        Requires `da_rivmsk`.</span>
-<span class="sd">    logger : logger object, optional</span>
-<span class="sd">        The logger object used for logging messages. If not provided, the default</span>
-<span class="sd">        logger will be used.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>

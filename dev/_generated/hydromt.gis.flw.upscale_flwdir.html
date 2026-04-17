@@ -915,18 +915,16 @@
 <li><p><strong>ds</strong> (<a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2026.4.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a>) – Dataset flow direction.</p></li>
 <li><p><strong>flwdir</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">pyflwdir.FlwdirRaster</span></code>) – Flow direction raster object.</p></li>
 <li><p><strong>scale_ratio</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Size of upscaled (coarse) grid cells.</p></li>
+<li><p><strong>method</strong> (<code class="docutils literal notranslate"><span class="pre">{'com2',</span> <span class="pre">'com',</span> <span class="pre">'eam',</span> <span class="pre">'dmm'}</span></code>) – Upscaling method for flow direction data, by default ‘com2’.</p></li>
 <li><p><strong>uparea_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – Name of upstream area DataArray, by default None and derived on the fly.</p></li>
 <li><p><strong>flwdir_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – Name of upscaled flow direction raster DataArray, by default “flwdir”</p></li>
-<li><p><strong>method</strong> (<code class="docutils literal notranslate"><span class="pre">{'com2',</span> <span class="pre">'com',</span> <span class="pre">'eam',</span> <span class="pre">'dmm'}</span></code>) – Upscaling method for flow direction data, by default ‘com2’.</p></li>
-<li><p><strong>logger</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">logger</span> <span class="pre">object</span></code>, <em>optional</em>) – The logger object used for logging messages. If not provided, the default
-logger will be used.</p></li>
 <li><p><strong>**kwargs</strong> – Additional keyword arguments that are passed to the <cite>flwdir.upscale</cite>
 function.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
-<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">da_flwdir</span> <span class="pre">=</span> <span class="pre">xarray.DataArray</span></code> – Upscaled D8 flow direction grid.</p></li>
+<li><p><strong>da_flwdir</strong> (<a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v2026.4.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></a>) – Upscaled D8 flow direction grid.</p></li>
 <li><p><strong>flwdir_out</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">pyflwdir.FlwdirRaster</span></code>) – Upscaled pyflwdir flow direction raster object.</p></li>
 </ul>
 </p>

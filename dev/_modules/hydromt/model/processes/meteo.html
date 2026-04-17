@@ -611,9 +611,7 @@
     <span class="n">t_out</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s2">&quot;degree C.&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">freq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">resample_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">upsampling</span><span class="o">=</span><span class="s2">&quot;bfill&quot;</span><span class="p">,</span> <span class="n">downsampling</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">)</span>
-        <span class="n">t_out</span> <span class="o">=</span> <span class="n">resample_time</span><span class="p">(</span>
-            <span class="n">t_out</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">conserve_mass</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span> <span class="o">**</span><span class="n">resample_kwargs</span>
-        <span class="p">)</span>
+        <span class="n">t_out</span> <span class="o">=</span> <span class="n">resample_time</span><span class="p">(</span><span class="n">t_out</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">conserve_mass</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">resample_kwargs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">t_out</span></div>
 
 
@@ -673,7 +671,7 @@
     <span class="k">if</span> <span class="n">freq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">resample_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">upsampling</span><span class="o">=</span><span class="s2">&quot;bfill&quot;</span><span class="p">,</span> <span class="n">downsampling</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">)</span>
         <span class="n">press_out</span> <span class="o">=</span> <span class="n">resample_time</span><span class="p">(</span>
-            <span class="n">press_out</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">conserve_mass</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span> <span class="o">**</span><span class="n">resample_kwargs</span>
+            <span class="n">press_out</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">conserve_mass</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">resample_kwargs</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">press_out</span></div>
 
