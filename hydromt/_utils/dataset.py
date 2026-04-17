@@ -125,6 +125,8 @@ def _enforce_dataset_type(maybe_ds: xr.Dataset | xr.DataArray) -> xr.Dataset:
 def _test_equal_grid_data(
     grid: xr.Dataset | xr.DataArray,
     other_grid: xr.Dataset | xr.DataArray,
+    *,
+    skip_crs: bool = False,
 ) -> tuple[bool, dict[str, str]]:
     """
     Test if two grid datasets are equal.
@@ -137,6 +139,8 @@ def _test_equal_grid_data(
         The first grid dataset to compare.
     other_grid : xr.Dataset | xr.DataArray
         The second grid dataset to compare.
+    skip_crs : bool, optional
+        Whether to skip the CRS check. Useful for non-geospatial grids. Default is False.
 
     Returns
     -------
@@ -162,8 +166,9 @@ def _test_equal_grid_data(
     # Check CRS and dims
     maps = grid.raster.vars
 
-    if not np.all(grid.raster.crs == other_grid.raster.crs):
-        errors["crs"] = "the two grids have different crs"
+    if not skip_crs:
+        if not np.all(grid.raster.crs == other_grid.raster.crs):
+            errors["crs"] = "the two grids have different crs"
 
     # check on dims names and values
     for dim in other_grid.dims:

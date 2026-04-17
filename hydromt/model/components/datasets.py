@@ -233,7 +233,9 @@ class DatasetsComponent(ModelComponent):
         other_datasets = cast(DatasetsComponent, other)
         for name, ds in self.data.items():
             try:
-                eq, grid_errors = _test_equal_grid_data(ds, other_datasets.data[name])
+                eq, grid_errors = _test_equal_grid_data(
+                    ds, other_datasets.data[name], skip_crs=True
+                )
                 if not eq:
                     errors[name] = f"Not equal: {grid_errors}"
             except KeyError:

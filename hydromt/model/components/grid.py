@@ -1,7 +1,7 @@
 """Grid Component."""
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
@@ -302,18 +302,7 @@ class GridComponent(SpatialModelComponent):
         eq, errors = super().test_equal(other)
         if not eq:
             return eq, errors
-
-        other = cast(GridComponent, other)
-        for name, ds in self.data.items():
-            try:
-                eq, grid_errors = _test_equal_grid_data(ds, other.data[name])
-                if not eq:
-                    errors[name] = f"Not equal: {grid_errors}"
-            except KeyError:
-                errors[name] = "Not found in other component."
-            except Exception as e:
-                errors[name] = f"Error comparing: {e}"
-        return len(errors) == 0, errors
+        return _test_equal_grid_data(self.data, other.data)
 
     def _get_grid_data(self) -> Union[xr.DataArray, xr.Dataset]:
         """Get grid data as xarray.DataArray from this component or the reference."""
