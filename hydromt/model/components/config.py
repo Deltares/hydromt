@@ -3,7 +3,7 @@
 import logging
 from os.path import isfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union, cast
 
 from hydromt._utils.path import _make_config_paths_relative
 from hydromt.model.components.base import ModelComponent
@@ -324,7 +324,7 @@ class ConfigComponent(ModelComponent):
         for k, v in data.items():
             self.set(k, v)
 
-    def test_equal(self, other: ModelComponent) -> Tuple[bool, Dict[str, str]]:
+    def test_equal(self, other: ModelComponent) -> tuple[bool, dict[str, str]]:
         """Test if two components are equal.
 
         Parameters
@@ -335,15 +335,54 @@ class ConfigComponent(ModelComponent):
         Returns
         -------
         tuple[bool, Dict[str, str]]
-            True if the components are equal, and a dict with the associated errors per property checked.
+            True if the components are equal, and a dict with the associated errors per
+            property checked.
         """
         eq, errors = super().test_equal(other)
         if not eq:
             return eq, errors
         other_config = cast(ConfigComponent, other)
 
-        # for once python does the recursion for us
-        if self.data == other_config.data:
-            return True, {}
-        else:
-            return False, {"config": "Configs are not equal"}
+        # not enough details in python recursion
+        config_errors = _check_equal(self.data, other_config.data)
+        return len(config_errors) == 0, config_errors
+
+
+def _check_equal(a: Any, b: Any, name: str = "") -> dict[str, Any]:
+    """Recursively check if two values are equal, and return a dict of errors if not.
+
+    Parameters
+    ----------
+    a: Any
+        The first value to compare.
+    b: Any
+        The second value to compare.
+    name: str
+        The name of the property being compared, used for error reporting.
+        Should be empty when called by the user, and will be populated with the nested keys when called recursively.
+
+    Returns
+    -------
+    dict[str, str]
+        A dict of errors, where the keys are the property names and the values are the error messages.
+    """
+    errors = {}
+    if not isinstance(b, type(a)):
+        errors[name] = "property types do not match"
+        return errors
+
+    if isinstance(a, dict):
+        all_keys = a.keys() | b.keys()
+        for key in all_keys:
+            child_name = f"{name}.{key}" if name else key
+            if key not in a:
+                errors[child_name] = f"{key} missing from self"
+            elif key not in b:
+                errors[child_name] = f"{key} missing from other"
+            else:
+                errors.update(_check_equal(a[key], b[key], child_name))
+    else:
+        if a != b:
+            errors[name] = "values not equal"
+
+    return errors

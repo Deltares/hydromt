@@ -1,5 +1,6 @@
 from os.path import abspath, isabs
 from pathlib import Path
+from typing import Any
 
 import pytest
 from tomli_w import dump as toml_dump
@@ -7,7 +8,7 @@ from yaml import dump as yaml_dump
 
 from hydromt._utils.path import _make_config_paths_absolute, _make_config_paths_relative
 from hydromt.model import Model
-from hydromt.model.components.config import ConfigComponent
+from hydromt.model.components.config import ConfigComponent, _check_equal
 from hydromt.readers import _config_read, read_yaml
 from hydromt.writers import write_yaml
 
@@ -15,7 +16,7 @@ ABS_PATH = Path(abspath(__name__))
 
 
 @pytest.fixture
-def test_config_dict():
+def test_config_dict() -> dict[str, Any]:
     return {
         "section1": {
             "list": [1, 2, 3],
@@ -169,3 +170,120 @@ def test_get_config_abs_path(tmp_path: Path):
     config_component.set("global.file", "test.file")
     assert str(config_component.get_value("global.file")) == "test.file"
     assert config_component.get_value("global.file", abs_path=True) == abs_path
+
+
+class TestCheckEqual:
+    def test_check_equal_identical(self, test_config_dict: dict):
+        errors = _check_equal(test_config_dict, test_config_dict)
+        assert errors == {}
+
+    def test_check_equal_simple_value_mismatch(self):
+        data = {"section1": {"int": 1}}
+        other = {"section1": {"int": 2}}
+        errors = _check_equal(data, other)
+        assert "section1.int" in errors
+        assert "values not equal" in errors["section1.int"]
+
+    def test_check_equal_type_mismatch(self):
+        data = {"section1": {"int": 1}}
+        other = {"section1": {"int": "1"}}  # type mismatch
+        errors = _check_equal(data, other)
+        assert "section1.int" in errors
+        assert "types do not match" in errors["section1.int"]
+
+    def test_check_equal_key_missing_from_other(self):
+        data = {"section1": {"int": 1}}
+        other = {"section1": {}}
+        errors = _check_equal(data, other)
+        assert "section1.int" in errors
+        assert "missing from other" in errors["section1.int"]
+
+    def test_check_equal_key_missing_from_self(self):
+        data = {"section1": {"int": 1}}
+        other = {"section1": {"int": 1, "extra": 2}}
+        errors = _check_equal(data, other)
+        assert "section1.extra" in errors
+        assert "missing from self" in errors["section1.extra"]
+
+    def test_check_equal_collects_all_errors(self):
+        """All mismatches are reported, not just the first one."""
+        data = {"a": 1, "b": 2, "c": 3}
+        other = {k: 9 for k in data}
+        errors = _check_equal(data, other)
+        assert "a" in errors
+        assert "b" in errors
+        assert "c" in errors
+
+    def test_check_equal_nested_mismatch(self):
+        a = {"section": {"key": 1}}
+        b = {"section": {"key": 2}}
+        errors = _check_equal(a, b)
+        assert "section.key" in errors
+
+    def test_check_equal_nested_missing_key(self):
+        a = {"section": {"key1": 1, "key2": 2}}
+        b = {"section": {"key1": 1}}
+        errors = _check_equal(a, b)
+        assert "section.key2" in errors
+        assert "section.key1" not in errors
+
+
+class TestConfigComponentEqual:
+    def test_test_equal_identical_components(self, tmp_path):
+        model = Model(root=tmp_path)
+        c1 = ConfigComponent(model)
+        c2 = ConfigComponent(model)
+        model.add_component("config", c1)
+        c1.set("a.b", 1)
+        c2.set("a.b", 1)
+        eq, errors = c1.test_equal(c2)
+        assert eq
+        assert errors == {}
+
+    def test_test_equal_different_values(self, tmp_path):
+        model = Model(root=tmp_path)
+        c1 = ConfigComponent(model)
+        c2 = ConfigComponent(model)
+        model.add_component("config", c1)
+        c1.set("a.b", 1)
+        c2.set("a.b", 99)
+        eq, errors = c1.test_equal(c2)
+        assert not eq
+        assert "a.b" in errors
+
+    def test_test_equal_missing_key(self, tmp_path):
+        model = Model(root=tmp_path)
+        c1 = ConfigComponent(model)
+        c2 = ConfigComponent(model)
+        model.add_component("config", c1)
+        c1.set("a.b", 1)
+        c1.set("a.c", 2)
+        c2.set("a.b", 1)
+        eq, errors = c1.test_equal(c2)
+        print(eq, errors)
+        assert not eq
+        assert "a.c" in errors
+
+    def test_test_equal_extra_key_in_other(self, tmp_path):
+        model = Model(root=tmp_path)
+        c1 = ConfigComponent(model)
+        c2 = ConfigComponent(model)
+        model.add_component("config", c1)
+        c1.set("a.b", 1)
+        c2.set("a.b", 1)
+        c2.set("a.c", 2)
+        eq, errors = c1.test_equal(c2)
+        print(eq, errors)
+        assert not eq
+        assert "a.c" in errors
+
+    def test_test_equal_wrong_type(self, tmp_path):
+        model = Model(root=tmp_path)
+        c1 = ConfigComponent(model)
+        c2 = ConfigComponent(model)
+        model.add_component("config", c1)
+        c1.set("a", 1)
+        c2.set("a", "1")
+        eq, errors = c1.test_equal(c2)
+        assert not eq
+        assert "a" in errors

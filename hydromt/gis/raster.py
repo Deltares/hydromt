@@ -1128,9 +1128,6 @@ class XRasterBase(XGeoBase):
         method : str, optional
             Reclassification method. For now only 'exact' for
             one-on-one cell value mapping.
-        logger:
-            The logger to be used. If no logger is provided the
-            default one will beused.
 
         Returns
         -------
@@ -1882,8 +1879,6 @@ class RasterDataArray(XRasterBase):
             Nodata value for the DataArray.
             If the nodata property and argument are both None, the _FillValue
             attribute will be removed.
-        logger:
-            The logger to use.
         """
         if nodata is None:
             nodata = self._obj.rio.nodata
@@ -2368,9 +2363,6 @@ class RasterDataArray(XRasterBase):
             Additional keyword arguments to pass into writing the raster. The
             nodata, transform, crs, count, width, and height attributes
             are ignored.
-        logger : logger object, optional
-            The logger object used for logging messages. If not provided, the default
-            logger will be used.
 
         """
         for k in ["height", "width", "count", "transform"]:
@@ -2767,7 +2759,7 @@ class RasterDataset(XRasterBase):
             If True, it will write using the windows of the output raster.
             Default is False.
         mask: bool
-            Whether to apply the mask to the tasterisation.
+            Whether to apply the mask to the rasterization.
         prefix : str, optional
             Prefix to filenames in mapstack
         postfix : str, optional
@@ -2776,9 +2768,6 @@ class RasterDataset(XRasterBase):
             Additional keyword arguments to pass into writing the raster. The
             nodata, transform, crs, count, width, and height attributes
             are ignored.
-        logger : logger object, optional
-            The logger object used for logging messages. If not provided, the default
-            logger will be used.
 
         """
         if driver not in GDAL_EXT_CODE_MAP:
