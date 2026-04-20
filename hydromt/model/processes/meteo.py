@@ -188,9 +188,7 @@ def temp(
     t_out.attrs.update(unit="degree C.")
     if freq is not None:
         resample_kwargs.update(upsampling="bfill", downsampling="mean")
-        t_out = resample_time(
-            t_out, freq, conserve_mass=False, logger=logger, **resample_kwargs
-        )
+        t_out = resample_time(t_out, freq, conserve_mass=False, **resample_kwargs)
     return t_out
 
 
@@ -247,7 +245,7 @@ def press(
     if freq is not None:
         resample_kwargs.update(upsampling="bfill", downsampling="mean")
         press_out = resample_time(
-            press_out, freq, conserve_mass=False, logger=logger, **resample_kwargs
+            press_out, freq, conserve_mass=False, **resample_kwargs
         )
     return press_out
 

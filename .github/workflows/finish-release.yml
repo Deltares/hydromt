@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: download-artifact
-        uses: dawidd6/action-download-artifact@v19
+        uses: dawidd6/action-download-artifact@v20
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: create-release-artifacts.yml
@@ -28,7 +28,7 @@ jobs:
           check_artifacts: true
           if_no_artifact_found: fail
       - name: Publish package to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.13.0
+        uses: pypa/gh-action-pypi-publish@v1.14.0
         with:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
@@ -39,7 +39,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - id: download-artifact
-      uses: dawidd6/action-download-artifact@v19
+      uses: dawidd6/action-download-artifact@v20
       with:
         github_token: ${{secrets.GITHUB_TOKEN}}
         workflow: create-release-artifacts.yml
@@ -112,7 +112,7 @@ jobs:
               ' docs/changelog.rst > release_notes.rst
 
       - name: Publish github release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           body_path: release_notes.rst
           name:  ${{ steps.calculate-release-version.outputs.RELEASE_VERSION }}

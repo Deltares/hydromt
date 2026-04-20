@@ -429,7 +429,7 @@ class VectorComponent(SpatialModelComponent):
         gdf_other = other_vector.geometry.to_frame("geometry")
         try:
             assert_geodataframe_equal(
-                gdf, gdf_other, check_like=True, check_less_precise=True
+                gdf, gdf_other, check_like=True, check_less_precise=True, normalize=True
             )
         except AssertionError as e:
             errors["geometry"] = str(e)

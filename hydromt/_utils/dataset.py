@@ -34,8 +34,8 @@ def _shift_dataset_time(
         time delta to shift the time of the dataset
     ds : xr.Dataset
         xarray dataset
-    logger : logging.Logger
-        logger
+    time_unit : str, optional
+        time unit for the time shift, by default "s"
 
     Returns
     -------
