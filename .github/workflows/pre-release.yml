@@ -47,8 +47,11 @@ jobs:
         id: version
         run: |
           SOURCE_VERSION=$(grep "__version__" hydromt/__init__.py \
-            | cut -d= -f 2 | tr -d '" ' \ # remove quote chars
-            | sed -E 's/^([0-9]+\.[0-9]+\.[0-9]+).*$/\1/') # extract base version, throw away release ident + build nr
+            | cut -d= -f 2 | tr -d '" ' \
+            | sed -E 's/^([0-9]+\.[0-9]+\.[0-9]+).*$/\1/')
+            # 'cut' removes quote chars
+            # 'sed' extract base version, throw away release ident + build nr
+
           if [ -z "$SOURCE_VERSION" ]; then
             echo "ERROR: Failed to extract base version from hydromt/__init__.py"
             exit 1
