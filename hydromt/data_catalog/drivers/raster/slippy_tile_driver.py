@@ -1,13 +1,23 @@
-"""HydroMT driver for reading XYZ / slippy map tiles.
+"""HydroMT driver for reading XYZ / slippy map tiles of packed scalar data.
 
-Reads terrain-encoded PNG tiles stored in the standard ``{zoom}/{x}/{y}.png``
-directory structure and returns the data as an ``xr.Dataset`` in EPSG:3857.
+Reads PNG tiles stored in the standard ``{zoom}/{x}/{y}.png`` directory
+structure and returns the data as an ``xr.Dataset`` in EPSG:3857 (the
+fixed projection of the XYZ / slippy tile scheme).
 
-Missing tiles are automatically downloaded from an S3 bucket when
-``s3_bucket``, ``s3_key``, and ``s3_region`` are configured.
+Scalar raster values (elevation, bathymetry, depth, precipitation, etc.)
+are packed into the PNG RGB(A) channels using one of nine encoding
+schemes: ``terrarium`` / ``terrarium16`` (the Mapzen/Mapbox terrain-RGB
+conventions), ``uint8`` / ``uint16`` / ``uint24`` / ``uint32`` (raw
+unsigned-integer packing), and ``float8`` / ``float16`` / ``float24`` /
+``float32`` (packed floats with a configurable ``[vmin, vmax]`` range).
+Elevation is the dominant use case in practice, but the mechanism is
+generic — any scalar raster can be encoded this way.
 
-Includes tile-math and PNG decoding utilities adapted from
-``cht_tiling.utils`` (Deltares).
+Remote access is limited to a public S3 bucket: when ``s3_bucket``,
+``s3_key``, and ``s3_region`` are configured, missing tiles are fetched
+on demand and cached in the local tile directory. There is no generic
+HTTP(S), WMTS, or Mapbox-protocol client here — if you need those, use
+a dedicated tile client and convert the result.
 
 Usage in a HydroMT data catalog YAML::
 
@@ -57,7 +67,7 @@ if HAS_BOTO3:
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# Tile utilities (adapted from cht_tiling.utils)
+# Tile utilities
 # ---------------------------------------------------------------------------
 
 # Pixel size at zoom 0 in metres (at the equator)
@@ -190,13 +200,17 @@ def _num2xy(xtile: int, ytile: int, zoom: int) -> tuple[float, float]:
     return _latlon_to_webmercator(lat_deg, lon_deg)
 
 
-def _png2elevation(
+def _png2value(
     png_file: str | Path,
     encoder: str = "terrarium",
     encoder_vmin: float = 0.0,
     encoder_vmax: float = 1.0,
 ) -> np.ndarray:
-    """Decode a terrain-RGB PNG tile to an elevation array.
+    """Decode a PNG tile with packed scalar values into a 2-D array.
+
+    The scalar values are typically elevation/bathymetry but can be any
+    scalar quantity (depth, precipitation, etc.) packed into the PNG
+    RGB(A) channels with one of the supported encoders.
 
     Parameters
     ----------
@@ -213,64 +227,58 @@ def _png2elevation(
     Returns
     -------
     np.ndarray
-        2-D elevation array (npix x npix).  NoData pixels are ``np.nan``
+        2-D value array (npix x npix).  NoData pixels are ``np.nan``
         for float encoders and terrarium, or ``-1`` for uint encoders.
     """
     with Image.open(png_file) as img:
         if encoder == "terrarium":
             rgb = np.array(img.convert("RGB")).astype(float)
-            elevation = (
+            value = (
                 rgb[:, :, 0] * _TWO_POW_8 + rgb[:, :, 1] + rgb[:, :, 2] / _TWO_POW_8
             ) - _TWO_POW_15
-            elevation[elevation < _TERRARIUM_NODATA_THRESHOLD] = np.nan
+            value[value < _TERRARIUM_NODATA_THRESHOLD] = np.nan
         elif encoder == "terrarium16":
             rgb = np.array(img.convert("RGB")).astype(float)
-            elevation = (rgb[:, :, 0] * _TWO_POW_8 + rgb[:, :, 1]) - _TWO_POW_15
-            elevation[elevation < _TERRARIUM_NODATA_THRESHOLD] = np.nan
+            value = (rgb[:, :, 0] * _TWO_POW_8 + rgb[:, :, 1]) - _TWO_POW_15
+            value[value < _TERRARIUM_NODATA_THRESHOLD] = np.nan
         elif encoder == "uint8":
             rgb = np.array(img.convert("RGB")).astype(int)
-            elevation = rgb[:, :, 0]
-            elevation[elevation == _MAX_UINT8] = -1
+            value = rgb[:, :, 0]
+            value[value == _MAX_UINT8] = -1
         elif encoder == "uint16":
             rgb = np.array(img.convert("RGB")).astype(int)
-            elevation = rgb[:, :, 0] * _TWO_POW_8 + rgb[:, :, 1]
-            elevation[elevation == _MAX_UINT16] = -1
+            value = rgb[:, :, 0] * _TWO_POW_8 + rgb[:, :, 1]
+            value[value == _MAX_UINT16] = -1
         elif encoder == "uint24":
             rgb = np.array(img.convert("RGB")).astype(int)
-            elevation = (
+            value = (
                 rgb[:, :, 0] * _TWO_POW_16 + rgb[:, :, 1] * _TWO_POW_8 + rgb[:, :, 2]
             )
-            elevation[elevation == _MAX_UINT24] = -1
+            value[value == _MAX_UINT24] = -1
         elif encoder == "uint32":
             rgb = np.array(img.convert("RGBA")).astype(int)
-            elevation = (
+            value = (
                 rgb[:, :, 0] * _TWO_POW_24
                 + rgb[:, :, 1] * _TWO_POW_16
                 + rgb[:, :, 2] * _TWO_POW_8
                 + rgb[:, :, 3]
             )
-            elevation[elevation == _MAX_UINT32] = -1
+            value[value == _MAX_UINT32] = -1
         elif encoder == "float8":
             rgb = np.array(img.convert("RGB")).astype(float)
             idx = rgb[:, :, 0]
-            elevation = (
-                encoder_vmin + (encoder_vmax - encoder_vmin) * idx / _FLOAT8_RANGE
-            )
-            elevation[idx == 0] = np.nan
+            value = encoder_vmin + (encoder_vmax - encoder_vmin) * idx / _FLOAT8_RANGE
+            value[idx == 0] = np.nan
         elif encoder == "float16":
             rgb = np.array(img.convert("RGB")).astype(float)
             idx = rgb[:, :, 0] * _TWO_POW_8 + rgb[:, :, 1]
-            elevation = (
-                encoder_vmin + (encoder_vmax - encoder_vmin) * idx / _FLOAT16_RANGE
-            )
-            elevation[idx == 0] = np.nan
+            value = encoder_vmin + (encoder_vmax - encoder_vmin) * idx / _FLOAT16_RANGE
+            value[idx == 0] = np.nan
         elif encoder == "float24":
             rgb = np.array(img.convert("RGB")).astype(float)
             idx = rgb[:, :, 0] * _TWO_POW_16 + rgb[:, :, 1] * _TWO_POW_8 + rgb[:, :, 2]
-            elevation = (
-                encoder_vmin + (encoder_vmax - encoder_vmin) * idx / _FLOAT24_RANGE
-            )
-            elevation[idx == 0] = np.nan
+            value = encoder_vmin + (encoder_vmax - encoder_vmin) * idx / _FLOAT24_RANGE
+            value[idx == 0] = np.nan
         elif encoder == "float32":
             rgb = np.array(img.convert("RGBA")).astype(float)
             idx = (
@@ -279,14 +287,12 @@ def _png2elevation(
                 + rgb[:, :, 2] * _TWO_POW_8
                 + rgb[:, :, 3]
             )
-            elevation = (
-                encoder_vmin + (encoder_vmax - encoder_vmin) * idx / _FLOAT32_RANGE
-            )
-            elevation[idx == 0] = np.nan
+            value = encoder_vmin + (encoder_vmax - encoder_vmin) * idx / _FLOAT32_RANGE
+            value[idx == 0] = np.nan
         else:
             raise ValueError(f"Unknown encoder: {encoder!r}")
 
-    return elevation
+    return value
 
 
 # ---------------------------------------------------------------------------
@@ -409,15 +415,18 @@ class SlippyTileOptions(DriverOptions):
 
 
 class SlippyTileDriver(RasterDatasetDriver):
-    """Read elevation data from local XYZ / slippy map tile directories.
+    """Read packed scalar raster data from XYZ / slippy map tile directories.
 
     Tiles must be stored as ``{uri}/{zoom}/{x}/{y}.png`` where *x* and *y*
-    are standard Web Mercator tile indices.  The PNG files are decoded using
-    the specified *encoder* (default: terrarium).
+    are standard Web Mercator tile indices.  The PNG files carry scalar
+    values (elevation, bathymetry, depth, precipitation, etc.) packed into
+    the RGB(A) channels and are decoded using the specified *encoder*
+    (default: ``terrarium``; see :class:`SlippyTileOptions` for the full
+    list).
 
     When ``s3_bucket``, ``s3_key``, and ``s3_region`` are set, missing tiles
-    are automatically downloaded from S3 (unsigned/public access) before
-    reading.
+    are automatically downloaded from a public S3 bucket (unsigned access)
+    before reading. No other remote protocols are supported.
 
     The returned ``xr.Dataset`` has coordinates in EPSG:3857.
     """
@@ -515,7 +524,7 @@ class SlippyTileDriver(RasterDatasetDriver):
                 png_file = os.path.join(tile_root, str(izoom), str(itile), f"{j}.png")
                 if not os.path.exists(png_file):
                     continue
-                tile_data = _png2elevation(
+                tile_data = _png2value(
                     png_file,
                     encoder=opts.encoder,
                     encoder_vmin=opts.encoder_vmin,
