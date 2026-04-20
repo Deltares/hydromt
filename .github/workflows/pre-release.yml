@@ -8,6 +8,24 @@ on:
         description: "Description for this pre-release"
         required: true
         type: string
+      base_version:
+        description: "Base version (e.g. 1.2.0). Defaults to current version in source."
+        required: false
+        type: string
+      identifier:
+        description: "Pre-release identifier. One of: rc, alpha, beta, or timestamp."
+        required: false
+        type: choice
+        options:
+          - timestamp
+          - rc
+          - alpha
+          - beta
+        default: timestamp
+      build_nr:
+        description: "Build number (e.g. 1, 2). Defaults to lowest non-existing tag."
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -22,7 +40,7 @@ jobs:
 
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.14"
+          python-version: "3.12"
 
       - name: Install build tools
         run: pip install flit twine
@@ -30,10 +48,40 @@ jobs:
       - name: Compute pre-release version
         id: version
         run: |
-          BASE_VERSION=$(grep "__version__" hydromt/__init__.py \
-            | cut -d= -f 2 | tr -d "\" " | sed 's/\.dev0$//')
-          TIMESTAMP=$(date -u +"%Y%m%d%H%M%S")
-          PRE_VERSION="${BASE_VERSION}.dev${TIMESTAMP}"
+          SOURCE_VERSION=$(grep "__version__" hydromt/__init__.py \
+            | cut -d= -f 2 | tr -d '" ' | sed 's/\.dev0$//')
+
+          BASE="${{ inputs.base_version }}"
+          if [ -z "$BASE" ]; then
+            BASE="$SOURCE_VERSION"
+          fi
+
+          IDENTIFIER="${{ inputs.identifier }}"
+
+          if [ "$IDENTIFIER" = "timestamp" ]; then
+            TIMESTAMP=$(date -u +"%Y%m%d%H%M%S")
+            PRE_VERSION="${BASE}.dev${TIMESTAMP}"
+          else
+            case "$IDENTIFIER" in
+              rc)    RELEASE_KIND="rc"    ;;
+              alpha) RELEASE_KIND="a"     ;;
+              beta)  RELEASE_KIND="b"     ;;
+            esac
+
+            BUILD_NR="${{ inputs.build_nr }}"
+            if [ -z "$BUILD_NR" ]; then
+              # Find the lowest N where the tag doesn't exist
+              N=1
+              git fetch --tags --quiet
+              while git tag --list | grep -qx "v${BASE}.${RELEASE_KIND}${N}"; do
+                N=$((N + 1))
+              done
+              BUILD_NR="$N"
+            fi
+
+            PRE_VERSION="${BASE}.${RELEASE_KIND}${BUILD_NR}"
+          fi
+
           echo "PRE_VERSION=$PRE_VERSION" >> "$GITHUB_OUTPUT"
           echo "TAG=v${PRE_VERSION}" >> "$GITHUB_OUTPUT"
           echo "Pre-release version: $PRE_VERSION"
@@ -70,14 +118,11 @@ jobs:
           DESCRIPTION="${{ inputs.description }}"
           BRANCH="${GITHUB_REF_NAME}"
 
-          # tag the current commit
           git tag "$TAG"
           git push origin "$TAG"
 
-          # build release title
           TITLE="$TAG - $DESCRIPTION"
 
-          # generate a short body
           echo "Pre-release \`$TAG\` built from \`$BRANCH\` ($(git rev-parse --short HEAD))." > notes.md
           echo "" >> notes.md
           echo "> $DESCRIPTION" >> notes.md
