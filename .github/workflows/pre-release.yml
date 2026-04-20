@@ -13,15 +13,13 @@ on:
         required: false
         type: string
       identifier:
-        description: "Pre-release identifier. One of: rc, alpha, beta, or timestamp."
+        description: "Pre-release identifier. One of: rc or dev."
         required: false
         type: choice
         options:
-          - timestamp
           - rc
-          - alpha
-          - beta
-        default: timestamp
+          - dev
+        default: dev
       build_nr:
         description: "Build number (e.g. 1, 2). Defaults to lowest non-existing tag."
         required: false
@@ -40,7 +38,7 @@ jobs:
 
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: "3.14"
 
       - name: Install build tools
         run: pip install flit twine
@@ -49,38 +47,56 @@ jobs:
         id: version
         run: |
           SOURCE_VERSION=$(grep "__version__" hydromt/__init__.py \
-            | cut -d= -f 2 | tr -d '" ' | sed 's/\.dev0$//')
+            | cut -d= -f 2 | tr -d '" ' \ # remove quote chars
+            | sed -E 's/^([0-9]+\.[0-9]+\.[0-9]+).*$/\1/') # extract base version, throw away release ident + build nr
+          if [ -z "$SOURCE_VERSION" ]; then
+            echo "ERROR: Failed to extract base version from hydromt/__init__.py"
+            exit 1
+          fi
 
           BASE="${{ inputs.base_version }}"
           if [ -z "$BASE" ]; then
             BASE="$SOURCE_VERSION"
           fi
 
-          IDENTIFIER="${{ inputs.identifier }}"
-
-          if [ "$IDENTIFIER" = "timestamp" ]; then
-            TIMESTAMP=$(date -u +"%Y%m%d%H%M%S")
-            PRE_VERSION="${BASE}.dev${TIMESTAMP}"
-          else
-            case "$IDENTIFIER" in
-              rc)    RELEASE_KIND="rc"    ;;
-              alpha) RELEASE_KIND="a"     ;;
-              beta)  RELEASE_KIND="b"     ;;
-            esac
-
-            BUILD_NR="${{ inputs.build_nr }}"
-            if [ -z "$BUILD_NR" ]; then
-              # Find the lowest N where the tag doesn't exist
-              N=1
-              git fetch --tags --quiet
-              while git tag --list | grep -qx "v${BASE}.${RELEASE_KIND}${N}"; do
-                N=$((N + 1))
-              done
-              BUILD_NR="$N"
-            fi
-
-            PRE_VERSION="${BASE}.${RELEASE_KIND}${BUILD_NR}"
+          # Validate base version has the form x.y.z
+          if ! [[ "$BASE" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "ERROR: base_version must be in format X.Y.Z (e.g. 1.2.0). Got: '$BASE'"
+            exit 1
           fi
+
+          IDENTIFIER="${{ inputs.identifier }}"
+          case "$IDENTIFIER" in
+            rc)    RELEASE_IDENT="rc"    ;;
+            dev)   RELEASE_IDENT=".dev"  ;;
+            *)
+              echo "ERROR: Unsupported identifier '$IDENTIFIER'. Allowed: rc, dev"
+              exit 1
+              ;;
+          esac
+
+          BUILD_NR="${{ inputs.build_nr }}"
+
+          # Determine build nr if not provided
+          if [ -z "$BUILD_NR" ]; then
+            N=1
+            git fetch --tags --quiet
+            while git tag --list "v${BASE}${RELEASE_IDENT}${N}" | grep -q .; do
+              N=$((N + 1))
+            done
+            BUILD_NR="$N"
+          fi
+
+          # Validate build nr
+          if [ -n "$BUILD_NR" ]; then
+            # Validate build number if provided
+            if ! [[ "$BUILD_NR" =~ ^[0-9]+$ ]]; then
+              echo "ERROR: build_nr must be a positive integer. Got: '$BUILD_NR'"
+              exit 1
+            fi
+          fi
+
+          PRE_VERSION="${BASE}${RELEASE_IDENT}${BUILD_NR}"
 
           echo "PRE_VERSION=$PRE_VERSION" >> "$GITHUB_OUTPUT"
           echo "TAG=v${PRE_VERSION}" >> "$GITHUB_OUTPUT"
