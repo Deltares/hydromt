@@ -42,6 +42,7 @@ extent (targeting ~1024 pixels across the x-range).
 import logging
 import math
 import os
+import shutil
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any, ClassVar
@@ -298,12 +299,12 @@ def _png2value(
 # ---------------------------------------------------------------------------
 
 
-def _download_tile(fs: s3fs.S3FileSystem, bucket: str, key: str, filename: str) -> bool:
+def _download_tile(fs: Any, bucket: str, key: str, filename: str) -> bool:
     """Download a single tile from S3 via s3fs. Returns True on success."""
     try:
         Path(filename).parent.mkdir(parents=True, exist_ok=True)
         with fs.open(f"{bucket}/{key}", "rb") as src, open(filename, "wb") as dst:
-            dst.write(src.read())
+            shutil.copyfileobj(src, dst)
         return True
     except Exception as e:
         logger.error(f"Failed to download {key}: {e}")
@@ -338,7 +339,7 @@ def _download_missing_tiles(
         Number of tiles downloaded.
     """
     if not HAS_S3FS:
-        logger.warning("s3fs not installed — cannot download missing tiles from S3.")
+        logger.error("s3fs not installed — cannot download missing tiles from S3.")
         return 0
 
     # Collect missing tiles
