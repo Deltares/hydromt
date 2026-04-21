@@ -27,7 +27,7 @@ dependencies = [
 	"pyarrow",                # Apache Arrow bindings
 	"pydantic~=2.4",          # Validation
 	"pydantic-settings~=2.2", # Settings Management
-	"pyflwdir>=0.5.10",       # Hight models and derivatives
+	"pyflwdir>=0.5.10",       # Height models and derivatives
 	"pyogrio>=0.6",           # io for geopandas dataframes
 	"pyproj",                 # projections for Coordinate reference systems
 	"pystac",                 # STAC integration
