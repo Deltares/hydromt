@@ -4,11 +4,11 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
-import xarray as xr
 from geopandas import GeoDataFrame
 from pandas import DataFrame
 from xarray import DataArray, Dataset
 
+from hydromt._utils.dataset import _test_equal_grid_data
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step
@@ -416,13 +416,16 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         eq, errors = super().test_equal(other)
         if not eq:
             return eq, errors
-        other_datasets = cast(SpatialDatasetsComponent, other)
+
+        other = cast(SpatialDatasetsComponent, other)
         for name, ds in self.data.items():
-            if name not in other_datasets.data:
-                errors[name] = "Dataset not found in other component."
             try:
-                xr.testing.assert_allclose(ds, other_datasets.data[name])
-            except AssertionError as e:
-                errors[name] = str(e)
+                eq, grid_errors = _test_equal_grid_data(ds, other.data[name])
+                if not eq:
+                    errors[name] = f"Not equal: {grid_errors}"
+            except KeyError:
+                errors[name] = "Not found in other component."
+            except Exception as e:
+                errors[name] = f"Error comparing: {str(e)}"
 
         return len(errors) == 0, errors

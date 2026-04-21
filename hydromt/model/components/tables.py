@@ -181,8 +181,8 @@ class TablesComponent(ModelComponent):
         other_tables = cast(TablesComponent, other)
         for name, df in self.data.items():
             if name not in other_tables.data:
-                errors[name] = "Table not found in other component."
+                errors[name] = "Not found in other component."
             elif not df.equals(other_tables.data[name]):
-                errors[name] = "Table content is not equal."
+                errors[name] = "Not equal."
 
         return len(errors) == 0, errors
