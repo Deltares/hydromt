@@ -419,7 +419,7 @@
 <span></span><span class="sd">&quot;&quot;&quot;Implementation for grid based workflows.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -455,19 +455,21 @@
 <div class="viewcode-block" id="create_grid_from_region">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.processes.grid.create_grid_from_region.html#hydromt.model.processes.grid.create_grid_from_region">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">create_grid_from_region</span><span class="p">(</span>
-    <span class="n">region</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">region</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">data_catalog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DataCatalog</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">res</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">data_catalog</span><span class="p">:</span> <span class="n">DataCatalog</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">res</span><span class="p">:</span> <span class="n">Number</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">crs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">region_crs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4326</span><span class="p">,</span>
     <span class="n">rotated</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">hydrography_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">basin_index_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">hydrography_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">basin_index_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">add_mask</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">align</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">dec_origin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">dec_rotation</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="n">nodata</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a 2D regular grid or reads an existing grid.</span>
 
@@ -477,7 +479,7 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    region : dict</span>
-<span class="sd">        Dictionary describing region of interest, e.g.:</span>
+<span class="sd">        dictionary describing region of interest, e.g.:</span>
 <span class="sd">        * {&#39;bbox&#39;: [xmin, ymin, xmax, ymax]}</span>
 <span class="sd">        * {&#39;geom&#39;: &#39;path/to/polygon_geometry&#39;}</span>
 <span class="sd">        * {&#39;grid&#39;: &#39;path/to/grid_file&#39;}</span>
@@ -520,6 +522,10 @@
 <span class="sd">        number of decimals to round the origin coordinates, by default 0</span>
 <span class="sd">    dec_rotation : int, optional</span>
 <span class="sd">        number of decimals to round the rotation angle, by default 3</span>
+<span class="sd">    nodata : int, float, optional</span>
+<span class="sd">        The nodata value to use for the grid. By default 1.</span>
+<span class="sd">    dtype : type, optional</span>
+<span class="sd">        The data type of the grid, by default np.uint8.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -557,11 +563,17 @@
 
         <span class="k">if</span> <span class="n">rotated</span><span class="p">:</span>
             <span class="n">grid</span> <span class="o">=</span> <span class="n">create_rotated_grid_from_geom</span><span class="p">(</span>
-                <span class="n">geom</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="n">res</span><span class="p">,</span> <span class="n">dec_origin</span><span class="o">=</span><span class="n">dec_origin</span><span class="p">,</span> <span class="n">dec_rotation</span><span class="o">=</span><span class="n">dec_rotation</span>
+                <span class="n">geom</span><span class="p">,</span>
+                <span class="n">res</span><span class="o">=</span><span class="n">res</span><span class="p">,</span>
+                <span class="n">dec_origin</span><span class="o">=</span><span class="n">dec_origin</span><span class="p">,</span>
+                <span class="n">dec_rotation</span><span class="o">=</span><span class="n">dec_rotation</span><span class="p">,</span>
+                <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">xcoords</span><span class="p">,</span> <span class="n">ycoords</span> <span class="o">=</span> <span class="n">_extract_coords_from_geom</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="n">res</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="n">align</span><span class="p">)</span>
-            <span class="n">grid</span> <span class="o">=</span> <span class="n">_create_non_rotated_grid</span><span class="p">(</span><span class="n">xcoords</span><span class="p">,</span> <span class="n">ycoords</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">geom</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+            <span class="n">grid</span> <span class="o">=</span> <span class="n">_create_non_rotated_grid</span><span class="p">(</span>
+                <span class="n">xcoords</span><span class="p">,</span> <span class="n">ycoords</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">geom</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span>
+            <span class="p">)</span>
     <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;grid&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">rotated</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
@@ -578,7 +590,9 @@
         <span class="n">xcoords</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">xcoords</span><span class="o">.</span><span class="n">values</span>
         <span class="n">ycoords</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">ycoords</span><span class="o">.</span><span class="n">values</span>
         <span class="n">geom</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">box</span>
-        <span class="n">grid</span> <span class="o">=</span> <span class="n">_create_non_rotated_grid</span><span class="p">(</span><span class="n">xcoords</span><span class="p">,</span> <span class="n">ycoords</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">_create_non_rotated_grid</span><span class="p">(</span>
+            <span class="n">xcoords</span><span class="p">,</span> <span class="n">ycoords</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span>
+        <span class="p">)</span>
     <span class="k">elif</span> <span class="n">kind</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;basin&quot;</span><span class="p">,</span> <span class="s2">&quot;interbasin&quot;</span><span class="p">,</span> <span class="s2">&quot;subbasin&quot;</span><span class="p">]:</span>
         <span class="k">if</span> <span class="n">rotated</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Cannot create a rotated grid from a basin region&quot;</span><span class="p">)</span>
@@ -597,7 +611,7 @@
             <span class="n">align</span><span class="o">=</span><span class="n">align</span><span class="p">,</span>
             <span class="n">data_catalog</span><span class="o">=</span><span class="n">data_catalog</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">grid</span> <span class="o">=</span> <span class="n">_create_non_rotated_grid</span><span class="p">(</span><span class="n">xcoords</span><span class="p">,</span> <span class="n">ycoords</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">_create_non_rotated_grid</span><span class="p">(</span><span class="n">xcoords</span><span class="p">,</span> <span class="n">ycoords</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Region for grid must be of kind [grid, bbox, geom, basin, subbasin,&quot;</span>
@@ -615,7 +629,12 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_create_non_rotated_grid</span><span class="p">(</span>
-    <span class="n">xcoords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">ycoords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">crs</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">xcoords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">ycoords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">crs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">,</span>
+    <span class="n">nodata</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a grid that is not rotated based on x and y coordinates.</span>
 
@@ -627,6 +646,10 @@
 <span class="sd">        An array of y coordinates.</span>
 <span class="sd">    crs : int</span>
 <span class="sd">        The crs that the coordinates are in.</span>
+<span class="sd">    dtype : type</span>
+<span class="sd">        The data type of the grid, by default np.uint8.</span>
+<span class="sd">    nodata: int, float, optional</span>
+<span class="sd">        The nodata value to use for the grid. By default 1.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -636,8 +659,8 @@
     <span class="n">coords</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">xcoords</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">ycoords</span><span class="p">}</span>
     <span class="k">return</span> <span class="n">raster_utils</span><span class="o">.</span><span class="n">full</span><span class="p">(</span>
         <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span>
-        <span class="n">nodata</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">,</span>
+        <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mask&quot;</span><span class="p">,</span>
         <span class="n">attrs</span><span class="o">=</span><span class="p">{},</span>
         <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span>
@@ -648,7 +671,13 @@
 <div class="viewcode-block" id="create_rotated_grid_from_geom">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.processes.grid.create_rotated_grid_from_geom.html#hydromt.model.processes.grid.create_rotated_grid_from_geom">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">create_rotated_grid_from_geom</span><span class="p">(</span>
-    <span class="n">geom</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">dec_origin</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dec_rotation</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">geom</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">res</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">dec_origin</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">dec_rotation</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">nodata</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a rotated grid based on a geometry.</span>
 
@@ -662,6 +691,10 @@
 <span class="sd">        The number of significant numbers to round the origin points to.</span>
 <span class="sd">    dec_rotation : int</span>
 <span class="sd">        The number of significant numbers to round the rotation to.</span>
+<span class="sd">    nodata: int, float, None</span>
+<span class="sd">        The nodata value to use for the grid. by default 1</span>
+<span class="sd">    dtype: type</span>
+<span class="sd">        The data type of the grid, by default np.uint8.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -678,8 +711,8 @@
     <span class="k">return</span> <span class="n">raster_utils</span><span class="o">.</span><span class="n">full_from_transform</span><span class="p">(</span>
         <span class="n">transform</span><span class="p">,</span>
         <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">nmax</span><span class="p">,</span> <span class="n">mmax</span><span class="p">),</span>
-        <span class="n">nodata</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">,</span>
+        <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mask&quot;</span><span class="p">,</span>
         <span class="n">attrs</span><span class="o">=</span><span class="p">{},</span>
         <span class="n">crs</span><span class="o">=</span><span class="n">geom</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
@@ -691,12 +724,12 @@
 <div class="viewcode-block" id="grid_from_constant">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.processes.grid.grid_from_constant.html#hydromt.model.processes.grid.grid_from_constant">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">grid_from_constant</span><span class="p">(</span>
-    <span class="n">grid_like</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">],</span>
-    <span class="n">constant</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+    <span class="n">grid_like</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
+    <span class="n">constant</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">dtype</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;float32&quot;</span><span class="p">,</span>
-    <span class="n">nodata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">mask_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;mask&quot;</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+    <span class="n">nodata</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">mask_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mask&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepare a grid based on a constant value.</span>
 
@@ -708,8 +741,8 @@
 <span class="sd">        Constant value to fill grid with.</span>
 <span class="sd">    name: str</span>
 <span class="sd">        Name of grid.</span>
-<span class="sd">    dtype: str, optional</span>
-<span class="sd">        Data type of grid. By default &#39;float32&#39;.</span>
+<span class="sd">    dtype: type, optional</span>
+<span class="sd">        Data type of grid. By default np.float32.</span>
 <span class="sd">    nodata: int, float, optional</span>
 <span class="sd">        Nodata value. By default infered from dtype.</span>
 <span class="sd">    mask_name: str, optional</span>
@@ -743,13 +776,13 @@
 <div class="viewcode-block" id="grid_from_rasterdataset">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.processes.grid.grid_from_rasterdataset.html#hydromt.model.processes.grid.grid_from_rasterdataset">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">grid_from_rasterdataset</span><span class="p">(</span>
-    <span class="n">grid_like</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">],</span>
-    <span class="n">ds</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">],</span>
-    <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">fill_method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">reproject_method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="s2">&quot;nearest&quot;</span><span class="p">,</span>
-    <span class="n">mask_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;mask&quot;</span><span class="p">,</span>
-    <span class="n">rename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">grid_like</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
+    <span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
+    <span class="n">variables</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">fill_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">reproject_method</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;nearest&quot;</span><span class="p">,</span>
+    <span class="n">mask_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;mask&quot;</span><span class="p">,</span>
+    <span class="n">rename</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepare data by resampling ds to grid_like.</span>
 
@@ -774,7 +807,7 @@
 <span class="sd">        Name of mask in self.grid to use for masking raster_data. By default &#39;mask&#39;.</span>
 <span class="sd">        Use None to disable masking.</span>
 <span class="sd">    rename: dict, optional</span>
-<span class="sd">        Dictionary to rename variable names in raster_data before adding to grid</span>
+<span class="sd">        dictionary to rename variable names in raster_data before adding to grid</span>
 <span class="sd">        {&#39;name_in_raster_data&#39;: &#39;name_in_grid&#39;}. By default empty.</span>
 
 <span class="sd">    Returns</span>
@@ -814,14 +847,14 @@
 <div class="viewcode-block" id="grid_from_raster_reclass">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.processes.grid.grid_from_raster_reclass.html#hydromt.model.processes.grid.grid_from_raster_reclass">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">grid_from_raster_reclass</span><span class="p">(</span>
-    <span class="n">grid_like</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">],</span>
+    <span class="n">grid_like</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
     <span class="n">da</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
     <span class="n">reclass_table</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-    <span class="n">reclass_variables</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
-    <span class="n">fill_method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">reproject_method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="s2">&quot;nearest&quot;</span><span class="p">,</span>
-    <span class="n">mask_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;mask&quot;</span><span class="p">,</span>
-    <span class="n">rename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">reclass_variables</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+    <span class="n">fill_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">reproject_method</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;nearest&quot;</span><span class="p">,</span>
+    <span class="n">mask_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;mask&quot;</span><span class="p">,</span>
+    <span class="n">rename</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepare data variable(s) resampled to grid_like object by reclassifying the data in ``da`` based on ``reclass_table``.</span>
 
@@ -847,7 +880,7 @@
 <span class="sd">        Name of mask in self.grid to use for masking raster_data. By default &#39;mask&#39;.</span>
 <span class="sd">        Use None to disable masking.</span>
 <span class="sd">    rename: dict, optional</span>
-<span class="sd">        Dictionary to rename variable names in reclass_variables before adding to grid</span>
+<span class="sd">        dictionary to rename variable names in reclass_variables before adding to grid</span>
 <span class="sd">        {&#39;name_in_reclass_table&#39;: &#39;name_in_grid&#39;}. By default empty.</span>
 
 <span class="sd">    Returns</span>
@@ -891,14 +924,14 @@
 <div class="viewcode-block" id="grid_from_geodataframe">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.processes.grid.grid_from_geodataframe.html#hydromt.model.processes.grid.grid_from_geodataframe">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">grid_from_geodataframe</span><span class="p">(</span>
-    <span class="n">grid_like</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">],</span>
+    <span class="n">grid_like</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
     <span class="n">gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
-    <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">nodata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">rasterize_method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;value&quot;</span><span class="p">,</span>
-    <span class="n">mask_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;mask&quot;</span><span class="p">,</span>
-    <span class="n">rename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">all_touched</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">variables</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">nodata</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">rasterize_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;value&quot;</span><span class="p">,</span>
+    <span class="n">mask_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;mask&quot;</span><span class="p">,</span>
+    <span class="n">rename</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">all_touched</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepare data variable(s) resampled to grid_like object by rasterizing the data from ``gdf``.</span>
 
@@ -914,10 +947,10 @@
 <span class="sd">        Grid to copy metadata from.</span>
 <span class="sd">    gdf : gpd.GeoDataFrame</span>
 <span class="sd">        geopandas object to rasterize.</span>
-<span class="sd">    variables : List, str, optional</span>
+<span class="sd">    variables : list[str] | str, optional</span>
 <span class="sd">        List of variables to add to grid from vector_data. Required if</span>
 <span class="sd">        rasterize_method is &quot;value&quot;, by default None.</span>
-<span class="sd">    nodata : List, int, float, optional</span>
+<span class="sd">    nodata : float or int or list, optional</span>
 <span class="sd">        No data value to use for rasterization, by default -1. If a list is provided,</span>
 <span class="sd">        it should have the same length has variables.</span>
 <span class="sd">    rasterize_method : str, optional</span>
@@ -930,7 +963,7 @@
 <span class="sd">        Name of mask in self.grid to use for masking raster_data. By default &#39;mask&#39;.</span>
 <span class="sd">        Use None to disable masking.</span>
 <span class="sd">    rename: dict or str, optional</span>
-<span class="sd">        Dictionary to rename variable names in variables before adding to grid</span>
+<span class="sd">        dictionary to rename variable names in variables before adding to grid</span>
 <span class="sd">        {&#39;name_in_variables&#39;: &#39;name_in_grid&#39;}. To rename with method fraction</span>
 <span class="sd">        or area give directly &#39;name_in_grid&#39; string. By default empty.</span>
 <span class="sd">    all_touched : bool, optional</span>
@@ -1005,7 +1038,7 @@
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.processes.grid.rotated_grid.html#hydromt.model.processes.grid.rotated_grid">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">rotated_grid</span><span class="p">(</span>
     <span class="n">pol</span><span class="p">:</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">dec_origin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dec_rotation</span><span class="o">=</span><span class="mi">3</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the origin (x0, y0), shape (mmax, nmax) and rotation of the rotated grid.</span>
 
 <span class="sd">    The grid is fitted to the minimum rotated rectangle around the</span>
@@ -1062,7 +1095,7 @@
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_extract_coords_from_geom</span><span class="p">(</span>
     <span class="n">geom</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">align</span><span class="p">:</span> <span class="nb">bool</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">]:</span>
     <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">total_bounds</span>
     <span class="n">res</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">align</span><span class="p">:</span>
@@ -1091,11 +1124,11 @@
     <span class="n">geom</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">hydrography_fn</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">res</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
-    <span class="n">crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">res</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">crs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">align</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">data_catalog</span><span class="p">:</span> <span class="n">DataCatalog</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">CRS</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">CRS</span><span class="p">]:</span>
     <span class="n">da_hyd</span> <span class="o">=</span> <span class="n">data_catalog</span><span class="o">.</span><span class="n">get_rasterdataset</span><span class="p">(</span><span class="n">hydrography_fn</span><span class="p">,</span> <span class="n">geom</span><span class="o">=</span><span class="n">geom</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">res</span><span class="p">:</span>

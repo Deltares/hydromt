@@ -615,9 +615,9 @@
         <span class="n">other_tables</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">TablesComponent</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">other_tables</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
-                <span class="n">errors</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Table not found in other component.&quot;</span>
+                <span class="n">errors</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Not found in other component.&quot;</span>
             <span class="k">elif</span> <span class="ow">not</span> <span class="n">df</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">other_tables</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">]):</span>
-                <span class="n">errors</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Table content is not equal.&quot;</span>
+                <span class="n">errors</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Not equal.&quot;</span>
 
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">errors</span></div>
 </div>
