@@ -1,10 +1,16 @@
 from pathlib import Path
 from typing import cast
+from unittest.mock import patch
 
 import pytest
 
 from hydromt.model import Model
 from hydromt.model.components.datasets import DatasetsComponent
+
+_SUPER_TEST_EQUAL_IN_BASE = "hydromt.model.components.base.ModelComponent.test_equal"
+_TEST_EQUAL_GRID_DATA_IMPORT_PATH = (
+    "hydromt.model.components.datasets._test_equal_grid_data"
+)
 
 
 def test_model_dataset_key_error(tmp_path: Path):
@@ -59,3 +65,58 @@ def test_model_read_dataset(obsda, tmp_path: Path):
 
     component_data = dataset_component.data["forcing"]
     assert obsda.equals(component_data)
+
+
+def test_datasetscomponent_test_equal_identical(mock_model, obsda):
+    comp1 = DatasetsComponent(mock_model)
+    comp2 = DatasetsComponent(mock_model)
+    comp1.set(obsda, name="test")
+    comp2.set(obsda.copy(deep=True), name="test")
+    with (
+        patch(_SUPER_TEST_EQUAL_IN_BASE, return_value=(True, {})),
+        patch(_TEST_EQUAL_GRID_DATA_IMPORT_PATH, return_value=(True, {})),
+    ):
+        eq, errors = comp1.test_equal(comp2)
+    assert eq
+    assert errors == {}
+
+
+def test_datasetscomponent_test_equal_class_mismatch(mock_model):
+    comp = DatasetsComponent(mock_model)
+
+    class Dummy:
+        pass
+
+    dummy = Dummy()
+    eq, errors = comp.test_equal(dummy)
+    assert not eq
+    assert "__class__" in errors
+
+
+def test_datasetscomponent_test_equal_missing_key(mock_model, obsda):
+    comp1 = DatasetsComponent(mock_model)
+    comp2 = DatasetsComponent(mock_model)
+    comp1.set(obsda, name="test")
+    # comp2 has no data
+    with (
+        patch(_SUPER_TEST_EQUAL_IN_BASE, return_value=(True, {})),
+        patch(_TEST_EQUAL_GRID_DATA_IMPORT_PATH, return_value=(True, {})),
+    ):
+        eq, errors = comp1.test_equal(comp2)
+    assert not eq
+    assert list(errors.values())[0].startswith("Not found in other component.")
+
+
+def test_datasetscomponent_test_equal_data_not_equal(mock_model, obsda):
+    comp1 = DatasetsComponent(mock_model)
+    comp2 = DatasetsComponent(mock_model)
+    comp1.set(obsda, name="test")
+    comp2.set(obsda.copy(deep=True), name="test")
+    # Simulate data not equal
+    with (
+        patch(_SUPER_TEST_EQUAL_IN_BASE, return_value=(True, {})),
+        patch(_TEST_EQUAL_GRID_DATA_IMPORT_PATH, return_value=(False, {"err": "fail"})),
+    ):
+        eq, errors = comp1.test_equal(comp2)
+    assert not eq
+    assert any("Not equal" in v for v in errors.values()), errors

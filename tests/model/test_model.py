@@ -499,21 +499,25 @@ def test_gridmodel(demda, tmp_path: Path, dc_param_path: Path):
         mode="w",
     )
     bbox = [12.00, 45.00, 12.25, 45.25]
-    ds = create_grid_from_region(
+    nodata_value = -99.0
+    ds1 = create_grid_from_region(
         region={"bbox": bbox},
         res=0.05,
         crs=4326,
         data_catalog=grid_model.data_catalog,
+        nodata=nodata_value,
+        dtype=np.float32,
     )
-    grid_model.grid.set(data=ds)
+    grid_model.grid.set(data=ds1)
 
-    ds = grid_from_constant(
+    ds2 = grid_from_constant(
         grid_like=grid_model.grid.data,
         constant=0.01,
         name="c1",
-        nodata=-99.0,
+        nodata=nodata_value,
+        dtype=np.float32,
     )
-    grid_model.grid.set(data=ds)
+    grid_model.grid.set(data=ds2)
 
     # grid specific attributes
     assert np.all(grid_model.grid.res == grid_model.grid.data.raster.res)
@@ -522,7 +526,8 @@ def test_gridmodel(demda, tmp_path: Path, dc_param_path: Path):
 
     # write model
     grid_model.write()
-    # read model
+
+    # read models
     model1 = Model(
         root=tmp_path,
         data_libs=["artifact_data", dc_param_path],
@@ -531,22 +536,22 @@ def test_gridmodel(demda, tmp_path: Path, dc_param_path: Path):
         mode="r",
     )
     model1.read()
+    model2 = Model(
+        root=tmp_path,
+        data_libs=["artifact_data", dc_param_path],
+        components={"grid": {"type": "GridComponent"}},
+        region_component="grid",
+        mode="r",
+    )
+    model2.read()
+
     # check if equal
-    equal, errors = grid_model.test_equal(model1)
+    equal, errors = model2.test_equal(model1)
     assert equal, errors
 
     # try update
     update_root = tmp_path / "update"
-    grid_model.root.set(update_root, mode="w")
-    grid_model.write()
-
-    model1 = Model(
-        root=update_root,
-        data_libs=["artifact_data", dc_param_path],
-        components={"grid": {"type": "GridComponent"}},
-        region_component="grid",
-        mode="r+",
-    )
+    model1.root.set(update_root, mode="w")
     model1.grid.set(demda, name="testdata")
     model1.grid.write()
     assert "testdata" in model1.grid.data
