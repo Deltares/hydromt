@@ -1,38 +1,3 @@
-.. _create_pre_release:
-
-Creating a pre-release
-----------------------
-
-A pre-release allows you to publish a timestamped development build from any branch to PyPI and GitHub,
-making it easy to share and test changes before a full release.
-
-1. Go to the `actions` tab on GitHub, select `Pre-release` from the actions list on the left, then use
-   the `Run workflow` button.
-2. You will be prompted to enter a **description** for the pre-release (e.g. ``"Fix broken reader API"``
-   or ``"amazing untested feature"``). This description appears in the GitHub release title and body.
-3. The workflow will automatically compute a version number of the form
-   ``<BASE_VERSION>.dev<TIMESTAMP>`` (for example ``1.2.3.dev20260414153000``), set it in the source,
-   and build the package.
-4. The built artifacts are uploaded to the repository's internal artifact cache and published to PyPI.
-   Anyone can then install the pre-release with::
-
-       pip install hydromt==<PRE_VERSION>
-
-   The exact install command is shown in the body of the GitHub release that is created automatically.
-5. A GitHub pre-release is created and tagged as ``v<PRE_VERSION>``, linked to the commit on the branch
-   you ran the workflow from.
-
-.. note::
-   Pre-releases are built from whatever branch you select when running the workflow — they are not
-   restricted to ``main`` or ``release/*`` branches. This makes them suitable for sharing in-progress
-   work or testing a hotfix branch before it is merged.
-
-.. warning::
-   Pre-release versions are marked as pre-releases on GitHub and are not promoted as the latest
-   stable release. They are intended for testing purposes only. Do not use a pre-release version as
-   the basis for a full release; follow the :ref:`create_release` process instead.
-
-
 .. _create_release:
 
 
@@ -47,6 +12,47 @@ Creating a release
 6. The newly published PyPi package will trigger a new PR to the `HydroMT feedstock repos of conda-forge <https://github.com/conda-forge/hydromt-feedstock>`_.
    Here you can use the comment posted to the release PR to see if the `meta.yml` needs to be updated. Merge the PR to release the new version on conda-forge.
 7. celebrate the new release!
+
+
+.. _create_pre_release:
+
+Creating a pre-release / release candidate
+------------------------------------------
+
+A pre-release allows you to publish a development build from any branch to PyPI and GitHub, making it easy to share and test changes before a full release.
+A release candidate is very similar, but meant as a feature-complete build that is expected to become the final release unless critical issues are found. Unlike general pre-releases, which may include experimental or unstable changes, a release candidate should be considered production-ready and is primarily used for final validation, testing, and stakeholder sign-off.
+
+.. admonition:: When to use either
+   Use a pre-release when the goal is early feedback.
+   Use a release candidate when no new features are expected or planned anymore and you are preparing for an actual release.
+
+Luckily, both types of releases can be made with the same workflow: ``pre-release.yml``
+The workflow will automatically compute a version number of the form ``<BASE_VERSION><IDENTIFIER><BUILD_NR>`` ( ``1.2.3.dev1`` or ``1.2.3rc2``), set it in the source, and build the package.
+
+1. Go to the ``actions`` tab on GitHub, select ``Pre-release`` from the actions list on the left, then use the ``Run workflow`` button.
+2. You will be prompted to enter:
+   - **identifier** (``rc`` or ``dev``). Determines the type of release
+   - **description** (``Fix broken reader API`` or ``amazing untested feature``). This description appears in the GitHub release title and body.
+   - **base_version** (``1.2.3`` or ``2.0.0``). Optional base version to use in the release, defaults to what is defined in ``hydromt.__version__``.
+   - **build_nr** (``1``, or ``2``). Optional build nr to use, defaults to the lowest non-existing build nr.
+3. The built artifacts are uploaded to the repository's internal artifact cache and published to PyPI.
+   Anyone can then install the pre-release with::
+
+       pip install hydromt==<PRE_VERSION>
+
+   The exact install command is shown in the body of the GitHub release that is created automatically.
+4. A GitHub pre-release is created and tagged as ``v<PRE_VERSION>``, linked to the commit on the branch
+   you ran the workflow from.
+
+.. note::
+   Pre-releases are built from whatever branch you select when running the workflow - they are not
+   restricted to ``main`` or ``release/*`` branches. This makes them suitable for sharing in-progress
+   work or testing a hotfix branch before it is merged.
+
+.. warning::
+   Pre-release versions are marked as pre-releases on GitHub and are not promoted as the latest
+   stable release. They are intended for testing purposes only. Do not use a pre-release version as
+   the basis for a full release; follow the :ref:`create_release` process instead.
 
 Plugin compatibility test
 -------------------------
