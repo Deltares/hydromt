@@ -205,7 +205,10 @@ class TestS3Download:
         (tmp_path / "1" / "1" / "1.png").touch()
 
         result = _download_missing_tiles(
-            str(tmp_path), "bucket", "tiles", "us-east-1", [(1, 0, 0), (1, 1, 1)]
+            tile_root=str(tmp_path),
+            s3_bucket="bucket",
+            s3_key="tiles",
+            tile_indices=[(1, 0, 0), (1, 1, 1)],
         )
         assert result == 1
         mock_fs.open.assert_called_once_with("bucket/tiles/1/0/0.png", "rb")

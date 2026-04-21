@@ -8,7 +8,6 @@ gebco_2024:
       variable_name: elevation
       s3_bucket: deltares-ddb
       s3_key: data/bathymetry/gebco_2024
-      s3_region: eu-west-1
   uri: .
   metadata:
     crs: 3857

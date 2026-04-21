@@ -14,7 +14,7 @@ Elevation is the dominant use case in practice, but the mechanism is
 generic — any scalar raster can be encoded this way.
 
 Remote access is limited to a public S3 bucket: when ``s3_bucket``,
-``s3_key``, and ``s3_region`` are configured, missing tiles are fetched
+and ``s3_key`` are configured, missing tiles are fetched
 on demand and cached in the local tile directory. There is no generic
 HTTP(S), WMTS, or Mapbox-protocol client here — if you need those, use
 a dedicated tile client and convert the result.
@@ -29,7 +29,6 @@ Usage in a HydroMT data catalog YAML::
           encoder: terrarium
           s3_bucket: deltares-ddb
           s3_key: data/bathymetry/my_dataset
-          s3_region: eu-west-1
       uri: c:/data/tiles/my_dataset/
       metadata:
         crs: 3857
@@ -63,6 +62,7 @@ from hydromt.typing import Geom, SourceMetadata, Variables, Zoom
 logger = logging.getLogger(__name__)
 
 if HAS_S3FS:
+    import botocore.session
     import s3fs
 
 # ---------------------------------------------------------------------------
@@ -297,6 +297,11 @@ def _png2value(
 # ---------------------------------------------------------------------------
 # S3 tile download
 # ---------------------------------------------------------------------------
+def has_credentials() -> bool:
+    """Return True if AWS credentials are available in the environment."""
+    session = botocore.session.get_session()
+    creds = session.get_credentials()
+    return creds is not None and creds.access_key is not None
 
 
 def _download_tile(fs: Any, bucket: str, key: str, filename: str) -> bool:
@@ -315,7 +320,6 @@ def _download_missing_tiles(
     tile_root: str,
     s3_bucket: str,
     s3_key: str,
-    s3_region: str,
     tile_indices: list[tuple[int, int, int]],
 ) -> int:
     """Download missing tiles from S3 in parallel.
@@ -328,8 +332,6 @@ def _download_missing_tiles(
         S3 bucket name.
     s3_key : str
         S3 key prefix (e.g. ``'data/bathymetry/gebco_2024'``).
-    s3_region : str
-        AWS region.
     tile_indices : list of (zoom, x_tile, y_tile)
         Tiles to check and download if missing.
 
@@ -356,13 +358,8 @@ def _download_missing_tiles(
     logger.info(
         f"Downloading {len(to_download)} missing tiles from s3://{s3_bucket}/{s3_key}/ ..."
     )
-    fs = s3fs.S3FileSystem(
-        anon=True,
-        client_kwargs={
-            "region_name": s3_region,
-            "endpoint_url": f"https://s3.{s3_region}.amazonaws.com",
-        },
-    )
+
+    fs = s3fs.S3FileSystem(anon=not has_credentials())
 
     downloaded = 0
     with ThreadPoolExecutor() as pool:
@@ -403,8 +400,6 @@ class SlippyTileOptions(DriverOptions):
         S3 bucket for downloading missing tiles.
     s3_key : str or None
         S3 key prefix (e.g. ``'data/bathymetry/gebco_2024'``).
-    s3_region : str or None
-        AWS region of the S3 bucket.
     """
 
     encoder: str = Field(default="terrarium", description="PNG encoding scheme")
@@ -415,7 +410,6 @@ class SlippyTileOptions(DriverOptions):
     tile_size: int = Field(default=256, description="Tile pixel size")
     s3_bucket: str | None = Field(default=None, description="S3 bucket name")
     s3_key: str | None = Field(default=None, description="S3 key prefix")
-    s3_region: str | None = Field(default=None, description="AWS region")
 
 
 class SlippyTileDriver(RasterDatasetDriver):
@@ -428,7 +422,7 @@ class SlippyTileDriver(RasterDatasetDriver):
     (default: ``terrarium``; see :class:`SlippyTileOptions` for the full
     list).
 
-    When ``s3_bucket``, ``s3_key``, and ``s3_region`` are set, missing tiles
+    When ``s3_bucket``, and ``s3_key`` are set, missing tiles
     are automatically downloaded from a public S3 bucket (unsigned access)
     before reading. No other remote protocols are supported.
 
@@ -505,14 +499,17 @@ class SlippyTileDriver(RasterDatasetDriver):
         ntiles = 2**izoom
 
         # --- download missing tiles from S3 if configured ---------------------
-        if opts.s3_bucket and opts.s3_key and opts.s3_region:
+        if opts.s3_bucket and opts.s3_key:
             tile_list = [
                 (izoom, i % ntiles, j)
                 for i in range(ix0, ix1 + 1)
                 for j in range(iy0, iy1 + 1)
             ]
             _download_missing_tiles(
-                tile_root, opts.s3_bucket, opts.s3_key, opts.s3_region, tile_list
+                tile_root=tile_root,
+                s3_bucket=opts.s3_bucket,
+                s3_key=opts.s3_key,
+                tile_indices=tile_list,
             )
 
         # --- read and assemble tiles ------------------------------------------
