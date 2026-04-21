@@ -23,6 +23,7 @@ A pre-release allows you to publish a development build from any branch to PyPI 
 A release candidate is very similar, but meant as a feature-complete build that is expected to become the final release unless critical issues are found. Unlike general pre-releases, which may include experimental or unstable changes, a release candidate should be considered production-ready and is primarily used for final validation, testing, and stakeholder sign-off.
 
 .. admonition:: When to use either
+
    Use a pre-release when the goal is early feedback.
    Use a release candidate when no new features are expected or planned anymore and you are preparing for an actual release.
 
