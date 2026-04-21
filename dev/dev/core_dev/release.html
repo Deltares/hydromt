@@ -409,6 +409,7 @@
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Creating a release</a></li>
 
 
+
 </ul>
 </details></li>
 </ul>
@@ -486,6 +487,47 @@
 Here you can use the comment posted to the release PR to see if the <cite>meta.yml</cite> needs to be updated. Merge the PR to release the new version on conda-forge.</p></li>
 <li><p>celebrate the new release!</p></li>
 </ol>
+</section>
+<section id="creating-a-pre-release-release-candidate">
+<span id="create-pre-release"></span><h1>Creating a pre-release / release candidate<a class="headerlink" href="#creating-a-pre-release-release-candidate" title="Link to this heading">#</a></h1>
+<p>A pre-release allows you to publish a development build from any branch to PyPI and GitHub, making it easy to share and test changes before a full release.
+A release candidate is very similar, but meant as a feature-complete build that is expected to become the final release unless critical issues are found. Unlike general pre-releases, which may include experimental or unstable changes, a release candidate should be considered production-ready and is primarily used for final validation, testing, and stakeholder sign-off.</p>
+<div class="admonition-when-to-use-either admonition">
+<p class="admonition-title">When to use either</p>
+<p>Use a pre-release when the goal is early feedback.
+Use a release candidate when no new features are expected or planned anymore and you are preparing for an actual release.</p>
+</div>
+<p>Luckily, both types of releases can be made with the same workflow: <code class="docutils literal notranslate"><span class="pre">pre-release.yml</span></code>
+The workflow will automatically compute a version number of the form <code class="docutils literal notranslate"><span class="pre">&lt;BASE_VERSION&gt;&lt;IDENTIFIER&gt;&lt;BUILD_NR&gt;</span></code> ( <code class="docutils literal notranslate"><span class="pre">1.2.3.dev1</span></code> or <code class="docutils literal notranslate"><span class="pre">1.2.3rc2</span></code>), set it in the source, and build the package.</p>
+<ol class="arabic">
+<li><p>Go to the <code class="docutils literal notranslate"><span class="pre">actions</span></code> tab on GitHub, select <code class="docutils literal notranslate"><span class="pre">Pre-release</span></code> from the actions list on the left, then use the <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">workflow</span></code> button.</p></li>
+<li><p>You will be prompted to enter:
+- <strong>identifier</strong> (<code class="docutils literal notranslate"><span class="pre">rc</span></code> or <code class="docutils literal notranslate"><span class="pre">dev</span></code>). Determines the type of release
+- <strong>description</strong> (<code class="docutils literal notranslate"><span class="pre">Fix</span> <span class="pre">broken</span> <span class="pre">reader</span> <span class="pre">API</span></code> or <code class="docutils literal notranslate"><span class="pre">amazing</span> <span class="pre">untested</span> <span class="pre">feature</span></code>). This description appears in the GitHub release title and body.
+- <strong>base_version</strong> (<code class="docutils literal notranslate"><span class="pre">1.2.3</span></code> or <code class="docutils literal notranslate"><span class="pre">2.0.0</span></code>). Optional base version to use in the release, defaults to what is defined in <code class="docutils literal notranslate"><span class="pre">hydromt.__version__</span></code>.
+- <strong>build_nr</strong> (<code class="docutils literal notranslate"><span class="pre">1</span></code>, or <code class="docutils literal notranslate"><span class="pre">2</span></code>). Optional build nr to use, defaults to the lowest non-existing build nr.</p></li>
+<li><p>The built artifacts are uploaded to the repository’s internal artifact cache and published to PyPI.
+Anyone can then install the pre-release with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">hydromt</span><span class="o">==&lt;</span><span class="n">PRE_VERSION</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>The exact install command is shown in the body of the GitHub release that is created automatically.</p>
+</li>
+<li><p>A GitHub pre-release is created and tagged as <code class="docutils literal notranslate"><span class="pre">v&lt;PRE_VERSION&gt;</span></code>, linked to the commit on the branch
+you ran the workflow from.</p></li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Pre-releases are built from whatever branch you select when running the workflow - they are not
+restricted to <code class="docutils literal notranslate"><span class="pre">main</span></code> or <code class="docutils literal notranslate"><span class="pre">release/*</span></code> branches. This makes them suitable for sharing in-progress
+work or testing a hotfix branch before it is merged.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Pre-release versions are marked as pre-releases on GitHub and are not promoted as the latest
+stable release. They are intended for testing purposes only. Do not use a pre-release version as
+the basis for a full release; follow the <a class="reference internal" href="#create-release"><span class="std std-ref">Creating a release</span></a> process instead.</p>
+</div>
 </section>
 <section id="plugin-compatibility-test">
 <h1>Plugin compatibility test<a class="headerlink" href="#plugin-compatibility-test" title="Link to this heading">#</a></h1>
@@ -589,6 +631,7 @@ You may need to restore backward compatibility in core, coordinate a plugin upda
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Creating a release</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-a-pre-release-release-candidate">Creating a pre-release / release candidate</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#plugin-compatibility-test">Plugin compatibility test</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-run-the-compatibility-test">How to run the compatibility test</a></li>
 </ul>
