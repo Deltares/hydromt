@@ -73,7 +73,7 @@ def create_registry_file(root: Path, registry_path: Optional[Path] = None) -> No
     if registry_path is None:
         registry_path = Path(root / "registry.txt")
     with open(registry_path, "w") as f:
-        for fname, hash in registry.items():
+        for fname, hash in sorted(registry.items()):
             f.write(f"{fname} {hash}\n")
 
 
