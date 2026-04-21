@@ -51,7 +51,7 @@ import xarray as xr
 from PIL import Image
 from pydantic import Field
 
-from hydromt._compat import HAS_BOTO3
+from hydromt._compat import HAS_S3FS
 from hydromt.data_catalog.drivers.base_driver import DriverOptions
 from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
     RasterDatasetDriver,
@@ -59,12 +59,10 @@ from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.typing import Geom, SourceMetadata, Variables, Zoom
 
-if HAS_BOTO3:
-    import boto3
-    from botocore import UNSIGNED
-    from botocore.client import Config as BotoConfig
-
 logger = logging.getLogger(__name__)
+
+if HAS_S3FS:
+    import s3fs
 
 # ---------------------------------------------------------------------------
 # Tile utilities
@@ -300,14 +298,15 @@ def _png2value(
 # ---------------------------------------------------------------------------
 
 
-def _download_tile(s3_client: Any, bucket: str, key: str, filename: str) -> bool:
-    """Download a single tile from S3.  Returns True on success."""
+def _download_tile(fs: s3fs.S3FileSystem, bucket: str, key: str, filename: str) -> bool:
+    """Download a single tile from S3 via s3fs. Returns True on success."""
     try:
         Path(filename).parent.mkdir(parents=True, exist_ok=True)
-        s3_client.download_file(Bucket=bucket, Key=key, Filename=filename)
+        with fs.open(f"{bucket}/{key}", "rb") as src, open(filename, "wb") as dst:
+            dst.write(src.read())
         return True
     except Exception as e:
-        logger.debug(f"Failed to download {key}: {e}")
+        logger.error(f"Failed to download {key}: {e}")
         return False
 
 
@@ -338,17 +337,17 @@ def _download_missing_tiles(
     int
         Number of tiles downloaded.
     """
-    if not HAS_BOTO3:
-        logger.warning("boto3 not installed — cannot download missing tiles from S3.")
+    if not HAS_S3FS:
+        logger.warning("s3fs not installed — cannot download missing tiles from S3.")
         return 0
 
     # Collect missing tiles
     to_download: list[tuple[str, str]] = []  # (s3_key, local_path)
     for izoom, itile, j in tile_indices:
-        png_file = os.path.join(tile_root, str(izoom), str(itile), f"{j}.png")
-        if not os.path.exists(png_file):
+        png_file = Path(tile_root, str(izoom), str(itile), f"{j}.png")
+        if not png_file.exists():
             key = f"{s3_key}/{izoom}/{itile}/{j}.png"
-            to_download.append((key, png_file))
+            to_download.append((key, str(png_file)))
 
     if not to_download:
         return 0
@@ -356,14 +355,18 @@ def _download_missing_tiles(
     logger.info(
         f"Downloading {len(to_download)} missing tiles from s3://{s3_bucket}/{s3_key}/ ..."
     )
-    s3_client = boto3.client(
-        "s3", region_name=s3_region, config=BotoConfig(signature_version=UNSIGNED)
+    fs = s3fs.S3FileSystem(
+        anon=True,
+        client_kwargs={
+            "region_name": s3_region,
+            "endpoint_url": f"https://s3.{s3_region}.amazonaws.com",
+        },
     )
 
     downloaded = 0
     with ThreadPoolExecutor() as pool:
         futures = [
-            pool.submit(_download_tile, s3_client, s3_bucket, key, local)
+            pool.submit(_download_tile, fs, s3_bucket, key, local)
             for key, local in to_download
         ]
         for future in futures:

@@ -12,7 +12,7 @@ import xarray as xr
 from PIL import Image
 from shapely.geometry import box
 
-from hydromt._compat import HAS_BOTO3
+from hydromt._compat import HAS_S3FS
 from hydromt.data_catalog import DataCatalog
 from hydromt.data_catalog.drivers.raster.slippy_tile_driver import (
     SlippyTileDriver,
@@ -172,33 +172,33 @@ def test_unknown_encoder_raises(tmp_path):
 # ---------------------------------------------------------------------------
 # S3 download helpers (mocked)
 # ---------------------------------------------------------------------------
-
-
-@pytest.mark.skipif(not HAS_BOTO3, reason="Requires boto3")
+@pytest.mark.skipif(not HAS_S3FS, reason="Requires s3fs")
 class TestS3Download:
     def test_download_tile_success_and_failure(self, tmp_path):
         """_download_tile returns True on success and False on any exception."""
-        mock_client = MagicMock()
+        mock_fs = MagicMock()
+        mock_fs.open.return_value.__enter__.return_value.read.return_value = b""
+
         assert (
             _download_tile(
-                mock_client, "bucket", "k/0/0/0.png", str(tmp_path / "0/0/0.png")
+                mock_fs, "bucket", "k/0/0/0.png", str(tmp_path / "0/0/0.png")
             )
             is True
         )
+        mock_fs.open.assert_called_once_with("bucket/k/0/0/0.png", "rb")
 
-        mock_client.download_file.side_effect = Exception("network error")
+        mock_fs.open.side_effect = Exception("network error")
         assert (
-            _download_tile(
-                mock_client, "bucket", "k/0/0/0.png", str(tmp_path / "fail.png")
-            )
+            _download_tile(mock_fs, "bucket", "k/0/0/0.png", str(tmp_path / "fail.png"))
             is False
         )
 
-    @patch("hydromt.data_catalog.drivers.raster.slippy_tile_driver.boto3")
-    def test_download_missing_tiles_downloads_and_skips(self, mock_boto3, tmp_path):
+    @patch("hydromt.data_catalog.drivers.raster.slippy_tile_driver.s3fs")
+    def test_download_missing_tiles_downloads_and_skips(self, mock_s3fs, tmp_path):
         """Missing tiles are downloaded; tiles that already exist are skipped."""
-        mock_client = MagicMock()
-        mock_boto3.client.return_value = mock_client
+        mock_fs = MagicMock()
+        mock_fs.open.return_value.__enter__.return_value.read.return_value = b""
+        mock_s3fs.S3FileSystem.return_value = mock_fs
 
         # (1, 0, 0) is missing; (1, 1, 1) already exists locally.
         (tmp_path / "1" / "1").mkdir(parents=True)
@@ -208,7 +208,7 @@ class TestS3Download:
             str(tmp_path), "bucket", "tiles", "us-east-1", [(1, 0, 0), (1, 1, 1)]
         )
         assert result == 1
-        mock_client.download_file.assert_called_once()
+        mock_fs.open.assert_called_once_with("bucket/tiles/1/0/0.png", "rb")
 
 
 # ---------------------------------------------------------------------------
@@ -320,7 +320,7 @@ def test_options_defaults():
 
 
 # ---------------------------------------------------------------------------
-# S3 integration — real bucket, marked to skip without network / boto3
+# S3 integration — real bucket, marked to skip without network / s3fs
 # ---------------------------------------------------------------------------
 
 
@@ -332,7 +332,7 @@ def gebco_2024_catalog_path(test_data_dir):
 
 
 @pytest.mark.integration
-@pytest.mark.skipif(not HAS_BOTO3, reason="boto3 required for S3 integration")
+@pytest.mark.skipif(not HAS_S3FS, reason="s3fs required for S3 integration")
 class TestSlippyTileDriverS3Integration:
     """End-to-end tests against the public deltares-ddb GEBCO 2024 tile set."""
 
