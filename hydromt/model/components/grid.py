@@ -1,7 +1,7 @@
 """Grid Component."""
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
@@ -10,6 +10,7 @@ from affine import Affine
 from pyproj import CRS
 from shapely.geometry import box
 
+from hydromt._utils.dataset import _test_equal_grid_data
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step
@@ -301,13 +302,7 @@ class GridComponent(SpatialModelComponent):
         eq, errors = super().test_equal(other)
         if not eq:
             return eq, errors
-        other_grid = cast(GridComponent, other)
-        try:
-            xr.testing.assert_allclose(self.data, other_grid.data)
-        except AssertionError as e:
-            errors["data"] = str(e)
-
-        return len(errors) == 0, errors
+        return _test_equal_grid_data(self.data, other.data)
 
     def _get_grid_data(self) -> Union[xr.DataArray, xr.Dataset]:
         """Get grid data as xarray.DataArray from this component or the reference."""

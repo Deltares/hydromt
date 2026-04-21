@@ -291,7 +291,7 @@ class GeomsComponent(SpatialModelComponent):
         other_geoms = cast(GeomsComponent, other)
         for name, gdf in self.data.items():
             if name not in other_geoms.data:
-                errors[name] = "Geom not found in other component."
+                errors[name] = "Not found in other component."
 
             try:
                 assert_geodataframe_equal(
