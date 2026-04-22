@@ -28,6 +28,13 @@ Changed
 deltares_data
 =============
 
+version v1.1.1
+--------------
+
+changed
+^^^^^^^
+- Changed root to roots to support multiple (linux) paths (for cluster compatibility)
+
 version v1.1.0
 --------------
 
