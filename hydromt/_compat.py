@@ -1,7 +1,6 @@
 import sys
-from typing import List
 
-__all__: List[str] = []
+__all__: list[str] = []
 
 HAS_ADLFS = False
 HAS_GCSFS = False
