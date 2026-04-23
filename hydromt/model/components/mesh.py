@@ -133,7 +133,7 @@ class MeshComponent(SpatialModelComponent):
         """
         self.root._assert_write_mode()
 
-        if len(self.data) == 0:
+        if self.is_empty:
             logger.info(
                 f"{self.model.name}.{self.name_in_model}: No mesh data found, skip writing."
             )
@@ -257,11 +257,7 @@ class MeshComponent(SpatialModelComponent):
     @property
     def is_empty(self):
         """Check whether the mesh is empty or not."""
-        ndims = len(self.data.sizes)
-        if ndims == 0:
-            return True
-        else:
-            return False
+        return len(self.data.sizes) == 0
 
     @property
     def mesh_names(self) -> list[str]:
@@ -274,30 +270,25 @@ class MeshComponent(SpatialModelComponent):
     @property
     def mesh_grids(self) -> dict[str, xu.Ugrid1d | xu.Ugrid2d]:
         """Dictionary of grid names and Ugrid topologies in mesh."""
-        grids = dict()
         if len(self.data.grids) > 0:
-            for grid in self.data.ugrid.grids:
-                grids[grid.name] = grid
-
-        return grids
+            return {grid.name: grid for grid in self.data.ugrid.grids}
+        return {}
 
     @property
     def mesh_datasets(self) -> dict[str, xu.UgridDataset]:
         """Dictionnary of grid names and corresponding UgridDataset topology and data variables in mesh."""  # noqa: E501
-        datasets = dict()
-        if len(self.data) > 0:
-            for grid in self.data.ugrid.grids:
-                datasets[grid.name] = self.get_mesh(
-                    grid_name=grid.name, include_data=True
-                )
-
-        return datasets
+        if not self.is_empty:
+            return {
+                grid.name: self.get_mesh(grid_name=grid.name, include_data=True)
+                for grid in self.data.ugrid.grids
+            }
+        return {}
 
     @property
     def mesh_gdf(self) -> dict[str, gpd.GeoDataFrame]:
         """Returns dict of geometry of grids in mesh as a gpd.GeoDataFrame."""
-        mesh_gdf = dict()
-        if len(self.data.grids) > 0:
+        mesh_gdf = {}
+        if not self.is_empty:
             for k, grid in self.mesh_grids.items():
                 if grid.topology_dimension == 1:
                     dim = grid.edge_dimension
@@ -332,7 +323,7 @@ class MeshComponent(SpatialModelComponent):
         uds: xu.Ugrid1d | xu.Ugrid2d | xu.UgridDataArray | xu.UgridDataset
             Grid topology with or without data variables.
         """
-        if len(self.data) == 0:
+        if self.is_empty:
             raise ValueError("Mesh is not set, please use set_mesh first.")
         if grid_name not in self.mesh_names:
             raise ValueError(f"Grid {grid_name} not found in mesh.")
@@ -367,7 +358,7 @@ class MeshComponent(SpatialModelComponent):
     def _add_mesh(
         self, data: xu.UgridDataset, grid_name: str, overwrite_grid: bool
     ) -> CRS | None:
-        if len(self.data) == 0:
+        if self.is_empty:
             # Check on crs
             if not data.ugrid.grid.crs:
                 raise ValueError("Data should have CRS.")
@@ -380,7 +371,9 @@ class MeshComponent(SpatialModelComponent):
         else:
             # Check on crs
             if data.ugrid.grid.crs != self.crs:
-                raise ValueError("Data and Mesh should have the same CRS.")
+                raise ValueError(
+                    f"Data and MeshComponent should have the same CRS, got ({data.ugrid.grid.crs} vs {self.crs})."
+                )
             # Save crs as it will be lost when converting to xarray
             crs = self.crs
             # Check on new grid topology

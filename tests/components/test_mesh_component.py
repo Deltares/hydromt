@@ -49,7 +49,9 @@ def test_add_mesh_errors(mock_model, mocker: MockerFixture):
     mesh_component._data = data
     data4326 = xu.data.elevation_nl().to_dataset()
     data4326.grid.crs = CRS.from_user_input(4326)
-    with pytest.raises(ValueError, match="Data and Mesh should have the same CRS."):
+    with pytest.raises(
+        ValueError, match="Data and MeshComponent should have the same CRS."
+    ):
         mesh_component._add_mesh(data=data4326, grid_name="", overwrite_grid=False)
     grid_name = "mesh2d"
     mock_grid_is_equal = mocker.patch.object(MeshComponent, "_grid_is_equal")
@@ -233,20 +235,24 @@ def test_model_mesh_workflow(tmp_path: Path):
     m = Model(root=tmp_path, mode="r+")
     m.add_component("mesh", MeshComponent(m))
     component = cast(MeshComponent, m.mesh)
-    region = {
-        "bbox": [11.949099, 45.9722, 12.004855, 45.998441]
-    }  # small area in Piave basin
+    # small area in Piave basin
+    region = {"bbox": [11.949099, 45.9722, 12.004855, 45.998441]}
     crs = 4326
     res = 0.001
-    mesh = create_mesh2d_from_region(region=region, res=res, crs=crs)
+    mesh = create_mesh2d_from_region(region=region, res=res, crs=crs, region_crs=crs)
+
     component.set(data=mesh)
 
-    assert component.data.grid.crs == crs
-    # clear empty mesh dataset
-    mesh._data = None
-    # Test with sample data
+    assert component.crs == CRS.from_user_input(crs)
+
+
+def test_model_mesh_read_write_round_trip(tmp_path: Path):
     data = xu.data.elevation_nl().to_dataset()
     data.grid.crs = CRS.from_user_input(28992)
+    m = Model(root=tmp_path, mode="r+")
+    m.add_component("mesh", MeshComponent(m))
+    component = cast(MeshComponent, m.mesh)
+
     component.set(data=data, grid_name="elevation_mesh")
     assert "elevation_mesh" in component.mesh_names
     assert component.data == data
@@ -254,3 +260,12 @@ def test_model_mesh_workflow(tmp_path: Path):
     component._data = None
     component.read()
     assert component.data == data
+
+
+def test_is_empty(mock_model):
+    mesh_component = MeshComponent(mock_model)
+    assert mesh_component.is_empty
+    data = xu.data.elevation_nl().to_dataset()
+    data.grid.crs = CRS.from_user_input(28992)
+    mesh_component._data = data
+    assert not mesh_component.is_empty
