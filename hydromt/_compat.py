@@ -2,6 +2,7 @@ import sys
 
 __all__: list[str] = []
 
+HAS_ADLFS = False
 HAS_GCSFS = False
 HAS_GDAL = False
 HAS_OPENPYXL = False
@@ -43,6 +44,12 @@ try:
 except ImportError:
     pass
 
+try:
+    import adlfs
+
+    HAS_ADLFS = True
+except ImportError:
+    pass
 
 # entrypoints in standard library only compatible from 3.10 onwards
 py_version = sys.version_info

@@ -1,7 +1,10 @@
 meta:
-  root: p:/wflow_global/hydromt
-  version: v1.1.0
-  hydromt_version: '>=1.0a, <2'
+  roots:
+    - p:/wflow_global/hydromt
+    - /mnt/p/wflow_global/hydromt
+    - /p/wflow_global/hydromt
+  version: v1.1.1
+  hydromt_version: ">=1.0a, <2"
   name: deltares_data
 
 hydro_basin_atlas_level12:
@@ -19,7 +22,7 @@ hydro_basin_atlas_level12:
     license: CC BY 4.0
     extent:
       bbox:
-        West: -180.0
+        West: -180
         South: -55.988
         East: 180.001
         North: 83.626
@@ -43,8 +46,8 @@ chelsa:
     license: CC BY 4.0
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 84.0
     crs: 4326
@@ -71,13 +74,13 @@ chirps:
     license: CC
     extent:
       bbox:
-        West: -20.0
-        South: -40.0
+        West: -20
+        South: -40
         East: 55.0
         North: 40.0
       time_range:
-        start: '1981-01-02'
-        end: '2022-04-01'
+        start: "1981-01-02"
+        end: "2022-04-01"
     crs: 4326
   data_adapter:
     rename:
@@ -107,13 +110,13 @@ chirps_global:
     license: CC
     extent:
       bbox:
-        West: -180.0
-        South: -50.0
+        West: -180
+        South: -50
         East: 180.0
         North: 50.0
       time_range:
-        start: '1981-01-02'
-        end: '2023-02-01'
+        start: "1981-01-02"
+        end: "2023-02-01"
     crs: 4326
   data_adapter:
     rename:
@@ -138,7 +141,7 @@ copdem30:
     extent:
       bbox:
         West: -180.001
-        South: -90.0
+        South: -90
         East: 180.0
         North: 84.0
     nodata: -9999
@@ -163,7 +166,7 @@ copdem30_mask:
     extent:
       bbox:
         West: -180.001
-        South: -90.0
+        South: -90
         East: 180.0
         North: 84.0
     nodata: 255
@@ -188,7 +191,7 @@ copdem30_masked:
     extent:
       bbox:
         West: -180.001
-        South: -90.0
+        South: -90
         East: 180.0
         North: 84.0
   data_adapter:
@@ -270,48 +273,48 @@ dtu10mdt_egm96:
 eobs:
   data_type: RasterDataset
   variants:
-  - version: 22.0e
-    uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v22.0e.nc
-    metadata:
-      extent:
-        time_range:
-          start: '1950-01-02'
-          end: '2020-07-01'
-  - version: 23.1e
-    uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v23.1e.nc
-    metadata:
-      extent:
-        time_range:
-          start: '1950-01-02'
-          end: '2021-01-01'
-  - version: 24.0e
-    uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v24.0e.nc
-    metadata:
-      processing_script: meteo/eobs/scripts/v24.0e_fix_qq_dims_and_match_extent.py
-      processing_notes: correct lat/lon dimension for variable qq to match the grid
-        of the other variables
-      extent:
-        time_range:
-          start: '1950-01-02'
-          end: '2021-07-01'
-  - version: 25.0e
-    uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v25.0e.nc
-    metadata:
-      processing_script: v25.0e_fix_qq_dims_and_match_extent.py
-      processing_notes: correct lat/lon dimension for variable qq to match the grid
-        of the other variables
-      extent:
-        time_range:
-          start: '1950-01-02'
-          end: '2022-01-01'
-  - version: 29.0e
-    uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v29.0e.nc
-    metadata:
-      processing_script: meteo/eobs/scripts/v29.0e_fix_qq_dims_and_match_extent.py
-      extent:
-        time_range:
-          start: '1950-01-01'
-          end: '2024-02-01'
+    - version: 22.0e
+      uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v22.0e.nc
+      metadata:
+        extent:
+          time_range:
+            start: "1950-01-02"
+            end: "2020-07-01"
+    - version: 23.1e
+      uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v23.1e.nc
+      metadata:
+        extent:
+          time_range:
+            start: "1950-01-02"
+            end: "2021-01-01"
+    - version: 24.0e
+      uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v24.0e.nc
+      metadata:
+        processing_script: meteo/eobs/scripts/v24.0e_fix_qq_dims_and_match_extent.py
+        processing_notes: correct lat/lon dimension for variable qq to match the grid of
+          the other variables
+        extent:
+          time_range:
+            start: "1950-01-02"
+            end: "2021-07-01"
+    - version: 25.0e
+      uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v25.0e.nc
+      metadata:
+        processing_script: v25.0e_fix_qq_dims_and_match_extent.py
+        processing_notes: correct lat/lon dimension for variable qq to match the grid of
+          the other variables
+        extent:
+          time_range:
+            start: "1950-01-02"
+            end: "2022-01-01"
+    - version: 29.0e
+      uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v29.0e.nc
+      metadata:
+        processing_script: meteo/eobs/scripts/v29.0e_fix_qq_dims_and_match_extent.py
+        extent:
+          time_range:
+            start: "1950-01-01"
+            end: "2024-02-01"
   driver:
     name: raster_xarray
     options:
@@ -331,13 +334,13 @@ eobs:
     license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
     extent:
       bbox:
-        West: -25.0
+        West: -25
         South: 25.0
         East: 45.5
         North: 71.5
       time_range:
-        start: '1950-01-02'
-        end: '2022-01-01'
+        start: "1950-01-02"
+        end: "2022-01-01"
     crs: 4326
   data_adapter:
     rename:
@@ -351,18 +354,18 @@ eobs:
 eobs_orography:
   data_type: RasterDataset
   variants:
-  - version: 20.0e
-    uri: meteo/eobs/elev_ens_0.1deg_reg_v20.0e.nc
-  - version: 22.0e
-    uri: meteo/eobs/elev_ens_0.1deg_reg_v22.0e.nc
-  - version: 23.1e
-    uri: meteo/eobs/elev_ens_0.1deg_reg_v23.1e.nc
-  - version: 24.0e
-    uri: meteo/eobs/elev_ens_0.1deg_reg_v24.0e.nc
-  - version: 25.0e
-    uri: meteo/eobs/elev_ens_0.1deg_reg_v25.0e.nc
-  - version: 29.0e
-    uri: meteo/eobs/elev_ens_0.1deg_reg_v29.0e.nc
+    - version: 20.0e
+      uri: meteo/eobs/elev_ens_0.1deg_reg_v20.0e.nc
+    - version: 22.0e
+      uri: meteo/eobs/elev_ens_0.1deg_reg_v22.0e.nc
+    - version: 23.1e
+      uri: meteo/eobs/elev_ens_0.1deg_reg_v23.1e.nc
+    - version: 24.0e
+      uri: meteo/eobs/elev_ens_0.1deg_reg_v24.0e.nc
+    - version: 25.0e
+      uri: meteo/eobs/elev_ens_0.1deg_reg_v25.0e.nc
+    - version: 29.0e
+      uri: meteo/eobs/elev_ens_0.1deg_reg_v29.0e.nc
   driver:
     name: raster_xarray
     options:
@@ -377,7 +380,7 @@ eobs_orography:
     license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
     extent:
       bbox:
-        West: -25.0
+        West: -25
         South: 25.0
         East: 45.5
         North: 71.5
@@ -389,24 +392,24 @@ eobs_orography:
 era5:
   data_type: RasterDataset
   variants:
-  - provider: netcdf
-    uri: meteo/era5_daily/nc_merged/era5_{year}_daily.nc
-    driver:
-      name: raster_xarray
-      options:
-        chunks:
-          latitude: 250
-          longitude: 240
-          time: 30
-        combine: by_coords
-        decode_times: true
-        parallel: true
-  - provider: zarr
-    uri: meteo/era5_daily.zarr
-    driver:
-      name: raster_xarray
-      options:
-        chunks: auto
+    - provider: netcdf
+      uri: meteo/era5_daily/nc_merged/era5_{year}_daily.nc
+      driver:
+        name: raster_xarray
+        options:
+          chunks:
+            latitude: 250
+            longitude: 240
+            time: 30
+          combine: by_coords
+          decode_times: true
+          parallel: true
+    - provider: zarr
+      uri: meteo/era5_daily.zarr
+      driver:
+        name: raster_xarray
+        options:
+          chunks: auto
   metadata:
     category: meteo
     notes: Extracted from Copernicus Climate Data Store; resampled by Deltares to
@@ -423,8 +426,8 @@ era5:
         East: 359.875
         North: 90.125
       time_range:
-        start: '1950-01-02'
-        end: '2023-11-30'
+        start: "1950-01-02"
+        end: "2023-11-30"
     crs: 4326
   data_adapter:
     unit_mult:
@@ -452,24 +455,24 @@ era5:
 era5_hourly:
   data_type: RasterDataset
   variants:
-  - provider: netcdf
-    uri: meteo/era5/{variable}/era5_{variable}_{year}_hourly.nc
-    driver:
-      name: raster_xarray
-      options:
-        chunks:
-          latitude: 125
-          longitude: 120
-          time: 50
-        combine: by_coords
-        decode_times: true
-        parallel: true
-  - provider: zarr
-    uri: meteo/era5.zarr
-    driver:
-      name: raster_xarray
-      options:
-        chunks: auto
+    - provider: netcdf
+      uri: meteo/era5/{variable}/era5_{variable}_{year}_hourly.nc
+      driver:
+        name: raster_xarray
+        options:
+          chunks:
+            latitude: 125
+            longitude: 120
+            time: 50
+          combine: by_coords
+          decode_times: true
+          parallel: true
+    - provider: zarr
+      uri: meteo/era5.zarr
+      driver:
+        name: raster_xarray
+        options:
+          chunks: auto
   uri: meteo/era5/{variable}/era5_{variable}_{year}_hourly.nc
   metadata:
     category: meteo
@@ -485,8 +488,8 @@ era5_hourly:
         East: 359.875
         North: 90.125
       time_range:
-        start: '1950-01-01'
-        end: '2023-03-01'
+        start: "1950-01-01"
+        end: "2023-03-01"
     crs: 4326
   data_adapter:
     unit_mult:
@@ -535,8 +538,8 @@ era5_ocean:
         East: 359.75
         North: 90.25
       time_range:
-        start: '1979-01-01'
-        end: '2022-04-08'
+        start: "1979-01-01"
+        end: "2022-04-08"
     crs: 4326
 
 era5_orography:
@@ -562,8 +565,8 @@ era5_orography:
         East: 359.875
         North: 90.125
       time_range:
-        start: '2018-01-01'
-        end: '2018-01-01'
+        start: "2018-01-01"
+        end: "2018-01-01"
     crs: 4326
   data_adapter:
     unit_mult:
@@ -588,13 +591,13 @@ esa_worldcover:
     license: CC BY 4.0
     extent:
       bbox:
-        West: -180.0
-        South: -60.0
+        West: -180
+        South: -60
         East: 180.0
         North: 84.0
       time_range:
-        start: '2020-01-01'
-        end: '2020-12-31'
+        start: "2020-01-01"
+        end: "2020-12-31"
     crs: 4326
 
 fabdem:
@@ -615,8 +618,8 @@ fabdem:
     license: CC BY-NC-SA 4.0
     extent:
       bbox:
-        West: -180.0
-        South: -60.0
+        West: -180
+        South: -60
         East: 180.0
         North: 80.0
     crs: 4326
@@ -639,8 +642,8 @@ gadm:
     license: https://gadm.org/license.html
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 83.658
     crs: 4326
@@ -660,8 +663,8 @@ gadm_level1:
     license: https://gadm.org/license.html
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 83.658
     crs: 4326
@@ -681,8 +684,8 @@ gadm_level2:
     license: https://gadm.org/license.html
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 83.658
     crs: 4326
@@ -702,8 +705,8 @@ gadm_level3:
     license: https://gadm.org/license.html
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 83.658
     crs: 4326
@@ -726,8 +729,8 @@ gcn250:
     license: CC BY 4.0
     extent:
       bbox:
-        West: -180.0
-        South: -56.0
+        West: -180
+        South: -56
         East: 180.0
         North: 84.0
     nodata: 255
@@ -745,14 +748,16 @@ gdp_world:
     name: pyogrio
   metadata:
     category: socio-economic
-    processing_notes: data combined by Deltares (Wilfred Altena) from World Bank (https://data.worldbank.org/indicator/NY.GDP.MKTP.CD)
-      and CIA World Factbook (https://www.cia.gov/the-world-factbook/field/real-gdp-per-capita/country-comparison)
+    processing_notes: data combined by Deltares (Wilfred Altena) from World Bank
+      (https://data.worldbank.org/indicator/NY.GDP.MKTP.CD) and CIA World
+      Factbook
+      (https://www.cia.gov/the-world-factbook/field/real-gdp-per-capita/country-comparison)
     author: Wilfred Altena
     license: CC BY-4.0
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 83.665
     crs: 4326
@@ -782,8 +787,8 @@ gebco:
     license: https://www.gebco.net/data_and_products/gridded_bathymetry_data/#a1
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 90.0
     crs: 4326
@@ -810,7 +815,7 @@ ghs_pop_2015:
     license: https://data.jrc.ec.europa.eu/licence/com_reuse
     extent:
       bbox:
-        West: -180.0
+        West: -180
         South: -59.485
         East: 180.0
         North: 83.628
@@ -834,8 +839,8 @@ ghs_pop_2015_54009:
     license: CC BY 4.0
     extent:
       bbox:
-        West: -18041000.0
-        South: -9000000.0
+        West: -18041000
+        South: -9000000
         East: 18041000.0
         North: 9000000.0
     crs: ESRI:54009
@@ -843,17 +848,17 @@ ghs_pop_2015_54009:
 ghs_smod_2015:
   data_type: RasterDataset
   variants:
-  - version: R2016A_v1.0
-    uri: socio_economic/ghs/GHS_SMOD_POP2015_GLOBE_R2016A_54009_1k_v1_0.tif
-    metadata:
-      paper_ref: Pesaresi and Freire (2016)
-      url: https://data.jrc.ec.europa.eu/dataset/jrc-ghsl-ghs_smod_pop_globe_r2016a
-  - version: R2019A_v2.0
-    uri: socio_economic/ghs/GHS_SMOD_POP2015_GLOBE_R2019A_54009_1K_V2_0.tif
-    metadata:
-      paper_doi: 10.2905/42E8BE89-54FF-464E-BE7B-BF9E64DA5218
-      paper_ref: Pesaresi et al (2019)
-      url: https://data.jrc.ec.europa.eu/dataset/42e8be89-54ff-464e-be7b-bf9e64da5218
+    - version: R2016A_v1.0
+      uri: socio_economic/ghs/GHS_SMOD_POP2015_GLOBE_R2016A_54009_1k_v1_0.tif
+      metadata:
+        paper_ref: Pesaresi and Freire (2016)
+        url: https://data.jrc.ec.europa.eu/dataset/jrc-ghsl-ghs_smod_pop_globe_r2016a
+    - version: R2019A_v2.0
+      uri: socio_economic/ghs/GHS_SMOD_POP2015_GLOBE_R2019A_54009_1K_V2_0.tif
+      metadata:
+        paper_doi: 10.2905/42E8BE89-54FF-464E-BE7B-BF9E64DA5218
+        paper_ref: Pesaresi et al (2019)
+        url: https://data.jrc.ec.europa.eu/dataset/42e8be89-54ff-464e-be7b-bf9e64da5218
   driver:
     name: rasterio
     options:
@@ -866,8 +871,8 @@ ghs_smod_2015:
     license: https://data.jrc.ec.europa.eu/licence/com_reuse
     extent:
       bbox:
-        West: -18041000.0
-        South: -9000000.0
+        West: -18041000
+        South: -9000000
         East: 18041000.0
         North: 9000000.0
     crs: ESRI:54009
@@ -920,13 +925,13 @@ glofas_era5:
     license: https://cds.climate.copernicus.eu/api/v2/terms/static/cems-floods.pdf
     extent:
       bbox:
-        West: -180.0
-        South: -60.0
+        West: -180
+        South: -60
         East: 180.0
         North: 90.0
       time_range:
-        start: '1980-01-01'
-        end: '2021-05-31'
+        start: "1980-01-01"
+        end: "2021-05-31"
     crs: 4326
   data_adapter:
     rename:
@@ -951,13 +956,13 @@ glofas_uparea:
     license: https://cds.climate.copernicus.eu/api/v2/terms/static/cems-floods.pdf
     extent:
       bbox:
-        West: -180.0
-        South: -60.0
+        West: -180
+        South: -60
         East: 180.0
         North: 90.0
   data_adapter:
     unit_mult:
-      uparea: 1.0e-06
+      uparea: 1e-6
     rename:
       glofas_v31_uparea: uparea
 
@@ -981,8 +986,8 @@ glw_buffaloes:
     license: CC 4.0
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 90.0
     crs: 4326
@@ -1006,8 +1011,8 @@ glw_cattle:
     license: CC 4.0
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 90.0
     crs: 4326
@@ -1031,8 +1036,8 @@ glw_chicken:
     license: CC 4.0
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 90.0
     crs: 4326
@@ -1056,8 +1061,8 @@ glw_ducks:
     license: CC 4.0
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 90.0
     crs: 4326
@@ -1081,8 +1086,8 @@ glw_goats:
     license: CC 4.0
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 90.0
     crs: 4326
@@ -1106,8 +1111,8 @@ glw_horses:
     license: CC 4.0
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 90.0
     crs: 4326
@@ -1131,8 +1136,8 @@ glw_pigs:
     license: CC 4.0
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 90.0
     crs: 4326
@@ -1156,8 +1161,8 @@ glw_sheeps:
     license: CC 4.0
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 90.0
     crs: 4326
@@ -1218,7 +1223,7 @@ grwl:
     license: CC BY 4.0
     extent:
       bbox:
-        West: -180.0
+        West: -180
         South: -54.31
         East: 180.0
         North: 82.311
@@ -1265,8 +1270,8 @@ gswo:
     url: https://global-surface-water.appspot.com/download
     extent:
       bbox:
-        West: -180.0
-        South: -60.0
+        West: -180
+        South: -60
         East: 180.0
         North: 80.0
     nodata: 255
@@ -1289,8 +1294,8 @@ guf_bld_2012:
     license: https://www.dlr.de/eoc/en/PortalData/60/Resources/dokumente/guf/DLR-GUF_LicenseAgreement-and-OrderForm.pdf
     extent:
       bbox:
-        West: -180.0
-        South: -65.0
+        West: -180
+        South: -65
         East: 180.0
         North: 85.0
     crs: 4326
@@ -1303,12 +1308,12 @@ hydro_lakes:
     name: pyogrio
   metadata:
     category: surface water
-    processing_notes: extract of hydrolakes to only include natural lakes and exclude
-      reservoirs and control lakes (ie filter on Lake_type = 1)
+    processing_notes: extract of hydrolakes to only include natural lakes and
+      exclude reservoirs and control lakes (ie filter on Lake_type = 1)
     author: HydroSHEDS
     extent:
       bbox:
-        West: -180.0
+        West: -180
         South: -55.865
         East: 180.0
         North: 83.576
@@ -1383,8 +1388,8 @@ koppen_geiger:
     url: http://koeppen-geiger.vu-wien.ac.at/present.htm
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 90.0
     crs: 4326
@@ -1405,7 +1410,7 @@ hydro_lake_atlas_pol:
     license: CC BY 4.0
     extent:
       bbox:
-        West: -180.0
+        West: -180
         South: -55.865
         East: 180.0
         North: 83.576
@@ -1430,8 +1435,8 @@ mdt_cnes_cls18:
     url: https://www.aviso.altimetry.fr/en/data/products/auxiliary-products/mdt.html
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 90.0
     crs: 4326
@@ -1455,8 +1460,8 @@ merit:
     license: CC-BY-NC 4.0 or ODbL 1.0
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 90.0
     crs: 4326
@@ -1479,13 +1484,14 @@ merit_hydro:
     paper_doi: 10.1029/2019WR024873
     paper_ref: Yamazaki et al. (2019)
     processing_notes: create vrt file with gdalbuildvrt; additional variables for
-      stream-order, basin index (basins), and slope (lndslp) derived with pyflwdir
+      stream-order, basin index (basins), and slope (lndslp) derived with
+      pyflwdir
     url: http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro
     license: CC-BY-NC 4.0 or ODbL 1.0
     extent:
       bbox:
-        West: -180.0
-        South: -60.0
+        West: -180
+        South: -60
         East: 180.0
         North: 85.0
     crs: 4326
@@ -1520,8 +1526,8 @@ merit_hydro_ihu:
     license: ODC-By 1.0
     extent:
       bbox:
-        West: -180.0
-        South: -60.0
+        West: -180
+        South: -60
         East: 180.0
         North: 85.0
     crs: 4326
@@ -1596,8 +1602,8 @@ merit_hydro_patch:
     license: CC-BY-NC 4.0 or ODbL 1.0
     extent:
       bbox:
-        West: -180.0
-        South: -60.0
+        West: -180
+        South: -60
         East: 180.0
         North: 85.0
     crs: 4326
@@ -1627,8 +1633,8 @@ modis_lai:
     category: landuse
     paper_doi: 10.5067/MODIS/MCD15A3H.006
     paper_ref: Myneni et al (2015)
-    processing_notes: this dataset has been extracted from GEE ('MODIS/006/MCD15A3H')
-      for the period '2003-01-01', '2017-12-31'
+    processing_notes: this dataset has been extracted from GEE
+      ('MODIS/006/MCD15A3H') for the period '2003-01-01', '2017-12-31'
     processing_script:
       GEE_script: landuse/modis/MODIS_MCD15A3H_LAI/GEE_MODIS_LAI.js
       merge_script: landuse/modis/MODIS_MCD15A3H_LAI/merge_rasters_GEE_LAI.py
@@ -1659,7 +1665,7 @@ osm_coastlines:
     license: ODbL
     extent:
       bbox:
-        West: -180.0
+        West: -180
         South: -78.733
         East: 180.0
         North: 90.0
@@ -1682,8 +1688,8 @@ osm_landareas:
     license: ODbL
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 83.666
     crs: 4326
@@ -1694,14 +1700,14 @@ osm_landareas:
 pcr_globwb:
   data_type: RasterDataset
   variants:
-  - version: 1990
-    uri: hydro/pcr_globwb/glob_1990.zarr
-  - version: 1995
-    uri: hydro/pcr_globwb/glob_1995.zarr
-  - version: 2000
-    uri: hydro/pcr_globwb/glob_2000.zarr
-  - version: 2005
-    uri: hydro/pcr_globwb/glob_2005.zarr
+    - version: 1990
+      uri: hydro/pcr_globwb/glob_1990.zarr
+    - version: 1995
+      uri: hydro/pcr_globwb/glob_1995.zarr
+    - version: 2000
+      uri: hydro/pcr_globwb/glob_2000.zarr
+    - version: 2005
+      uri: hydro/pcr_globwb/glob_2005.zarr
   driver:
     name: raster_xarray
     options:
@@ -1715,8 +1721,8 @@ pcr_globwb:
     url: https://zenodo.org/records/1045339#.XWUr7E2P5aR
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 90.0
     crs: 4326
@@ -1829,8 +1835,8 @@ simard:
     url: https://webmap.ornl.gov/ogc/dataset.jsp?ds_id=10023
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 90.0
     crs: 4326
@@ -1856,13 +1862,13 @@ SM2RAIN_ASCAT_monthly_025:
     license: https://creativecommons.org/licenses/by/4.0/legalcode
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 90.0
       time_range:
-        start: '2007-01-01'
-        end: '2020-12-01'
+        start: "2007-01-01"
+        end: "2020-12-01"
     crs: 4326
   data_adapter:
     rename:
@@ -1889,13 +1895,13 @@ SM2RAIN_ASCAT_monthly_05:
     license: https://creativecommons.org/licenses/by/4.0/legalcode
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 90.0
       time_range:
-        start: '2007-01-01'
-        end: '2020-12-01'
+        start: "2007-01-01"
+        end: "2020-12-01"
     crs: 4326
   data_adapter:
     rename:
@@ -1913,24 +1919,26 @@ soilgrids:
         y: 2400
   metadata:
     category: soil
-    notes: "soilthickness is based on 1) soilgrids (global) and 2) dataset for Eurasia\
-      \ (ESDAC, 2004; Panagos et al., 2012): ESDAC, 2004. The european soil database\
-      \ distribution version 2.0, european commission and the European soil bureau\n\
-      \ network.  esdac.jrc.ec.europa.eu, accessed: 2017-11-17.  Panagos, P., Van\
-      \ Liedekerke, M., Jones, A., Montanarella, L., 2012. European soil data centre:\
-      \ Response to european policy support  and public data requirements. Land Use\
-      \ Policy 29 (2), 329\xE2\u20AC\u201C338. \n"
+    notes: "soilthickness is based on 1) soilgrids (global) and 2) dataset for
+      Eurasia (ESDAC, 2004; Panagos et al., 2012): ESDAC, 2004. The european
+      soil database distribution version 2.0, european commission and the
+      European soil bureau
+
+      \ network.  esdac.jrc.ec.europa.eu, accessed: 2017-11-17.  Panagos, P.,
+      Van Liedekerke, M., Jones, A., Montanarella, L., 2012. European soil data
+      centre: Response to european policy support  and public data requirements.
+      Land Use Policy 29 (2), 329â€“338.\ \n"
     paper_doi: 10.1371/journal.pone.0169748
     paper_ref: Hengl et al. (2017)
-    processing_notes: soilthickness is based on 1) soilgrids (global, depth to bedrock
-      - BDRICM variable) and 2) dataset for Eurasia
+    processing_notes: soilthickness is based on 1) soilgrids (global, depth to
+      bedrock - BDRICM variable) and 2) dataset for Eurasia
     processing_script: p:/wflow_global/static_data/wflow_sbm_parameters/
     url: https://www.isric.org/explore/soilgrids/faq-soilgrids-201
     license: ODbL
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 90.0
     crs: 4326
@@ -2020,8 +2028,8 @@ vito_2015:
     url: https://land.copernicus.eu/global/products/lc
     extent:
       bbox:
-        West: -180.0
-        South: -60.0
+        West: -180
+        South: -60
         East: 180.0
         North: 80.0
     crs: 4326
@@ -2043,8 +2051,8 @@ vito_2016:
     url: https://land.copernicus.eu/global/products/lc
     extent:
       bbox:
-        West: -180.0
-        South: -60.0
+        West: -180
+        South: -60
         East: 180.0
         North: 80.0
     crs: 4326
@@ -2066,8 +2074,8 @@ vito_2017:
     url: https://land.copernicus.eu/global/products/lc
     extent:
       bbox:
-        West: -180.0
-        South: -60.0
+        West: -180
+        South: -60
         East: 180.0
         North: 80.0
     crs: 4326
@@ -2089,8 +2097,8 @@ vito_2018:
     url: https://land.copernicus.eu/global/products/lc
     extent:
       bbox:
-        West: -180.0
-        South: -60.0
+        West: -180
+        South: -60
         East: 180.0
         North: 80.0
     crs: 4326
@@ -2112,8 +2120,8 @@ vito_2019:
     url: https://land.copernicus.eu/global/products/lc
     extent:
       bbox:
-        West: -180.0
-        South: -60.0
+        West: -180
+        South: -60
         East: 180.0
         North: 80.0
     crs: 4326
@@ -2132,7 +2140,7 @@ wb_countries:
     license: CC-BY 4.0
     extent:
       bbox:
-        West: -180.0
+        West: -180
         South: -59.473
         East: 180.0
         North: 83.634
@@ -2161,12 +2169,12 @@ worldclim:
     category: meteo
     paper_doi: 10.1002/joc.5086
     paper_ref: Fick and Hijmans (2017)
-    nodata: -999.0
+    nodata: -999
     url: https://www.worldclim.org/data/worldclim21.html
     extent:
       bbox:
-        West: -180.0
-        South: -90.0
+        West: -180
+        South: -90
         East: 180.0
         North: 90.0
     crs: 4326
@@ -2180,7 +2188,8 @@ worldpop_2020_constrained:
   driver:
     name: rasterio
     options:
-      chunks: # multiples of blocksize 128
+      chunks:
+        # multiples of blocksize 128
         x: 512
         y: 512
   metadata:
@@ -2192,7 +2201,7 @@ worldpop_2020_constrained:
     license: CC BY 4.0
     extent:
       bbox:
-        West: -180.0
+        West: -180
         South: -55.985
         East: 180.0
         North: 83.628
@@ -2214,7 +2223,7 @@ worldpop_2020_UNadj_constrained:
     processing_script: socio_economic/worldpop/src/
     extent:
       bbox:
-        West: -180.0
+        West: -180
         South: -55.985
         East: 180.0
         North: 83.628
@@ -2240,8 +2249,8 @@ wsf_bld_2015:
     license: CC0 1.0
     extent:
       bbox:
-        West: -180.0
-        South: -60.0
+        West: -180
+        South: -60
         East: 180.0
         North: 80.0
     crs: 4326

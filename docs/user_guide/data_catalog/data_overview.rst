@@ -60,3 +60,4 @@ Using a data catalog
    Preparing a data catalog <data_prepare_cat>
    Supported data types <data_types>
    Data conventions <data_conventions>
+   Cloud storage <data_cloud_storage>

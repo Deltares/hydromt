@@ -534,8 +534,11 @@ class DataCatalog(object):
                 return False
             for name, source in self.list_sources():
                 try:
+                    version = (
+                        str(source.version) if source.version is not None else None
+                    )
                     other_source = other.get_source(
-                        name, provider=source.provider, version=str(source.version)
+                        name, provider=source.provider, version=version
                     )
                 except KeyError:
                     return False
@@ -749,9 +752,15 @@ class DataCatalog(object):
                 break
 
         if root is None:
-            raise ValueError("None of the specified roots were found")
-        else:
-            return Path(root)
+            if to_check:
+                logger.warning(
+                    "None of the specified roots were found, "
+                    f"using first root: {to_check[0]}"
+                )
+                root = to_check[0]
+            else:
+                raise ValueError("No roots specified in catalog metadata")
+        return Path(root)
 
     def from_dict(
         self,
