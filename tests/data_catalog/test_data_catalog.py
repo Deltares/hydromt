@@ -52,15 +52,21 @@ from hydromt.typing import Bbox, TimeRange
 from hydromt.writers import write_xy
 
 
-def test_errors_on_no_root_found(tmp_path: Path):
+def test_falls_back_to_first_root_when_none_found(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+):
+    roots = [tmp_path / p for p in ["a", "b", "c", "d", "4", "⽀"]]
     d = {
         "meta": {
             "hydromt_version": ">=1.0a,<2",
-            "roots": [tmp_path / p for p in ["a", "b", "c", "d", "4", "⽀"]],
+            "roots": roots,
         },
     }
-    with pytest.raises(ValueError, match="None of the specified roots were found"):
-        _ = DataCatalog().from_dict(d)
+    with caplog.at_level(WARNING):
+        cat = DataCatalog().from_dict(d)
+    assert cat.root == roots[0]
+    assert "None of the specified roots were found" in caplog.text
+    assert str(roots[0]) in caplog.text
 
 
 def test_finds_later_roots(tmp_path: Path):
