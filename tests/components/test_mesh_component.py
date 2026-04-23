@@ -173,7 +173,7 @@ def test_properties(mock_model):
     # Test crs
     data.ugrid.set_crs(4326)
     mesh_component._data = data
-    assert mesh_component.crs == 4326
+    assert mesh_component.crs == CRS.from_user_input(4326)
     # Test bounds
     assert mesh_component.bounds == data.ugrid.bounds
     # Test mesh_names
@@ -205,7 +205,7 @@ def test_get_mesh(mock_model):
 
     mesh = mesh_component.get_mesh(grid_name="mesh2d")
     assert isinstance(mesh, xu.Ugrid2d)
-    mesh_component._data.grid.crs = 4326
+    mesh_component._data.grid.crs = CRS.from_user_input(4326)
     mesh = mesh_component.get_mesh(grid_name="mesh2d", include_data=True)
     assert isinstance(mesh, xu.UgridDataset)
 

@@ -25,7 +25,7 @@ from pystac import Item as StacItem
 from shapely import box
 from yaml import dump
 
-from hydromt._compat import HAS_GCSFS, HAS_GDAL, HAS_OPENPYXL, HAS_S3FS
+from hydromt._compat import HAS_ADLFS, HAS_GCSFS, HAS_GDAL, HAS_OPENPYXL, HAS_S3FS
 from hydromt._utils import temp_env
 from hydromt.config import Settings
 from hydromt.data_catalog.adapters import (
@@ -346,6 +346,99 @@ def test_catalog_entry_merging_round_trip(aws_worldcover, legacy_aws_worldcover)
 
     aws_and_legacy_catalog2 = DataCatalog().from_dict(d)
     assert aws_and_legacy_catalog2 == aws_and_legacy_catalog
+
+
+@pytest.fixture
+def azure_catalog(test_data_dir: Path) -> DataCatalog:
+    catalog = DataCatalog(data_libs=[test_data_dir / "azure_catalog.yml"])
+    assert len(catalog) == 4
+    return catalog
+
+
+@pytest.mark.skipif(not HAS_ADLFS, reason="adlfs is not installed")
+def test_azure_catalog_filesystem_source(azure_catalog: DataCatalog):
+    """Check abfs:// source with SAS token URL and explicit account_name."""
+    source = azure_catalog.get_source("esa_worldcover_azure", provider="azure")
+    assert source.uri.endswith("ESA_WorldCover_10m_2021_v200_N51E003_Map.tif")
+    assert source.uri_resolver.name == "azure_blob"
+    assert source.uri_resolver.options.get("account_name") == "ai4edataeuwest"
+    assert "sas_token_url" in source.uri_resolver.options
+
+
+@pytest.mark.skipif(not HAS_ADLFS, reason="adlfs is not installed")
+def test_azure_catalog_resolver_source(azure_catalog: DataCatalog):
+    """Check HTTPS blob URI is parsed and account_name extracted from URL."""
+    source = azure_catalog.get_source("esa_worldcover_azure_resolver", provider="azure")
+    assert source.uri.startswith("https://ai4edataeuwest.blob.core.windows.net/")
+    assert source.uri_resolver.name == "azure_blob"
+    assert "sas_token_url" in source.uri_resolver.options
+
+
+@pytest.mark.skipif(not HAS_ADLFS, reason="adlfs is not installed")
+def test_azure_catalog_round_trip(azure_catalog: DataCatalog):
+    catalog_read = DataCatalog().from_dict(
+        azure_catalog.to_dict(), root=azure_catalog.root
+    )
+    assert catalog_read == azure_catalog
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(not HAS_ADLFS, reason="adlfs is not installed")
+@pytest.mark.parametrize(
+    "source_name",
+    [
+        "esa_worldcover_azure",
+        "esa_worldcover_azure_resolver",
+    ],
+)
+def test_azure_get_rasterdataset(azure_catalog: DataCatalog, source_name: str):
+    """Read a raster tile from ESA WorldCover on Azure (Planetary Computer).
+
+    Parameterized over both catalog flavours:
+    - abfs:// URI with SAS token URL
+    - HTTPS blob URI (normalised to abfs:// by the resolver)
+    """
+    da = azure_catalog.get_rasterdataset(
+        source_name,
+        bbox=[3.5, 51.5, 3.6, 51.6],
+        provider="azure",
+    )
+    assert isinstance(da, xr.DataArray)
+    assert da.size > 0
+
+
+@pytest.mark.skipif(not HAS_ADLFS, reason="adlfs is not installed")
+def test_azure_anon_convention_source(azure_catalog: DataCatalog):
+    """Check the convention-resolver source uses abfs filesystem with anon access."""
+    source = azure_catalog.get_source("noaa_isd_azure", provider="abfs")
+    assert source.driver.filesystem.protocol == "abfs"
+    assert source.uri.startswith("abfs://")
+
+
+@pytest.mark.skipif(not HAS_ADLFS, reason="adlfs is not installed")
+def test_azure_anon_resolver_source(azure_catalog: DataCatalog):
+    """Check the azure_blob resolver source loads and has correct settings."""
+    source = azure_catalog.get_source("noaa_isd_azure_resolver", provider="azure")
+    assert source.uri_resolver.name == "azure_blob"
+    assert source.uri_resolver.options.get("anon") is True
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(not HAS_ADLFS, reason="adlfs is not installed")
+def test_azure_anon_convention_glob(azure_catalog: DataCatalog):
+    """Verify that the ConventionResolver can glob files on a public Azure container.
+
+    Uses NOAA ISD weather data on Azure Open Datasets
+    (account: azureopendatastorage, container: isdweatherdatacontainer).
+    This container supports anonymous (unauthenticated) read access.
+    """
+    source = azure_catalog.get_source("noaa_isd_azure", provider="abfs")
+    uris = source.uri_resolver.resolve(
+        source.uri,
+        handle_nodata=NoDataStrategy.RAISE,
+    )
+    assert len(uris) > 0
+    assert all(u.endswith(".parquet") for u in uris)
 
 
 def test_versioned_catalogs_no_version(data_catalog):

@@ -1,0 +1,82 @@
+meta:
+  hydromt_version: ">=1.0a, <2.0"
+  version: v1.0.0
+
+# Anonymous access to Azure Blob Storage using the default ConventionResolver.
+# This mirrors the AWS S3 pattern (filesystem protocol + anon: true) and
+# demonstrates that no special resolver is needed for simple abfs:// URIs.
+#
+# Data source: NOAA Integrated Surface Data (ISD) hosted by Microsoft
+# Azure Open Datasets — publicly accessible without authentication.
+noaa_isd_azure:
+  data_type: DataFrame
+  uri: abfs://isdweatherdatacontainer/ISDWeather/year=2020/month=1/*.parquet
+  driver:
+    name: pandas
+    filesystem:
+      protocol: abfs
+      account_name: azureopendatastorage
+      anon: true
+  provider: abfs
+  metadata:
+    category: meteo
+    url: https://azure.microsoft.com/en-us/services/open-datasets/catalog/noaa-integrated-surface-data/
+    license: Public Domain
+
+# Same dataset but using the azure_blob resolver with anonymous access.
+# Demonstrates that the AzureBlobResolver also supports anon access.
+noaa_isd_azure_resolver:
+  data_type: DataFrame
+  uri: abfs://isdweatherdatacontainer/ISDWeather/year=2020/month=1/*.parquet
+  driver:
+    name: pandas
+  uri_resolver:
+    name: azure_blob
+    options:
+      account_name: azureopendatastorage
+      anon: true
+  provider: azure
+  metadata:
+    category: meteo
+    url: https://azure.microsoft.com/en-us/services/open-datasets/catalog/noaa-integrated-surface-data/
+    license: Public Domain
+
+## Authenticated access
+# abfs:// URI with azure_blob resolver + automatic SAS token fetching.
+esa_worldcover_azure:
+  data_type: RasterDataset
+  uri: abfs://esa-worldcover/v200/2021/map/ESA_WorldCover_10m_2021_v200_N51E003_Map.tif
+  driver:
+    name: rasterio
+  uri_resolver:
+    name: azure_blob
+    options:
+      account_name: ai4edataeuwest
+      sas_token_url: https://planetarycomputer.microsoft.com/api/sas/v1/token/esa-worldcover
+  version: v200
+  provider: azure
+  metadata:
+    crs: 4326
+    category: landuse
+    url: https://esa-worldcover.org/
+    license: CC BY 4.0
+
+# Same dataset but with an HTTPS blob URI.
+# The resolver normalises this to abfs:// internally and extracts the
+# account_name from the URL, so it does not need to be specified again.
+esa_worldcover_azure_resolver:
+  data_type: RasterDataset
+  uri: https://ai4edataeuwest.blob.core.windows.net/esa-worldcover/v200/2021/map/ESA_WorldCover_10m_2021_v200_N51E003_Map.tif
+  driver:
+    name: rasterio
+  uri_resolver:
+    name: azure_blob
+    options:
+      sas_token_url: https://planetarycomputer.microsoft.com/api/sas/v1/token/esa-worldcover
+  version: v200
+  provider: azure
+  metadata:
+    crs: 4326
+    category: landuse
+    url: https://esa-worldcover.org/
+    license: CC BY 4.0

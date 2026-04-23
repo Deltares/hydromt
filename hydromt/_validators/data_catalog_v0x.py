@@ -50,7 +50,7 @@ class SourceVariant(BaseModel):
     version: Optional[Union[str, Number]] = None
     path: Path
     rename: Optional[Dict[str, str]] = None
-    filesystem: Optional[Literal["local", "s3", "gcs"]] = None
+    filesystem: Optional[Literal["local", "s3", "gcs", "az", "abfs"]] = None
     storage_options: Optional[Dict[str, Any]] = None
 
 
