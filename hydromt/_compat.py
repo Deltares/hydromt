@@ -1,10 +1,9 @@
 import sys
 from typing import List
 
-from packaging.version import Version
-
 __all__: List[str] = []
 
+HAS_ADLFS = False
 HAS_GCSFS = False
 HAS_GDAL = False
 HAS_OPENPYXL = False
@@ -43,6 +42,13 @@ try:
     import s3fs
 
     HAS_S3FS = True
+except ImportError:
+    pass
+
+try:
+    import adlfs
+
+    HAS_ADLFS = True
 except ImportError:
     pass
 

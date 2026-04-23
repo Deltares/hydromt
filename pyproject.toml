@@ -63,6 +63,9 @@ dynamic = ['version', 'description']
 
 [project.optional-dependencies]
 io = [
+	"azure-ai-ml",      # AzureML datastore URI resolution
+	"azure-identity",   # Azure credential chain (DefaultAzureCredential)
+	"adlfs",            # Azure Data Lake / Blob Storage file system
 	"gcsfs>=2023.12.1", # google cloud file system
 	"fastparquet",      # parquet IO
 	"openpyxl",         # excel IO
