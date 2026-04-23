@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
@@ -37,10 +37,10 @@
     <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css?v=d7afb10b" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../_static/scripts/fontawesome.js?digest=7f76b32a3354e82990f2"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
     <script src="../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
@@ -51,7 +51,7 @@
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_examples/reading_tabular_data';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.17.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.4.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -83,7 +83,9 @@
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -486,13 +488,22 @@
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/runner/work/hydromt/hydromt/.pixi/envs/default/lib/python3.14/site-packages/tqdm/auto.py:21: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html
+  from .autonotebook import tqdm as notebook_tqdm
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-04-22 11:16:54,697 - hydromt - log - INFO - HydroMT version: 1.4.0.dev0
-2026-04-22 11:16:54,698 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from data/tabular_data_catalog.yml
+2026-04-23 10:10:20,939 - hydromt - log - INFO - HydroMT version: 1.4.0.dev0
+2026-04-23 10:10:20,940 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from data/tabular_data_catalog.yml
 </pre></div></div>
 </div>
 <section id="Pandas-driver">
@@ -535,7 +546,7 @@ DataFrameSource(name=&#39;example_csv_data&#39;, uri=&#39;example_csv_data.csv&#
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-04-22 11:16:54,733 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading example_csv_data DataFrame data from /home/runner/work/hydromt/hydromt/docs/_examples/data/example_csv_data.csv
+2026-04-23 10:10:20,968 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading example_csv_data DataFrame data from /home/runner/work/hydromt/hydromt/docs/_examples/data/example_csv_data.csv
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -644,9 +655,9 @@ DataFrameSource(name=&#39;example_csv_data&#39;, uri=&#39;example_csv_data.csv&#
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-04-22 11:16:55,149 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from data/vito_reclass.yml
-2026-04-22 11:16:55,168 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data latest
-2026-04-22 11:16:55,168 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
+2026-04-23 10:10:21,328 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from data/vito_reclass.yml
+2026-04-23 10:10:21,344 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data latest
+2026-04-23 10:10:21,345 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -672,7 +683,7 @@ DataFrameSource(name=&#39;vito_reclass&#39;, uri=&#39;vito_reclass.csv&#39;, dat
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-04-22 11:16:55,745 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading vito_reclass DataFrame data from /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
+2026-04-23 10:10:21,928 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading vito_reclass DataFrame data from /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -759,7 +770,7 @@ DataFrameSource(name=&#39;vito_reclass&#39;, uri=&#39;vito_reclass.csv&#39;, dat
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-04-22 11:16:55,756 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading vito_2015 RasterDataset data from /home/runner/.hydromt/artifact_data/latest/vito.tif
+2026-04-23 10:10:21,938 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading vito_2015 RasterDataset data from /home/runner/.hydromt/artifact_data/latest/vito.tif
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -768,7 +779,7 @@ DataFrameSource(name=&#39;vito_reclass&#39;, uri=&#39;vito_reclass.csv&#39;, dat
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7f43704ed400&gt;
+&lt;matplotlib.image.AxesImage at 0x7f2706d4ecf0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -870,8 +881,8 @@ DataFrameSource(name=&#39;vito_reclass&#39;, uri=&#39;vito_reclass.csv&#39;, dat
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -905,7 +916,7 @@ DataFrameSource(name=&#39;vito_reclass&#39;, uri=&#39;vito_reclass.csv&#39;, dat
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
 </p></div>
       
     </div>
