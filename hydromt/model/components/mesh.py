@@ -233,26 +233,35 @@ class MeshComponent(SpatialModelComponent):
     @property
     def crs(self) -> CRS | None:
         """Returns model mesh crs."""
-        if len(self.data) > 0:
+        if not self.is_empty:
             return next(iter(self.data.ugrid.crs.values()))
         return None
 
     @property
     def bounds(self) -> tuple[float, float, float, float] | None:
         """Returns model mesh bounds."""
-        if len(self.data) > 0:
+        if not self.is_empty:
             return self.data.ugrid.bounds
         return None
 
     @property
     def _region_data(self) -> gpd.GeoDataFrame | None:
         """Return mesh total_bounds as a geodataframe."""
-        if len(self.data) > 0:
+        if not self.is_empty:
             region = gpd.GeoDataFrame(
                 geometry=[box(*self.data.ugrid.total_bounds)], crs=self.crs
             )
             return region
         return None
+
+    @property
+    def is_empty(self):
+        """Check whether the mesh is empty or not."""
+        ndims = len(self.data.sizes)
+        if ndims == 0:
+            return True
+        else:
+            return False
 
     @property
     def mesh_names(self) -> list[str]:
