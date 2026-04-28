@@ -17,6 +17,7 @@ New
 - Added ``precision`` parameter to ``GeomsComponent.write`` to set the number of decimals used when writing (#1415).
 - More informative error messages when calling ``test_equal`` on ConfigComponent (#1430).
 - Added ``SlippyTileDriver`` for reading XYZ/slippy map tiles stored in ``{zoom}/{x}/{y}.png`` (#1417).
+- Added ``MeshComponent.is_empty`` to check for existing data correctly. (#1437)
 
 Changed
 -------
@@ -27,6 +28,8 @@ Fixed
 - Properly log unhandled errors to ``hydromt.log`` (#1399).
 - ``gis.vector_utils.nearest_merge`` now correctly respects ``max_dist`` filtering and ``overwrite`` flag when merging columns (#1414).
 - Normalize geometries before comparing them in ``test_equal`` for ``SpatialModelComponent``, ``GeomsComponent`` and ``VectorComponent`` (#1415).
+- ``pet_debruin`` now keeps all inputs lazy-loaded instead of reading in the entire array. (#1439)
+- The functions ``_strip_scheme`` and ``_strip_vsi`` in ``hydromt._utils.uris`` no longer use ``lstrip`` to remove leading characters, but now remove only the exact prefix. (#1438)
 
 Deprecated
 ----------
