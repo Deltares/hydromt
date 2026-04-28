@@ -1,18 +1,28 @@
 name: Create release
 
-# Creates a release from a release branch:
-# - major / minor: assumes the version on the release branch is already X.Y.0
-#                  (set by `create-release-branch.yml`). Tags HEAD and creates a
-#                  GitHub release marked as latest.
-# - patch:         increments the patch version on the release branch (with
-#                  changelog & switcher updates), commits, tags and creates a
-#                  GitHub release marked as latest.
-# - rc:            builds with a pre-release version derived from the current
-#                  source version. Does NOT commit the version change to the
-#                  branch. Tags the current commit and creates a GitHub pre-release.
+# Creates a release from a release branch. Tags the release branch, creates a
+# GitHub release, and (for full releases) publishes versioned docs to GitHub
+# Pages.
 #
-# Whenever a GitHub release is published, `publish-pypi.yml` is automatically
-# triggered (it listens to the `release: published` event).
+# Per release_type:
+# - major / minor: assumes the version on the release branch is already X.Y.0
+#                  (set by `create-release-branch.yml`). Tags HEAD and creates
+#                  a GitHub release marked as latest.
+# - patch:         increments the patch version on the release branch (with
+#                  changelog & switcher updates), commits, tags, and creates a
+#                  GitHub release marked as latest.
+# - rc:            commits a pre-release version bump (vX.Y.ZrcN) on the
+#                  release branch, tags it, and creates a GitHub pre-release.
+#                  No changelog/switcher changes; no docs are published.
+#
+# Publishing:
+# - PyPI: triggered automatically by the `release: published` event handled
+#         in `publish-pypi.yml`.
+# - Docs: published from the release tag in the `publish-docs` job below for
+#         full releases (major/minor/patch).
+# - Cleanup: after the corresponding release PR is merged into `main`,
+#            `post-release-cleanup.yml` opens a follow-up PR resetting the
+#            version to `.dev0` and adding a new `Unreleased` section.
 
 on:
   workflow_dispatch:

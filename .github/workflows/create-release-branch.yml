@@ -1,10 +1,14 @@
 name: Create release branch (minor/major)
 
-# Creates a `release/X.Y` branch off `main` for a major or minor release.
-# Bumps the version, updates the changelog header and switcher.json, commits,
-# pushes the branch, and opens a PR from the release branch into `main`.
-# This workflow does NOT create tags or GitHub releases. Use `create-release.yml`
-# for that, once the release branch is ready.
+# Creates a long-lived `release/vX.Y` branch off `main` for a major or minor
+# release. Bumps the version to X.Y.0, updates the changelog header and
+# switcher.json, commits, pushes the branch, and opens a PR from the release
+# branch into `main`. Also comments the `pyproject.toml` diff since the last
+# tag on the PR for conda-recipe tracking.
+#
+# This workflow does NOT create tags or GitHub releases. Use
+# `create-release.yml` once the release branch is ready to tag the release
+# (and again later for any patches or release candidates on the same branch).
 
 on:
   workflow_dispatch:

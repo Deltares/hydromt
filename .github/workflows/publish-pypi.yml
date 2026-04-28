@@ -1,6 +1,10 @@
 ---
 name: Build and Publish to PyPI
 
+# Builds the PyPI distribution and publishes it. Triggered automatically when
+# a GitHub release is published (by `create-release.yml`), and also callable
+# directly via `workflow_call` or `workflow_dispatch`.
+
 on:
   release:
     types:

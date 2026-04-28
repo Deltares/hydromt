@@ -1,11 +1,12 @@
 name: Post-release cleanup
 
-# Triggered when a release PR (from a `release/**` branch) is merged into
-# `main`. Opens a follow-up PR that:
+# Triggered automatically when a release PR (from a `release/*` branch) is
+# merged into `main`. Opens a follow-up PR against `main` that:
 #   - resets the version in source to `X.Y.Z.dev0`
 #   - inserts a fresh `Unreleased` section in the changelog
 #
-# Can also be run manually via workflow_dispatch.
+# Can also be run manually via workflow_dispatch (e.g. if the auto-trigger
+# was missed).
 
 on:
   pull_request:
