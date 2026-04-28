@@ -1,78 +1,144 @@
-name: Create a new release branch
+name: Create release branch (minor/major)
+
+# Creates a `release/X.Y` branch off `main` for a major or minor release.
+# Bumps the version, updates the changelog header and switcher.json, commits,
+# pushes the branch, and opens a PR from the release branch into `main`.
+# This workflow does NOT create tags or GitHub releases. Use `create-release.yml`
+# for that, once the release branch is ready.
 
 on:
   workflow_dispatch:
     inputs:
       bump:
         type: choice
+        description: "Is this a Minor or Major release?"
         options:
           - minor
           - major
         default: minor
-        description: "Is this a Minor or Major release?"
 
 defaults:
   run:
     shell: bash -l -e {0}
 
 jobs:
-  build:
+  create-release-branch:
+    name: Create release branch and PR
+    runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
-    name: Setup release PR
-    runs-on: ubuntu-latest
     concurrency:
       group: NEW_RELEASE
       cancel-in-progress: false
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
-
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: main
 
-      - name: check there are no pre-existing release PRs
+      - name: Check there are no pre-existing release PRs
         run: |
-          export EXISTING_RELEASE_PR_NUMBER=$(gh pr list --search "release" --json "number")
-          if [ $(echo $EXISTING_RELEASE_PR_NUMBER | jq '.|length') -gt 0]; then
-            gh pr comment $EXISTING_RELEASE_PR_NUMBER --body "$username It looks like you tried to start a new release but this one is already started. Please either finish or close this one before continuing";
+          EXISTING=$(gh pr list --state open --base main --json number,title,headRefName \
+            --jq '[.[] | select(.headRefName | startswith("release/"))]')
+          if [ "$(echo "$EXISTING" | jq 'length')" -gt 0 ]; then
+            echo "An open release PR already exists; finish or close it before creating a new one."
+            echo "$EXISTING" | jq
             exit 1
           fi
-        env:
-          username: ${{ github.actor }}
 
-      - name: setup release PR
-        env:
-          GH_TOKEN: ${{ github.token }}
-          BUMP_KIND: ${{ inputs.bump }}
+      - name: Compute new version and branch
+        id: version
         run: |
-          export CURRENT_VERSION=$(bash .github/scripts/get-version.sh)
-          export CURRENT_MAJOR=$(echo $CURRENT_VERSION | cut -d'.' -f 1)
-          export CURRENT_MINOR=$(echo $CURRENT_VERSION | cut -d'.' -f 2)
+          CURRENT_VERSION=$(bash .github/scripts/get-version.sh \
+            | sed -E 's/^([0-9]+\.[0-9]+\.[0-9]+).*$/\1/')
+          MAJOR=$(echo "$CURRENT_VERSION" | cut -d'.' -f 1)
+          MINOR=$(echo "$CURRENT_VERSION" | cut -d'.' -f 2)
 
-          case $BUMP_KIND in
-            "minor")
-              export NEW_MAJOR=$CURRENT_MAJOR
-              export NEW_MINOR=$(($CURRENT_MINOR + 1))
+          case "${{ inputs.bump }}" in
+            minor)
+              NEW_MAJOR=$MAJOR
+              NEW_MINOR=$((MINOR + 1))
               ;;
-            "major")
-              export NEW_MAJOR=$((CURRENT_MAJOR + 1))
-              export NEW_MINOR=0
-              ;;
-            *)
-              echo "invalid bump: $BUMP_KIND"
-              exit 1
+            major)
+              NEW_MAJOR=$((MAJOR + 1))
+              NEW_MINOR=0
               ;;
           esac
 
-          export NEW_VERSION="$NEW_MAJOR.$NEW_MINOR.0"
-          export RELEASE_BRANCH="release/$NEW_MAJOR.$NEW_MINOR"
+          NEW_VERSION="$NEW_MAJOR.$NEW_MINOR.0"
+          RELEASE_BRANCH="release/v$NEW_MAJOR.$NEW_MINOR"
 
+          if git ls-remote --exit-code --heads origin "$RELEASE_BRANCH" >/dev/null; then
+            echo "Release branch '$RELEASE_BRANCH' already exists on origin."
+            exit 1
+          fi
+
+          echo "NEW_VERSION=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          echo "RELEASE_BRANCH=$RELEASE_BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: Create release branch with version bump
+        env:
+          NEW_VERSION: ${{ steps.version.outputs.NEW_VERSION }}
+          RELEASE_BRANCH: ${{ steps.version.outputs.RELEASE_BRANCH }}
+        run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
 
-          git pull
           git checkout -b "$RELEASE_BRANCH"
           git push --set-upstream origin "$RELEASE_BRANCH"
 
-          bash .github/scripts/setup-release.sh "$NEW_VERSION" "$RELEASE_BRANCH"
+          # Bump version, update changelog & switcher, commit, push.
+          bash .github/scripts/setup-release.sh "$NEW_VERSION"
+
+      - name: Open PR into main
+        env:
+          NEW_VERSION: ${{ steps.version.outputs.NEW_VERSION }}
+          RELEASE_BRANCH: ${{ steps.version.outputs.RELEASE_BRANCH }}
+        run: |
+          PR_BODY=$(cat <<EOF
+          Automated PR for the **v$NEW_VERSION** release.
+
+          - Branch: \`$RELEASE_BRANCH\`
+          - Push any final fixes / changelog tweaks to \`$RELEASE_BRANCH\` before merging.
+          - When ready, run the **Create release** workflow on this branch with type \`minor\` or \`major\` to tag the release and trigger PyPI publishing.
+          - After merging this PR into \`main\`, the **Post-release cleanup** workflow will open a follow-up PR.
+          EOF
+          )
+
+          PR_URL=$(gh pr create \
+            --base main \
+            --head "$RELEASE_BRANCH" \
+            --title "Release v$NEW_VERSION" \
+            --body "$PR_BODY")
+
+          echo "PR_URL=$PR_URL" >> "$GITHUB_ENV"
+
+      - name: Comment pyproject.toml diff since last tag
+        env:
+          NEW_VERSION: ${{ steps.version.outputs.NEW_VERSION }}
+        run: |
+          git fetch --tags --quiet
+          LAST_TAG=$(git describe --tags --abbrev=0 --match "v*" 2>/dev/null || echo "")
+          if [ -z "$LAST_TAG" ]; then
+            gh pr comment "$PR_URL" --body "No previous version tag found; skipping pyproject.toml diff."
+            exit 0
+          fi
+
+          DIFF=$(git diff "$LAST_TAG" -- pyproject.toml || true)
+          if [ -z "$DIFF" ]; then
+            gh pr comment "$PR_URL" --body "Latest tag is \`$LAST_TAG\`. No \`pyproject.toml\` changes since then; conda recipe likely needs no updates."
+          else
+            {
+              echo "Latest tag is \`$LAST_TAG\`. \`pyproject.toml\` changes since then:"
+              echo
+              echo '```diff'
+              echo "$DIFF"
+              echo '```'
+              echo
+              echo "_(You may need to update the conda recipe accordingly.)_"
+            } > comment.txt
+            gh pr comment "$PR_URL" --body-file comment.txt
+          fi
