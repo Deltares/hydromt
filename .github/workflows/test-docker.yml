@@ -15,6 +15,10 @@ on:
       - .binder/**
       - pyproject.toml
 
+defaults:
+  run:
+    shell: bash -e -l {0}
+
 jobs:
   test-binder:
     runs-on: ubuntu-latest
@@ -34,9 +38,6 @@ jobs:
       - name:
         id: test-image
         run: |
-          # actually fail when something goes wrong
-          set -e
-
           # run the docker image detached, it will start the jupyter server for us
           docker run -d -p 8888:8888 hydromt-binder
 

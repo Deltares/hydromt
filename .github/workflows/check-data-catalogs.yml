@@ -12,12 +12,12 @@ on:
     paths:
       - data/catalogs/*.yml
 
+defaults:
+  run:
+    shell: bash -l -e {0}
 
 jobs:
   build:
-    defaults:
-      run:
-        shell: bash -l {0}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     concurrency:

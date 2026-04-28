@@ -10,6 +10,9 @@ on:
       - v*
   workflow_dispatch:
 
+defaults:
+  run:
+    shell: bash -e -l {0}
 
 jobs:
   build-artifacts:
@@ -46,9 +49,6 @@ jobs:
   test-built-dist:
     needs: build-artifacts
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash -l {0}
     steps:
       - uses: actions/checkout@v6
 

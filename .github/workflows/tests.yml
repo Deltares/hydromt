@@ -25,12 +25,12 @@ on:
     types:
       - completed
 
+defaults:
+  run:
+    shell: bash -e -l {0}
 
 jobs:
   test:
-    defaults:
-      run:
-        shell: bash -e -l {0}
     strategy:
       fail-fast: false
       matrix:

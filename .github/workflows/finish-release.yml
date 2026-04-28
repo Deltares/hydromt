@@ -8,13 +8,14 @@ on:
       - 'release/**'
   workflow_dispatch:
 
+defaults:
+  run:
+    shell: bash -l -e {0}
+
 jobs:
   publish-pypi:
-    defaults:
-      run:
-        shell: bash -l {0}
     name: Publish to PyPI
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - id: download-artifact
         uses: dawidd6/action-download-artifact@v20
@@ -35,11 +36,8 @@ jobs:
           verbose: true
 
   publish-docs:
-    defaults:
-      run:
-        shell: bash -l {0}
     name: Publish docs
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
@@ -83,14 +81,11 @@ jobs:
           git push
 
   gh-release:
-    defaults:
-      run:
-        shell: bash -l {0}
     name: Publish GitHub release
     needs:
       - publish-pypi
       - publish-docs
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     concurrency:
       group: NEW_RELEASE
       cancel-in-progress: false
@@ -107,7 +102,6 @@ jobs:
 
       - name: Publish github release
         run: |
-          set -e
           export RELEASE_VERSION=v$(bash .github/scripts/get-version.sh)
           if [ -z "$RELEASE_VERSION" ]; then
             echo "could not determine release version"
@@ -127,7 +121,6 @@ jobs:
 
       - name: Create post release PR
         run: |
-          set -e
           export RELEASE_VERSION=v$(bash .github/scripts/get-version.sh)
 
           git config user.name "GitHub Actions Bot"

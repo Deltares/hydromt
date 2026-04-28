@@ -8,16 +8,17 @@ on:
         description: "Release branch to patch (e.g. release/1.4)"
         required: true
 
+defaults:
+  run:
+    shell: bash -l -e {0}
+
 jobs:
   build:
     permissions:
       contents: write
       pull-requests: write
-    defaults:
-      run:
-        shell: bash -l {0}
     name: Setup patch release PR
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     concurrency:
       group: NEW_RELEASE
       cancel-in-progress: false
@@ -50,8 +51,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_BRANCH: ${{ inputs.release_branch }}
         run: |
-          set -e
-
           export CURRENT_VERSION=$(bash .github/scripts/get-version.sh)
           export CURRENT_MAJOR=$(echo $CURRENT_VERSION | cut -d'.' -f 1)
           export CURRENT_MINOR=$(echo $CURRENT_VERSION | cut -d'.' -f 2)

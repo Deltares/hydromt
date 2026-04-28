@@ -27,13 +27,12 @@ on:
     types:
       - completed
 
+defaults:
+  run:
+    shell: bash -e -l {0}
 
 jobs:
   scan:
-    defaults:
-      run:
-        shell: bash -e -l {0}
-
     name: run test coverage and SonarQube scan
     runs-on: ubuntu-latest
     steps:
