@@ -568,22 +568,31 @@ def pet_debruin(
     """
     # saturation and actual vapour pressure at given temperature [hPa °C-1]
     esat = 6.112 * np.exp((17.67 * temp) / (temp + 243.5))
+
     # slope of vapour pressure curve [hPa °C-1]
     slope = esat * (17.269 / (temp + 243.5)) * (1.0 - (temp / (temp + 243.5)))
-    # compute latent heat of vapourization [J kg-1]
-    lam = (2.502 * 10**6) - (2250.0 * temp)
+
+    # latent heat of vapourization [J kg-1]
+    lam = (2.502e6) - (2250.0 * temp)
+
     # psychometric constant [hPa °C-1]
     gamma = (cp * press) / (0.622 * lam)
-    # compute ref. evaporation (with global radiation, therefore calling it potential)
+
+    # define mask in a lazy way to avoid division by zero
+    mask = abs(k_ext) > 1e-8
+
+    # compute ref. evaporation [J m-2] (with global radiation, therefore calling it potential)
     # in J m-2 over whole period
-    ep_joule = (
-        (slope / (slope + gamma))
-        * (((1.0 - 0.23) * k_in) - (cs * (k_in / (k_ext + 0.00001))))
-    ) + beta
-    ep_joule = xr.where(np.isclose(k_ext, 0.0), 0.0, ep_joule)
-    pet = ((ep_joule / lam) * timestep).astype(np.float32)
-    pet = xr.where(pet > 0.0, pet, 0.0)
-    return pet
+    ratio = xr.where(mask, k_in / k_ext, 0.0)
+    ep_joule = (slope / (slope + gamma)) * (((1.0 - 0.23) * k_in) - cs * ratio) + beta
+
+    # apply same mask
+    ep_joule = ep_joule.where(mask, 0.0)
+
+    pet = (ep_joule / lam) * timestep
+    pet = pet.clip(min=0.0)
+
+    return pet.astype(np.float32)
 
 
 def pet_makkink(
