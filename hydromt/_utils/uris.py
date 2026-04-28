@@ -13,7 +13,7 @@ def _strip_scheme(uri: str) -> Tuple[Optional[str], str]:
     except StopIteration:
         # no scheme found
         return (None, uri)
-    return (scheme, uri.lstrip(scheme))
+    return (scheme, uri[len(scheme) :])
 
 
 def _strip_vsi(uri: str) -> Tuple[Optional[str], str]:
@@ -23,7 +23,7 @@ def _strip_vsi(uri: str) -> Tuple[Optional[str], str]:
     except StopIteration:
         # No prefix found
         return None, uri
-    return (prefix, uri.lstrip(prefix))
+    return (prefix, uri[len(prefix) :])
 
 
 def _is_valid_url(uri: str | Path) -> bool:
