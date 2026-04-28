@@ -1,8 +1,8 @@
 name: Create release
 
 # Creates a release from a release branch. Tags the release branch, creates a
-# GitHub release, and (for full releases) publishes versioned docs to GitHub
-# Pages.
+# GitHub release, and (for full releases) opens a PR back into `main` and
+# publishes versioned docs to GitHub Pages.
 #
 # Per release_type:
 # - major / minor: assumes the version on the release branch is already X.Y.0
@@ -13,14 +13,18 @@ name: Create release
 #                  GitHub release marked as latest.
 # - rc:            commits a pre-release version bump (vX.Y.ZrcN) on the
 #                  release branch, tags it, and creates a GitHub pre-release.
-#                  No changelog/switcher changes; no docs are published.
+#                  No changelog/switcher changes; no docs published; no PR.
 #
-# Publishing:
+# For full releases (major/minor/patch), this workflow also opens a PR from
+# the release branch into `main` and comments the `pyproject.toml` diff since
+# the previous tag on that PR (for conda-recipe tracking).
+#
+# Publishing chain:
 # - PyPI: triggered automatically by the `release: published` event handled
 #         in `publish-pypi.yml`.
 # - Docs: published from the release tag in the `publish-docs` job below for
-#         full releases (major/minor/patch).
-# - Cleanup: after the corresponding release PR is merged into `main`,
+#         full releases.
+# - Cleanup: after the release PR is merged into `main`,
 #            `post-release-cleanup.yml` opens a follow-up PR resetting the
 #            version to `.dev0` and adding a new `Unreleased` section.
 
@@ -141,6 +145,55 @@ jobs:
         run: |
           # major/minor releases already have these changes due to `create-release-branch.yml` already running `setup-release.sh`
           bash .github/scripts/setup-release.sh "${{ steps.version.outputs.NEW_VERSION }}"
+
+      - name: Open PR back into main (full releases only)
+        if: ${{ steps.version.outputs.IS_PRERELEASE == 'false' }}
+        env:
+          NEW_VERSION: ${{ steps.version.outputs.NEW_VERSION }}
+        run: |
+          PR_BODY=$(cat <<EOF
+          Automated PR for the **v$NEW_VERSION** release.
+
+          - Branch: \`$RELEASE_BRANCH\`
+          - The release has already been tagged and published. Merging this PR brings the changelog, switcher, and version bump back into \`main\`.
+          - After merging, the **Post-release cleanup** workflow will open a follow-up PR resetting the version to \`.dev0\` and adding a new \`Unreleased\` section.
+          EOF
+          )
+
+          PR_URL=$(gh pr create \
+            --base main \
+            --head "$RELEASE_BRANCH" \
+            --title "Release v$NEW_VERSION" \
+            --body "$PR_BODY")
+
+          echo "PR_URL=$PR_URL" >> "$GITHUB_ENV"
+
+      - name: Comment pyproject.toml diff since last tag
+        if: ${{ steps.version.outputs.IS_PRERELEASE == 'false' }}
+        run: |
+          git fetch --tags --quiet
+          # Use the second-to-last tag, since the latest is the one we just created.
+          PREV_TAG=$(git tag --list 'v*' --sort=-v:refname | sed -n '2p')
+          if [ -z "$PREV_TAG" ]; then
+            gh pr comment "$PR_URL" --body "No previous version tag found; skipping pyproject.toml diff."
+            exit 0
+          fi
+
+          DIFF=$(git diff "$PREV_TAG" -- pyproject.toml || true)
+          if [ -z "$DIFF" ]; then
+            gh pr comment "$PR_URL" --body "Previous tag is \`$PREV_TAG\`. No \`pyproject.toml\` changes since then; conda recipe likely needs no updates."
+          else
+            {
+              echo "Previous tag is \`$PREV_TAG\`. \`pyproject.toml\` changes since then:"
+              echo
+              echo '```diff'
+              echo "$DIFF"
+              echo '```'
+              echo
+              echo "_(You may need to update the conda recipe accordingly.)_"
+            } > comment.txt
+            gh pr comment "$PR_URL" --body-file comment.txt
+          fi
 
       - name: Set pre-release version in source (rc)
         if: ${{ steps.version.outputs.IS_PRERELEASE == 'true' }}

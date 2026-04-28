@@ -2,13 +2,11 @@ name: Create release branch (minor/major)
 
 # Creates a long-lived `release/vX.Y` branch off `main` for a major or minor
 # release. Bumps the version to X.Y.0, updates the changelog header and
-# switcher.json, commits, pushes the branch, and opens a PR from the release
-# branch into `main`. Also comments the `pyproject.toml` diff since the last
-# tag on the PR for conda-recipe tracking.
+# switcher.json, commits, and pushes the branch.
 #
-# This workflow does NOT create tags or GitHub releases. Use
-# `create-release.yml` once the release branch is ready to tag the release
-# (and again later for any patches or release candidates on the same branch).
+# This workflow does NOT create tags, GitHub releases, or PRs. Use
+# `create-release.yml` once the release branch is ready to tag the release;
+# that workflow opens the PR back into `main` and publishes everything.
 
 on:
   workflow_dispatch:
@@ -96,53 +94,3 @@ jobs:
 
           # Bump version, update changelog & switcher, commit, push.
           bash .github/scripts/setup-release.sh "$NEW_VERSION"
-
-      - name: Open PR into main
-        env:
-          NEW_VERSION: ${{ steps.version.outputs.NEW_VERSION }}
-          RELEASE_BRANCH: ${{ steps.version.outputs.RELEASE_BRANCH }}
-        run: |
-          PR_BODY=$(cat <<EOF
-          Automated PR for the **v$NEW_VERSION** release.
-
-          - Branch: \`$RELEASE_BRANCH\`
-          - Push any final fixes / changelog tweaks to \`$RELEASE_BRANCH\` before merging.
-          - When ready, run the **Create release** workflow on this branch with type \`minor\` or \`major\` to tag the release and trigger PyPI publishing.
-          - After merging this PR into \`main\`, the **Post-release cleanup** workflow will open a follow-up PR.
-          EOF
-          )
-
-          PR_URL=$(gh pr create \
-            --base main \
-            --head "$RELEASE_BRANCH" \
-            --title "Release v$NEW_VERSION" \
-            --body "$PR_BODY")
-
-          echo "PR_URL=$PR_URL" >> "$GITHUB_ENV"
-
-      - name: Comment pyproject.toml diff since last tag
-        env:
-          NEW_VERSION: ${{ steps.version.outputs.NEW_VERSION }}
-        run: |
-          git fetch --tags --quiet
-          LAST_TAG=$(git describe --tags --abbrev=0 --match "v*" 2>/dev/null || echo "")
-          if [ -z "$LAST_TAG" ]; then
-            gh pr comment "$PR_URL" --body "No previous version tag found; skipping pyproject.toml diff."
-            exit 0
-          fi
-
-          DIFF=$(git diff "$LAST_TAG" -- pyproject.toml || true)
-          if [ -z "$DIFF" ]; then
-            gh pr comment "$PR_URL" --body "Latest tag is \`$LAST_TAG\`. No \`pyproject.toml\` changes since then; conda recipe likely needs no updates."
-          else
-            {
-              echo "Latest tag is \`$LAST_TAG\`. \`pyproject.toml\` changes since then:"
-              echo
-              echo '```diff'
-              echo "$DIFF"
-              echo '```'
-              echo
-              echo "_(You may need to update the conda recipe accordingly.)_"
-            } > comment.txt
-            gh pr comment "$PR_URL" --body-file comment.txt
-          fi
