@@ -20,7 +20,7 @@ Major / minor release
 2. The workflow creates a ``release/vX.Y`` branch off ``main`` (e.g. ``release/v1.4``), bumps the version to ``X.Y.0``, and updates ``docs/changelog.rst`` and ``docs/_static/switcher.json``. The branch is pushed but no PR is opened yet.
 3. Push any final fixes or changelog tweaks directly to the release branch. When you are happy with the release content, run the **Create release** workflow on this branch with type ``major`` or ``minor``. This tags the branch HEAD as ``vX.Y.0``, creates a GitHub release marked as latest, opens a PR from ``release/vX.Y`` into ``main``, comments the ``pyproject.toml`` diff since the previous tag on that PR, and publishes the versioned docs to GitHub Pages.
 4. Publishing the GitHub release automatically triggers ``publish-pypi.yml`` which uploads the package to PyPI.
-5. Merge the release PR into ``main``. This automatically triggers **Post-release cleanup**, which opens a follow-up PR resetting the version in source to ``X.Y.Z.dev0`` and adding a fresh ``Unreleased`` section to ``docs/changelog.rst``.
+5. Merge the release PR into ``main`` **WITHOUT SQUASHING**! This automatically triggers **Post-release cleanup**, which opens a follow-up PR resetting the version in source to ``X.Y.Z.dev0`` and adding a fresh ``Unreleased`` section to ``docs/changelog.rst``.
 6. The newly published PyPI package will trigger a new PR to the `HydroMT feedstock repo on conda-forge <https://github.com/conda-forge/hydromt-feedstock>`_. Use the ``pyproject.toml`` diff comment from step 3 to check whether ``meta.yml`` needs updating. Merge the PR to release on conda-forge.
 7. Celebrate the new release!
 
