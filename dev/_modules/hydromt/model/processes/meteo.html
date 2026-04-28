@@ -1011,22 +1011,31 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># saturation and actual vapour pressure at given temperature [hPa °C-1]</span>
     <span class="n">esat</span> <span class="o">=</span> <span class="mf">6.112</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="mf">17.67</span> <span class="o">*</span> <span class="n">temp</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">temp</span> <span class="o">+</span> <span class="mf">243.5</span><span class="p">))</span>
+
     <span class="c1"># slope of vapour pressure curve [hPa °C-1]</span>
     <span class="n">slope</span> <span class="o">=</span> <span class="n">esat</span> <span class="o">*</span> <span class="p">(</span><span class="mf">17.269</span> <span class="o">/</span> <span class="p">(</span><span class="n">temp</span> <span class="o">+</span> <span class="mf">243.5</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="p">(</span><span class="n">temp</span> <span class="o">/</span> <span class="p">(</span><span class="n">temp</span> <span class="o">+</span> <span class="mf">243.5</span><span class="p">)))</span>
-    <span class="c1"># compute latent heat of vapourization [J kg-1]</span>
-    <span class="n">lam</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.502</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**</span><span class="mi">6</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mf">2250.0</span> <span class="o">*</span> <span class="n">temp</span><span class="p">)</span>
+
+    <span class="c1"># latent heat of vapourization [J kg-1]</span>
+    <span class="n">lam</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.502e6</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mf">2250.0</span> <span class="o">*</span> <span class="n">temp</span><span class="p">)</span>
+
     <span class="c1"># psychometric constant [hPa °C-1]</span>
     <span class="n">gamma</span> <span class="o">=</span> <span class="p">(</span><span class="n">cp</span> <span class="o">*</span> <span class="n">press</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.622</span> <span class="o">*</span> <span class="n">lam</span><span class="p">)</span>
-    <span class="c1"># compute ref. evaporation (with global radiation, therefore calling it potential)</span>
+
+    <span class="c1"># define mask in a lazy way to avoid division by zero</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">k_ext</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-8</span>
+
+    <span class="c1"># compute ref. evaporation [J m-2] (with global radiation, therefore calling it potential)</span>
     <span class="c1"># in J m-2 over whole period</span>
-    <span class="n">ep_joule</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="p">(</span><span class="n">slope</span> <span class="o">/</span> <span class="p">(</span><span class="n">slope</span> <span class="o">+</span> <span class="n">gamma</span><span class="p">))</span>
-        <span class="o">*</span> <span class="p">(((</span><span class="mf">1.0</span> <span class="o">-</span> <span class="mf">0.23</span><span class="p">)</span> <span class="o">*</span> <span class="n">k_in</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">cs</span> <span class="o">*</span> <span class="p">(</span><span class="n">k_in</span> <span class="o">/</span> <span class="p">(</span><span class="n">k_ext</span> <span class="o">+</span> <span class="mf">0.00001</span><span class="p">))))</span>
-    <span class="p">)</span> <span class="o">+</span> <span class="n">beta</span>
-    <span class="n">ep_joule</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">k_ext</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">ep_joule</span><span class="p">)</span>
-    <span class="n">pet</span> <span class="o">=</span> <span class="p">((</span><span class="n">ep_joule</span> <span class="o">/</span> <span class="n">lam</span><span class="p">)</span> <span class="o">*</span> <span class="n">timestep</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-    <span class="n">pet</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">pet</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">pet</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">pet</span></div>
+    <span class="n">ratio</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">k_in</span> <span class="o">/</span> <span class="n">k_ext</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">ep_joule</span> <span class="o">=</span> <span class="p">(</span><span class="n">slope</span> <span class="o">/</span> <span class="p">(</span><span class="n">slope</span> <span class="o">+</span> <span class="n">gamma</span><span class="p">))</span> <span class="o">*</span> <span class="p">(((</span><span class="mf">1.0</span> <span class="o">-</span> <span class="mf">0.23</span><span class="p">)</span> <span class="o">*</span> <span class="n">k_in</span><span class="p">)</span> <span class="o">-</span> <span class="n">cs</span> <span class="o">*</span> <span class="n">ratio</span><span class="p">)</span> <span class="o">+</span> <span class="n">beta</span>
+
+    <span class="c1"># apply same mask</span>
+    <span class="n">ep_joule</span> <span class="o">=</span> <span class="n">ep_joule</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="n">pet</span> <span class="o">=</span> <span class="p">(</span><span class="n">ep_joule</span> <span class="o">/</span> <span class="n">lam</span><span class="p">)</span> <span class="o">*</span> <span class="n">timestep</span>
+    <span class="n">pet</span> <span class="o">=</span> <span class="n">pet</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pet</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span></div>
 
 
 

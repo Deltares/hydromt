@@ -444,6 +444,7 @@
 <li><p>Added <code class="docutils literal notranslate"><span class="pre">precision</span></code> parameter to <code class="docutils literal notranslate"><span class="pre">GeomsComponent.write</span></code> to set the number of decimals used when writing (#1415).</p></li>
 <li><p>More informative error messages when calling <code class="docutils literal notranslate"><span class="pre">test_equal</span></code> on ConfigComponent (#1430).</p></li>
 <li><p>Added <code class="docutils literal notranslate"><span class="pre">SlippyTileDriver</span></code> for reading XYZ/slippy map tiles stored in <code class="docutils literal notranslate"><span class="pre">{zoom}/{x}/{y}.png</span></code> (#1417).</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">MeshComponent.is_empty</span></code> to check for existing data correctly. (#1437)</p></li>
 </ul>
 </section>
 <section id="changed">
@@ -458,6 +459,8 @@
 <li><p>Properly log unhandled errors to <code class="docutils literal notranslate"><span class="pre">hydromt.log</span></code> (#1399).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">gis.vector_utils.nearest_merge</span></code> now correctly respects <code class="docutils literal notranslate"><span class="pre">max_dist</span></code> filtering and <code class="docutils literal notranslate"><span class="pre">overwrite</span></code> flag when merging columns (#1414).</p></li>
 <li><p>Normalize geometries before comparing them in <code class="docutils literal notranslate"><span class="pre">test_equal</span></code> for <code class="docutils literal notranslate"><span class="pre">SpatialModelComponent</span></code>, <code class="docutils literal notranslate"><span class="pre">GeomsComponent</span></code> and <code class="docutils literal notranslate"><span class="pre">VectorComponent</span></code> (#1415).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pet_debruin</span></code> now keeps all inputs lazy-loaded instead of reading in the entire array. (#1439)</p></li>
+<li><p>The functions <code class="docutils literal notranslate"><span class="pre">_strip_scheme</span></code> and <code class="docutils literal notranslate"><span class="pre">_strip_vsi</span></code> in <code class="docutils literal notranslate"><span class="pre">hydromt._utils.uris</span></code> no longer use <code class="docutils literal notranslate"><span class="pre">lstrip</span></code> to remove leading characters, but now remove only the exact prefix. (#1438)</p></li>
 </ul>
 </section>
 <section id="deprecated">
