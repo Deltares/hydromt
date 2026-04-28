@@ -1,0 +1,79 @@
+name: Create a new release branch
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        type: choice
+        options:
+          - minor
+          - major
+        default: minor
+        description: "Is this a Minor or Major release?"
+
+jobs:
+  build:
+    permissions:
+      contents: write
+      pull-requests: write
+    defaults:
+      run:
+        shell: bash -l {0}
+    name: Setup release PR
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: NEW_RELEASE
+      cancel-in-progress: false
+    steps:
+
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: check there are no pre-existing release PRs
+        run: |
+          export EXISTING_RELEASE_PR_NUMBER=$(gh pr list --search "release" --json "number")
+          if [ $(echo $EXISTING_RELEASE_PR_NUMBER | jq '.|length') -gt 0]; then
+            gh pr comment $EXISTING_RELEASE_PR_NUMBER --body "$username It looks like you tried to start a new release but this one is already started. Please either finish or close this one before continuing";
+            exit 1
+          fi
+        env:
+          username: ${{ github.actor }}
+
+      - name: setup release PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUMP_KIND: ${{ inputs.bump }}
+        run: |
+          set -e
+
+          export CURRENT_VERSION=$(bash .github/scripts/get-version.sh)
+          export CURRENT_MAJOR=$(echo $CURRENT_VERSION | cut -d'.' -f 1)
+          export CURRENT_MINOR=$(echo $CURRENT_VERSION | cut -d'.' -f 2)
+
+          case $BUMP_KIND in
+            "minor")
+              export NEW_MAJOR=$CURRENT_MAJOR
+              export NEW_MINOR=$(($CURRENT_MINOR + 1))
+              ;;
+            "major")
+              export NEW_MAJOR=$((CURRENT_MAJOR + 1))
+              export NEW_MINOR=0
+              ;;
+            *)
+              echo "invalid bump: $BUMP_KIND"
+              exit 1
+              ;;
+          esac
+
+          export NEW_VERSION="$NEW_MAJOR.$NEW_MINOR.0"
+          export RELEASE_BRANCH="release/$NEW_MAJOR.$NEW_MINOR"
+
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+
+          git pull
+          git checkout -b "$RELEASE_BRANCH"
+          git push --set-upstream origin "$RELEASE_BRANCH"
+
+          bash .github/scripts/setup-release.sh "$NEW_VERSION" "$RELEASE_BRANCH"

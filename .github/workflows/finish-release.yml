@@ -1,32 +1,32 @@
-
 name: Finalise release
 
 on:
   pull_request:
     types:
-    - closed
+      - closed
     branches:
-    - 'release/**'
+      - 'release/**'
   workflow_dispatch:
-
-permissions:
-  contents: write
-  pull-requests: write
 
 jobs:
   publish-pypi:
-    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    name: Publish to PyPI
+    runs-on: ubuntu-24.04
     steps:
       - id: download-artifact
         uses: dawidd6/action-download-artifact@v20
         with:
-          github_token: ${{secrets.GITHUB_TOKEN}}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow: create-release-artifacts.yml
           workflow_conclusion: success
           name: pypi-release-artifacts
           path: dist
           check_artifacts: true
           if_no_artifact_found: fail
+
       - name: Publish package to PyPI
         uses: pypa/gh-action-pypi-publish@v1.14.0
         with:
@@ -35,104 +35,110 @@ jobs:
           verbose: true
 
   publish-docs:
-    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    name: Publish docs
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
     steps:
-    - uses: actions/checkout@v6
-    - id: download-artifact
-      uses: dawidd6/action-download-artifact@v20
-      with:
-        github_token: ${{secrets.GITHUB_TOKEN}}
-        workflow: create-release-artifacts.yml
-        workflow_conclusion: success
-        name: docs-release-artifacts
-        path: docs/_build
-        check_artifacts: true
-        if_no_artifact_found: fail
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
-    - name: Determine release version
-      run: |
-        export CURRENT_VERSION=$(grep "__version__" hydromt/__init__.py | cut -d= -f 2 | tr -d "\" ")
-        echo "DOC_VERSION=v$CURRENT_VERSION" >> "$GITHUB_ENV"
+      - id: download-artifact
+        uses: dawidd6/action-download-artifact@v20
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: create-release-artifacts.yml
+          workflow_conclusion: success
+          name: docs-release-artifacts
+          path: docs/_build
+          check_artifacts: true
+          if_no_artifact_found: fail
 
+      - name: Determine release version
+        run: echo "DOC_VERSION=v$(bash .github/scripts/get-version.sh)" >> "$GITHUB_ENV"
 
-    - name: Upload to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v4.0.0
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs/_build/html
-        exclude_assets: .buildinfo,_sources/*,_examples/*.ipynb
-        destination_dir: ./${{ env.DOC_VERSION }}
-        keep_files: false
-        full_commit_message: Deploy Release ${{ env.DOC_VERSION }} docs to GitHub Pages
-    - name: update doc symlinks
-      run: |
-        git config user.name "GitHub Actions Bot"
-        git config user.email "<>"
-        git pull
-        git checkout gh-pages
-        # create new symlink replacing the old one at stable pointing to versions just published.
-        ln -sfn "${{ env.DOC_VERSION }}" stable
-        git add stable
-        git commit -m "update symlinks"
-        git push
+      - name: Upload to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4.0.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/_build/html
+          exclude_assets: .buildinfo,_sources/*,_examples/*.ipynb
+          destination_dir: ./${{ env.DOC_VERSION }}
+          keep_files: false
+          full_commit_message: Deploy Release ${{ env.DOC_VERSION }} docs to GitHub Pages
+
+      - name: Update doc symlinks
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          git pull
+          git checkout gh-pages
+          ln -sfn "${{ env.DOC_VERSION }}" stable
+          git add stable
+          git commit -m "update symlinks"
+          git push
 
   gh-release:
+    defaults:
+      run:
+        shell: bash -l {0}
+    name: Publish GitHub release
     needs:
       - publish-pypi
       - publish-docs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: NEW_RELEASE
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      pull-requests: write
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
         with:
-          fetch-depth: 0 # get the whole history not just the one commit
+          fetch-depth: 0
           ref: main
 
-      - name: Determine release version
-        id: calculate-release-version
-        run: |
-            export RELEASE_VERSION=$(grep "__version__" hydromt/__init__.py | cut -d= -f 2 | tr -d "\" ")
-            if [ -z "$RELEASE_VERSION" ]; then
-              echo "could not determine release version"
-              echo "detection result: $RELEASE_VERSION"
-              exit 1 # something went very wrong
-            fi
-            echo "RELEASE_VERSION=v$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
-
-      - name: generate release notes
-        run: |
-              awk '
-              BEGIN { capture = 0; }
-              # Match the first header and start capturing
-              /^v[0-9]+\.[0-9]+\.[0-9]+.*$/ { if (capture == 0) { capture = 1; } else { exit; } }
-              # Capture lines between headers
-              capture { print; }
-              ' docs/changelog.rst > release_notes.rst
-
       - name: Publish github release
-        uses: softprops/action-gh-release@v3
-        with:
-          body_path: release_notes.rst
-          name:  ${{ steps.calculate-release-version.outputs.RELEASE_VERSION }}
-          tag_name:  ${{ steps.calculate-release-version.outputs.RELEASE_VERSION }}
-          make_latest: true
+        run: |
+          set -e
+          export RELEASE_VERSION=v$(bash .github/scripts/get-version.sh)
+          if [ -z "$RELEASE_VERSION" ]; then
+            echo "could not determine release version"
+            exit 1
+          fi
+
+          awk '
+          BEGIN { capture = 0; }
+          /^v[0-9]+\.[0-9]+\.[0-9]+.*$/ { if (capture == 0) { capture = 1; } else { exit; } }
+          capture { print; }
+          ' docs/changelog.rst > release_notes.rst
+
+          gh release create "$RELEASE_VERSION" \
+            --title "$RELEASE_VERSION" \
+            --notes-file release_notes.rst \
+            --latest
 
       - name: Create post release PR
-        env:
-          RELEASE_VERSION: ${{ steps.calculate-release-version.outputs.RELEASE_VERSION }}
         run: |
-            git config user.name "GitHub Actions Bot"
-            git config user.email "<>"
-            git checkout -b "post-$RELEASE_VERSION-release"
+          set -e
+          export RELEASE_VERSION=v$(bash .github/scripts/get-version.sh)
 
-            # post release stuff so we don't forget
-            sed -i "s/$RELEASE_VERSION/Unreleased\n==========\n\nNew\n---\n\nChanged\n-------\n\nFixed\n-----\n\nDeprecated\n----------\n\n$RELEASE_VERSION/" docs/changelog.rst
-            sed -i 's/__version__.*=.*"\(.*\)".*/__version__ = "\1.dev0"/' hydromt/__init__.py
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          git checkout -b "post-$RELEASE_VERSION-release"
 
-            git add hydromt/__init__.py docs/changelog.rst
-            git commit -m "Post release $RELEASE_VERSION"
-            git push --set-upstream origin "post-$RELEASE_VERSION-release"
+          sed -i "s/$RELEASE_VERSION/Unreleased\n==========\n\nNew\n---\n\nChanged\n-------\n\nFixed\n-----\n\nDeprecated\n----------\n\n$RELEASE_VERSION/" docs/changelog.rst
+          sed -i 's/__version__.*=.*"\(.*\)".*/__version__ = "\1.dev0"/' hydromt/__init__.py
 
-            gh pr create -B "main" -H "post-$RELEASE_VERSION-release" -t "Post $RELEASE_VERSION release cleanup" -b "Add new changelog headers and set version back to dev"
+          git add hydromt/__init__.py docs/changelog.rst
+          git commit -m "Post release $RELEASE_VERSION"
+          git push --set-upstream origin "post-$RELEASE_VERSION-release"
+
+          gh pr create -B "main" -H "post-$RELEASE_VERSION-release" -t "Post $RELEASE_VERSION release cleanup" -b "Add new changelog headers and set version back to dev"
