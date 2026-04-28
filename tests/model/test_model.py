@@ -1146,14 +1146,14 @@ def test_mesh_model_setup_from_raster_dataset_and_reclass(
         region={"mesh": griduda},
         data_catalog=mesh_model.data_catalog,
     )
-    mesh_model.mesh.set(data=mesh)
+    mesh_model.mesh.set(data=mesh, overwrite_grid=True)
     ds = vito_2015["vito"]
     mesh = mesh2d_from_rasterdataset(
         mesh2d=mesh_model.mesh.data,
         ds=ds,
         resampling_method="mode",
     )
-    mesh_model.mesh.set(data=mesh)
+    mesh_model.mesh.set(data=mesh, overwrite_grid=True)
     assert "vito" in mesh_model.mesh.data.data_vars
 
     # Part 2: reclass
@@ -1170,7 +1170,7 @@ def test_mesh_model_setup_from_raster_dataset_and_reclass(
         reclass_variables=["landuse", "roughness_manning"],
         resampling_method=["mode", "centroid"],
     )
-    mesh_model.mesh.set(data=mesh, grid_name="mesh2d")
+    mesh_model.mesh.set(data=mesh, overwrite_grid=True)
     ds_mesh2d = mesh_model.mesh.get_mesh("mesh2d", include_data=True)
 
     assert "vito" in ds_mesh2d
