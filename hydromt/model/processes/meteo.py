@@ -581,7 +581,8 @@ def pet_debruin(
     # define mask in a lazy way to avoid division by zero
     mask = abs(k_ext) > 1e-8
 
-    # compute ref. evaporation [J m-2]
+    # compute ref. evaporation [J m-2] (with global radiation, therefore calling it potential)
+    # in J m-2 over whole period
     ratio = xr.where(mask, k_in / k_ext, 0.0)
     ep_joule = (slope / (slope + gamma)) * (((1.0 - 0.23) * k_in) - cs * ratio) + beta
 
