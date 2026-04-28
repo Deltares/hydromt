@@ -85,6 +85,11 @@
     "url": "https://deltares.github.io/hydromt/v1.3.0/"
   },
   {
+    "name": "v1.5.0",
+    "version": "1.5.0",
+    "url": "https://deltares.github.io/hydromt/v1.5.0/"
+  },
+  {
     "name": "latest",
     "version": "latest",
     "url": "https://deltares.github.io/hydromt/latest/"
