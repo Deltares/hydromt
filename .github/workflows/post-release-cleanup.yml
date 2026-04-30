@@ -1,17 +1,16 @@
-name: Post-release cleanup
+name: Post-release cleanup (manual escape hatch)
 
-# Triggered automatically when a release PR (from a `release/*` branch) is
-# merged into `main`. Opens a follow-up PR against `main` that:
-#   - resets the version in source to `X.Y.(Z+1).dev0`
-#   - inserts a fresh `Unreleased` section in the changelog
+# Release branches are NEVER merged back into `main` under the current model.
+# `main`'s version is advanced to the next dev cycle by
+# `create-release-branch.yml` at branch-cut time.
 #
-# Can also be run manually via workflow_dispatch (e.g. if the auto-trigger
-# was missed).
+# This workflow is kept as a manual escape hatch only (e.g. if the
+# create-release-branch run failed partway through and main was not bumped).
+# It opens a PR against `main` that:
+#   - resets the version in source to `X.(Y+1).0.dev0`
+#   - inserts a fresh `Unreleased` section in the changelog
 
 on:
-  pull_request:
-    types: [closed]
-    branches: [main]
   workflow_dispatch:
 
 defaults:
@@ -25,10 +24,6 @@ permissions:
 jobs:
   cleanup-pr:
     name: Open post-release cleanup PR
-    if: >
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.pull_request.merged == true &&
-       startsWith(github.event.pull_request.head.ref, 'release/'))
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
@@ -70,10 +65,15 @@ jobs:
         env:
           RELEASE_VERSION: ${{ steps.version.outputs.RELEASE_VERSION }}
         run: |
+          # Always bump the MINOR version on main. Rationale: releases never
+          # come from main (only from `release/vX.Y` branches), so main's
+          # version just needs to be strictly greater than the most recent
+          # release in its release family. Bumping the minor opens a fresh
+          # next family on main and leaves room on the just-released family
+          # for further patches without colliding with main's version.
           NEXT_VERSION=$(echo "$RELEASE_VERSION" \
-            | awk -F. '{printf "%d.%d.%d", $1, $2, $3 + 1}')
+            | awk -F. '{printf "%d.%d.0", $1, $2 + 1}')
           echo "NEXT_VERSION=$NEXT_VERSION" >> "$GITHUB_OUTPUT"
-
       - name: Bump version to dev0 and add Unreleased changelog section
         env:
           RELEASE_VERSION: ${{ steps.version.outputs.RELEASE_VERSION }}

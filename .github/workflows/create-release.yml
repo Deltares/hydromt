@@ -1,8 +1,13 @@
 name: Create release
 
 # Creates a release from a release branch. Tags the release branch, creates a
-# GitHub release, and (for full releases) opens a PR back into `main` and
-# publishes versioned docs to GitHub Pages.
+# GitHub release, and (for full releases) opens a `record-release/v…` PR
+# against `main` that brings only the changelog and switcher.json entry to
+# `main` (the version in source is never changed on `main` by this workflow).
+#
+# Release branches are NEVER merged back into `main`. `main`'s version is
+# advanced to the next dev cycle by `create-release-branch.yml` at branch-
+# cut time, not here.
 #
 # Per release_type:
 # - major / minor: assumes the version on the release branch is already X.Y.0
@@ -13,20 +18,13 @@ name: Create release
 #                  GitHub release marked as latest.
 # - rc:            commits a pre-release version bump (vX.Y.ZrcN) on the
 #                  release branch, tags it, and creates a GitHub pre-release.
-#                  No changelog/switcher changes; no docs published; no PR.
-#
-# For full releases (major/minor/patch), this workflow also opens a PR from
-# the release branch into `main` and comments the `pyproject.toml` diff since
-# the previous tag on that PR (for conda-recipe tracking).
+#                  No record-on-main PR; no docs published.
 #
 # Publishing chain:
 # - PyPI: triggered automatically by the `release: published` event handled
 #         in `publish-pypi.yml`.
 # - Docs: published from the release tag in the `publish-docs` job below for
 #         full releases.
-# - Cleanup: after the release PR is merged into `main`,
-#            `post-release-cleanup.yml` opens a follow-up PR resetting the
-#            version to `.dev0` and adding a new `Unreleased` section.
 
 on:
   workflow_dispatch:
@@ -44,6 +42,10 @@ on:
           - patch
           - rc
         default: patch
+      mark_as_latest:
+        type: boolean
+        description: "Mark this release as 'latest' on GitHub (also makes it the default version on the docs site). Uncheck for releases on an older release family (e.g. an older release/vX.Y branch) that should not become the new latest."
+        default: true
 
 defaults:
   run:
@@ -146,57 +148,39 @@ jobs:
           # major/minor releases already have these changes due to `create-release-branch.yml` already running `setup-release.sh`
           bash .github/scripts/setup-release.sh "${{ steps.version.outputs.NEW_VERSION }}"
 
-      - name: Open PR back into main (full releases only)
+      - name: Open record-on-main PR (all full releases)
         if: ${{ steps.version.outputs.IS_PRERELEASE == 'false' }}
         env:
           NEW_VERSION: ${{ steps.version.outputs.NEW_VERSION }}
         run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+
+          git fetch origin "$RELEASE_BRANCH" --quiet
+
+          RECORD_BRANCH=$(bash .github/scripts/record-release-on-main.sh \
+            "$RELEASE_BRANCH" "$NEW_VERSION" | tail -n 1)
+
           PR_BODY=$(cat <<EOF
-          Automated PR for the **v$NEW_VERSION** release.
+          Automated **changelog-only** record PR for the **v$NEW_VERSION** release.
 
-          - Branch: \`$RELEASE_BRANCH\`
-          - The release has already been tagged and published. Merging this PR brings the changelog, switcher, and version bump back into \`main\`.
-          - After merging, the **Post-release cleanup** workflow will open a follow-up PR resetting the version to \`.dev0\` and adding a new \`Unreleased\` section.
+          - Release branch: \`$RELEASE_BRANCH\`
+          - The release has already been tagged and published. This PR brings
+            only \`docs/changelog.rst\` and \`docs/_static/switcher.json\` to
+            \`main\`. The version in \`hydromt/__init__.py\` on \`main\` is
+            intentionally left untouched (release branches are never merged
+            back into main).
 
-          > [!WARNING]
-          > **Do not squash-merge this PR.** Use a regular merge commit so that the tagged release commit (\`v$NEW_VERSION\`) stays reachable from \`main\`'s history. Squashing would orphan the tag from \`main\`.
+          > [!NOTE]
+          > **Squash-merge this PR.** No tag points at these commits.
           EOF
           )
 
-          PR_URL=$(gh pr create \
+          gh pr create \
             --base main \
-            --head "$RELEASE_BRANCH" \
-            --title "Release v$NEW_VERSION" \
-            --body "$PR_BODY")
-
-          echo "PR_URL=$PR_URL" >> "$GITHUB_ENV"
-
-      - name: Comment pyproject.toml diff since last tag
-        if: ${{ steps.version.outputs.IS_PRERELEASE == 'false' }}
-        run: |
-          git fetch --tags --quiet
-          # Use the second-to-last tag, since the latest is the one we just created.
-          PREV_TAG=$(git tag --list 'v*' --sort=-v:refname | sed -n '2p')
-          if [ -z "$PREV_TAG" ]; then
-            gh pr comment "$PR_URL" --body "No previous version tag found; skipping pyproject.toml diff."
-            exit 0
-          fi
-
-          DIFF=$(git diff "$PREV_TAG" -- pyproject.toml || true)
-          if [ -z "$DIFF" ]; then
-            gh pr comment "$PR_URL" --body "Previous tag is \`$PREV_TAG\`. No \`pyproject.toml\` changes since then; conda recipe likely needs no updates."
-          else
-            {
-              echo "Previous tag is \`$PREV_TAG\`. \`pyproject.toml\` changes since then:"
-              echo
-              echo '```diff'
-              echo "$DIFF"
-              echo '```'
-              echo
-              echo "_(You may need to update the conda recipe accordingly.)_"
-            } > comment.txt
-            gh pr comment "$PR_URL" --body-file comment.txt
-          fi
+            --head "$RECORD_BRANCH" \
+            --title "Record v$NEW_VERSION release on main" \
+            --body "$PR_BODY"
 
       - name: Set pre-release version in source (rc)
         if: ${{ steps.version.outputs.IS_PRERELEASE == 'true' }}
@@ -242,6 +226,7 @@ jobs:
         env:
           TAG: ${{ steps.version.outputs.TAG }}
           IS_PRERELEASE: ${{ steps.version.outputs.IS_PRERELEASE }}
+          MARK_AS_LATEST: ${{ inputs.mark_as_latest }}
         run: |
           TITLE="$TAG"
 
@@ -251,12 +236,18 @@ jobs:
               --title "$TITLE" \
               --notes-file release_notes.md \
               --prerelease
-          else
+          elif [ "$MARK_AS_LATEST" = "true" ]; then
             gh release create "$TAG" \
               --target "$RELEASE_BRANCH" \
               --title "$TITLE" \
               --notes-file release_notes.md \
               --latest
+          else
+            gh release create "$TAG" \
+              --target "$RELEASE_BRANCH" \
+              --title "$TITLE" \
+              --notes-file release_notes.md \
+              --latest=false
           fi
 
   publish-docs:
@@ -293,6 +284,7 @@ jobs:
           full_commit_message: Deploy ${{ env.DOC_VERSION }} docs to GitHub Pages
 
       - name: Update `stable` symlink
+        if: ${{ inputs.mark_as_latest }}
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
