@@ -62,7 +62,7 @@ A **release family** is the set of releases that share the same
 - `main` is always preparing the **next** family. When `release/v1.5` is cut,
   `create-release-branch.yml` immediately bumps main to `1.6.0.dev0`.
 
-### Two key design rules
+### Key design rules
 
 1. **Main is always one minor ahead of the most recent release family.**
    `create-release-branch.yml` bumps main to `X.(Y+1).0.dev0` in the same
@@ -73,6 +73,13 @@ A **release family** is the set of releases that share the same
    only `docs/changelog.rst` and `docs/_static/switcher.json` to `main`.
    The version in `hydromt/__init__.py` on `main` is never changed by a
    release event.
+3. **All development lands on `main` first.** Features and bugfixes are
+   merged into `main` via normal PRs. When a fix needs to ship in an older
+   release family, cherry-pick the merge commit onto the relevant
+   `release/vX.Y` branch(es) and dispatch `create-release.yml` with
+   `release_type = patch` against that branch. Never commit fixes
+   directly to a release branch — this keeps `main` the single source of
+   truth and avoids drift between families.
 
 The developer dispatching `create-release.yml` chooses, via a
 `mark_as_latest` checkbox, whether the GitHub release should be marked as
