@@ -1,0 +1,304 @@
+name: Create release
+
+# Creates a release from a release branch. Tags the release branch, creates a
+# GitHub release, and (for full releases) opens a PR back into `main` and
+# publishes versioned docs to GitHub Pages.
+#
+# Per release_type:
+# - major / minor: assumes the version on the release branch is already X.Y.0
+#                  (set by `create-release-branch.yml`). Tags HEAD and creates
+#                  a GitHub release marked as latest.
+# - patch:         increments the patch version on the release branch (with
+#                  changelog & switcher updates), commits, tags, and creates a
+#                  GitHub release marked as latest.
+# - rc:            commits a pre-release version bump (vX.Y.ZrcN) on the
+#                  release branch, tags it, and creates a GitHub pre-release.
+#                  No changelog/switcher changes; no docs published; no PR.
+#
+# For full releases (major/minor/patch), this workflow also opens a PR from
+# the release branch into `main` and comments the `pyproject.toml` diff since
+# the previous tag on that PR (for conda-recipe tracking).
+#
+# Publishing chain:
+# - PyPI: triggered automatically by the `release: published` event handled
+#         in `publish-pypi.yml`.
+# - Docs: published from the release tag in the `publish-docs` job below for
+#         full releases.
+# - Cleanup: after the release PR is merged into `main`,
+#            `post-release-cleanup.yml` opens a follow-up PR resetting the
+#            version to `.dev0` and adding a new `Unreleased` section.
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_branch:
+        type: string
+        description: "Release branch (e.g. release/v1.4)"
+        required: true
+      release_type:
+        type: choice
+        description: "Type of release"
+        options:
+          - major
+          - minor
+          - patch
+          - rc
+        default: patch
+
+defaults:
+  run:
+    shell: bash -l -e {0}
+
+jobs:
+  release:
+    name: Tag and create GitHub release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    concurrency:
+      group: NEW_RELEASE
+      cancel-in-progress: false
+    outputs:
+      tag: ${{ steps.version.outputs.TAG }}
+      is_prerelease: ${{ steps.version.outputs.IS_PRERELEASE }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_BRANCH: ${{ inputs.release_branch }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.release_branch }}
+
+      - name: Verify release branch
+        run: |
+          if [[ "$RELEASE_BRANCH" != release/* ]]; then
+            echo "release_branch must start with 'release/'. Got: $RELEASE_BRANCH"
+            exit 1
+          fi
+          if ! git show-ref --verify --quiet "refs/remotes/origin/$RELEASE_BRANCH"; then
+            echo "Branch '$RELEASE_BRANCH' does not exist on origin."
+            exit 1
+          fi
+
+      - name: Compute release version
+        id: version
+        env:
+          RELEASE_TYPE: ${{ inputs.release_type }}
+        run: |
+          SOURCE_VERSION=$(bash .github/scripts/get-version.sh \
+            | sed -E 's/^([0-9]+\.[0-9]+\.[0-9]+).*$/\1/')
+
+          if ! [[ "$SOURCE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Could not parse base version from source: '$SOURCE_VERSION'"
+            exit 1
+          fi
+
+          MAJOR=$(echo "$SOURCE_VERSION" | cut -d'.' -f 1)
+          MINOR=$(echo "$SOURCE_VERSION" | cut -d'.' -f 2)
+          PATCH=$(echo "$SOURCE_VERSION" | cut -d'.' -f 3)
+
+          IS_PRERELEASE=false
+
+          case "$RELEASE_TYPE" in
+            major|minor)
+              # Source version on branch must already be the target X.Y.0.
+              if [[ "$PATCH" != "0" ]]; then
+                echo "Expected source version X.Y.0 on a $RELEASE_TYPE release branch, got $SOURCE_VERSION."
+                echo "Did you forget to run 'create-release-branch.yml' first?"
+                exit 1
+              fi
+              NEW_VERSION="$SOURCE_VERSION"
+              ;;
+            patch)
+              NEW_VERSION="$MAJOR.$MINOR.$((PATCH + 1))"
+              ;;
+            rc)
+              IS_PRERELEASE=true
+              git fetch --tags --quiet
+              N=1
+              while git tag --list "v${SOURCE_VERSION}rc${N}" | grep -q .; do
+                N=$((N + 1))
+              done
+              NEW_VERSION="${SOURCE_VERSION}rc${N}"
+              ;;
+            *)
+              echo "Unsupported release_type: $RELEASE_TYPE"
+              exit 1
+              ;;
+          esac
+
+          TAG="v$NEW_VERSION"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists."
+            exit 1
+          fi
+
+          echo "NEW_VERSION=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
+          echo "IS_PRERELEASE=$IS_PRERELEASE" >> "$GITHUB_OUTPUT"
+          echo "Release version: $NEW_VERSION (tag: $TAG, prerelease: $IS_PRERELEASE)"
+
+      - name: Bump version on release branch (patch only)
+        if: ${{ inputs.release_type == 'patch' }}
+        run: |
+          # major/minor releases already have these changes due to `create-release-branch.yml` already running `setup-release.sh`
+          bash .github/scripts/setup-release.sh "${{ steps.version.outputs.NEW_VERSION }}"
+
+      - name: Open PR back into main (full releases only)
+        if: ${{ steps.version.outputs.IS_PRERELEASE == 'false' }}
+        env:
+          NEW_VERSION: ${{ steps.version.outputs.NEW_VERSION }}
+        run: |
+          PR_BODY=$(cat <<EOF
+          Automated PR for the **v$NEW_VERSION** release.
+
+          - Branch: \`$RELEASE_BRANCH\`
+          - The release has already been tagged and published. Merging this PR brings the changelog, switcher, and version bump back into \`main\`.
+          - After merging, the **Post-release cleanup** workflow will open a follow-up PR resetting the version to \`.dev0\` and adding a new \`Unreleased\` section.
+
+          > [!WARNING]
+          > **Do not squash-merge this PR.** Use a regular merge commit so that the tagged release commit (\`v$NEW_VERSION\`) stays reachable from \`main\`'s history. Squashing would orphan the tag from \`main\`.
+          EOF
+          )
+
+          PR_URL=$(gh pr create \
+            --base main \
+            --head "$RELEASE_BRANCH" \
+            --title "Release v$NEW_VERSION" \
+            --body "$PR_BODY")
+
+          echo "PR_URL=$PR_URL" >> "$GITHUB_ENV"
+
+      - name: Comment pyproject.toml diff since last tag
+        if: ${{ steps.version.outputs.IS_PRERELEASE == 'false' }}
+        run: |
+          git fetch --tags --quiet
+          # Use the second-to-last tag, since the latest is the one we just created.
+          PREV_TAG=$(git tag --list 'v*' --sort=-v:refname | sed -n '2p')
+          if [ -z "$PREV_TAG" ]; then
+            gh pr comment "$PR_URL" --body "No previous version tag found; skipping pyproject.toml diff."
+            exit 0
+          fi
+
+          DIFF=$(git diff "$PREV_TAG" -- pyproject.toml || true)
+          if [ -z "$DIFF" ]; then
+            gh pr comment "$PR_URL" --body "Previous tag is \`$PREV_TAG\`. No \`pyproject.toml\` changes since then; conda recipe likely needs no updates."
+          else
+            {
+              echo "Previous tag is \`$PREV_TAG\`. \`pyproject.toml\` changes since then:"
+              echo
+              echo '```diff'
+              echo "$DIFF"
+              echo '```'
+              echo
+              echo "_(You may need to update the conda recipe accordingly.)_"
+            } > comment.txt
+            gh pr comment "$PR_URL" --body-file comment.txt
+          fi
+
+      - name: Set pre-release version in source (rc)
+        if: ${{ steps.version.outputs.IS_PRERELEASE == 'true' }}
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          bash .github/scripts/set-version.sh "${{ steps.version.outputs.NEW_VERSION }}"
+          git add hydromt/__init__.py
+          git commit -m "Set pre-release version v${{ steps.version.outputs.NEW_VERSION }}"
+          git push
+
+      - name: Create and push tag
+        run: |
+          git tag "${{ steps.version.outputs.TAG }}"
+          git push origin "${{ steps.version.outputs.TAG }}"
+
+      - name: Extract changelog notes (full release)
+        if: ${{ steps.version.outputs.IS_PRERELEASE == 'false' }}
+        run: |
+          awk '
+          BEGIN { capture = 0; }
+          /^v[0-9]+\.[0-9]+\.[0-9]+.*$/ { if (capture == 0) { capture = 1; } else { exit; } }
+          capture { print; }
+          ' docs/changelog.rst > release_notes.md
+
+      - name: Build pre-release notes (rc)
+        if: ${{ steps.version.outputs.IS_PRERELEASE == 'true' }}
+        env:
+          TAG: ${{ steps.version.outputs.TAG }}
+          NEW_VERSION: ${{ steps.version.outputs.NEW_VERSION }}
+          BRANCH: ${{ inputs.release_branch }}
+        run: |
+          {
+            echo "Release candidate \`$TAG\` built from \`$BRANCH\` ($(git rev-parse --short HEAD))."
+            echo
+            echo "Install with:"
+            echo '```'
+            echo "pip install hydromt==$NEW_VERSION"
+            echo '```'
+          } > release_notes.md
+
+      - name: Create GitHub release
+        env:
+          TAG: ${{ steps.version.outputs.TAG }}
+          IS_PRERELEASE: ${{ steps.version.outputs.IS_PRERELEASE }}
+        run: |
+          TITLE="$TAG"
+
+          if [ "$IS_PRERELEASE" = "true" ]; then
+            gh release create "$TAG" \
+              --target "$RELEASE_BRANCH" \
+              --title "$TITLE" \
+              --notes-file release_notes.md \
+              --prerelease
+          else
+            gh release create "$TAG" \
+              --target "$RELEASE_BRANCH" \
+              --title "$TITLE" \
+              --notes-file release_notes.md \
+              --latest
+          fi
+
+  publish-docs:
+    name: Publish docs to GitHub Pages
+    needs: release
+    if: ${{ needs.release.outputs.is_prerelease == 'false' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.release.outputs.tag }}
+
+      - uses: prefix-dev/setup-pixi@v0.9.5
+        with:
+          pixi-version: "v0.59.0"
+
+      - name: Build docs
+        run: pixi run --locked doc
+
+      - name: Determine doc version
+        run: echo "DOC_VERSION=v$(bash .github/scripts/get-version.sh)" >> "$GITHUB_ENV"
+
+      - name: Upload to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4.0.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/_build/html
+          exclude_assets: .buildinfo,_sources/*,_examples/*.ipynb
+          destination_dir: ./${{ env.DOC_VERSION }}
+          keep_files: false
+          full_commit_message: Deploy ${{ env.DOC_VERSION }} docs to GitHub Pages
+
+      - name: Update `stable` symlink
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          git fetch origin gh-pages
+          git checkout gh-pages
+          ln -sfn "${{ env.DOC_VERSION }}" stable
+          git add stable
+          git commit -m "Update stable symlink to ${{ env.DOC_VERSION }}" || echo "No symlink change"
+          git push

@@ -4,61 +4,69 @@
 Creating a release
 ------------------
 
-1. Go to the `actions` tab on Github, select `Create a release` from the actions listen to the left, then use the `run workflow` button to start the release process. You will be asked whether it will be a `major`, `minor` or `patch` release. Choose the appropriate action.
-2. The action you just run will open a new PR for you with a new branch named `release/v<NEW_VERSION>`. (the `NEW_VERSION` will be calculated for you based on which kind of release you selected.) In the new PR, the changelog, hydromt version and sphinx `switcher.json` will be updated for you. Any changes you made to the `pyproject.toml` since the last release will be posted as a comment in the PR. You will need these during the Conda-forge release if there are any.
-3. Every commit to this new branch will trigger the creation (and testing) of release artifacts. In our case those are: Documentation and the PyPi package (the conda release happens separately). After the artifacts are created, they will be uploaded to the repository's internal artifact cache. A bot will post links to these created artifacts in the PR which you can use to download and locally inspect them.
-4. When you are happy with the release in the PR, you can simply merge it. We suggest naming the commit something like "Release v<NEW_VERSION>"
-5. After the PR is merged, you will need to run the `Finalise a new release` action that will publish the latest artifacts created to their respective platform, it will also create a tag and a github release for you automatically.  After this, a bot will open a new PR to the `main` branch, setting the hydromt version back to a dev version, and adding new headers to the `docs/changelog.rst` for unreleased features. The release is now done as far as this repo is concerned.
-6. The newly published PyPi package will trigger a new PR to the `HydroMT feedstock repos of conda-forge <https://github.com/conda-forge/hydromt-feedstock>`_.
-   Here you can use the comment posted to the release PR to see if the `meta.yml` needs to be updated. Merge the PR to release the new version on conda-forge.
-7. celebrate the new release!
+Releases are produced by four GitHub Actions workflows that work together:
+
+- ``create-release-branch.yml`` — creates a long-lived ``release/vX.Y`` branch (major/minor only).
+- ``create-release.yml`` — tags the release on a release branch and creates the GitHub release (major / minor / patch / rc).
+- ``post-release-cleanup.yml`` — opens a follow-up PR after a release PR is merged into ``main``.
+- ``publish-pypi.yml`` — publishes to PyPI; runs automatically when a GitHub release is published.
+
+Before tagging a major, minor, or patch release, run the :ref:`plugin compatibility test <plugin_compat_test>` against the release branch.
+
+Major / minor release
+^^^^^^^^^^^^^^^^^^^^^
+
+1. Go to the ``Actions`` tab on GitHub, select **Create release branch (minor/major)**, click **Run workflow** and choose ``minor`` or ``major``.
+2. The workflow creates a ``release/vX.Y`` branch off ``main`` (e.g. ``release/v1.4``), bumps the version to ``X.Y.0``, and updates ``docs/changelog.rst`` and ``docs/_static/switcher.json``. The branch is pushed but no PR is opened yet.
+3. Push any final fixes or changelog tweaks directly to the release branch. When you are happy with the release content, run the **Create release** workflow on this branch with type ``major`` or ``minor``. This tags the branch HEAD as ``vX.Y.0``, creates a GitHub release marked as latest, opens a PR from ``release/vX.Y`` into ``main``, comments the ``pyproject.toml`` diff since the previous tag on that PR, and publishes the versioned docs to GitHub Pages.
+4. Publishing the GitHub release automatically triggers ``publish-pypi.yml`` which uploads the package to PyPI.
+5. Merge the release PR into ``main`` **WITHOUT SQUASHING**! This automatically triggers **Post-release cleanup**, which opens a follow-up PR resetting the version in source to ``X.Y.Z.dev0`` and adding a fresh ``Unreleased`` section to ``docs/changelog.rst``.
+6. The newly published PyPI package will trigger a new PR to the `HydroMT feedstock repo on conda-forge <https://github.com/conda-forge/hydromt-feedstock>`_. Use the ``pyproject.toml`` diff comment from step 3 to check whether ``meta.yml`` needs updating. Merge the PR to release on conda-forge.
+7. Celebrate the new release!
+
+
+.. _create_patch_release:
+
+Patch release
+^^^^^^^^^^^^^
+
+Patch releases are made against an already-existing ``release/vX.Y`` branch rather than creating a new one.
+
+1. Go to the ``Actions`` tab on GitHub, select **Create release**, click **Run workflow**.
+2. Enter the release branch (e.g. ``release/v1.4``) and choose ``patch`` as the release type.
+3. The workflow increments the patch version (reading the current version from the branch), updates the changelog and ``switcher.json``, commits the bump, tags HEAD as ``vX.Y.Z``, creates a GitHub release marked as latest, opens a PR from ``release/vX.Y`` into ``main``, comments the ``pyproject.toml`` diff since the previous tag, and publishes the versioned docs to GitHub Pages. The package is published to PyPI automatically.
+4. Merge the auto-opened PR. Once merged, **Post-release cleanup** opens its follow-up PR.
 
 
 .. _create_pre_release:
 
-Creating a pre-release / release candidate
-------------------------------------------
+Release candidate
+^^^^^^^^^^^^^^^^^
 
-A pre-release allows you to publish a development build from any branch to PyPI and GitHub, making it easy to share and test changes before a full release.
-A release candidate is very similar, but meant as a feature-complete build that is expected to become the final release unless critical issues are found. Unlike general pre-releases, which may include experimental or unstable changes, a release candidate should be considered production-ready and is primarily used for final validation, testing, and stakeholder sign-off.
+Release candidates are feature-complete builds expected to become the final release unless critical issues are found. They are produced from a ``release/vX.Y`` branch using the same **Create release** workflow.
 
-.. admonition:: When to use either
+1. Go to the ``Actions`` tab on GitHub, select **Create release**, click **Run workflow**.
+2. Enter the release branch (e.g. ``release/v1.4``) and choose ``rc`` as the release type.
+3. The workflow computes the next available rc version of the form ``X.Y.ZrcN`` based on existing tags, commits the version bump on the release branch, tags it as ``vX.Y.ZrcN`` and creates a GitHub *pre-release*. The package is published to PyPI automatically.
+4. Anyone can install the release candidate with::
 
-   Use a pre-release when the goal is early feedback.
-   Use a release candidate when no new features are expected or planned anymore and you are preparing for an actual release.
+       pip install hydromt==X.Y.ZrcN
 
-Luckily, both types of releases can be made with the same workflow: ``pre-release.yml``
-The workflow will automatically compute a version number of the form ``<BASE_VERSION><IDENTIFIER><BUILD_NR>`` ( ``1.2.3.dev1`` or ``1.2.3rc2``), set it in the source, and build the package.
-
-1. Go to the ``actions`` tab on GitHub, select ``Pre-release`` from the actions list on the left, then use the ``Run workflow`` button.
-2. You will be prompted to enter:
-   - **identifier** (``rc`` or ``dev``). Determines the type of release
-   - **description** (``Fix broken reader API`` or ``amazing untested feature``). This description appears in the GitHub release title and body.
-   - **base_version** (``1.2.3`` or ``2.0.0``). Optional base version to use in the release, defaults to what is defined in ``hydromt.__version__``.
-   - **build_nr** (``1``, or ``2``). Optional build nr to use, defaults to the lowest non-existing build nr.
-3. The built artifacts are uploaded to the repository's internal artifact cache and published to PyPI.
-   Anyone can then install the pre-release with::
-
-       pip install hydromt==<PRE_VERSION>
-
-   The exact install command is shown in the body of the GitHub release that is created automatically.
-4. A GitHub pre-release is created and tagged as ``v<PRE_VERSION>``, linked to the commit on the branch
-   you ran the workflow from.
+   The exact install command is shown in the body of the GitHub pre-release.
 
 .. note::
-   Pre-releases are built from whatever branch you select when running the workflow - they are not
-   restricted to ``main`` or ``release/*`` branches. This makes them suitable for sharing in-progress
-   work or testing a hotfix branch before it is merged.
+   Release candidates are built from a ``release/vX.Y`` branch only. They share the same long-lived branch as the eventual full release, so the rc commits become part of the release history.
 
 .. warning::
-   Pre-release versions are marked as pre-releases on GitHub and are not promoted as the latest
-   stable release. They are intended for testing purposes only. Do not use a pre-release version as
-   the basis for a full release; follow the :ref:`create_release` process instead.
+   Pre-release versions are marked as pre-releases on GitHub and are not promoted as the latest stable release. They are intended for testing purposes only. Do not use a release candidate as the basis for a full release; run **Create release** with type ``major`` / ``minor`` / ``patch`` to produce the actual release.
+
+
+.. _plugin_compat_test:
 
 Plugin compatibility test
 -------------------------
 
-Before finishing a new HydroMT core release, you must run the downstream plugin compatibility test.
+Before tagging a major, minor, or patch release, you must run the downstream plugin compatibility test against the release branch.
 This is part of the release gate.
 It checks whether the new HydroMT wheel still works with a set of mature plugins.
 
@@ -68,25 +76,25 @@ This makes sure we test the real release artifact, including packaging metadata 
 
 For each plugin, the workflow runs in two modes.
 
-In the first mode, HydroMT is installed with --no-deps. (deps=false)
+In the first mode, HydroMT is installed with ``--no-deps`` (``deps=false``).
 This upgrades only the HydroMT wheel and keeps the plugin's existing, already solved environment unchanged.
 This simulates a user upgrading HydroMT in an existing environment.
 If this fails, it means the upgrade is not fully drop-in compatible.
 These failures must be reviewed, but they are not automatically release blockers.
 
-In the second mode, HydroMT is installed allowing dependency updates. (deps=true)
+In the second mode, HydroMT is installed allowing dependency updates (``deps=true``).
 This allows the environment to re-solve and update third-party packages if needed.
 This simulates a clean installation.
 If this fails, the release is considered broken and must not be finalised.
 These failures are release blockers.
 
 How to run the compatibility test
----------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1. Make sure your release branch (for example release/vX.Y) is up to date.
+1. Make sure your release branch (for example ``release/vX.Y``) is up to date.
 2. Go to the GitHub Actions tab.
-3. Select the “Downstream plugin compatibility” workflow.
-4. Click “Run workflow” and choose the release branch.
+3. Select the **Downstream plugin compatibility** workflow.
+4. Click **Run workflow** and choose the release branch.
 
 If the ``with dependencies`` run fails, you must fix the problem before continuing the release.
 

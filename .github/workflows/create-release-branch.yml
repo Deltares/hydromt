@@ -1,0 +1,96 @@
+name: Create release branch (minor/major)
+
+# Creates a long-lived `release/vX.Y` branch off `main` for a major or minor
+# release. Bumps the version to X.Y.0, updates the changelog header and
+# switcher.json, commits, and pushes the branch.
+#
+# This workflow does NOT create tags, GitHub releases, or PRs. Use
+# `create-release.yml` once the release branch is ready to tag the release;
+# that workflow opens the PR back into `main` and publishes everything.
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        type: choice
+        description: "Is this a Minor or Major release?"
+        options:
+          - minor
+          - major
+        default: minor
+
+defaults:
+  run:
+    shell: bash -l -e {0}
+
+jobs:
+  create-release-branch:
+    name: Create release branch and PR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    concurrency:
+      group: NEW_RELEASE
+      cancel-in-progress: false
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Check there are no pre-existing release PRs
+        run: |
+          EXISTING=$(gh pr list --state open --base main --json number,title,headRefName \
+            --jq '[.[] | select(.headRefName | startswith("release/"))]')
+          if [ "$(echo "$EXISTING" | jq 'length')" -gt 0 ]; then
+            echo "An open release PR already exists; finish or close it before creating a new one."
+            echo "$EXISTING" | jq
+            exit 1
+          fi
+
+      - name: Compute new version and branch
+        id: version
+        run: |
+          CURRENT_VERSION=$(bash .github/scripts/get-version.sh \
+            | sed -E 's/^([0-9]+\.[0-9]+\.[0-9]+).*$/\1/')
+          MAJOR=$(echo "$CURRENT_VERSION" | cut -d'.' -f 1)
+          MINOR=$(echo "$CURRENT_VERSION" | cut -d'.' -f 2)
+
+          case "${{ inputs.bump }}" in
+            minor)
+              NEW_MAJOR=$MAJOR
+              NEW_MINOR=$((MINOR + 1))
+              ;;
+            major)
+              NEW_MAJOR=$((MAJOR + 1))
+              NEW_MINOR=0
+              ;;
+          esac
+
+          NEW_VERSION="$NEW_MAJOR.$NEW_MINOR.0"
+          RELEASE_BRANCH="release/v$NEW_MAJOR.$NEW_MINOR"
+
+          if git ls-remote --exit-code --heads origin "$RELEASE_BRANCH" >/dev/null; then
+            echo "Release branch '$RELEASE_BRANCH' already exists on origin."
+            exit 1
+          fi
+
+          echo "NEW_VERSION=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          echo "RELEASE_BRANCH=$RELEASE_BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: Create release branch with version bump
+        env:
+          NEW_VERSION: ${{ steps.version.outputs.NEW_VERSION }}
+          RELEASE_BRANCH: ${{ steps.version.outputs.RELEASE_BRANCH }}
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+
+          git checkout -b "$RELEASE_BRANCH"
+          git push --set-upstream origin "$RELEASE_BRANCH"
+
+          # Bump version, update changelog & switcher, commit, push.
+          bash .github/scripts/setup-release.sh "$NEW_VERSION"
