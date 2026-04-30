@@ -410,8 +410,6 @@
 <li class="toctree-l2"><a class="reference internal" href="test_ci.html">Test and CI</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Creating a release</a></li>
 
-
-
 </ul>
 </details></li>
 </ul>
@@ -479,90 +477,92 @@
                   
   <section id="creating-a-release">
 <span id="create-release"></span><h1>Creating a release<a class="headerlink" href="#creating-a-release" title="Link to this heading">#</a></h1>
+<p>Releases are produced by four GitHub Actions workflows that work together:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">create-release-branch.yml</span></code> — creates a long-lived <code class="docutils literal notranslate"><span class="pre">release/vX.Y</span></code> branch (major/minor only).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> — tags the release on a release branch and creates the GitHub release (major / minor / patch / rc).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">post-release-cleanup.yml</span></code> — opens a follow-up PR after a release PR is merged into <code class="docutils literal notranslate"><span class="pre">main</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">publish-pypi.yml</span></code> — publishes to PyPI; runs automatically when a GitHub release is published.</p></li>
+</ul>
+<p>Before tagging a major, minor, or patch release, run the <a class="reference internal" href="#plugin-compat-test"><span class="std std-ref">plugin compatibility test</span></a> against the release branch.</p>
+<section id="major-minor-release">
+<h2>Major / minor release<a class="headerlink" href="#major-minor-release" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
-<li><p>Go to the <cite>actions</cite> tab on Github, select <cite>Create a release</cite> from the actions listen to the left, then use the <cite>run workflow</cite> button to start the release process. You will be asked whether it will be a <cite>major</cite>, <cite>minor</cite> or <cite>patch</cite> release. Choose the appropriate action.</p></li>
-<li><p>The action you just run will open a new PR for you with a new branch named <cite>release/v&lt;NEW_VERSION&gt;</cite>. (the <cite>NEW_VERSION</cite> will be calculated for you based on which kind of release you selected.) In the new PR, the changelog, hydromt version and sphinx <cite>switcher.json</cite> will be updated for you. Any changes you made to the <cite>pyproject.toml</cite> since the last release will be posted as a comment in the PR. You will need these during the Conda-forge release if there are any.</p></li>
-<li><p>Every commit to this new branch will trigger the creation (and testing) of release artifacts. In our case those are: Documentation and the PyPi package (the conda release happens separately). After the artifacts are created, they will be uploaded to the repository’s internal artifact cache. A bot will post links to these created artifacts in the PR which you can use to download and locally inspect them.</p></li>
-<li><p>When you are happy with the release in the PR, you can simply merge it. We suggest naming the commit something like “Release v&lt;NEW_VERSION&gt;”</p></li>
-<li><p>After the PR is merged, you will need to run the <cite>Finalise a new release</cite> action that will publish the latest artifacts created to their respective platform, it will also create a tag and a github release for you automatically.  After this, a bot will open a new PR to the <cite>main</cite> branch, setting the hydromt version back to a dev version, and adding new headers to the <cite>docs/changelog.rst</cite> for unreleased features. The release is now done as far as this repo is concerned.</p></li>
-<li><p>The newly published PyPi package will trigger a new PR to the <a class="reference external" href="https://github.com/conda-forge/hydromt-feedstock">HydroMT feedstock repos of conda-forge</a>.
-Here you can use the comment posted to the release PR to see if the <cite>meta.yml</cite> needs to be updated. Merge the PR to release the new version on conda-forge.</p></li>
-<li><p>celebrate the new release!</p></li>
+<li><p>Go to the <code class="docutils literal notranslate"><span class="pre">Actions</span></code> tab on GitHub, select <strong>Create release branch (minor/major)</strong>, click <strong>Run workflow</strong> and choose <code class="docutils literal notranslate"><span class="pre">minor</span></code> or <code class="docutils literal notranslate"><span class="pre">major</span></code>.</p></li>
+<li><p>The workflow creates a <code class="docutils literal notranslate"><span class="pre">release/vX.Y</span></code> branch off <code class="docutils literal notranslate"><span class="pre">main</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">release/v1.4</span></code>), bumps the version to <code class="docutils literal notranslate"><span class="pre">X.Y.0</span></code>, and updates <code class="docutils literal notranslate"><span class="pre">docs/changelog.rst</span></code> and <code class="docutils literal notranslate"><span class="pre">docs/_static/switcher.json</span></code>. The branch is pushed but no PR is opened yet.</p></li>
+<li><p>Push any final fixes or changelog tweaks directly to the release branch. When you are happy with the release content, run the <strong>Create release</strong> workflow on this branch with type <code class="docutils literal notranslate"><span class="pre">major</span></code> or <code class="docutils literal notranslate"><span class="pre">minor</span></code>. This tags the branch HEAD as <code class="docutils literal notranslate"><span class="pre">vX.Y.0</span></code>, creates a GitHub release marked as latest, opens a PR from <code class="docutils literal notranslate"><span class="pre">release/vX.Y</span></code> into <code class="docutils literal notranslate"><span class="pre">main</span></code>, comments the <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> diff since the previous tag on that PR, and publishes the versioned docs to GitHub Pages.</p></li>
+<li><p>Publishing the GitHub release automatically triggers <code class="docutils literal notranslate"><span class="pre">publish-pypi.yml</span></code> which uploads the package to PyPI.</p></li>
+<li><p>Merge the release PR into <code class="docutils literal notranslate"><span class="pre">main</span></code> <strong>WITHOUT SQUASHING</strong>! This automatically triggers <strong>Post-release cleanup</strong>, which opens a follow-up PR resetting the version in source to <code class="docutils literal notranslate"><span class="pre">X.Y.Z.dev0</span></code> and adding a fresh <code class="docutils literal notranslate"><span class="pre">Unreleased</span></code> section to <code class="docutils literal notranslate"><span class="pre">docs/changelog.rst</span></code>.</p></li>
+<li><p>The newly published PyPI package will trigger a new PR to the <a class="reference external" href="https://github.com/conda-forge/hydromt-feedstock">HydroMT feedstock repo on conda-forge</a>. Use the <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> diff comment from step 3 to check whether <code class="docutils literal notranslate"><span class="pre">meta.yml</span></code> needs updating. Merge the PR to release on conda-forge.</p></li>
+<li><p>Celebrate the new release!</p></li>
 </ol>
 </section>
-<section id="creating-a-pre-release-release-candidate">
-<span id="create-pre-release"></span><h1>Creating a pre-release / release candidate<a class="headerlink" href="#creating-a-pre-release-release-candidate" title="Link to this heading">#</a></h1>
-<p>A pre-release allows you to publish a development build from any branch to PyPI and GitHub, making it easy to share and test changes before a full release.
-A release candidate is very similar, but meant as a feature-complete build that is expected to become the final release unless critical issues are found. Unlike general pre-releases, which may include experimental or unstable changes, a release candidate should be considered production-ready and is primarily used for final validation, testing, and stakeholder sign-off.</p>
-<div class="admonition-when-to-use-either admonition">
-<p class="admonition-title">When to use either</p>
-<p>Use a pre-release when the goal is early feedback.
-Use a release candidate when no new features are expected or planned anymore and you are preparing for an actual release.</p>
-</div>
-<p>Luckily, both types of releases can be made with the same workflow: <code class="docutils literal notranslate"><span class="pre">pre-release.yml</span></code>
-The workflow will automatically compute a version number of the form <code class="docutils literal notranslate"><span class="pre">&lt;BASE_VERSION&gt;&lt;IDENTIFIER&gt;&lt;BUILD_NR&gt;</span></code> ( <code class="docutils literal notranslate"><span class="pre">1.2.3.dev1</span></code> or <code class="docutils literal notranslate"><span class="pre">1.2.3rc2</span></code>), set it in the source, and build the package.</p>
+<section id="patch-release">
+<span id="create-patch-release"></span><h2>Patch release<a class="headerlink" href="#patch-release" title="Link to this heading">#</a></h2>
+<p>Patch releases are made against an already-existing <code class="docutils literal notranslate"><span class="pre">release/vX.Y</span></code> branch rather than creating a new one.</p>
+<ol class="arabic simple">
+<li><p>Go to the <code class="docutils literal notranslate"><span class="pre">Actions</span></code> tab on GitHub, select <strong>Create release</strong>, click <strong>Run workflow</strong>.</p></li>
+<li><p>Enter the release branch (e.g. <code class="docutils literal notranslate"><span class="pre">release/v1.4</span></code>) and choose <code class="docutils literal notranslate"><span class="pre">patch</span></code> as the release type.</p></li>
+<li><p>The workflow increments the patch version (reading the current version from the branch), updates the changelog and <code class="docutils literal notranslate"><span class="pre">switcher.json</span></code>, commits the bump, tags HEAD as <code class="docutils literal notranslate"><span class="pre">vX.Y.Z</span></code>, creates a GitHub release marked as latest, opens a PR from <code class="docutils literal notranslate"><span class="pre">release/vX.Y</span></code> into <code class="docutils literal notranslate"><span class="pre">main</span></code>, comments the <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> diff since the previous tag, and publishes the versioned docs to GitHub Pages. The package is published to PyPI automatically.</p></li>
+<li><p>Merge the auto-opened PR. Once merged, <strong>Post-release cleanup</strong> opens its follow-up PR.</p></li>
+</ol>
+</section>
+<section id="release-candidate">
+<span id="create-pre-release"></span><h2>Release candidate<a class="headerlink" href="#release-candidate" title="Link to this heading">#</a></h2>
+<p>Release candidates are feature-complete builds expected to become the final release unless critical issues are found. They are produced from a <code class="docutils literal notranslate"><span class="pre">release/vX.Y</span></code> branch using the same <strong>Create release</strong> workflow.</p>
 <ol class="arabic">
-<li><p>Go to the <code class="docutils literal notranslate"><span class="pre">actions</span></code> tab on GitHub, select <code class="docutils literal notranslate"><span class="pre">Pre-release</span></code> from the actions list on the left, then use the <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">workflow</span></code> button.</p></li>
-<li><p>You will be prompted to enter:
-- <strong>identifier</strong> (<code class="docutils literal notranslate"><span class="pre">rc</span></code> or <code class="docutils literal notranslate"><span class="pre">dev</span></code>). Determines the type of release
-- <strong>description</strong> (<code class="docutils literal notranslate"><span class="pre">Fix</span> <span class="pre">broken</span> <span class="pre">reader</span> <span class="pre">API</span></code> or <code class="docutils literal notranslate"><span class="pre">amazing</span> <span class="pre">untested</span> <span class="pre">feature</span></code>). This description appears in the GitHub release title and body.
-- <strong>base_version</strong> (<code class="docutils literal notranslate"><span class="pre">1.2.3</span></code> or <code class="docutils literal notranslate"><span class="pre">2.0.0</span></code>). Optional base version to use in the release, defaults to what is defined in <code class="docutils literal notranslate"><span class="pre">hydromt.__version__</span></code>.
-- <strong>build_nr</strong> (<code class="docutils literal notranslate"><span class="pre">1</span></code>, or <code class="docutils literal notranslate"><span class="pre">2</span></code>). Optional build nr to use, defaults to the lowest non-existing build nr.</p></li>
-<li><p>The built artifacts are uploaded to the repository’s internal artifact cache and published to PyPI.
-Anyone can then install the pre-release with:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">hydromt</span><span class="o">==&lt;</span><span class="n">PRE_VERSION</span><span class="o">&gt;</span>
+<li><p>Go to the <code class="docutils literal notranslate"><span class="pre">Actions</span></code> tab on GitHub, select <strong>Create release</strong>, click <strong>Run workflow</strong>.</p></li>
+<li><p>Enter the release branch (e.g. <code class="docutils literal notranslate"><span class="pre">release/v1.4</span></code>) and choose <code class="docutils literal notranslate"><span class="pre">rc</span></code> as the release type.</p></li>
+<li><p>The workflow computes the next available rc version of the form <code class="docutils literal notranslate"><span class="pre">X.Y.ZrcN</span></code> based on existing tags, commits the version bump on the release branch, tags it as <code class="docutils literal notranslate"><span class="pre">vX.Y.ZrcN</span></code> and creates a GitHub <em>pre-release</em>. The package is published to PyPI automatically.</p></li>
+<li><p>Anyone can install the release candidate with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">hydromt</span><span class="o">==</span><span class="n">X</span><span class="o">.</span><span class="n">Y</span><span class="o">.</span><span class="n">ZrcN</span>
 </pre></div>
 </div>
-<p>The exact install command is shown in the body of the GitHub release that is created automatically.</p>
+<p>The exact install command is shown in the body of the GitHub pre-release.</p>
 </li>
-<li><p>A GitHub pre-release is created and tagged as <code class="docutils literal notranslate"><span class="pre">v&lt;PRE_VERSION&gt;</span></code>, linked to the commit on the branch
-you ran the workflow from.</p></li>
 </ol>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Pre-releases are built from whatever branch you select when running the workflow - they are not
-restricted to <code class="docutils literal notranslate"><span class="pre">main</span></code> or <code class="docutils literal notranslate"><span class="pre">release/*</span></code> branches. This makes them suitable for sharing in-progress
-work or testing a hotfix branch before it is merged.</p>
+<p>Release candidates are built from a <code class="docutils literal notranslate"><span class="pre">release/vX.Y</span></code> branch only. They share the same long-lived branch as the eventual full release, so the rc commits become part of the release history.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>Pre-release versions are marked as pre-releases on GitHub and are not promoted as the latest
-stable release. They are intended for testing purposes only. Do not use a pre-release version as
-the basis for a full release; follow the <a class="reference internal" href="#create-release"><span class="std std-ref">Creating a release</span></a> process instead.</p>
+<p>Pre-release versions are marked as pre-releases on GitHub and are not promoted as the latest stable release. They are intended for testing purposes only. Do not use a release candidate as the basis for a full release; run <strong>Create release</strong> with type <code class="docutils literal notranslate"><span class="pre">major</span></code> / <code class="docutils literal notranslate"><span class="pre">minor</span></code> / <code class="docutils literal notranslate"><span class="pre">patch</span></code> to produce the actual release.</p>
 </div>
 </section>
+</section>
 <section id="plugin-compatibility-test">
-<h1>Plugin compatibility test<a class="headerlink" href="#plugin-compatibility-test" title="Link to this heading">#</a></h1>
-<p>Before finishing a new HydroMT core release, you must run the downstream plugin compatibility test.
+<span id="plugin-compat-test"></span><h1>Plugin compatibility test<a class="headerlink" href="#plugin-compatibility-test" title="Link to this heading">#</a></h1>
+<p>Before tagging a major, minor, or patch release, you must run the downstream plugin compatibility test against the release branch.
 This is part of the release gate.
 It checks whether the new HydroMT wheel still works with a set of mature plugins.</p>
 <p>The workflow builds the actual wheel that would be published on PyPI and installs that wheel into each plugin’s Pixi environment.
 We do not use an editable install.
 This makes sure we test the real release artifact, including packaging metadata and included data files.</p>
 <p>For each plugin, the workflow runs in two modes.</p>
-<p>In the first mode, HydroMT is installed with –no-deps. (deps=false)
+<p>In the first mode, HydroMT is installed with <code class="docutils literal notranslate"><span class="pre">--no-deps</span></code> (<code class="docutils literal notranslate"><span class="pre">deps=false</span></code>).
 This upgrades only the HydroMT wheel and keeps the plugin’s existing, already solved environment unchanged.
 This simulates a user upgrading HydroMT in an existing environment.
 If this fails, it means the upgrade is not fully drop-in compatible.
 These failures must be reviewed, but they are not automatically release blockers.</p>
-<p>In the second mode, HydroMT is installed allowing dependency updates. (deps=true)
+<p>In the second mode, HydroMT is installed allowing dependency updates (<code class="docutils literal notranslate"><span class="pre">deps=true</span></code>).
 This allows the environment to re-solve and update third-party packages if needed.
 This simulates a clean installation.
 If this fails, the release is considered broken and must not be finalised.
 These failures are release blockers.</p>
-</section>
 <section id="how-to-run-the-compatibility-test">
-<h1>How to run the compatibility test<a class="headerlink" href="#how-to-run-the-compatibility-test" title="Link to this heading">#</a></h1>
+<h2>How to run the compatibility test<a class="headerlink" href="#how-to-run-the-compatibility-test" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
-<li><p>Make sure your release branch (for example release/vX.Y) is up to date.</p></li>
+<li><p>Make sure your release branch (for example <code class="docutils literal notranslate"><span class="pre">release/vX.Y</span></code>) is up to date.</p></li>
 <li><p>Go to the GitHub Actions tab.</p></li>
-<li><p>Select the “Downstream plugin compatibility” workflow.</p></li>
-<li><p>Click “Run workflow” and choose the release branch.</p></li>
+<li><p>Select the <strong>Downstream plugin compatibility</strong> workflow.</p></li>
+<li><p>Click <strong>Run workflow</strong> and choose the release branch.</p></li>
 </ol>
 <p>If the <code class="docutils literal notranslate"><span class="pre">with</span> <span class="pre">dependencies</span></code> run fails, you must fix the problem before continuing the release.</p>
 <p>If the <code class="docutils literal notranslate"><span class="pre">no-deps</span></code> run fails, review the failure and decide what to do.
 You may need to restore backward compatibility in core, coordinate a plugin update, or accept that upgrading HydroMT requires re-solving the environment.</p>
 <p>Do not finalise the release until all blocking failures are resolved and advisory failures have been reviewed.</p>
+</section>
 </section>
 
 
@@ -632,10 +632,16 @@ You may need to restore backward compatibility in core, coordinate a plugin upda
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Creating a release</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-a-pre-release-release-candidate">Creating a pre-release / release candidate</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#plugin-compatibility-test">Plugin compatibility test</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-run-the-compatibility-test">How to run the compatibility test</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Creating a release</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#major-minor-release">Major / minor release</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#patch-release">Patch release</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#release-candidate">Release candidate</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#plugin-compatibility-test">Plugin compatibility test</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-run-the-compatibility-test">How to run the compatibility test</a></li>
+</ul>
+</li>
 </ul>
 
   </nav></div>
