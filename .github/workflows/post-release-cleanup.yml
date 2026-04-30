@@ -2,7 +2,7 @@ name: Post-release cleanup
 
 # Triggered automatically when a release PR (from a `release/*` branch) is
 # merged into `main`. Opens a follow-up PR against `main` that:
-#   - resets the version in source to `X.Y.Z.dev0`
+#   - resets the version in source to `X.Y.(Z+1).dev0`
 #   - inserts a fresh `Unreleased` section in the changelog
 #
 # Can also be run manually via workflow_dispatch (e.g. if the auto-trigger
@@ -65,12 +65,22 @@ jobs:
           git checkout -b "$BRANCH"
           echo "BRANCH=$BRANCH" >> "$GITHUB_OUTPUT"
 
-      - name: Bump version to dev0 and add Unreleased changelog section
+      - name: Compute next dev version
+        id: next
         env:
           RELEASE_VERSION: ${{ steps.version.outputs.RELEASE_VERSION }}
         run: |
+          NEXT_VERSION=$(echo "$RELEASE_VERSION" \
+            | awk -F. '{printf "%d.%d.%d", $1, $2, $3 + 1}')
+          echo "NEXT_VERSION=$NEXT_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Bump version to dev0 and add Unreleased changelog section
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.RELEASE_VERSION }}
+          NEXT_VERSION: ${{ steps.next.outputs.NEXT_VERSION }}
+        run: |
           sed -i "s/v$RELEASE_VERSION/Unreleased\n==========\n\nNew\n---\n\nChanged\n-------\n\nFixed\n-----\n\nDeprecated\n----------\n\nRemoved\n-------\n\nv$RELEASE_VERSION/" docs/changelog.rst
-          bash .github/scripts/set-version.sh "${RELEASE_VERSION}.dev0"
+          bash .github/scripts/set-version.sh "${NEXT_VERSION}.dev0"
 
           git add docs/changelog.rst hydromt/__init__.py
           git commit -m "Post-release cleanup for v$RELEASE_VERSION"
@@ -79,10 +89,11 @@ jobs:
         env:
           BRANCH: ${{ steps.branch.outputs.BRANCH }}
           RELEASE_VERSION: ${{ steps.version.outputs.RELEASE_VERSION }}
+          NEXT_VERSION: ${{ steps.next.outputs.NEXT_VERSION }}
         run: |
           git push --set-upstream origin "$BRANCH"
           gh pr create \
             --base main \
             --head "$BRANCH" \
             --title "Post-release cleanup for v$RELEASE_VERSION" \
-            --body "Resets the version in source to \`${RELEASE_VERSION}.dev0\` and adds a fresh \`Unreleased\` section to the changelog."
+            --body "Resets the version in source to \`${NEXT_VERSION}.dev0\` and adds a fresh \`Unreleased\` section to the changelog."
