@@ -96,4 +96,7 @@ jobs:
             --base main \
             --head "$BRANCH" \
             --title "Post-release cleanup for v$RELEASE_VERSION" \
-            --body "Resets the version in source to \`${NEXT_VERSION}.dev0\` and adds a fresh \`Unreleased\` section to the changelog."
+            --body "Resets the version in source to \`${NEXT_VERSION}.dev0\` and adds a fresh \`Unreleased\` section to the changelog.
+
+          > [!NOTE]
+          > **Squash-merge this PR.** It only contains housekeeping commits; squashing keeps \`main\`'s history tidy. (Unlike the release PR, there's no tag pointing at these commits.)"

@@ -157,6 +157,9 @@ jobs:
           - Branch: \`$RELEASE_BRANCH\`
           - The release has already been tagged and published. Merging this PR brings the changelog, switcher, and version bump back into \`main\`.
           - After merging, the **Post-release cleanup** workflow will open a follow-up PR resetting the version to \`.dev0\` and adding a new \`Unreleased\` section.
+
+          > [!WARNING]
+          > **Do not squash-merge this PR.** Use a regular merge commit so that the tagged release commit (\`v$NEW_VERSION\`) stays reachable from \`main\`'s history. Squashing would orphan the tag from \`main\`.
           EOF
           )
 
