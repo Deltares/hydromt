@@ -27,10 +27,14 @@ jobs:
           set -o pipefail
           pixi run generate-sbom
 
+
+      # Use a PAT from the service account so the created PR triggers downstream
+      # workflows. Events created by the default GITHUB_TOKEN are intentionally
+      # ignored by other workflow triggers to prevent infinite recursive runs.
       - name: Create pull request
         uses: peter-evans/create-pull-request@v8
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.DELTARES_SERVICE_ACCOUNT_PAT }}
           commit-message: Update pixi lockfile
           title: Update pixi lockfile
           body-path: diff.md

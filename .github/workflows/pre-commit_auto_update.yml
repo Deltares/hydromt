@@ -21,10 +21,12 @@ jobs:
         with:
           python-version: "3.14"
       - uses: browniebroke/pre-commit-autoupdate-action@main
+      # Use a PAT from the service account so the created PR triggers downstream
+      # workflows. Events created by the default GITHUB_TOKEN are intentionally
+      # ignored by other workflow triggers to prevent infinite recursive runs.
       - uses: peter-evans/create-pull-request@v8
-        if: always()
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.DELTARES_SERVICE_ACCOUNT_PAT }}
           branch: update/pre-commit-hooks
           title: Update pre-commit hooks
           commit-message: "Update pre-commit hooks"

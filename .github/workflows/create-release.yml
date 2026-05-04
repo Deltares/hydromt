@@ -63,11 +63,13 @@ jobs:
       tag: ${{ steps.version.outputs.TAG }}
       is_prerelease: ${{ steps.version.outputs.IS_PRERELEASE }}
     env:
-      GH_TOKEN: ${{ github.token }}
+      # Use a PAT so the created PR triggers downstream workflows.
+      GH_TOKEN: ${{ secrets.DELTARES_SERVICE_ACCOUNT_PAT }}
       RELEASE_BRANCH: ${{ inputs.release_branch }}
     steps:
       - uses: actions/checkout@v6
         with:
+          token: ${{ secrets.DELTARES_SERVICE_ACCOUNT_PAT }}
           fetch-depth: 0
           ref: ${{ inputs.release_branch }}
 

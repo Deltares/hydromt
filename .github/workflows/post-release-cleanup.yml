@@ -31,10 +31,12 @@ jobs:
        startsWith(github.event.pull_request.head.ref, 'release/'))
     runs-on: ubuntu-latest
     env:
-      GH_TOKEN: ${{ github.token }}
+      # Use a PAT so the created PR triggers downstream workflows.
+      GH_TOKEN: ${{ secrets.DELTARES_SERVICE_ACCOUNT_PAT }}
     steps:
       - uses: actions/checkout@v6
         with:
+          token: ${{ secrets.DELTARES_SERVICE_ACCOUNT_PAT }}
           fetch-depth: 0
           ref: main
 
