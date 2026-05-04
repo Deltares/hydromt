@@ -34,12 +34,10 @@ jobs:
       group: NEW_RELEASE
       cancel-in-progress: false
     env:
-      # Use a PAT so the branch push triggers downstream workflows.
-      GH_TOKEN: ${{ secrets.DELTARES_SERVICE_ACCOUNT_PAT }}
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v6
         with:
-          token: ${{ secrets.DELTARES_SERVICE_ACCOUNT_PAT }}
           fetch-depth: 0
           ref: main
 

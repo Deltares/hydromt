@@ -27,14 +27,19 @@ jobs:
           set -o pipefail
           pixi run generate-sbom
 
-
-      # Use a PAT from the service account so the created PR triggers downstream
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.TOKEN_ISSUER_ACTIONS_ID }}
+          private-key: ${{ secrets.TOKEN_ISSUER_ACTIONS_KEY }}
+      # Use a token from the GH App so the created PR triggers downstream
       # workflows. Events created by the default GITHUB_TOKEN are intentionally
       # ignored by other workflow triggers to prevent infinite recursive runs.
       - name: Create pull request
         uses: peter-evans/create-pull-request@v8
         with:
-          token: ${{ secrets.DELTARES_SERVICE_ACCOUNT_PAT }}
+          token: ${{ steps.app-token.outputs.token }}
           commit-message: Update pixi lockfile
           title: Update pixi lockfile
           body-path: diff.md
