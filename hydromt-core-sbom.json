@@ -6,12 +6,12 @@
     "creators": [
       "Tool: sbom4python-0.12.5"
     ],
-    "created": "2026-04-03T03:59:42Z",
+    "created": "2026-05-03T04:25:13Z",
     "licenseListVersion": "3.28.0"
   },
   "name": "Python-hydromt",
   "dataLicense": "CC0-1.0",
-  "documentNamespace": "http://spdx.org/spdxdocs/Python-hydromt-4cc2f60d-2a2a-40c4-a665-54d2035ad53e",
+  "documentNamespace": "http://spdx.org/spdxdocs/Python-hydromt-2f507c49-5ce3-40b3-a3a9-d8f9dba410d9",
   "packages": [
     {
       "SPDXID": "SPDXRef-1-hydromt",
@@ -171,22 +171,22 @@
     {
       "SPDXID": "SPDXRef-5-click",
       "name": "click",
-      "versionInfo": "8.3.1",
+      "versionInfo": "8.3.3",
       "primaryPackagePurpose": "LIBRARY",
       "supplier": "NOASSERTION",
-      "downloadLocation": "https://pypi.org/project/click/8.3.1/#files",
+      "downloadLocation": "https://pypi.org/project/click/8.3.3/#files",
       "filesAnalyzed": false,
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "981153a64e25f12d547d3426c367a4857371575ee7ad18df2a6183ab0545b2a6"
+          "checksumValue": "a2bf429bb3033c89fa4936ffb35d5cb471e3719e1f3c8a7c3fff0b8314305613"
         }
       ],
       "licenseConcluded": "BSD-3-Clause",
       "licenseDeclared": "BSD-3-Clause",
       "copyrightText": "NOASSERTION",
       "summary": "Composable command line interface toolkit",
-      "releaseDate": "2025-11-15T20:45:41Z",
+      "releaseDate": "2026-04-22T15:11:25Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -216,12 +216,46 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/click@8.3.1"
+          "referenceLocator": "pkg:pypi/click@8.3.3"
         }
       ]
     },
     {
-      "SPDXID": "SPDXRef-6-dask",
+      "SPDXID": "SPDXRef-6-colorama",
+      "name": "colorama",
+      "versionInfo": "0.4.6",
+      "primaryPackagePurpose": "LIBRARY",
+      "supplier": "Person: Jonathan Hartley (tartley@tartley.com)",
+      "downloadLocation": "https://pypi.org/project/colorama/0.4.6/#files",
+      "filesAnalyzed": false,
+      "homepage": "https://github.com/tartley/colorama",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"
+        }
+      ],
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "NOASSERTION",
+      "licenseComments": "colorama declares BSD License which is not currently a valid SPDX License identifier or expression.",
+      "copyrightText": "NOASSERTION",
+      "summary": "Cross-platform colored terminal text.",
+      "releaseDate": "2022-10-25T02:36:20Z",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:pypi/colorama@0.4.6"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:jonathan_hartley:colorama:0.4.6:*:*:*:*:*:*:*"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-7-dask",
       "name": "dask",
       "versionInfo": "2026.3.0",
       "primaryPackagePurpose": "LIBRARY",
@@ -249,7 +283,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-7-cloudpickle",
+      "SPDXID": "SPDXRef-8-cloudpickle",
       "name": "cloudpickle",
       "versionInfo": "3.1.2",
       "primaryPackagePurpose": "LIBRARY",
@@ -282,25 +316,25 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-8-fsspec",
+      "SPDXID": "SPDXRef-9-fsspec",
       "name": "fsspec",
-      "versionInfo": "2026.3.0",
+      "versionInfo": "2026.4.0",
       "primaryPackagePurpose": "LIBRARY",
       "supplier": "NOASSERTION",
-      "downloadLocation": "https://pypi.org/project/fsspec/2026.3.0/#files",
+      "downloadLocation": "https://pypi.org/project/fsspec/2026.4.0/#files",
       "filesAnalyzed": false,
       "homepage": "https://github.com/fsspec/filesystem_spec",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "d2ceafaad1b3457968ed14efa28798162f1638dbb5d2a6868a2db002a5ee39a4"
+          "checksumValue": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2"
         }
       ],
       "licenseConcluded": "BSD-3-Clause",
       "licenseDeclared": "BSD-3-Clause",
       "copyrightText": "NOASSERTION",
       "summary": "File-system specification",
-      "releaseDate": "2026-03-27T19:11:13Z",
+      "releaseDate": "2026-04-29T20:42:36Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -315,29 +349,29 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/fsspec@2026.3.0"
+          "referenceLocator": "pkg:pypi/fsspec@2026.4.0"
         }
       ]
     },
     {
-      "SPDXID": "SPDXRef-9-packaging",
+      "SPDXID": "SPDXRef-10-packaging",
       "name": "packaging",
-      "versionInfo": "26.0",
+      "versionInfo": "26.2",
       "primaryPackagePurpose": "LIBRARY",
       "supplier": "Person: Donald Stufft (donald@stufft.io)",
-      "downloadLocation": "https://pypi.org/project/packaging/26.0/#files",
+      "downloadLocation": "https://pypi.org/project/packaging/26.2/#files",
       "filesAnalyzed": false,
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "b36f1fef9334a5588b4166f8bcd26a14e521f2b55e6b9de3aaa80d3ff7a37529"
+          "checksumValue": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e"
         }
       ],
       "licenseConcluded": "Apache-2.0 OR BSD-2-Clause",
       "licenseDeclared": "Apache-2.0 OR BSD-2-Clause",
       "copyrightText": "NOASSERTION",
       "summary": "Core utilities for Python packages",
-      "releaseDate": "2026-01-21T20:50:37Z",
+      "releaseDate": "2026-04-24T20:15:22Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -352,17 +386,17 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/packaging@26.0"
+          "referenceLocator": "pkg:pypi/packaging@26.2"
         },
         {
           "referenceCategory": "SECURITY",
           "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:donald_stufft:packaging:26.0:*:*:*:*:*:*:*"
+          "referenceLocator": "cpe:2.3:a:donald_stufft:packaging:26.2:*:*:*:*:*:*:*"
         }
       ]
     },
     {
-      "SPDXID": "SPDXRef-10-partd",
+      "SPDXID": "SPDXRef-11-partd",
       "name": "partd",
       "versionInfo": "1.4.2",
       "primaryPackagePurpose": "LIBRARY",
@@ -391,7 +425,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-11-locket",
+      "SPDXID": "SPDXRef-12-locket",
       "name": "locket",
       "versionInfo": "1.0.0",
       "primaryPackagePurpose": "LIBRARY",
@@ -424,7 +458,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-12-toolz",
+      "SPDXID": "SPDXRef-13-toolz",
       "name": "toolz",
       "versionInfo": "1.1.0",
       "primaryPackagePurpose": "LIBRARY",
@@ -472,7 +506,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-13-pyyaml",
+      "SPDXID": "SPDXRef-14-pyyaml",
       "name": "pyyaml",
       "versionInfo": "6.0.3",
       "primaryPackagePurpose": "LIBRARY",
@@ -530,24 +564,24 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-14-importlib-metadata",
+      "SPDXID": "SPDXRef-15-importlib-metadata",
       "name": "importlib-metadata",
-      "versionInfo": "9.0.0",
+      "versionInfo": "8.7.1",
       "primaryPackagePurpose": "LIBRARY",
       "supplier": "Organization: Jason R. (jaraco@jaraco.com)",
-      "downloadLocation": "https://pypi.org/project/importlib-metadata/9.0.0/#files",
+      "downloadLocation": "https://pypi.org/project/importlib-metadata/8.7.1/#files",
       "filesAnalyzed": false,
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "2d21d1cc5a017bd0559e36150c21c830ab1dc304dedd1b7ea85d20f45ef3edd7"
+          "checksumValue": "5a1f80bf1daa489495071efbb095d75a634cf28a8bc299581244063b53176151"
         }
       ],
       "licenseConcluded": "Apache-2.0",
       "licenseDeclared": "Apache-2.0",
       "copyrightText": "NOASSERTION",
       "summary": "Read metadata from Python packages",
-      "releaseDate": "2026-03-20T06:42:55Z",
+      "releaseDate": "2025-12-21T10:00:18Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -557,34 +591,34 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/importlib-metadata@9.0.0"
+          "referenceLocator": "pkg:pypi/importlib-metadata@8.7.1"
         },
         {
           "referenceCategory": "SECURITY",
           "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:jason_r.:importlib-metadata:9.0.0:*:*:*:*:*:*:*"
+          "referenceLocator": "cpe:2.3:a:jason_r.:importlib-metadata:8.7.1:*:*:*:*:*:*:*"
         }
       ]
     },
     {
-      "SPDXID": "SPDXRef-15-zipp",
+      "SPDXID": "SPDXRef-16-zipp",
       "name": "zipp",
-      "versionInfo": "3.23.0",
+      "versionInfo": "3.23.1",
       "primaryPackagePurpose": "LIBRARY",
       "supplier": "Organization: Jason R. (jaraco@jaraco.com)",
-      "downloadLocation": "https://pypi.org/project/zipp/3.23.0/#files",
+      "downloadLocation": "https://pypi.org/project/zipp/3.23.1/#files",
       "filesAnalyzed": false,
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "071652d6115ed432f5ce1d34c336c0adfd6a884660d1e9712a256d3d3bd4b14e"
+          "checksumValue": "0b3596c50a5c700c9cb40ba8d86d9f2cc4807e9bedb06bcdf7fac85633e444dc"
         }
       ],
       "licenseConcluded": "MIT",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "summary": "Backport of pathlib-compatible object wrapper for zip files",
-      "releaseDate": "2025-06-08T17:06:38Z",
+      "releaseDate": "2026-04-13T23:21:45Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -594,17 +628,17 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/zipp@3.23.0"
+          "referenceLocator": "pkg:pypi/zipp@3.23.1"
         },
         {
           "referenceCategory": "SECURITY",
           "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:jason_r.:zipp:3.23.0:*:*:*:*:*:*:*"
+          "referenceLocator": "cpe:2.3:a:jason_r.:zipp:3.23.1:*:*:*:*:*:*:*"
         }
       ]
     },
     {
-      "SPDXID": "SPDXRef-16-geopandas",
+      "SPDXID": "SPDXRef-17-geopandas",
       "name": "geopandas",
       "versionInfo": "1.1.3",
       "primaryPackagePurpose": "LIBRARY",
@@ -616,7 +650,7 @@
       "licenseDeclared": "BSD-3-Clause",
       "copyrightText": "NOASSERTION",
       "summary": "Geographic pandas extensions",
-      "releaseDate": "2025-06-08T17:06:38Z",
+      "releaseDate": "2026-04-13T23:21:45Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -636,7 +670,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-17-pyogrio",
+      "SPDXID": "SPDXRef-18-pyogrio",
       "name": "pyogrio",
       "versionInfo": "0.12.1",
       "primaryPackagePurpose": "LIBRARY",
@@ -675,25 +709,25 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-18-certifi",
+      "SPDXID": "SPDXRef-19-certifi",
       "name": "certifi",
-      "versionInfo": "2026.2.25",
+      "versionInfo": "2026.4.22",
       "primaryPackagePurpose": "LIBRARY",
       "supplier": "Person: Kenneth Reitz (me@kennethreitz.com)",
-      "downloadLocation": "https://pypi.org/project/certifi/2026.2.25/#files",
+      "downloadLocation": "https://pypi.org/project/certifi/2026.4.22/#files",
       "filesAnalyzed": false,
       "homepage": "https://github.com/certifi/python-certifi",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "027692e4402ad994f1c42e52a4997a9763c646b73e4096e4d5d6db8af1d6f0fa"
+          "checksumValue": "3cb2210c8f88ba2318d29b0388d1023c8492ff72ecdde4ebdaddbb13a31b1c4a"
         }
       ],
       "licenseConcluded": "MPL-2.0",
       "licenseDeclared": "MPL-2.0",
       "copyrightText": "NOASSERTION",
       "summary": "Python package for providing Mozilla's CA Bundle.",
-      "releaseDate": "2026-02-25T02:54:15Z",
+      "releaseDate": "2026-04-22T11:26:09Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -703,17 +737,17 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/certifi@2026.2.25"
+          "referenceLocator": "pkg:pypi/certifi@2026.4.22"
         },
         {
           "referenceCategory": "SECURITY",
           "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:kenneth_reitz:certifi:2026.2.25:*:*:*:*:*:*:*"
+          "referenceLocator": "cpe:2.3:a:kenneth_reitz:certifi:2026.4.22:*:*:*:*:*:*:*"
         }
       ]
     },
     {
-      "SPDXID": "SPDXRef-19-pandas",
+      "SPDXID": "SPDXRef-20-pandas",
       "name": "pandas",
       "versionInfo": "3.0.2",
       "primaryPackagePurpose": "LIBRARY",
@@ -752,7 +786,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-20-python-dateutil",
+      "SPDXID": "SPDXRef-21-python-dateutil",
       "name": "python-dateutil",
       "versionInfo": "2.9.0.post0",
       "primaryPackagePurpose": "LIBRARY",
@@ -796,7 +830,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-21-six",
+      "SPDXID": "SPDXRef-22-six",
       "name": "six",
       "versionInfo": "1.17.0",
       "primaryPackagePurpose": "LIBRARY",
@@ -829,25 +863,25 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-22-tzdata",
+      "SPDXID": "SPDXRef-23-tzdata",
       "name": "tzdata",
-      "versionInfo": "2025.3",
+      "versionInfo": "2026.2",
       "primaryPackagePurpose": "LIBRARY",
       "supplier": "Organization: Python Software Foundation (datetime-sig@python.org)",
-      "downloadLocation": "https://pypi.org/project/tzdata/2025.3/#files",
+      "downloadLocation": "https://pypi.org/project/tzdata/2026.2/#files",
       "filesAnalyzed": false,
       "homepage": "https://github.com/python/tzdata",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "06a47e5700f3081aab02b2e513160914ff0694bce9947d6b76ebd6bf57cfc5d1"
+          "checksumValue": "bbe9af844f658da81a5f95019480da3a89415801f6cc966806612cc7169bffe7"
         }
       ],
       "licenseConcluded": "Apache-2.0",
       "licenseDeclared": "Apache-2.0",
       "copyrightText": "NOASSERTION",
       "summary": "Provider of IANA time zone data",
-      "releaseDate": "2025-12-13T17:45:33Z",
+      "releaseDate": "2026-04-24T15:22:05Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -862,22 +896,22 @@
         {
           "referenceCategory": "OTHER",
           "referenceType": "documentation",
-          "referenceLocator": "https://tzdata.readthedocs.io"
+          "referenceLocator": "https://tzdata.python.org"
         },
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/tzdata@2025.3"
+          "referenceLocator": "pkg:pypi/tzdata@2026.2"
         },
         {
           "referenceCategory": "SECURITY",
           "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python_software_foundation:tzdata:2025.3:*:*:*:*:*:*:*"
+          "referenceLocator": "cpe:2.3:a:python_software_foundation:tzdata:2026.2:*:*:*:*:*:*:*"
         }
       ]
     },
     {
-      "SPDXID": "SPDXRef-23-pyproj",
+      "SPDXID": "SPDXRef-24-pyproj",
       "name": "pyproj",
       "versionInfo": "3.7.2",
       "primaryPackagePurpose": "LIBRARY",
@@ -925,7 +959,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-24-shapely",
+      "SPDXID": "SPDXRef-25-shapely",
       "name": "shapely",
       "versionInfo": "2.1.2",
       "primaryPackagePurpose": "LIBRARY",
@@ -968,7 +1002,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-25-mercantile",
+      "SPDXID": "SPDXRef-26-mercantile",
       "name": "mercantile",
       "versionInfo": "1.2.1",
       "primaryPackagePurpose": "LIBRARY",
@@ -1002,7 +1036,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-26-netcdf4",
+      "SPDXID": "SPDXRef-27-netcdf4",
       "name": "netcdf4",
       "versionInfo": "1.7.4",
       "primaryPackagePurpose": "LIBRARY",
@@ -1044,7 +1078,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-27-cftime",
+      "SPDXID": "SPDXRef-28-cftime",
       "name": "cftime",
       "versionInfo": "1.6.5",
       "primaryPackagePurpose": "LIBRARY",
@@ -1076,18 +1110,18 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-28-numba",
+      "SPDXID": "SPDXRef-29-numba",
       "name": "numba",
-      "versionInfo": "0.65.0",
+      "versionInfo": "0.65.1",
       "primaryPackagePurpose": "LIBRARY",
       "supplier": "NOASSERTION",
-      "downloadLocation": "https://pypi.org/project/numba/0.65.0/#files",
+      "downloadLocation": "https://pypi.org/project/numba/0.65.1/#files",
       "filesAnalyzed": false,
       "homepage": "https://numba.pydata.org",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "dff9fd5fbc9a35c517359c5823ea705d9b65f01fb46e42e35a2eabe5a52c2e96"
+          "checksumValue": "9d993ed0a257aa4116e6f553f114004bcfdee540c7276ab8ea48f650d514c452"
         }
       ],
       "licenseConcluded": "BSD-3-Clause",
@@ -1095,17 +1129,17 @@
       "licenseComments": "numba declares BSD which is not currently a valid SPDX License identifier or expression.",
       "copyrightText": "NOASSERTION",
       "summary": "compiling Python code using LLVM",
-      "releaseDate": "2026-04-01T03:51:17Z",
+      "releaseDate": "2026-04-24T02:02:10Z",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/numba@0.65.0"
+          "referenceLocator": "pkg:pypi/numba@0.65.1"
         }
       ]
     },
     {
-      "SPDXID": "SPDXRef-29-llvmlite",
+      "SPDXID": "SPDXRef-30-llvmlite",
       "name": "llvmlite",
       "versionInfo": "0.47.0",
       "primaryPackagePurpose": "LIBRARY",
@@ -1119,9 +1153,8 @@
           "checksumValue": "41270b0b1310717f717cf6f2a9c68d3c43bd7905c33f003825aebc361d0d1b17"
         }
       ],
-      "licenseConcluded": "NOASSERTION",
-      "licenseDeclared": "NOASSERTION",
-      "licenseComments": "llvmlite declares BSD-2-Clause AND Apache-2.0 WITH LLVM-exception which is not currently a valid SPDX License identifier or expression.",
+      "licenseConcluded": "BSD-2-Clause AND Apache-2.0 WITH LLVM-exception",
+      "licenseDeclared": "BSD-2-Clause AND Apache-2.0 WITH LLVM-exception",
       "copyrightText": "NOASSERTION",
       "summary": "lightweight wrapper around basic LLVM functionality",
       "releaseDate": "2026-03-31T18:28:12Z",
@@ -1139,7 +1172,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-30-pooch",
+      "SPDXID": "SPDXRef-31-pooch",
       "name": "pooch",
       "versionInfo": "1.9.0",
       "primaryPackagePurpose": "LIBRARY",
@@ -1191,25 +1224,25 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-31-platformdirs",
+      "SPDXID": "SPDXRef-32-platformdirs",
       "name": "platformdirs",
-      "versionInfo": "4.9.4",
+      "versionInfo": "4.9.6",
       "primaryPackagePurpose": "LIBRARY",
       "supplier": "NOASSERTION",
-      "downloadLocation": "https://pypi.org/project/platformdirs/4.9.4/#files",
+      "downloadLocation": "https://pypi.org/project/platformdirs/4.9.6/#files",
       "filesAnalyzed": false,
       "homepage": "https://github.com/tox-dev/platformdirs",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "68a9a4619a666ea6439f2ff250c12a853cd1cbd5158d258bd824a7df6be2f868"
+          "checksumValue": "e61adb1d5e5cb3441b4b7710bea7e4c12250ca49439228cc1021c00dcfac0917"
         }
       ],
       "licenseConcluded": "MIT",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "summary": "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`.",
-      "releaseDate": "2026-03-05T18:34:12Z",
+      "releaseDate": "2026-04-09T00:04:09Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -1234,12 +1267,12 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/platformdirs@4.9.4"
+          "referenceLocator": "pkg:pypi/platformdirs@4.9.6"
         }
       ]
     },
     {
-      "SPDXID": "SPDXRef-32-requests",
+      "SPDXID": "SPDXRef-33-requests",
       "name": "requests",
       "versionInfo": "2.33.1",
       "primaryPackagePurpose": "LIBRARY",
@@ -1281,7 +1314,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-33-charset-normalizer",
+      "SPDXID": "SPDXRef-34-charset-normalizer",
       "name": "charset-normalizer",
       "versionInfo": "3.4.7",
       "primaryPackagePurpose": "LIBRARY",
@@ -1333,24 +1366,24 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-34-idna",
+      "SPDXID": "SPDXRef-35-idna",
       "name": "idna",
-      "versionInfo": "3.11",
+      "versionInfo": "3.13",
       "primaryPackagePurpose": "LIBRARY",
       "supplier": "Person: Kim Davies (kim+pypi@gumleaf.org)",
-      "downloadLocation": "https://pypi.org/project/idna/3.11/#files",
+      "downloadLocation": "https://pypi.org/project/idna/3.13/#files",
       "filesAnalyzed": false,
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "771a87f49d9defaf64091e6e6fe9c18d4833f140bd19464795bc32d966ca37ea"
+          "checksumValue": "892ea0cde124a99ce773decba204c5552b69c3c67ffd5f232eb7696135bc8bb3"
         }
       ],
       "licenseConcluded": "BSD-3-Clause",
       "licenseDeclared": "BSD-3-Clause",
       "copyrightText": "NOASSERTION",
       "summary": "Internationalized Domain Names in Applications (IDNA)",
-      "releaseDate": "2025-10-12T14:55:18Z",
+      "releaseDate": "2026-04-22T16:42:40Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -1370,17 +1403,17 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/idna@3.11"
+          "referenceLocator": "pkg:pypi/idna@3.13"
         },
         {
           "referenceCategory": "SECURITY",
           "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:kim_davies:idna:3.11:*:*:*:*:*:*:*"
+          "referenceLocator": "cpe:2.3:a:kim_davies:idna:3.13:*:*:*:*:*:*:*"
         }
       ]
     },
     {
-      "SPDXID": "SPDXRef-35-urllib3",
+      "SPDXID": "SPDXRef-36-urllib3",
       "name": "urllib3",
       "versionInfo": "2.6.3",
       "primaryPackagePurpose": "LIBRARY",
@@ -1432,25 +1465,25 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-36-pyarrow",
+      "SPDXID": "SPDXRef-37-pyarrow",
       "name": "pyarrow",
-      "versionInfo": "23.0.1",
+      "versionInfo": "24.0.0",
       "primaryPackagePurpose": "LIBRARY",
       "supplier": "NOASSERTION",
-      "downloadLocation": "https://pypi.org/project/pyarrow/23.0.1/#files",
+      "downloadLocation": "https://pypi.org/project/pyarrow/24.0.0/#files",
       "filesAnalyzed": false,
       "homepage": "https://arrow.apache.org/",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "3fab8f82571844eb3c460f90a75583801d14ca0cc32b1acc8c361650e006fd56"
+          "checksumValue": "7c2b98645d576a0b9616892ead22b64a83a5f043c5e2ca15ebcefcb5b70c80cb"
         }
       ],
       "licenseConcluded": "Apache-2.0",
       "licenseDeclared": "Apache-2.0",
       "copyrightText": "NOASSERTION",
       "summary": "Python library for Apache Arrow",
-      "releaseDate": "2026-02-16T10:08:08Z",
+      "releaseDate": "2026-04-21T08:51:46Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -1470,30 +1503,30 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/pyarrow@23.0.1"
+          "referenceLocator": "pkg:pypi/pyarrow@24.0.0"
         }
       ]
     },
     {
-      "SPDXID": "SPDXRef-37-pydantic",
+      "SPDXID": "SPDXRef-38-pydantic",
       "name": "pydantic",
-      "versionInfo": "2.12.5",
+      "versionInfo": "2.13.3",
       "primaryPackagePurpose": "LIBRARY",
-      "supplier": "Organization: Samuel Colvin Eric Jolibois Hasan Ramezani Adrian Garcia Badaracco Terrence Dorsey David Montague Serge Matveenko Marcelo Trylesinski Sydney Runkle David Hewitt Alex Hall Victorien Plot Douwe Maan (hi@douwe.me)",
-      "downloadLocation": "https://pypi.org/project/pydantic/2.12.5/#files",
+      "supplier": "Organization: Samuel Colvin Eric Jolibois Hasan Ramezani Adrian Garcia Badaracco Terrence Dorsey David Montague Serge Matveenko Marcelo Trylesinski Sydney Runkle David Hewitt Alex Hall Victorien Plot (contact@vctrn.dev)",
+      "downloadLocation": "https://pypi.org/project/pydantic/2.13.3/#files",
       "filesAnalyzed": false,
       "homepage": "https://github.com/pydantic/pydantic",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "e561593fccf61e8a20fc46dfc2dfe075b8be7d0188df33f221ad1f0139180f9d"
+          "checksumValue": "6db14ac8dfc9a1e57f87ea2c0de670c251240f43cb0c30a5130e9720dc612927"
         }
       ],
       "licenseConcluded": "MIT",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "summary": "Data validation using Python type hints",
-      "releaseDate": "2025-11-26T15:11:44Z",
+      "releaseDate": "2026-04-20T14:46:41Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -1518,17 +1551,17 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/pydantic@2.12.5"
+          "referenceLocator": "pkg:pypi/pydantic@2.13.3"
         },
         {
           "referenceCategory": "SECURITY",
           "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:samuel_colvin_eric_jolibois_hasan_ramezani_adrian_garcia_badaracco_terrence_dorsey_david_montague_serge_matveenko_marcelo_trylesinski_sydney_runkle_david_hewitt_alex_hall_victorien_plot_douwe_maan:pydantic:2.12.5:*:*:*:*:*:*:*"
+          "referenceLocator": "cpe:2.3:a:samuel_colvin_eric_jolibois_hasan_ramezani_adrian_garcia_badaracco_terrence_dorsey_david_montague_serge_matveenko_marcelo_trylesinski_sydney_runkle_david_hewitt_alex_hall_victorien_plot:pydantic:2.13.3:*:*:*:*:*:*:*"
         }
       ]
     },
     {
-      "SPDXID": "SPDXRef-38-annotated-types",
+      "SPDXID": "SPDXRef-39-annotated-types",
       "name": "annotated-types",
       "versionInfo": "0.7.0",
       "primaryPackagePurpose": "LIBRARY",
@@ -1572,7 +1605,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-39-typing-extensions",
+      "SPDXID": "SPDXRef-40-typing-extensions",
       "name": "typing-extensions",
       "versionInfo": "4.15.0",
       "primaryPackagePurpose": "LIBRARY",
@@ -1630,25 +1663,25 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-40-pydantic-core",
+      "SPDXID": "SPDXRef-41-pydantic-core",
       "name": "pydantic-core",
-      "versionInfo": "2.41.5",
+      "versionInfo": "2.46.3",
       "primaryPackagePurpose": "LIBRARY",
       "supplier": "Organization: Samuel Colvin Adrian Garcia Badaracco David Montague David Hewitt Sydney Runkle Victorien Plot (contact@vctrn.dev)",
-      "downloadLocation": "https://pypi.org/project/pydantic-core/2.41.5/#files",
+      "downloadLocation": "https://pypi.org/project/pydantic-core/2.46.3/#files",
       "filesAnalyzed": false,
-      "homepage": "https://github.com/pydantic/pydantic-core",
+      "homepage": "https://github.com/pydantic",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "77b63866ca88d804225eaa4af3e664c5faf3568cea95360d21f4725ab6e07146"
+          "checksumValue": "1da3786b8018e60349680720158cc19161cc3b4bdd815beb0a321cd5ce1ad5b1"
         }
       ],
       "licenseConcluded": "MIT",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "summary": "Core functionality for Pydantic validation and serialization",
-      "releaseDate": "2025-11-04T13:39:04Z",
+      "releaseDate": "2026-04-20T14:43:51Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -1658,22 +1691,22 @@
         {
           "referenceCategory": "OTHER",
           "referenceType": "vcs",
-          "referenceLocator": "https://github.com/pydantic/pydantic-core"
+          "referenceLocator": "https://github.com/pydantic/pydantic/tree/main/pydantic-core"
         },
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/pydantic-core@2.41.5"
+          "referenceLocator": "pkg:pypi/pydantic-core@2.46.3"
         },
         {
           "referenceCategory": "SECURITY",
           "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:samuel_colvin_adrian_garcia_badaracco_david_montague_david_hewitt_sydney_runkle_victorien_plot:pydantic-core:2.41.5:*:*:*:*:*:*:*"
+          "referenceLocator": "cpe:2.3:a:samuel_colvin_adrian_garcia_badaracco_david_montague_david_hewitt_sydney_runkle_victorien_plot:pydantic-core:2.46.3:*:*:*:*:*:*:*"
         }
       ]
     },
     {
-      "SPDXID": "SPDXRef-41-typing-inspection",
+      "SPDXID": "SPDXRef-42-typing-inspection",
       "name": "typing-inspection",
       "versionInfo": "0.4.2",
       "primaryPackagePurpose": "LIBRARY",
@@ -1721,25 +1754,25 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-42-pydantic-settings",
+      "SPDXID": "SPDXRef-43-pydantic-settings",
       "name": "pydantic-settings",
-      "versionInfo": "2.13.1",
+      "versionInfo": "2.14.0",
       "primaryPackagePurpose": "LIBRARY",
       "supplier": "Organization: Samuel Colvin Eric Jolibois Hasan Ramezani (hasan.r67@gmail.com)",
-      "downloadLocation": "https://pypi.org/project/pydantic-settings/2.13.1/#files",
+      "downloadLocation": "https://pypi.org/project/pydantic-settings/2.14.0/#files",
       "filesAnalyzed": false,
       "homepage": "https://github.com/pydantic/pydantic-settings",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "d56fd801823dbeae7f0975e1f8c8e25c258eb75d278ea7abb5d9cebb01b56237"
+          "checksumValue": "fc8d5d692eb7092e43c8647c1c35a3ecd00e040fcf02ed86f4cb5458ca62182e"
         }
       ],
       "licenseConcluded": "MIT",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "summary": "Settings management using Pydantic",
-      "releaseDate": "2026-02-19T13:45:06Z",
+      "releaseDate": "2026-04-20T13:37:38Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -1764,17 +1797,17 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/pydantic-settings@2.13.1"
+          "referenceLocator": "pkg:pypi/pydantic-settings@2.14.0"
         },
         {
           "referenceCategory": "SECURITY",
           "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:samuel_colvin_eric_jolibois_hasan_ramezani:pydantic-settings:2.13.1:*:*:*:*:*:*:*"
+          "referenceLocator": "cpe:2.3:a:samuel_colvin_eric_jolibois_hasan_ramezani:pydantic-settings:2.14.0:*:*:*:*:*:*:*"
         }
       ]
     },
     {
-      "SPDXID": "SPDXRef-43-python-dotenv",
+      "SPDXID": "SPDXRef-44-python-dotenv",
       "name": "python-dotenv",
       "versionInfo": "1.2.2",
       "primaryPackagePurpose": "LIBRARY",
@@ -1811,18 +1844,18 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-44-pyflwdir",
+      "SPDXID": "SPDXRef-45-pyflwdir",
       "name": "pyflwdir",
-      "versionInfo": "0.5.10",
+      "versionInfo": "0.5.11",
       "primaryPackagePurpose": "LIBRARY",
       "supplier": "Person: Dirk Eilander (dirk.eilander@deltares.nl)",
-      "downloadLocation": "https://pypi.org/project/pyflwdir/0.5.10/#files",
+      "downloadLocation": "https://pypi.org/project/pyflwdir/0.5.11/#files",
       "filesAnalyzed": false,
       "homepage": "https://github.com/Deltares/pyflwdir",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "09bb27ad90a5c23cfb4a75da3e8a3b53950104b49f538cf2b9de6d530a564b42"
+          "checksumValue": "3813f208c78c0b9851c3a7cd032a62e3139275ac7f46a80e36bb9dc3cc47ebcf"
         }
       ],
       "licenseConcluded": "MIT",
@@ -1830,7 +1863,7 @@
       "licenseComments": "pyflwdir declares MIT License which is not currently a valid SPDX License identifier or expression.",
       "copyrightText": "NOASSERTION",
       "summary": "Fast methods to work with hydro- and topography data in pure Python.",
-      "releaseDate": "2025-02-18T21:16:25Z",
+      "releaseDate": "2026-04-21T10:00:07Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -1840,17 +1873,17 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/pyflwdir@0.5.10"
+          "referenceLocator": "pkg:pypi/pyflwdir@0.5.11"
         },
         {
           "referenceCategory": "SECURITY",
           "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:dirk_eilander:pyflwdir:0.5.10:*:*:*:*:*:*:*"
+          "referenceLocator": "cpe:2.3:a:dirk_eilander:pyflwdir:0.5.11:*:*:*:*:*:*:*"
         }
       ]
     },
     {
-      "SPDXID": "SPDXRef-45-scipy",
+      "SPDXID": "SPDXRef-46-scipy",
       "name": "scipy",
       "versionInfo": "1.17.1",
       "primaryPackagePurpose": "LIBRARY",
@@ -1899,7 +1932,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-46-pystac",
+      "SPDXID": "SPDXRef-47-pystac",
       "name": "pystac",
       "versionInfo": "1.14.3",
       "primaryPackagePurpose": "LIBRARY",
@@ -1950,7 +1983,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-47-rasterio",
+      "SPDXID": "SPDXRef-48-rasterio",
       "name": "rasterio",
       "versionInfo": "1.5.0",
       "primaryPackagePurpose": "LIBRARY",
@@ -1992,7 +2025,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-48-attrs",
+      "SPDXID": "SPDXRef-49-attrs",
       "name": "attrs",
       "versionInfo": "26.1.0",
       "primaryPackagePurpose": "LIBRARY",
@@ -2049,7 +2082,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-49-cligj",
+      "SPDXID": "SPDXRef-50-cligj",
       "name": "cligj",
       "versionInfo": "0.7.2",
       "primaryPackagePurpose": "LIBRARY",
@@ -2083,7 +2116,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-50-pyparsing",
+      "SPDXID": "SPDXRef-51-pyparsing",
       "name": "pyparsing",
       "versionInfo": "3.3.2",
       "primaryPackagePurpose": "LIBRARY",
@@ -2126,7 +2159,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-51-rioxarray",
+      "SPDXID": "SPDXRef-52-rioxarray",
       "name": "rioxarray",
       "versionInfo": "0.22.0",
       "primaryPackagePurpose": "LIBRARY",
@@ -2170,25 +2203,25 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-52-xarray",
+      "SPDXID": "SPDXRef-53-xarray",
       "name": "xarray",
-      "versionInfo": "2026.2.0",
+      "versionInfo": "2026.4.0",
       "primaryPackagePurpose": "LIBRARY",
       "supplier": "Person: xarray Developers (xarray@googlegroups.com)",
-      "downloadLocation": "https://pypi.org/project/xarray/2026.2.0/#files",
+      "downloadLocation": "https://pypi.org/project/xarray/2026.4.0/#files",
       "filesAnalyzed": false,
       "homepage": "https://xarray.dev/",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "e927d7d716ea71dea78a13417970850a640447d8dd2ceeb65c5687f6373837c9"
+          "checksumValue": "d43751d9fb4a90f9249c30431684f00c41bc874f1edccd862631a40cbc0edf08"
         }
       ],
       "licenseConcluded": "Apache-2.0",
       "licenseDeclared": "Apache-2.0",
       "copyrightText": "NOASSERTION",
       "summary": "N-D labeled arrays and datasets in Python",
-      "releaseDate": "2026-02-13T22:20:47Z",
+      "releaseDate": "2026-04-13T19:45:34Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -2213,17 +2246,17 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/xarray@2026.2.0"
+          "referenceLocator": "pkg:pypi/xarray@2026.4.0"
         },
         {
           "referenceCategory": "SECURITY",
           "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:xarray_developers:xarray:2026.2.0:*:*:*:*:*:*:*"
+          "referenceLocator": "cpe:2.3:a:xarray_developers:xarray:2026.4.0:*:*:*:*:*:*:*"
         }
       ]
     },
     {
-      "SPDXID": "SPDXRef-53-tomli",
+      "SPDXID": "SPDXRef-54-tomli",
       "name": "tomli",
       "versionInfo": "2.4.1",
       "primaryPackagePurpose": "LIBRARY",
@@ -2261,7 +2294,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-54-tomli-w",
+      "SPDXID": "SPDXRef-55-tomli-w",
       "name": "tomli-w",
       "versionInfo": "1.2.0",
       "primaryPackagePurpose": "LIBRARY",
@@ -2300,7 +2333,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-55-universal-pathlib",
+      "SPDXID": "SPDXRef-56-universal-pathlib",
       "name": "universal-pathlib",
       "versionInfo": "0.3.10",
       "primaryPackagePurpose": "LIBRARY",
@@ -2338,7 +2371,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-56-pathlib-abc",
+      "SPDXID": "SPDXRef-57-pathlib-abc",
       "name": "pathlib-abc",
       "versionInfo": "0.5.2",
       "primaryPackagePurpose": "LIBRARY",
@@ -2377,7 +2410,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-57-xmltodict",
+      "SPDXID": "SPDXRef-58-xmltodict",
       "name": "xmltodict",
       "versionInfo": "1.0.4",
       "primaryPackagePurpose": "LIBRARY",
@@ -2410,19 +2443,25 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-58-xugrid",
+      "SPDXID": "SPDXRef-59-xugrid",
       "name": "xugrid",
-      "versionInfo": "0.15.1",
+      "versionInfo": "0.15.2",
       "primaryPackagePurpose": "LIBRARY",
       "supplier": "NOASSERTION",
-      "downloadLocation": "https://pypi.org/project/xugrid/0.15.1/#files",
+      "downloadLocation": "https://pypi.org/project/xugrid/0.15.2/#files",
       "filesAnalyzed": false,
       "homepage": "https://github.com/deltares/xugrid",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "3c5c327fb32fe6e822bc644f1785088c9eb518a2157a872c2e5f5f818aad3c21"
+        }
+      ],
       "licenseConcluded": "MIT",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "summary": "Xarray extension for unstructured grids",
-      "releaseDate": "2026-02-22T02:21:21Z",
+      "releaseDate": "2026-04-20T17:52:28Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -2437,12 +2476,12 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/xugrid@0.15.1"
+          "referenceLocator": "pkg:pypi/xugrid@0.15.2"
         }
       ]
     },
     {
-      "SPDXID": "SPDXRef-59-numba-celltree",
+      "SPDXID": "SPDXRef-60-numba-celltree",
       "name": "numba-celltree",
       "versionInfo": "0.4.2",
       "primaryPackagePurpose": "LIBRARY",
@@ -2480,25 +2519,25 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-60-zarr",
+      "SPDXID": "SPDXRef-61-zarr",
       "name": "zarr",
-      "versionInfo": "3.1.6",
+      "versionInfo": "3.2.0",
       "primaryPackagePurpose": "LIBRARY",
       "supplier": "Person: Alistair Miles (alimanfoo@googlemail.com)",
-      "downloadLocation": "https://pypi.org/project/zarr/3.1.6/#files",
+      "downloadLocation": "https://pypi.org/project/zarr/3.2.0/#files",
       "filesAnalyzed": false,
       "homepage": "https://github.com/zarr-developers/zarr-python",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "b5a82c5079d1c3d4ee8f06746fa3b9a98a7d804300fa3f4be154362a33e1207e"
+          "checksumValue": "c693bd4ae24328f242e47e9e1ced221e919d9f62cad71030fd059e398320e555"
         }
       ],
       "licenseConcluded": "MIT",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "summary": "An implementation of chunked, compressed, N-dimensional arrays for Python",
-      "releaseDate": "2026-03-23T17:25:17Z",
+      "releaseDate": "2026-04-30T22:18:01Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -2523,17 +2562,17 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/zarr@3.1.6"
+          "referenceLocator": "pkg:pypi/zarr@3.2.0"
         },
         {
           "referenceCategory": "SECURITY",
           "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:alistair_miles:zarr:3.1.6:*:*:*:*:*:*:*"
+          "referenceLocator": "cpe:2.3:a:alistair_miles:zarr:3.2.0:*:*:*:*:*:*:*"
         }
       ]
     },
     {
-      "SPDXID": "SPDXRef-61-donfig",
+      "SPDXID": "SPDXRef-62-donfig",
       "name": "donfig",
       "versionInfo": "0.8.1.post1",
       "primaryPackagePurpose": "LIBRARY",
@@ -2561,7 +2600,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-62-google-crc32c",
+      "SPDXID": "SPDXRef-63-google-crc32c",
       "name": "google-crc32c",
       "versionInfo": "1.8.0",
       "primaryPackagePurpose": "LIBRARY",
@@ -2594,7 +2633,7 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-63-numcodecs",
+      "SPDXID": "SPDXRef-64-numcodecs",
       "name": "numcodecs",
       "versionInfo": "0.16.5",
       "primaryPackagePurpose": "LIBRARY",
@@ -2664,608 +2703,613 @@
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-6-dask",
+      "spdxElementId": "SPDXRef-5-click",
+      "relatedSpdxElement": "SPDXRef-6-colorama",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-6-dask",
+      "spdxElementId": "SPDXRef-1-hydromt",
+      "relatedSpdxElement": "SPDXRef-7-dask",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-7-dask",
       "relatedSpdxElement": "SPDXRef-5-click",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-6-dask",
-      "relatedSpdxElement": "SPDXRef-7-cloudpickle",
+      "spdxElementId": "SPDXRef-7-dask",
+      "relatedSpdxElement": "SPDXRef-8-cloudpickle",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-6-dask",
-      "relatedSpdxElement": "SPDXRef-8-fsspec",
+      "spdxElementId": "SPDXRef-7-dask",
+      "relatedSpdxElement": "SPDXRef-9-fsspec",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-6-dask",
-      "relatedSpdxElement": "SPDXRef-9-packaging",
+      "spdxElementId": "SPDXRef-7-dask",
+      "relatedSpdxElement": "SPDXRef-10-packaging",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-6-dask",
-      "relatedSpdxElement": "SPDXRef-10-partd",
+      "spdxElementId": "SPDXRef-7-dask",
+      "relatedSpdxElement": "SPDXRef-11-partd",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-10-partd",
-      "relatedSpdxElement": "SPDXRef-11-locket",
+      "spdxElementId": "SPDXRef-11-partd",
+      "relatedSpdxElement": "SPDXRef-12-locket",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-10-partd",
-      "relatedSpdxElement": "SPDXRef-12-toolz",
+      "spdxElementId": "SPDXRef-11-partd",
+      "relatedSpdxElement": "SPDXRef-13-toolz",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-6-dask",
-      "relatedSpdxElement": "SPDXRef-13-pyyaml",
+      "spdxElementId": "SPDXRef-7-dask",
+      "relatedSpdxElement": "SPDXRef-14-pyyaml",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-6-dask",
-      "relatedSpdxElement": "SPDXRef-12-toolz",
+      "spdxElementId": "SPDXRef-7-dask",
+      "relatedSpdxElement": "SPDXRef-13-toolz",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-6-dask",
-      "relatedSpdxElement": "SPDXRef-14-importlib-metadata",
-      "relationshipType": "DEPENDS_ON"
-    },
-    {
-      "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-8-fsspec",
+      "spdxElementId": "SPDXRef-7-dask",
+      "relatedSpdxElement": "SPDXRef-15-importlib-metadata",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-16-geopandas",
+      "relatedSpdxElement": "SPDXRef-9-fsspec",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-16-geopandas",
+      "spdxElementId": "SPDXRef-1-hydromt",
+      "relatedSpdxElement": "SPDXRef-17-geopandas",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-17-geopandas",
       "relatedSpdxElement": "SPDXRef-4-numpy",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-16-geopandas",
-      "relatedSpdxElement": "SPDXRef-17-pyogrio",
+      "spdxElementId": "SPDXRef-17-geopandas",
+      "relatedSpdxElement": "SPDXRef-18-pyogrio",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-17-pyogrio",
-      "relatedSpdxElement": "SPDXRef-18-certifi",
+      "spdxElementId": "SPDXRef-18-pyogrio",
+      "relatedSpdxElement": "SPDXRef-19-certifi",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-17-pyogrio",
+      "spdxElementId": "SPDXRef-18-pyogrio",
       "relatedSpdxElement": "SPDXRef-4-numpy",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-17-pyogrio",
-      "relatedSpdxElement": "SPDXRef-9-packaging",
+      "spdxElementId": "SPDXRef-18-pyogrio",
+      "relatedSpdxElement": "SPDXRef-10-packaging",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-16-geopandas",
-      "relatedSpdxElement": "SPDXRef-9-packaging",
+      "spdxElementId": "SPDXRef-17-geopandas",
+      "relatedSpdxElement": "SPDXRef-10-packaging",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-16-geopandas",
-      "relatedSpdxElement": "SPDXRef-19-pandas",
+      "spdxElementId": "SPDXRef-17-geopandas",
+      "relatedSpdxElement": "SPDXRef-20-pandas",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-19-pandas",
+      "spdxElementId": "SPDXRef-20-pandas",
       "relatedSpdxElement": "SPDXRef-4-numpy",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-19-pandas",
-      "relatedSpdxElement": "SPDXRef-20-python-dateutil",
+      "spdxElementId": "SPDXRef-20-pandas",
+      "relatedSpdxElement": "SPDXRef-21-python-dateutil",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-20-python-dateutil",
-      "relatedSpdxElement": "SPDXRef-21-six",
+      "spdxElementId": "SPDXRef-21-python-dateutil",
+      "relatedSpdxElement": "SPDXRef-22-six",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-19-pandas",
-      "relatedSpdxElement": "SPDXRef-22-tzdata",
+      "spdxElementId": "SPDXRef-20-pandas",
+      "relatedSpdxElement": "SPDXRef-23-tzdata",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-16-geopandas",
-      "relatedSpdxElement": "SPDXRef-23-pyproj",
+      "spdxElementId": "SPDXRef-17-geopandas",
+      "relatedSpdxElement": "SPDXRef-24-pyproj",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-23-pyproj",
-      "relatedSpdxElement": "SPDXRef-18-certifi",
+      "spdxElementId": "SPDXRef-24-pyproj",
+      "relatedSpdxElement": "SPDXRef-19-certifi",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-16-geopandas",
-      "relatedSpdxElement": "SPDXRef-24-shapely",
+      "spdxElementId": "SPDXRef-17-geopandas",
+      "relatedSpdxElement": "SPDXRef-25-shapely",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-24-shapely",
+      "spdxElementId": "SPDXRef-25-shapely",
       "relatedSpdxElement": "SPDXRef-4-numpy",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-14-importlib-metadata",
+      "relatedSpdxElement": "SPDXRef-15-importlib-metadata",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-25-mercantile",
+      "relatedSpdxElement": "SPDXRef-26-mercantile",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-25-mercantile",
+      "spdxElementId": "SPDXRef-26-mercantile",
       "relatedSpdxElement": "SPDXRef-5-click",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-26-netcdf4",
+      "relatedSpdxElement": "SPDXRef-27-netcdf4",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-26-netcdf4",
-      "relatedSpdxElement": "SPDXRef-27-cftime",
+      "spdxElementId": "SPDXRef-27-netcdf4",
+      "relatedSpdxElement": "SPDXRef-28-cftime",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-27-cftime",
+      "spdxElementId": "SPDXRef-28-cftime",
       "relatedSpdxElement": "SPDXRef-4-numpy",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-26-netcdf4",
-      "relatedSpdxElement": "SPDXRef-18-certifi",
+      "spdxElementId": "SPDXRef-27-netcdf4",
+      "relatedSpdxElement": "SPDXRef-19-certifi",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-26-netcdf4",
-      "relatedSpdxElement": "SPDXRef-4-numpy",
-      "relationshipType": "DEPENDS_ON"
-    },
-    {
-      "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-28-numba",
-      "relationshipType": "DEPENDS_ON"
-    },
-    {
-      "spdxElementId": "SPDXRef-28-numba",
-      "relatedSpdxElement": "SPDXRef-29-llvmlite",
-      "relationshipType": "DEPENDS_ON"
-    },
-    {
-      "spdxElementId": "SPDXRef-28-numba",
+      "spdxElementId": "SPDXRef-27-netcdf4",
       "relatedSpdxElement": "SPDXRef-4-numpy",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
+      "relatedSpdxElement": "SPDXRef-29-numba",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-29-numba",
+      "relatedSpdxElement": "SPDXRef-30-llvmlite",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-29-numba",
       "relatedSpdxElement": "SPDXRef-4-numpy",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-9-packaging",
+      "relatedSpdxElement": "SPDXRef-4-numpy",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-19-pandas",
+      "relatedSpdxElement": "SPDXRef-10-packaging",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-30-pooch",
-      "relationshipType": "DEPENDS_ON"
-    },
-    {
-      "spdxElementId": "SPDXRef-30-pooch",
-      "relatedSpdxElement": "SPDXRef-31-platformdirs",
-      "relationshipType": "DEPENDS_ON"
-    },
-    {
-      "spdxElementId": "SPDXRef-30-pooch",
-      "relatedSpdxElement": "SPDXRef-9-packaging",
-      "relationshipType": "DEPENDS_ON"
-    },
-    {
-      "spdxElementId": "SPDXRef-30-pooch",
-      "relatedSpdxElement": "SPDXRef-32-requests",
-      "relationshipType": "DEPENDS_ON"
-    },
-    {
-      "spdxElementId": "SPDXRef-32-requests",
-      "relatedSpdxElement": "SPDXRef-33-charset-normalizer",
-      "relationshipType": "DEPENDS_ON"
-    },
-    {
-      "spdxElementId": "SPDXRef-32-requests",
-      "relatedSpdxElement": "SPDXRef-34-idna",
-      "relationshipType": "DEPENDS_ON"
-    },
-    {
-      "spdxElementId": "SPDXRef-32-requests",
-      "relatedSpdxElement": "SPDXRef-35-urllib3",
-      "relationshipType": "DEPENDS_ON"
-    },
-    {
-      "spdxElementId": "SPDXRef-32-requests",
-      "relatedSpdxElement": "SPDXRef-18-certifi",
+      "relatedSpdxElement": "SPDXRef-20-pandas",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-36-pyarrow",
+      "relatedSpdxElement": "SPDXRef-31-pooch",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-31-pooch",
+      "relatedSpdxElement": "SPDXRef-32-platformdirs",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-31-pooch",
+      "relatedSpdxElement": "SPDXRef-10-packaging",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-31-pooch",
+      "relatedSpdxElement": "SPDXRef-33-requests",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-33-requests",
+      "relatedSpdxElement": "SPDXRef-34-charset-normalizer",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-33-requests",
+      "relatedSpdxElement": "SPDXRef-35-idna",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-33-requests",
+      "relatedSpdxElement": "SPDXRef-36-urllib3",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-33-requests",
+      "relatedSpdxElement": "SPDXRef-19-certifi",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-37-pydantic",
-      "relationshipType": "DEPENDS_ON"
-    },
-    {
-      "spdxElementId": "SPDXRef-37-pydantic",
-      "relatedSpdxElement": "SPDXRef-38-annotated-types",
-      "relationshipType": "DEPENDS_ON"
-    },
-    {
-      "spdxElementId": "SPDXRef-38-annotated-types",
-      "relatedSpdxElement": "SPDXRef-39-typing-extensions",
-      "relationshipType": "DEPENDS_ON"
-    },
-    {
-      "spdxElementId": "SPDXRef-37-pydantic",
-      "relatedSpdxElement": "SPDXRef-40-pydantic-core",
-      "relationshipType": "DEPENDS_ON"
-    },
-    {
-      "spdxElementId": "SPDXRef-40-pydantic-core",
-      "relatedSpdxElement": "SPDXRef-39-typing-extensions",
-      "relationshipType": "DEPENDS_ON"
-    },
-    {
-      "spdxElementId": "SPDXRef-37-pydantic",
-      "relatedSpdxElement": "SPDXRef-39-typing-extensions",
-      "relationshipType": "DEPENDS_ON"
-    },
-    {
-      "spdxElementId": "SPDXRef-37-pydantic",
-      "relatedSpdxElement": "SPDXRef-41-typing-inspection",
-      "relationshipType": "DEPENDS_ON"
-    },
-    {
-      "spdxElementId": "SPDXRef-41-typing-inspection",
-      "relatedSpdxElement": "SPDXRef-39-typing-extensions",
+      "relatedSpdxElement": "SPDXRef-37-pyarrow",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-42-pydantic-settings",
+      "relatedSpdxElement": "SPDXRef-38-pydantic",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-42-pydantic-settings",
-      "relatedSpdxElement": "SPDXRef-37-pydantic",
+      "spdxElementId": "SPDXRef-38-pydantic",
+      "relatedSpdxElement": "SPDXRef-39-annotated-types",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-42-pydantic-settings",
-      "relatedSpdxElement": "SPDXRef-43-python-dotenv",
+      "spdxElementId": "SPDXRef-39-annotated-types",
+      "relatedSpdxElement": "SPDXRef-40-typing-extensions",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-42-pydantic-settings",
-      "relatedSpdxElement": "SPDXRef-41-typing-inspection",
+      "spdxElementId": "SPDXRef-38-pydantic",
+      "relatedSpdxElement": "SPDXRef-41-pydantic-core",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-41-pydantic-core",
+      "relatedSpdxElement": "SPDXRef-40-typing-extensions",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-38-pydantic",
+      "relatedSpdxElement": "SPDXRef-40-typing-extensions",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-38-pydantic",
+      "relatedSpdxElement": "SPDXRef-42-typing-inspection",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-42-typing-inspection",
+      "relatedSpdxElement": "SPDXRef-40-typing-extensions",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-44-pyflwdir",
+      "relatedSpdxElement": "SPDXRef-43-pydantic-settings",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-44-pyflwdir",
+      "spdxElementId": "SPDXRef-43-pydantic-settings",
+      "relatedSpdxElement": "SPDXRef-38-pydantic",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-43-pydantic-settings",
+      "relatedSpdxElement": "SPDXRef-44-python-dotenv",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-43-pydantic-settings",
+      "relatedSpdxElement": "SPDXRef-42-typing-inspection",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-1-hydromt",
+      "relatedSpdxElement": "SPDXRef-45-pyflwdir",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-45-pyflwdir",
       "relatedSpdxElement": "SPDXRef-2-affine",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-44-pyflwdir",
-      "relatedSpdxElement": "SPDXRef-28-numba",
+      "spdxElementId": "SPDXRef-45-pyflwdir",
+      "relatedSpdxElement": "SPDXRef-29-numba",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-44-pyflwdir",
+      "spdxElementId": "SPDXRef-45-pyflwdir",
       "relatedSpdxElement": "SPDXRef-4-numpy",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-44-pyflwdir",
-      "relatedSpdxElement": "SPDXRef-45-scipy",
+      "spdxElementId": "SPDXRef-45-pyflwdir",
+      "relatedSpdxElement": "SPDXRef-46-scipy",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-45-scipy",
+      "spdxElementId": "SPDXRef-46-scipy",
       "relatedSpdxElement": "SPDXRef-4-numpy",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-17-pyogrio",
+      "relatedSpdxElement": "SPDXRef-18-pyogrio",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-23-pyproj",
+      "relatedSpdxElement": "SPDXRef-24-pyproj",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-46-pystac",
+      "relatedSpdxElement": "SPDXRef-47-pystac",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-46-pystac",
-      "relatedSpdxElement": "SPDXRef-20-python-dateutil",
-      "relationshipType": "DEPENDS_ON"
-    },
-    {
-      "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-13-pyyaml",
+      "spdxElementId": "SPDXRef-47-pystac",
+      "relatedSpdxElement": "SPDXRef-21-python-dateutil",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-47-rasterio",
+      "relatedSpdxElement": "SPDXRef-14-pyyaml",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-47-rasterio",
+      "spdxElementId": "SPDXRef-1-hydromt",
+      "relatedSpdxElement": "SPDXRef-48-rasterio",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-48-rasterio",
       "relatedSpdxElement": "SPDXRef-2-affine",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-47-rasterio",
-      "relatedSpdxElement": "SPDXRef-48-attrs",
+      "spdxElementId": "SPDXRef-48-rasterio",
+      "relatedSpdxElement": "SPDXRef-49-attrs",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-47-rasterio",
-      "relatedSpdxElement": "SPDXRef-18-certifi",
+      "spdxElementId": "SPDXRef-48-rasterio",
+      "relatedSpdxElement": "SPDXRef-19-certifi",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-47-rasterio",
+      "spdxElementId": "SPDXRef-48-rasterio",
       "relatedSpdxElement": "SPDXRef-5-click",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-47-rasterio",
-      "relatedSpdxElement": "SPDXRef-49-cligj",
+      "spdxElementId": "SPDXRef-48-rasterio",
+      "relatedSpdxElement": "SPDXRef-50-cligj",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-49-cligj",
+      "spdxElementId": "SPDXRef-50-cligj",
       "relatedSpdxElement": "SPDXRef-5-click",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-47-rasterio",
+      "spdxElementId": "SPDXRef-48-rasterio",
       "relatedSpdxElement": "SPDXRef-4-numpy",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-47-rasterio",
-      "relatedSpdxElement": "SPDXRef-50-pyparsing",
+      "spdxElementId": "SPDXRef-48-rasterio",
+      "relatedSpdxElement": "SPDXRef-51-pyparsing",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-32-requests",
+      "relatedSpdxElement": "SPDXRef-33-requests",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-51-rioxarray",
+      "relatedSpdxElement": "SPDXRef-52-rioxarray",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-51-rioxarray",
-      "relatedSpdxElement": "SPDXRef-9-packaging",
+      "spdxElementId": "SPDXRef-52-rioxarray",
+      "relatedSpdxElement": "SPDXRef-10-packaging",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-51-rioxarray",
-      "relatedSpdxElement": "SPDXRef-47-rasterio",
+      "spdxElementId": "SPDXRef-52-rioxarray",
+      "relatedSpdxElement": "SPDXRef-48-rasterio",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-51-rioxarray",
-      "relatedSpdxElement": "SPDXRef-52-xarray",
+      "spdxElementId": "SPDXRef-52-rioxarray",
+      "relatedSpdxElement": "SPDXRef-53-xarray",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-52-xarray",
+      "spdxElementId": "SPDXRef-53-xarray",
       "relatedSpdxElement": "SPDXRef-4-numpy",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-52-xarray",
-      "relatedSpdxElement": "SPDXRef-9-packaging",
+      "spdxElementId": "SPDXRef-53-xarray",
+      "relatedSpdxElement": "SPDXRef-10-packaging",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-52-xarray",
-      "relatedSpdxElement": "SPDXRef-19-pandas",
+      "spdxElementId": "SPDXRef-53-xarray",
+      "relatedSpdxElement": "SPDXRef-20-pandas",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-51-rioxarray",
-      "relatedSpdxElement": "SPDXRef-23-pyproj",
+      "spdxElementId": "SPDXRef-52-rioxarray",
+      "relatedSpdxElement": "SPDXRef-24-pyproj",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-51-rioxarray",
+      "spdxElementId": "SPDXRef-52-rioxarray",
       "relatedSpdxElement": "SPDXRef-4-numpy",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-45-scipy",
+      "relatedSpdxElement": "SPDXRef-46-scipy",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-24-shapely",
+      "relatedSpdxElement": "SPDXRef-25-shapely",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-53-tomli",
+      "relatedSpdxElement": "SPDXRef-54-tomli",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-54-tomli-w",
+      "relatedSpdxElement": "SPDXRef-55-tomli-w",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-55-universal-pathlib",
+      "relatedSpdxElement": "SPDXRef-56-universal-pathlib",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-52-xarray",
+      "relatedSpdxElement": "SPDXRef-53-xarray",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-57-xmltodict",
+      "relatedSpdxElement": "SPDXRef-58-xmltodict",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-58-xugrid",
+      "relatedSpdxElement": "SPDXRef-59-xugrid",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-58-xugrid",
-      "relatedSpdxElement": "SPDXRef-6-dask",
+      "spdxElementId": "SPDXRef-59-xugrid",
+      "relatedSpdxElement": "SPDXRef-7-dask",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-58-xugrid",
-      "relatedSpdxElement": "SPDXRef-28-numba",
+      "spdxElementId": "SPDXRef-59-xugrid",
+      "relatedSpdxElement": "SPDXRef-29-numba",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-58-xugrid",
-      "relatedSpdxElement": "SPDXRef-59-numba-celltree",
+      "spdxElementId": "SPDXRef-59-xugrid",
+      "relatedSpdxElement": "SPDXRef-60-numba-celltree",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-59-numba-celltree",
-      "relatedSpdxElement": "SPDXRef-28-numba",
+      "spdxElementId": "SPDXRef-60-numba-celltree",
+      "relatedSpdxElement": "SPDXRef-29-numba",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-59-numba-celltree",
+      "spdxElementId": "SPDXRef-60-numba-celltree",
       "relatedSpdxElement": "SPDXRef-4-numpy",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-58-xugrid",
+      "spdxElementId": "SPDXRef-59-xugrid",
       "relatedSpdxElement": "SPDXRef-4-numpy",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-58-xugrid",
-      "relatedSpdxElement": "SPDXRef-19-pandas",
+      "spdxElementId": "SPDXRef-59-xugrid",
+      "relatedSpdxElement": "SPDXRef-20-pandas",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-58-xugrid",
-      "relatedSpdxElement": "SPDXRef-30-pooch",
+      "spdxElementId": "SPDXRef-59-xugrid",
+      "relatedSpdxElement": "SPDXRef-31-pooch",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-58-xugrid",
-      "relatedSpdxElement": "SPDXRef-45-scipy",
+      "spdxElementId": "SPDXRef-59-xugrid",
+      "relatedSpdxElement": "SPDXRef-46-scipy",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-58-xugrid",
-      "relatedSpdxElement": "SPDXRef-52-xarray",
+      "spdxElementId": "SPDXRef-59-xugrid",
+      "relatedSpdxElement": "SPDXRef-53-xarray",
       "relationshipType": "DEPENDS_ON"
     },
     {
       "spdxElementId": "SPDXRef-1-hydromt",
-      "relatedSpdxElement": "SPDXRef-60-zarr",
+      "relatedSpdxElement": "SPDXRef-61-zarr",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-60-zarr",
-      "relatedSpdxElement": "SPDXRef-61-donfig",
+      "spdxElementId": "SPDXRef-61-zarr",
+      "relatedSpdxElement": "SPDXRef-62-donfig",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-61-donfig",
-      "relatedSpdxElement": "SPDXRef-13-pyyaml",
+      "spdxElementId": "SPDXRef-62-donfig",
+      "relatedSpdxElement": "SPDXRef-14-pyyaml",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-60-zarr",
-      "relatedSpdxElement": "SPDXRef-62-google-crc32c",
+      "spdxElementId": "SPDXRef-61-zarr",
+      "relatedSpdxElement": "SPDXRef-63-google-crc32c",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-60-zarr",
-      "relatedSpdxElement": "SPDXRef-63-numcodecs",
+      "spdxElementId": "SPDXRef-61-zarr",
+      "relatedSpdxElement": "SPDXRef-64-numcodecs",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-63-numcodecs",
+      "spdxElementId": "SPDXRef-64-numcodecs",
       "relatedSpdxElement": "SPDXRef-4-numpy",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-63-numcodecs",
-      "relatedSpdxElement": "SPDXRef-39-typing-extensions",
+      "spdxElementId": "SPDXRef-64-numcodecs",
+      "relatedSpdxElement": "SPDXRef-40-typing-extensions",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-60-zarr",
+      "spdxElementId": "SPDXRef-61-zarr",
       "relatedSpdxElement": "SPDXRef-4-numpy",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-60-zarr",
-      "relatedSpdxElement": "SPDXRef-9-packaging",
+      "spdxElementId": "SPDXRef-61-zarr",
+      "relatedSpdxElement": "SPDXRef-10-packaging",
       "relationshipType": "DEPENDS_ON"
     },
     {
-      "spdxElementId": "SPDXRef-60-zarr",
-      "relatedSpdxElement": "SPDXRef-39-typing-extensions",
+      "spdxElementId": "SPDXRef-61-zarr",
+      "relatedSpdxElement": "SPDXRef-40-typing-extensions",
       "relationshipType": "DEPENDS_ON"
     }
   ]
