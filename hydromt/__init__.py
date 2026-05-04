@@ -3,12 +3,11 @@
 # version number without 'v' at start
 __version__ = "1.4.0.dev0"
 
-
 import warnings
 
 try:
     import rasterio as _rasterio
-    from packaging import Version
+    from packaging.version import Version
 
     if Version(_rasterio.__version__) >= Version("1.5.0"):
         # Rasterio 1.5 installs a broken sys.excepthook that recurses infinitely
