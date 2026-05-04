@@ -6,12 +6,12 @@
     "creators": [
       "Tool: sbom4python-0.12.5"
     ],
-    "created": "2026-05-03T04:25:13Z",
+    "created": "2026-05-04T14:37:27Z",
     "licenseListVersion": "3.28.0"
   },
   "name": "Python-hydromt",
   "dataLicense": "CC0-1.0",
-  "documentNamespace": "http://spdx.org/spdxdocs/Python-hydromt-2f507c49-5ce3-40b3-a3a9-d8f9dba410d9",
+  "documentNamespace": "http://spdx.org/spdxdocs/Python-hydromt-9e2f604c-049b-46c9-8a0e-759743f0b695",
   "packages": [
     {
       "SPDXID": "SPDXRef-1-hydromt",
@@ -96,18 +96,12 @@
       "downloadLocation": "http://pypi.python.org/pypi/Bottleneck",
       "filesAnalyzed": false,
       "homepage": "https://github.com/pydata/bottleneck",
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "40de6be68218ba32cd15addbf4ad7bbbf0075b5c5c4347c579aeae110a5c9a96"
-        }
-      ],
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "licenseComments": "bottleneck declares Simplified BSD which is not currently a valid SPDX License identifier or expression.",
       "copyrightText": "NOASSERTION",
       "summary": "Fast NumPy array functions written in C",
-      "releaseDate": "2025-09-08T16:29:35Z",
+      "releaseDate": "2023-01-19T23:44:28Z",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
@@ -129,7 +123,7 @@
       "licenseDeclared": "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0",
       "copyrightText": "NOASSERTION",
       "summary": "Fundamental package for array computing in Python",
-      "releaseDate": "2025-09-08T16:29:35Z",
+      "releaseDate": "2023-01-19T23:44:28Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -176,17 +170,11 @@
       "supplier": "NOASSERTION",
       "downloadLocation": "https://pypi.org/project/click/8.3.3/#files",
       "filesAnalyzed": false,
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "a2bf429bb3033c89fa4936ffb35d5cb471e3719e1f3c8a7c3fff0b8314305613"
-        }
-      ],
       "licenseConcluded": "BSD-3-Clause",
       "licenseDeclared": "BSD-3-Clause",
       "copyrightText": "NOASSERTION",
       "summary": "Composable command line interface toolkit",
-      "releaseDate": "2026-04-22T15:11:25Z",
+      "releaseDate": "2023-01-19T23:44:28Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -263,17 +251,11 @@
       "downloadLocation": "https://pypi.org/project/dask/2026.3.0/#files",
       "filesAnalyzed": false,
       "homepage": "https://github.com/dask/dask/",
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "be614b9242b0b38288060fb2d7696125946469c98a1c30e174883fd199e0428d"
-        }
-      ],
       "licenseConcluded": "BSD-3-Clause",
       "licenseDeclared": "BSD-3-Clause",
       "copyrightText": "NOASSERTION",
       "summary": "Parallel PyData with Task Scheduling",
-      "releaseDate": "2026-03-18T07:10:12Z",
+      "releaseDate": "2022-10-25T02:36:20Z",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
@@ -404,18 +386,12 @@
       "downloadLocation": "https://pypi.org/project/partd/1.4.2/#files",
       "filesAnalyzed": false,
       "homepage": "http://github.com/dask/partd/",
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "978e4ac767ec4ba5b86c6eaa52e5a2a3bc748a2ca839e8cc798f1cc6ce6efb0f"
-        }
-      ],
       "licenseConcluded": "BSD-3-Clause",
       "licenseDeclared": "NOASSERTION",
       "licenseComments": "partd declares BSD which is not currently a valid SPDX License identifier or expression.",
       "copyrightText": "NOASSERTION",
       "summary": "Appendable key-value storage",
-      "releaseDate": "2024-05-06T19:51:39Z",
+      "releaseDate": "2026-04-24T20:15:22Z",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
@@ -919,17 +895,11 @@
       "downloadLocation": "https://pypi.org/project/pyproj/3.7.2/#files",
       "filesAnalyzed": false,
       "homepage": "https://pyproj4.github.io/pyproj/",
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "2514d61f24c4e0bb9913e2c51487ecdaeca5f8748d8313c933693416ca41d4d5"
-        }
-      ],
       "licenseConcluded": "MIT",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "summary": "Python interface to PROJ (cartographic projections and coordinate transformations library)",
-      "releaseDate": "2025-08-14T12:03:51Z",
+      "releaseDate": "2026-04-24T15:22:05Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -966,18 +936,12 @@
       "supplier": "Person: Sean Gillies",
       "downloadLocation": "https://pypi.org/project/shapely/2.1.2/#files",
       "filesAnalyzed": false,
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "7ae48c236c0324b4e139bea88a306a04ca630f49be66741b340729d380d8f52f"
-        }
-      ],
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "licenseComments": "shapely declares BSD 3-Clause which is not currently a valid SPDX License identifier or expression.",
       "copyrightText": "NOASSERTION",
       "summary": "Manipulation and analysis of geometric objects",
-      "releaseDate": "2025-09-24T13:50:00Z",
+      "releaseDate": "2026-04-24T15:22:05Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -1010,18 +974,12 @@
       "downloadLocation": "https://pypi.org/project/mercantile/1.2.1/#files",
       "filesAnalyzed": false,
       "homepage": "https://github.com/mapbox/mercantile",
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "30f457a73ee88261aab787b7069d85961a5703bb09dc57a170190bc042cd023f"
-        }
-      ],
       "licenseConcluded": "BSD-3-Clause",
       "licenseDeclared": "NOASSERTION",
       "licenseComments": "mercantile declares BSD which is not currently a valid SPDX License identifier or expression.",
       "copyrightText": "NOASSERTION",
       "summary": "Web mercator XYZ tile utilities",
-      "releaseDate": "2021-04-21T14:42:39Z",
+      "releaseDate": "2026-04-24T15:22:05Z",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
@@ -1043,17 +1001,11 @@
       "supplier": "Person: Jeff Whitaker (whitaker.jeffrey@gmail.com)",
       "downloadLocation": "https://pypi.org/project/netcdf4/1.7.4/#files",
       "filesAnalyzed": false,
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "b1c1a7ea3678db76bf33d14f7e202385d634db38c5e70d8cf4895971023eebb9"
-        }
-      ],
       "licenseConcluded": "MIT",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "summary": "Provides an object-oriented python interface to the netCDF version 4 library",
-      "releaseDate": "2026-01-05T02:26:54Z",
+      "releaseDate": "2026-04-24T15:22:05Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -1990,17 +1942,11 @@
       "supplier": "Person: Sean Gillies (sean@mapbox.com)",
       "downloadLocation": "https://pypi.org/project/rasterio/1.5.0/#files",
       "filesAnalyzed": false,
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "420656074897a460f5ef46f657b3061d2e004f9d99e613914b0671643e69d92c"
-        }
-      ],
       "licenseConcluded": "BSD-3-Clause",
       "licenseDeclared": "BSD-3-Clause",
       "copyrightText": "NOASSERTION",
       "summary": "Fast and direct raster I/O for use with NumPy",
-      "releaseDate": "2026-01-05T16:05:19Z",
+      "releaseDate": "2026-02-23T00:16:00Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -2341,17 +2287,11 @@
       "downloadLocation": "https://pypi.org/project/universal-pathlib/0.3.10/#files",
       "filesAnalyzed": false,
       "homepage": "https://github.com/fsspec/universal_pathlib",
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "dfaf2fb35683d2eb1287a3ed7b215e4d6016aa6eaf339c607023d22f90821c66"
-        }
-      ],
       "licenseConcluded": "MIT",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "summary": "pathlib api extended to use fsspec backends",
-      "releaseDate": "2026-02-22T14:40:57Z",
+      "releaseDate": "2025-01-15T12:07:22Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -2379,18 +2319,12 @@
       "downloadLocation": "https://pypi.org/project/pathlib-abc/0.5.2/#files",
       "filesAnalyzed": false,
       "homepage": "https://github.com/barneygale/pathlib-abc",
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "4c9d94cf1b23af417ce7c0417b43333b06a106c01000b286c99de230d95eefbb"
-        }
-      ],
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "licenseComments": "pathlib-abc declares 1. This LICENSE AGREEMENT is between the Python Software Foundation\n(\"PSF\"), and the Individual or Organization (\"Licensee\") accessing and\notherwise using this software (\"Python\") in source or binary form and\nits associated documentation.\n\n2. Subject to the terms and conditions of this License Agreement, PSF hereby\ngrants Licensee a nonexclusive, royalty-free, world-wide license to reproduce,\nanalyze, test, perform and/or display publicly, prepare derivative works,\ndistribute, and otherwise use Python alone or in any derivative version,\nprovided, however, that PSF's License Agreement and PSF's notice of copyright,\ni.e., \"Copyright (c) 2001-2024 Python Software Foundation; All Rights Reserved\"\nare retained in Python alone or in any derivative version prepared by Licensee.\n\n3. In the event Licensee prepares a derivative work that is based on\nor incorporates Python or any part thereof, and wants to make\nthe derivative work available to others as provided herein, then\nLicensee hereby agrees to include in any such work a brief summary of\nthe changes made to Python.\n\n4. PSF is making Python available to Licensee on an \"AS IS\"\nbasis.  PSF MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR\nIMPLIED.  BY WAY OF EXAMPLE, BUT NOT LIMITATION, PSF MAKES NO AND\nDISCLAIMS ANY REPRESENTATION OR WARRANTY OF MERCHANTABILITY OR FITNESS\nFOR ANY PARTICULAR PURPOSE OR THAT THE USE OF PYTHON WILL NOT\nINFRINGE ANY THIRD PARTY RIGHTS.\n\n5. PSF SHALL NOT BE LIABLE TO LICENSEE OR ANY OTHER USERS OF PYTHON\nFOR ANY INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES OR LOSS AS\nA RESULT OF MODIFYING, DISTRIBUTING, OR OTHERWISE USING PYTHON,\nOR ANY DERIVATIVE THEREOF, EVEN IF ADVISED OF THE POSSIBILITY THEREOF.\n\n6. This License Agreement will automatically terminate upon a material\nbreach of its terms and conditions.\n\n7. Nothing in this License Agreement shall be deemed to create any\nrelationship of agency, partnership, or joint venture between PSF and\nLicensee.  This License Agreement does not grant permission to use PSF\ntrademarks or trade name in a trademark sense to endorse or promote\nproducts or services of Licensee, or any third party.\n\n8. By copying, installing or otherwise using Python, Licensee\nagrees to be bound by the terms and conditions of this License\nAgreement.\n which is not currently a valid SPDX License identifier or expression.",
       "copyrightText": "NOASSERTION",
       "summary": "Backport of pathlib ABCs",
-      "releaseDate": "2025-10-10T18:37:19Z",
+      "releaseDate": "2025-01-15T12:07:22Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
@@ -2580,17 +2514,11 @@
       "downloadLocation": "https://pypi.org/project/donfig/0.8.1.post1/#files",
       "filesAnalyzed": false,
       "homepage": "https://github.com/pytroll/donfig",
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "2a3175ce74a06109ff9307d90a230f81215cbac9a751f4d1c6194644b8204f9d"
-        }
-      ],
       "licenseConcluded": "MIT",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "summary": "Python package for configuring a python package",
-      "releaseDate": "2024-05-23T14:13:55Z",
+      "releaseDate": "2026-04-30T22:18:01Z",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
@@ -2641,17 +2569,11 @@
       "downloadLocation": "https://pypi.org/project/numcodecs/0.16.5/#files",
       "filesAnalyzed": false,
       "homepage": "https://github.com/zarr-developers/numcodecs",
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "78382dcea50622f2ef1e6e7a71dbe7f861d8fe376b27b7c297c26907304fef1e"
-        }
-      ],
       "licenseConcluded": "MIT",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "summary": "A Python package providing buffer compression and transformation codecs for use in data storage and communication applications.",
-      "releaseDate": "2025-11-21T02:49:17Z",
+      "releaseDate": "2025-12-16T00:19:07Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
