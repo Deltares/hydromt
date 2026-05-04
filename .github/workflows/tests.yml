@@ -20,10 +20,6 @@ on:
       - pyproject.toml
       - pixi.lock
       - .github/workflows/tests.yml
-  workflow_run:
-    workflows: [Pixi auto update]
-    types:
-      - completed
 
 defaults:
   run:
