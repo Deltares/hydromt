@@ -1,29 +1,21 @@
 #!/usr/bin/env bash
-# Record a release tagged on an older release family's branch (a
-# `release/vX.Y` branch whose MAJOR.MINOR is older than `main`'s) by
-# forwarding its changelog and switcher.json entries to `main`. The version
-# in source (hydromt/__init__.py) is intentionally NOT touched, because
-# main is preparing a newer release family and must keep its own version.
+# Merge the release branch back into main via a PR.
+# Starts from the release branch so code changes (hotfixes, version bumps)
+# are carried back. Pre-merges main to ensure the PR is conflict-free.
 #
-# A "release family" is the set of releases sharing the same MAJOR.MINOR.
-# Example: the 1.4 family contains v1.4.0, v1.4.1, v1.4.2 ... and lives on
-# `release/v1.4`.
+# Version is set to max(main's current, X.(Y+1).0.dev0).
 #
 # Usage: record-release-on-main.sh <RELEASE_BRANCH> <NEW_VERSION>
 #
 # Prerequisites:
-#  - origin/main and the release branch are fetched.
-#  - git is configured with a committer identity.
-#  - jq and awk are available.
+#  - origin/main and release branch fetched (full history)
+#  - git configured with committer identity
+#  - jq and awk available
 #
-# Effect:
-#  - Checks out a new branch `record-release/v<NEW_VERSION>` from origin/main.
-#  - Inserts the v<NEW_VERSION> section into docs/changelog.rst above the
-#    matching X.Y.0 entry (or above the first version heading as fallback).
-#  - Merges the switcher.json entry for v<NEW_VERSION> into
-#    docs/_static/switcher.json.
-#  - Commits and pushes the branch.
-#  - Echoes the branch name to stdout.
+# Creates record-release/v<NEW_VERSION> from the release branch, merges
+# origin/main (auto-resolves version/changelog/switcher conflicts, fails on
+# others), sets version, rebuilds changelog and switcher, pushes the branch.
+# Echoes the branch name to stdout.
 
 set -euo pipefail
 
@@ -37,9 +29,106 @@ fi
 
 RECORD_BRANCH="record-release/v$NEW_VERSION"
 
-git checkout -B "$RECORD_BRANCH" "origin/main"
+# Compute the target version for main (at least X.(Y+1).0.dev0).
+MAJOR=$(echo "$NEW_VERSION" | cut -d. -f1)
+MINOR=$(echo "$NEW_VERSION" | cut -d. -f2)
+COMPUTED_NEXT="${MAJOR}.$((MINOR + 1)).0.dev0"
 
-# Extract the v<NEW_VERSION> section from the release branch's changelog.
+# Read main's current version.
+MAIN_VERSION=$(git show origin/main:hydromt/__init__.py \
+  | grep "__version__" | cut -d= -f2 | tr -d "\" ")
+
+# Pick whichever version is higher.
+MAIN_MAJOR=$(echo "$MAIN_VERSION" | cut -d. -f1)
+MAIN_MINOR=$(echo "$MAIN_VERSION" | cut -d. -f2)
+COMP_MAJOR=$(echo "$COMPUTED_NEXT" | cut -d. -f1)
+COMP_MINOR=$(echo "$COMPUTED_NEXT" | cut -d. -f2)
+
+if [[ "$MAIN_MAJOR" -gt "$COMP_MAJOR" ]] || \
+   { [[ "$MAIN_MAJOR" -eq "$COMP_MAJOR" ]] && [[ "$MAIN_MINOR" -ge "$COMP_MINOR" ]]; }; then
+  TARGET_VERSION="$MAIN_VERSION"
+else
+  TARGET_VERSION="$COMPUTED_NEXT"
+fi
+
+# Create branch from the release branch.
+git checkout -B "$RECORD_BRANCH" "origin/$RELEASE_BRANCH"
+
+# Merge main into the branch. Metadata files are rebuilt after merge.
+MERGE_FAILED=false
+git merge origin/main --no-commit --no-edit 2>/dev/null || MERGE_FAILED=true
+
+if [[ "$MERGE_FAILED" == "true" ]]; then
+  # Auto-resolve conflicts in files we rebuild anyway.
+  KNOWN_FILES="hydromt/__init__.py docs/changelog.rst docs/_static/switcher.json"
+  for f in $KNOWN_FILES; do
+    if git diff --name-only --diff-filter=U | grep -qx "$f"; then
+      git checkout --theirs "$f" 2>/dev/null || true
+      git add "$f"
+    fi
+  done
+
+  # Fail on remaining unresolved conflicts.
+  REMAINING=$(git diff --name-only --diff-filter=U || true)
+  if [[ -n "$REMAINING" ]]; then
+    echo "ERROR: Unresolved merge conflicts in the following files:" >&2
+    echo "$REMAINING" >&2
+    echo "Please resolve these conflicts manually on the release branch" >&2
+    echo "(e.g. via cherry-pick) before retrying." >&2
+    git merge --abort
+    exit 1
+  fi
+fi
+
+# Complete the merge commit (--no-commit requires explicit commit).
+git commit --no-edit -m "Merge main into record-release/v$NEW_VERSION" \
+  --allow-empty 2>/dev/null || true
+
+# Set correct version.
+VERSION_BUMPED=false
+if [[ "$TARGET_VERSION" != "$MAIN_VERSION" ]]; then
+  VERSION_BUMPED=true
+fi
+bash .github/scripts/set-version.sh "$TARGET_VERSION"
+
+# Rebuild changelog from main's copy.
+git show origin/main:docs/changelog.rst > /tmp/main-changelog.rst
+
+# If version was bumped, replace the Unreleased section with a fresh one.
+if [[ "$VERSION_BUMPED" == "true" ]]; then
+  awk '
+    BEGIN { skip = 0; printed_header = 0 }
+    /^Unreleased$/ { skip = 1; next }
+    skip && /^=+$/ { next }
+    skip && /^v[0-9]+\.[0-9]+\.[0-9]+/ { skip = 0 }
+    skip { next }
+    !printed_header {
+      print "Unreleased"
+      print "=========="
+      print ""
+      print "New"
+      print "---"
+      print ""
+      print "Changed"
+      print "-------"
+      print ""
+      print "Fixed"
+      print "-----"
+      print ""
+      print "Deprecated"
+      print "----------"
+      print ""
+      print "Removed"
+      print "-------"
+      print ""
+      printed_header = 1
+    }
+    { print }
+  ' /tmp/main-changelog.rst > /tmp/main-changelog-fresh.rst
+  mv /tmp/main-changelog-fresh.rst /tmp/main-changelog.rst
+fi
+
+# Extract the v<NEW_VERSION> section from the release branch changelog.
 git show "origin/$RELEASE_BRANCH:docs/changelog.rst" > /tmp/release-changelog.rst
 awk -v ver="v$NEW_VERSION" '
   $0 ~ "^"ver"( |$)" { capture = 1 }
@@ -52,10 +141,7 @@ if [ ! -s /tmp/section.rst ]; then
   exit 1
 fi
 
-# Insert the section into main's changelog above the matching X.Y.0 heading
-# (the heading that opens the same release family).
-MAJOR=$(echo "$NEW_VERSION" | cut -d. -f1)
-MINOR=$(echo "$NEW_VERSION" | cut -d. -f2)
+# Insert the section above the matching X.Y.0 heading in main's changelog.
 FAMILY_BASE="v${MAJOR}.${MINOR}.0"
 
 awk -v family_base="$FAMILY_BASE" -v section_file="/tmp/section.rst" '
@@ -71,14 +157,15 @@ awk -v family_base="$FAMILY_BASE" -v section_file="/tmp/section.rst" '
   { print }
   END {
     if (!inserted) {
-      # Fallback: append at the end of the file.
+      # Fallback: insert after the first heading (Unreleased section).
       printf "\n%s", section
     }
   }
-' docs/changelog.rst > /tmp/changelog.rst
-mv /tmp/changelog.rst docs/changelog.rst
+' /tmp/main-changelog.rst > /tmp/changelog-merged.rst
+cp /tmp/changelog-merged.rst docs/changelog.rst
 
-# Merge switcher.json: union, dedup by version, sort numerically, keep 'latest' last.
+# Rebuild switcher.json: union of both sides.
+git show origin/main:docs/_static/switcher.json > /tmp/main-switcher.json
 git show "origin/$RELEASE_BRANCH:docs/_static/switcher.json" > /tmp/release-switcher.json
 jq -s '
   (.[0] + .[1])
@@ -86,11 +173,12 @@ jq -s '
   | unique_by(.version)
   | sort_by(.version | split(".") | map(tonumber? // 0))
   + [{"name":"latest","version":"latest","url":"https://deltares.github.io/hydromt/latest/"}]
-' docs/_static/switcher.json /tmp/release-switcher.json > /tmp/switcher.json
-mv /tmp/switcher.json docs/_static/switcher.json
+' /tmp/main-switcher.json /tmp/release-switcher.json > /tmp/switcher-merged.json
+cp /tmp/switcher-merged.json docs/_static/switcher.json
 
-git add docs/changelog.rst docs/_static/switcher.json
-git commit -m "Record v$NEW_VERSION release on main (changelog and switcher)"
+# Commit and push.
+git add hydromt/__init__.py docs/changelog.rst docs/_static/switcher.json
+git commit -m "Record v$NEW_VERSION release on main" --allow-empty
 git push --set-upstream origin "$RECORD_BRANCH"
 
 echo "$RECORD_BRANCH"

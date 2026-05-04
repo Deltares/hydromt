@@ -1,30 +1,15 @@
 name: Create release
 
-# Creates a release from a release branch. Tags the release branch, creates a
-# GitHub release, and (for full releases) opens a `record-release/v…` PR
-# against `main` that brings only the changelog and switcher.json entry to
-# `main` (the version in source is never changed on `main` by this workflow).
+# Tags a release branch, creates a GitHub release, and (for full releases)
+# opens a record-release PR to merge the branch back into main.
 #
-# Release branches are NEVER merged back into `main`. `main`'s version is
-# advanced to the next dev cycle by `create-release-branch.yml` at branch-
-# cut time, not here.
+# release_type:
+#   major/minor: tags X.Y.0 already on branch.
+#   patch: bumps patch version, commits, tags.
+#   rc: pre-release version bump + tag. No PR, no docs.
 #
-# Per release_type:
-# - major / minor: assumes the version on the release branch is already X.Y.0
-#                  (set by `create-release-branch.yml`). Tags HEAD and creates
-#                  a GitHub release marked as latest.
-# - patch:         increments the patch version on the release branch (with
-#                  changelog & switcher updates), commits, tags, and creates a
-#                  GitHub release marked as latest.
-# - rc:            commits a pre-release version bump (vX.Y.ZrcN) on the
-#                  release branch, tags it, and creates a GitHub pre-release.
-#                  No record-on-main PR; no docs published.
-#
-# Publishing chain:
-# - PyPI: triggered automatically by the `release: published` event handled
-#         in `publish-pypi.yml`.
-# - Docs: published from the release tag in the `publish-docs` job below for
-#         full releases.
+# PyPI publish triggered by `release: published` event.
+# Docs published from the tag for full releases.
 
 on:
   workflow_dispatch:
@@ -156,23 +141,25 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
 
+          git fetch origin main --quiet
           git fetch origin "$RELEASE_BRANCH" --quiet
 
           RECORD_BRANCH=$(bash .github/scripts/record-release-on-main.sh \
             "$RELEASE_BRANCH" "$NEW_VERSION" | tail -n 1)
 
           PR_BODY=$(cat <<EOF
-          Automated **changelog-only** record PR for the **v$NEW_VERSION** release.
+          Automated merge-back PR for the **v$NEW_VERSION** release.
 
           - Release branch: \`$RELEASE_BRANCH\`
-          - The release has already been tagged and published. This PR brings
-            only \`docs/changelog.rst\` and \`docs/_static/switcher.json\` to
-            \`main\`. The version in \`hydromt/__init__.py\` on \`main\` is
-            intentionally left untouched (release branches are never merged
-            back into main).
+          - This PR merges the release branch back into \`main\`, bringing
+            any code changes (hotfixes, version bumps) along with the
+            updated \`docs/changelog.rst\` and \`docs/_static/switcher.json\`.
+          - The version in \`hydromt/__init__.py\` on \`main\` is preserved
+            if it is already at or above the expected next dev version.
 
           > [!NOTE]
-          > **Squash-merge this PR.** No tag points at these commits.
+          > **Use a regular merge** (not squash) to preserve the relationship
+          > between the release branch and main.
           EOF
           )
 

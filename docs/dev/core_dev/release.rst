@@ -7,19 +7,21 @@ Creating a release
 Releases are produced by three GitHub Actions workflows:
 
 - ``create-release-branch.yml`` — creates a long-lived ``release/vX.Y`` branch
-  **and** immediately bumps ``main`` to the next dev version (major/minor only).
+  from ``main`` at version ``X.Y.0`` (major/minor only). Main is **not** bumped
+  here.
 - ``create-release.yml`` — tags the release on a release branch, creates the
-  GitHub release, publishes docs, and opens a ``record-release/v…`` PR against
-  ``main`` (major / minor / patch / rc).
+  GitHub release, publishes docs, and opens a ``record-release/v…`` PR that
+  merges the release branch back into ``main`` (major / minor / patch).
 - ``publish-pypi.yml`` — publishes to PyPI; triggered automatically when a
   GitHub release is published.
 
 .. important::
 
-   Release branches are **never merged back into** ``main``.
-   ``main``'s version is advanced by ``create-release-branch.yml`` at branch-cut
-   time. Every release opens a ``record-release/v…`` PR that carries only the
-   changelog and ``switcher.json`` changes to ``main``.
+   After each full release, the ``record-release/v…`` PR merges the release
+   branch back into ``main``. This PR bumps ``main`` to ``X.(Y+1).0.dev0``
+   (if it isn't already higher), adds a fresh ``Unreleased`` changelog section,
+   and carries any code changes from the release branch. Use a **regular merge**
+   (not squash) to preserve the branch relationship.
 
 Before tagging a major, minor, or patch release, run the
 :ref:`plugin compatibility test <plugin_compat_test>` against the release branch.
@@ -29,14 +31,10 @@ Major / minor release
 
 1. Go to the ``Actions`` tab on GitHub, select **Create release branch
    (minor/major)**, click **Run workflow** and choose ``minor`` or ``major``.
-2. The workflow does two things in one run:
-
-   a. Creates ``release/vX.Y`` from ``main``, bumps it to ``X.Y.0``, and
-      updates ``docs/changelog.rst`` and ``docs/_static/switcher.json``
-      (via ``setup-release.sh``). The branch is pushed but no tag is created yet.
-   b. Switches back to ``main`` and bumps it to ``X.(Y+1).0.dev0``, prepending
-      a fresh ``Unreleased`` section to the changelog. Commits and pushes.
-
+2. The workflow creates ``release/vX.Y`` from ``main``, bumps it to ``X.Y.0``,
+   and updates ``docs/changelog.rst`` and ``docs/_static/switcher.json``
+   (via ``setup-release.sh``). The branch is pushed but no tag is created yet.
+   Main is **not** modified.
 3. Push any final fixes or changelog tweaks directly to the release branch.
    When the release content is ready, run the **Create release** workflow with
    ``release_branch = release/vX.Y`` and ``release_type = major`` or ``minor``.
@@ -45,11 +43,13 @@ Major / minor release
      docs version.
    - The workflow tags ``HEAD`` as ``vX.Y.0``, creates a GitHub release marked
      as latest, publishes versioned docs to GitHub Pages, and opens a
-     ``record-release/vX.Y.0`` PR against ``main`` (changelog + switcher only).
+     ``record-release/vX.Y.0`` PR that merges the release branch back into
+     ``main`` (bumping version + changelog + switcher).
 
 4. Publishing the GitHub release automatically triggers ``publish-pypi.yml``
    which uploads the package to PyPI.
-5. Squash-merge the auto-opened ``record-release/vX.Y.0`` PR into ``main``.
+5. Merge the auto-opened ``record-release/vX.Y.0`` PR into ``main`` using a
+   **regular merge** (not squash).
 6. The newly published PyPI package will trigger a new PR to the
    `HydroMT feedstock repo on conda-forge <https://github.com/conda-forge/hydromt-feedstock>`_.
    Check whether ``meta.yml`` needs updating and merge the PR to release on
@@ -85,7 +85,8 @@ PR targeting the release branch directly).
    changelog, switcher), commits, tags ``vX.Y.Z``, creates the GitHub release,
    publishes versioned docs, and opens a ``record-release/vX.Y.Z`` PR. The
    package is published to PyPI automatically.
-5. Squash-merge the auto-opened ``record-release/vX.Y.Z`` PR into ``main``.
+5. Merge the auto-opened ``record-release/vX.Y.Z`` PR into ``main`` using a
+   **regular merge** (not squash).
 
 
 .. _create_pre_release:
@@ -123,14 +124,6 @@ release unless critical issues are found. They are produced from a
    **Create release** with type ``major`` / ``minor`` / ``patch`` to produce the
    actual release.
 
-
-Recovery
-^^^^^^^^
-
-If ``create-release-branch.yml`` fails after pushing the release branch but
-before bumping ``main``, manually open a PR that sets ``main`` to
-``X.(Y+1).0.dev0`` and adds a fresh ``Unreleased`` section to
-``docs/changelog.rst``.
 
 
 .. _plugin_compat_test:
