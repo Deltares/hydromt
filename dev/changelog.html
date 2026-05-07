@@ -450,6 +450,7 @@
 <section id="changed">
 <h3>Changed<a class="headerlink" href="#changed" title="Link to this heading">#</a></h3>
 <ul class="simple">
+<li><p>GeoTransform attribute is not written by default anymore when calling <cite>RasterDataArray.gdal_compliant</cite>, as this can lead to unexpected behaviour. Use <cite>write_transform</cite> argument to toggle this (#1454).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">log.initialize_logging()</span></code> is no longer called when hydromt is imported. It is now the users responsibility to configure logging at the start of their scripts (#1399).</p></li>
 </ul>
 </section>
