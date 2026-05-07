@@ -597,7 +597,10 @@ class XRasterBase(XGeoBase):
         )
 
     def gdal_compliant(
-        self, rename_dims=True, force_sn=False
+        self,
+        rename_dims: bool = True,
+        force_sn: bool = False,
+        write_transform: bool = False,
     ) -> Union[xr.DataArray, xr.Dataset]:
         """Update attributes to get GDAL compliant NetCDF files.
 
@@ -608,6 +611,10 @@ class XRasterBase(XGeoBase):
             (x/y for projected and lat/lon for geographic).
         force_sn: bool, optional
             If True, forces the dataset to have South -> North orientation.
+        write_transform : bool, optional
+            Whether or not to write the geotransform as an attribute of the
+            'spatial_ref' information coordinate. Writing this can make life easier for
+            GDAL, but it can also cause conflict. Use with caution. By default False.
 
         Returns
         -------
@@ -638,7 +645,7 @@ class XRasterBase(XGeoBase):
         crs_wkt = crs.to_wkt()
         grid_map_attrs["spatial_ref"] = crs_wkt
         grid_map_attrs["crs_wkt"] = crs_wkt
-        if transform is not None:
+        if transform is not None and write_transform:
             grid_map_attrs["GeoTransform"] = " ".join(
                 [str(item) for item in transform.to_gdal()]
             )
