@@ -110,6 +110,34 @@ def test_open_vector_s3(geodf: gpd.GeoDataFrame):
     assert np.all(geodf == df)
 
 
+def test_open_vector_from_table_non_string_columns(tmp_path: Path):
+    df = pd.DataFrame({0: [1, 2, 3], 1: [4, 5, 6], "X": [7, 8, 9]})
+    path = tmp_path / "test.csv"
+    df.to_csv(path, sep=r" ", header=False, index=False)
+
+    # Reading without header gives integer column names (0, 1, 2)
+    df = pd.read_csv(path, sep=r" ", header=None, index_col=0)
+    assert all(isinstance(c, (int, np.integer)) for c in df.columns)
+
+    # Old approach fails on integer column names
+    with pytest.raises(AttributeError):
+        _ = [c.lower() for c in df.columns]
+
+    # Fixed approach works: open_vector_from_table uses str(c).lower()
+    gdf = open_vector_from_table(
+        path,
+        driver="csv",
+        header=None,
+        index_col=False,
+        sep=r"\s+",
+        x_dim="0",
+        y_dim="1",
+        crs=32633,
+    )
+    assert isinstance(gdf, gpd.GeoDataFrame)
+    assert len(gdf) == 3
+
+
 def test_open_geodataset(tmp_path: Path, geodf):
     point_data_path = tmp_path / "points.geojson"
     geodf.to_file(point_data_path, driver="GeoJSON")
