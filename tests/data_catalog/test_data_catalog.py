@@ -740,6 +740,57 @@ def test_export_tiff_files_wild_card(tmp_path: Path, rioda: xr.DataArray):
     xr.testing.assert_equal(da_reread, data_catalog.get_rasterdataset("modis"))
 
 
+@pytest.mark.integration
+def test_export_tiff_bare_wildcard(tmp_path: Path):
+    data_catalog = DataCatalog(data_libs=["artifact_data"])
+    da = data_catalog.get_rasterdataset("modis_lai")
+
+    # Write one .tiff per time step with LAI_ prefix
+    files_dir = tmp_path / "modis_lai_bare"
+    files_dir.mkdir(exist_ok=True)
+    for i in da.time.values:
+        da_sel = da.sel(time=i).expand_dims("time")
+        da_sel.raster.to_raster(str(files_dir / f"LAI_{i}.tif"))
+
+    # Build catalog with bare wildcard
+    data_dict = {
+        "modis_lai": {
+            "uri": str(files_dir / "*.tif"),
+            "driver": {
+                "name": "rasterio",
+                "options": {"concat": True},
+            },
+            "data_type": "RasterDataset",
+            "data_adapter": {"unit_mult": {"LAI": 0.1}},
+        }
+    }
+
+    data_catalog = DataCatalog()
+    data_catalog.from_dict(data_dict, root=tmp_path)
+
+    # Read original data
+    original = data_catalog.get_rasterdataset("modis_lai")
+    assert original.name == "LAI"
+    original_dim0 = original.dims[0]
+    original_values = list(original.coords[original_dim0].values)
+
+    # Export
+    export_path = tmp_path / "exported"
+    data_catalog.export_data(new_root=str(export_path), source_names=["modis_lai"])
+
+    # Re-read from exported catalog
+    new_catalog = DataCatalog(str(export_path / "data_catalog.yml"))
+    exported = new_catalog.get_rasterdataset("modis_lai")
+
+    # Variable name should be preserved
+    assert exported.name == "LAI"
+    # Dimension values should be preserved
+    dim0_name = exported.dims[0]
+    assert list(exported.coords[dim0_name].values) == original_values
+    # Data values should match
+    xr.testing.assert_equal(exported, original)
+
+
 def test_export_dataset_rasterio(tmp_path: Path):
     dc = DataCatalog(data_libs=["artifact_data=v1.0.0"])
     new_root = tmp_path / "exported_vrt"

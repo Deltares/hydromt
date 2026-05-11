@@ -113,6 +113,53 @@ class TestRasterioDriver:
         assert len(written) == 1
         assert p == uri
 
+    def test_write_bare_wildcard(self, rioda: xr.DataArray, tmp_path: Path):
+        """Test that a bare wildcard '*.tif' produces parseable filenames."""
+        outdir = tmp_path / "bare_wildcard"
+        outdir.mkdir()
+        uri = outdir / "*.tif"
+
+        # Create a 3D DataArray with name and integer dim values (like modis_lai)
+        rioda_3d = xr.concat(
+            [rioda.assign_coords(dim0=i) for i in [1, 2, 3]], dim="dim0"
+        )
+        rioda_3d.name = "LAI"
+
+        p = RasterioDriver().write(uri, rioda_3d)
+        # Should return path with name prefix: "LAI_*.tif"
+        assert p.name == "LAI_*.tif"
+        assert p.parent == outdir
+
+        # Written files should follow the pattern LAI_<index>.tif
+        written = sorted(outdir.glob("LAI_*.tif"))
+        assert len(written) == 3
+        assert written[0].name == "LAI_1.tif"
+        assert written[1].name == "LAI_2.tif"
+        assert written[2].name == "LAI_3.tif"
+
+        # Verify open_mfraster can read them back with correct indices
+        ds = open_mfraster(str(outdir / "LAI_*.tif"), concat=True)
+        assert list(ds["LAI"].coords["dim0"].values) == [1, 2, 3]
+        assert "LAI" in ds.data_vars
+
+    def test_write_bare_wildcard_no_name_raises(
+        self, rioda: xr.DataArray, tmp_path: Path
+    ):
+        """Test that bare wildcard with unnamed DataArray raises ValueError."""
+        outdir = tmp_path / "bare_wildcard_noname"
+        outdir.mkdir()
+        uri = outdir / "*.tif"
+
+        rioda_3d = xr.concat(
+            [rioda.assign_coords(dim0=i) for i in [1, 2, 3]], dim="dim0"
+        )
+        rioda_3d.name = None
+
+        with pytest.raises(
+            ValueError, match="Cannot write a DataArray with bare wildcard path"
+        ):
+            RasterioDriver().write(uri, rioda_3d)
+
     def test_write_dataset(self, rioda: xr.DataArray, tmp_path: Path):
         ds = rioda.to_dataset(name="var1")
         test_dir = tmp_path / "test_dataset"
