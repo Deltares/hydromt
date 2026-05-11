@@ -4,6 +4,14 @@
 Creating a release
 ------------------
 
+.. toctree::
+   :hidden:
+
+   ../../RELEASE_PROCESS
+
+For an in-depth overview of how the workflows and branches fit together, see
+:doc:`../../RELEASE_PROCESS`.
+
 Releases are produced by three GitHub Actions workflows:
 
 - ``create-release-branch.yml`` — creates a long-lived ``release/vX.Y`` branch
@@ -65,9 +73,9 @@ Patch release
 Patch releases are made against an already-existing ``release/vX.Y`` branch.
 No new branch needs to be created.
 
-If the patch fixes a bug that exists on ``main``, merge the fix to ``main``
-first, then cherry-pick the squashed commit onto the release branch (or open a
-PR targeting the release branch directly).
+If the patch fixes a bug that exists on ``main``, commit the fix to ``main``
+first, then cherry-pick the squashed commit onto the release branches that are
+currently supported (or open a PR targeting the release branch directly).
 
 1. Go to the ``Actions`` tab on GitHub, select **Create release**, click
    **Run workflow**.

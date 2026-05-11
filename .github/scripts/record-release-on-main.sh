@@ -154,10 +154,15 @@ awk -v family_base="$FAMILY_BASE" -v section_file="/tmp/section.rst" '
     printf "%s\n", section
     inserted = 1
   }
+  !inserted && /^v[0-9]+\.[0-9]+\.[0-9]+/ {
+    # family_base not in changelog; insert before the first version heading.
+    printf "%s\n", section
+    inserted = 1
+  }
   { print }
   END {
     if (!inserted) {
-      # Fallback: insert after the first heading (Unreleased section).
+      # No version headings at all; append.
       printf "\n%s", section
     }
   }

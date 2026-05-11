@@ -109,6 +109,8 @@ doc = [
 	"sphinx-click",                 # click integration
 	"sbom4python",                  # generate software bill of materials
 	"autodoc_pydantic",             # pydantic autodoc
+	"myst-parser",                  # markdown support in Sphinx
+	"sphinxcontrib-mermaid",        # mermaid diagram rendering
 ]
 examples = [
 	"cartopy",    # plotting examples

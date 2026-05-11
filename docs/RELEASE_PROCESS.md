@@ -15,25 +15,32 @@ flowchart TD
     A[Manual dispatch:<br/>create-release-branch.yml<br/>bump = minor or major]
       -->|Creates release/vX.Y at X.Y.0<br/>setup-release.sh: changelog + switcher<br/>main is NOT bumped here| B[release/vX.Y branch at X.Y.0<br/>main unchanged]
 
-    B --> C{Manual dispatch:<br/>create-release.yml<br/>inputs: release_branch,<br/>release_type, mark_as_latest}
+    B --> C{Manual dispatch:<br/>create-release.yml<br/>release_type?}
 
-    C -->|major / minor<br/>X.Y.0 already on branch| D1[Tag prep: vX.Y.0 at HEAD<br/>of release branch]
-    C -->|patch<br/>setup-release.sh bumps Z+1| D2[Tag prep: commit + tag vX.Y.Z+1<br/>on release branch]
-    C -->|rc<br/>commit pre-release version| D3[Tag prep: vX.Y.ZrcN<br/>on release branch]
+    C -->|major / minor| D1[Tag vX.Y.0 at HEAD<br/>of release branch]
+    C -->|patch| D2[setup-release.sh bumps Z+1<br/>commit + tag vX.Y.Z]
+    C -->|rc| D3[Commit pre-release version<br/>tag vX.Y.ZrcN]
 
-    D1 --> E
+    D1 --> E[record-release-on-main.sh<br/>opens record-release/v… PR<br/>merges release branch → main<br/>bumps version + changelog + switcher]
     D2 --> E
-    E[record-release-on-main.sh<br/>opens record-release/v… PR<br/>merges release branch into main<br/>bumps version + changelog + switcher]
 
-    E --> G
-    D3 --> G[gh release create<br/>--latest / --latest=false / --prerelease]
+    D1 --> F{Pre-release?}
+    D2 --> F
+    D3 --> F
 
-    G --> I[release: published event]
+    F -->|No| G1[gh release create --latest<br/>or --latest=false]
+    F -->|Yes: rc| G2[gh release create --prerelease]
+
+    G1 --> H{mark_as_latest?}
+    G2 --> I[release: published event]
+
+    H -->|Yes| H1[Deploy docs to /vX.Y.Z/<br/>+ update stable symlink]
+    H -->|No| H2[Deploy docs to /vX.Y.Z/<br/>no stable update]
+
+    H1 --> I
+    H2 --> I
+
     I -->|auto-trigger| J[publish-pypi.yml<br/>flit build + twine publish]
-
-    G --> H[publish-docs job<br/>same workflow run<br/>gated on not-prerelease]
-    H -->|always| H1[Deploy docs to gh-pages<br/>under /vX.Y.Z/]
-    H -->|if mark_as_latest| H2[Update 'stable' symlink<br/>→ vX.Y.Z]
 
     E -.->|maintainer merges PR| K[Release branch merged into main<br/>main bumped to X.Y+1.0.dev0]
 ```
@@ -99,31 +106,39 @@ gitGraph
    commit id: "feature A (main at 1.4.0)"
    branch "release/v1.4"
    commit id: "Bump 1.4.0 + changelog" tag: "v1.4.0"
+   branch "record-release/v1.4.0"
+   commit id: "Update switcher + changelog (1.4.0)"
    checkout main
-   merge "release/v1.4" id: "Merge record-release/v1.4.0 (main → 1.5.0.dev0)"
+   merge "record-release/v1.4.0" id: "Merge record-release/v1.4.0 (main → 1.5.0.dev0)"
    commit id: "feature B"
    commit id: "feature C"
    branch "release/v1.5"
    commit id: "Bump 1.5.0 + changelog" tag: "v1.5.0"
+   branch "record-release/v1.5.0"
+   commit id: "add v1.5.0 to main's switcher / changelog"
    checkout main
-   merge "release/v1.5" id: "Merge record-release/v1.5.0 (main → 1.6.0.dev0)"
+   merge "record-release/v1.5.0" id: "Merge record-release/v1.5.0 (main → 1.6.0.dev0)"
    commit id: "feature D"
    commit id: "Bugfix PR" type: HIGHLIGHT
    checkout "release/v1.5"
    cherry-pick id: "Bugfix PR"
-   checkout "main"
+   checkout main
    commit id: "Feature E"
    checkout "release/v1.5"
    commit id: "Bump 1.5.1 + changelog" tag: "v1.5.1"
+   branch "record-release/v1.5.1"
+   commit id: "add v1.5.1 to main's switcher / changelog"
    checkout "release/v1.4"
    cherry-pick id: "Bugfix PR"
-   checkout "main"
+   checkout main
    commit id: "Feature F"
    checkout "release/v1.4"
    commit id: "Bump 1.4.1 + changelog" tag: "v1.4.1"
+   branch "record-release/v1.4.1"
+   commit id: "add v1.4.1 to main's switcher / changelog"
    checkout main
-   merge "release/v1.5" id: "Merge record-release/v1.5.1 (main stays 1.6.0.dev0)"
-   merge "release/v1.4" id: "Merge record-release/v1.4.1 (main stays 1.6.0.dev0)"
+   merge "record-release/v1.5.1" id: "Merge record-release/v1.5.1 (main stays 1.6.0.dev0)"
+   merge "record-release/v1.4.1" id: "Merge record-release/v1.4.1 (main stays 1.6.0.dev0)"
 ```
 
 ### How the workflows fit together

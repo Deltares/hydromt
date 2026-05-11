@@ -133,14 +133,35 @@ jobs:
           # major/minor releases already have these changes due to `create-release-branch.yml` already running `setup-release.sh`
           bash .github/scripts/setup-release.sh "${{ steps.version.outputs.NEW_VERSION }}"
 
+      - name: Set pre-release version in source (rc)
+        if: ${{ steps.version.outputs.IS_PRERELEASE == 'true' }}
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          bash .github/scripts/set-version.sh "${{ steps.version.outputs.NEW_VERSION }}"
+          git add hydromt/__init__.py
+          git commit -m "Set pre-release version v${{ steps.version.outputs.NEW_VERSION }}"
+          git push
+
+      - name: Create and push tag
+        run: |
+          git tag "${{ steps.version.outputs.TAG }}"
+          git push origin "${{ steps.version.outputs.TAG }}"
+
+      - name: Extract changelog notes (full release)
+        if: ${{ steps.version.outputs.IS_PRERELEASE == 'false' }}
+        run: |
+          awk '
+          BEGIN { capture = 0; }
+          /^v[0-9]+\.[0-9]+\.[0-9]+.*$/ { if (capture == 0) { capture = 1; } else { exit; } }
+          capture { print; }
+          ' docs/changelog.rst > release_notes.md
+
       - name: Open record-on-main PR (all full releases)
         if: ${{ steps.version.outputs.IS_PRERELEASE == 'false' }}
         env:
           NEW_VERSION: ${{ steps.version.outputs.NEW_VERSION }}
         run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "<>"
-
           git fetch origin main --quiet
           git fetch origin "$RELEASE_BRANCH" --quiet
 
@@ -168,30 +189,6 @@ jobs:
             --head "$RECORD_BRANCH" \
             --title "Record v$NEW_VERSION release on main" \
             --body "$PR_BODY"
-
-      - name: Set pre-release version in source (rc)
-        if: ${{ steps.version.outputs.IS_PRERELEASE == 'true' }}
-        run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "<>"
-          bash .github/scripts/set-version.sh "${{ steps.version.outputs.NEW_VERSION }}"
-          git add hydromt/__init__.py
-          git commit -m "Set pre-release version v${{ steps.version.outputs.NEW_VERSION }}"
-          git push
-
-      - name: Create and push tag
-        run: |
-          git tag "${{ steps.version.outputs.TAG }}"
-          git push origin "${{ steps.version.outputs.TAG }}"
-
-      - name: Extract changelog notes (full release)
-        if: ${{ steps.version.outputs.IS_PRERELEASE == 'false' }}
-        run: |
-          awk '
-          BEGIN { capture = 0; }
-          /^v[0-9]+\.[0-9]+\.[0-9]+.*$/ { if (capture == 0) { capture = 1; } else { exit; } }
-          capture { print; }
-          ' docs/changelog.rst > release_notes.md
 
       - name: Build pre-release notes (rc)
         if: ${{ steps.version.outputs.IS_PRERELEASE == 'true' }}
