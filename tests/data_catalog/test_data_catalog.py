@@ -791,6 +791,33 @@ def test_export_tiff_bare_wildcard(tmp_path: Path):
     xr.testing.assert_equal(exported, original)
 
 
+@pytest.mark.integration
+def test_export_unit_conversion_not_applied_twice(tmp_path: Path):
+    """Test that unit_conversion=True does not double-apply conversions on re-read."""
+    data_catalog = DataCatalog(data_libs=["artifact_data"])
+    # Read original with unit conversion applied
+    original = data_catalog.get_rasterdataset("modis_lai")
+
+    # Export with unit_conversion=True (default) — data is written converted,
+    # and the exported catalog must NOT re-apply conversion on read.
+    export_true = tmp_path / "export_true"
+    data_catalog.export_data(new_root=str(export_true), source_names=["modis_lai"])
+    cat_true = DataCatalog(str(export_true / "data_catalog.yml"))
+    reread_true = cat_true.get_rasterdataset("modis_lai")
+    xr.testing.assert_equal(reread_true, original)
+
+    # Export with unit_conversion=False — raw data is written, and the exported
+    # catalog also has no conversion. Re-reading gives unconverted values.
+    export_false = tmp_path / "export_false"
+    data_catalog.export_data(
+        new_root=str(export_false), source_names=["modis_lai"], unit_conversion=False
+    )
+    cat_false = DataCatalog(str(export_false / "data_catalog.yml"))
+    reread_false = cat_false.get_rasterdataset("modis_lai")
+    # Raw values should be 10x the converted values (unit_mult was 0.1)
+    xr.testing.assert_allclose(reread_false, original / 0.1, atol=1e-5)
+
+
 def test_export_dataset_rasterio(tmp_path: Path):
     dc = DataCatalog(data_libs=["artifact_data=v1.0.0"])
     new_root = tmp_path / "exported_vrt"
