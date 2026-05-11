@@ -15,7 +15,8 @@ from rasterio import gdal_version
 from shapely.geometry.base import BaseGeometry
 from xarray.core.types import DataVars
 
-from hydromt.gis import _normalize, raster
+from hydromt.gis import _normalize
+from hydromt.gis.gis_base import XDIMS, YDIMS, XGeoBase
 from hydromt.gis.vector_utils import _filter_gdf
 
 logger = logging.getLogger(__name__)
@@ -25,7 +26,7 @@ GDAL_VERSION = gdal_version()
 __all__ = ["GeoDataArray", "GeoDataset"]
 
 
-class GeoBase(raster.XGeoBase):
+class GeoBase(XGeoBase):
     """Base accessor class for geo data."""
 
     def __init__(self, xarray_obj) -> None:
@@ -69,7 +70,7 @@ class GeoBase(raster.XGeoBase):
         """Discover xy type geometries in the dataset/array."""
         # infer x dim
         if x_name is None:
-            for name in raster.XDIMS:
+            for name in XDIMS:
                 if name in self._all_names:
                     dim0 = (
                         index_dim if index_dim is not None else self._obj[name].dims[0]
@@ -80,7 +81,7 @@ class GeoBase(raster.XGeoBase):
                         break
         # infer y dim
         if y_name is None and x_name is not None:
-            for name in raster.YDIMS:
+            for name in YDIMS:
                 if name in self._all_names:
                     if self._obj[name].dims[0] == index_dim:
                         y_name = name
@@ -91,10 +92,10 @@ class GeoBase(raster.XGeoBase):
             and self._obj[x_name].ndim == 1
             and self._obj[x_name].dims == self._obj[y_name].dims
         ):
-            self.set_attrs(x_name=x_name)
-            self.set_attrs(y_name=y_name)
-            self.set_attrs(geom_format="xy")
-            self.set_attrs(index_dim=index_dim)
+            self.attrs.update(x_name=x_name)
+            self.attrs.update(y_name=y_name)
+            self.attrs.update(geom_format="xy")
+            self.attrs.update(index_dim=index_dim)
         else:
             self.attrs.pop("x_name", None)
             self.attrs.pop("y_name", None)
@@ -121,9 +122,9 @@ class GeoBase(raster.XGeoBase):
             raise ValueError(f"{geom_name} variable not recognized as geometry.")
 
         if geom_name is not None:
-            self.set_attrs(geom_name=geom_name)
-            self.set_attrs(geom_format=types[names.index(geom_name)])
-            self.set_attrs(index_dim=self._obj[geom_name].dims[0])
+            self.attrs.update(geom_name=geom_name)
+            self.attrs.update(geom_format=types[names.index(geom_name)])
+            self.attrs.update(index_dim=self._obj[geom_name].dims[0])
         else:
             self.attrs.pop("geom_name", None)
             self.attrs.pop("geom_format", None)
@@ -167,7 +168,7 @@ class GeoBase(raster.XGeoBase):
     @property
     def geom_format(self) -> Optional[str]:
         """Name of geometry coordinate; only for 'wkt' and 'geom' formats."""
-        if self.get_attrs("geom_format") not in self._obj.dims:
+        if self.get_attr("geom_format") not in self._obj.dims:
             self.set_spatial_dims()
         if "geom_format" in self.attrs:
             return self.attrs["geom_format"]
@@ -176,7 +177,7 @@ class GeoBase(raster.XGeoBase):
     @property
     def geom_name(self) -> Optional[str]:
         """Name of geometry coordinate; only for 'wkt' and 'geom' formats."""
-        if self.get_attrs("geom_name") not in self._obj.dims:
+        if self.get_attr("geom_name") not in self._obj.dims:
             self.set_spatial_dims()
         if "geom_name" in self.attrs:
             return self.attrs["geom_name"]
@@ -197,7 +198,7 @@ class GeoBase(raster.XGeoBase):
     @property
     def x_name(self) -> Optional[str]:
         """Name of x coordinate; only for point geometries in xy format."""
-        if self.get_attrs("x_name") not in self._obj.dims:
+        if self.get_attr("x_name") not in self._obj.dims:
             self.set_spatial_dims()
         if "x_name" in self.attrs:
             return self.attrs["x_name"]
@@ -205,7 +206,7 @@ class GeoBase(raster.XGeoBase):
     @property
     def y_name(self) -> Optional[str]:
         """Name of y coordinate; only for point geometries in xy format."""
-        if self.get_attrs("y_name") not in self._obj.dims:
+        if self.get_attr("y_name") not in self._obj.dims:
             self.set_spatial_dims()
         if "y_name" in self.attrs:
             return self.attrs["y_name"]
@@ -213,7 +214,7 @@ class GeoBase(raster.XGeoBase):
     @property
     def index_dim(self) -> Optional[str]:
         """Index dimension name."""
-        if self.get_attrs("index_dim") not in self._obj.dims:
+        if self.get_attr("index_dim") not in self._obj.dims:
             self.set_spatial_dims()
         if "index_dim" in self.attrs:
             return self.attrs["index_dim"]

@@ -21,6 +21,7 @@ New
 
 Changed
 -------
+- GeoTransform attribute is not written by default anymore when calling `RasterDataArray.gdal_compliant`, as this can lead to unexpected behaviour. Use `write_transform` argument to toggle this (#1454).
 - ``log.initialize_logging()`` is no longer called when hydromt is imported. It is now the users responsibility to configure logging at the start of their scripts (#1399).
 
 Fixed

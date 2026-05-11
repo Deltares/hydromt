@@ -9,14 +9,12 @@
 
 from __future__ import annotations  # noqa: I001
 
-import datetime
-import itertools
 import logging
 import math
 import os
 from os.path import join
-from typing import Any, Callable, Literal, Optional, Tuple, Union
-import cftime
+from typing import Callable, Literal, Optional, Tuple, Union
+
 import dask
 import geopandas as gpd
 import numpy as np
@@ -36,165 +34,17 @@ from scipy import ndimage
 from scipy.interpolate import griddata
 from scipy.spatial import cKDTree
 from shapely.geometry import LineString, Polygon, box
+
 from hydromt.gis import _normalize, gis_utils, raster_utils
 from hydromt.gis._gdal_drivers import GDAL_EXT_CODE_MAP
+from hydromt.gis.gis_base import GEO_MAP_COORD, XDIMS, YDIMS, XGeoBase
 
 logger = logging.getLogger(__name__)
-XDIMS = ("x", "longitude", "lon", "long")
-YDIMS = ("y", "latitude", "lat")
-GEO_MAP_COORD = "spatial_ref"
 _STAT_REDUCERS = ["count", "min", "max", "sum", "mean", "std", "median"]
 __all__ = [
     "RasterDataArray",
     "RasterDataset",
 ]
-
-
-class XGeoBase(object):
-    """Base class for the GIS extensions for xarray."""
-
-    def __init__(self, xarray_obj: Union[xr.DataArray, xr.Dataset]) -> None:
-        """Initialize new object based on the xarray object provided."""
-        self._obj = xarray_obj
-        self._crs = None
-
-    @property
-    def attrs(self) -> dict:
-        """Return dictionary of spatial attributes."""
-        # create new coordinate with attributes in which to save x_dim, y_dim and crs.
-        # other spatial properties are always calculated on the fly to ensure
-        # consistency with data
-        if isinstance(self._obj, xr.Dataset) and GEO_MAP_COORD in self._obj.data_vars:
-            self._obj = self._obj.set_coords(GEO_MAP_COORD)
-        elif GEO_MAP_COORD not in self._obj.coords:
-            self._obj.coords[GEO_MAP_COORD] = xr.Variable((), 0)
-        if isinstance(self._obj.coords[GEO_MAP_COORD].data, dask.array.Array):
-            self._obj[GEO_MAP_COORD].load()  # make sure spatial ref is not lazy
-        return self._obj.coords[GEO_MAP_COORD].attrs
-
-    def set_attrs(self, **kwargs) -> None:
-        """Update spatial attributes. Usage raster.set_attr(key=value)."""
-        self.attrs.update(**kwargs)
-
-    def get_attrs(self, key, placeholder=None) -> Any:
-        """Return single spatial attribute."""
-        return self.attrs.get(key, placeholder)
-
-    @property
-    def time_dim(self):
-        """Time dimension name."""
-        dim = self.get_attrs("time_dim")
-        # Try early return the timedim in attrs
-        if dim and dim in self._obj.dims:
-            coord = self._obj.coords.get(dim)
-            if coord is not None and np.dtype(coord).type == np.datetime64:
-                return dim
-
-        # Not found, so try detect
-        tdims = [
-            d
-            for d in self._obj.dims
-            if d in self._obj.coords and self._is_datetime_coord(self._obj.coords[d])
-        ]
-        if len(tdims) == 0:
-            self.set_attrs(time_dim=None)
-            return None
-        elif len(tdims) == 1:
-            self.set_attrs(time_dim=tdims[0])
-            return tdims[0]
-        else:
-            raise ValueError(
-                f"Multiple time dimensions found: {tdims}. "
-                "Set 'time_dim' attribute manually to resolve."
-            )
-
-    @property
-    def crs(self) -> CRS:
-        """Return horizontal Coordinate Reference System."""
-        # return horizontal crs by default to avoid errors downstream
-        # with reproject / rasterize etc.
-        if self._crs is not None:
-            crs = self._crs
-        else:
-            crs = self.set_crs()
-        return crs
-
-    def set_crs(self, input_crs=None, write_crs=True) -> CRS:
-        """Set the Coordinate Reference System.
-
-        Arguments
-        ---------
-        input_crs: int, dict, or str, optional
-            Coordinate Reference System. Accepts EPSG codes (int or str)
-            and proj (str or dict)
-        write_crs: bool, optional
-            If True (default), write CRS to attributes.
-        """
-        crs_names = ["crs_wkt", "crs", "epsg"]
-        names = list(self._obj.coords.keys())
-        if isinstance(self._obj, xr.Dataset):
-            names = names + list(self._obj.data_vars.keys())
-        # user defined
-        if isinstance(input_crs, (int, str, dict)):
-            input_crs = pyproj.CRS.from_user_input(input_crs)
-        # look in grid_mapping and data variable attributes
-        elif input_crs is not None and not isinstance(input_crs, CRS):
-            raise ValueError(f"Invalid CRS type: {type(input_crs)}")
-        elif not isinstance(input_crs, CRS):
-            crs = None
-            for name in crs_names:
-                # check default > GEO_MAP_COORDS attrs, then global attrs
-                if name in self.attrs:
-                    crs = self.attrs.get(name)
-                    break
-                if name in self._obj.attrs:
-                    crs = self._obj.attrs.pop(name)
-                    break
-            if crs is None:  # check data var and coords attrs
-                for var, name in itertools.product(names, crs_names):
-                    if name in self._obj[var].attrs:
-                        crs = self._obj[var].attrs.pop(name)
-                        break
-            if crs is not None:
-                # avoid Warning 1: +init=epsg:XXXX syntax is deprecated
-                if isinstance(crs, str):
-                    crs = crs.removeprefix("+init=")
-                try:
-                    input_crs = pyproj.CRS.from_user_input(crs)
-                except RuntimeError:
-                    pass  # continue to next name in crs_names
-        if input_crs is not None:
-            if write_crs:
-                grid_map_attrs = input_crs.to_cf()
-                crs_wkt = input_crs.to_wkt()
-                grid_map_attrs["spatial_ref"] = crs_wkt
-                grid_map_attrs["crs_wkt"] = crs_wkt
-                self.set_attrs(**grid_map_attrs)
-            self._crs = input_crs
-            return input_crs
-
-    @staticmethod
-    def _is_datetime_coord(coord) -> bool:
-        """Return True if coord is datetime64 or object of datetimes."""
-        dtype = np.asarray(coord).dtype
-        if np.issubdtype(dtype, np.datetime64):
-            return True
-        if np.issubdtype(dtype, np.object_):
-            # Handle object arrays of datetime.datetime or np.datetime64
-            values = np.asarray(coord)
-            if values.size == 0:
-                return False
-            sample = values.ravel()[0]
-            return isinstance(
-                sample,
-                (
-                    datetime.datetime,
-                    np.datetime64,
-                    pd.Timestamp,
-                    cftime.DatetimeGregorian,
-                ),
-            )
-        return False
 
 
 class XRasterBase(XGeoBase):
@@ -211,14 +61,14 @@ class XRasterBase(XGeoBase):
     @property
     def x_dim(self) -> str:
         """Return the x dimension name."""
-        if self.get_attrs("x_dim") not in self._obj.dims:
+        if self.get_attr("x_dim") not in self._obj.dims:
             self.set_spatial_dims()
         return self.attrs["x_dim"]
 
     @property
     def y_dim(self) -> str:
         """Return the y dimension name."""
-        if self.get_attrs("y_dim") not in self._obj.dims:
+        if self.get_attr("y_dim") not in self._obj.dims:
             self.set_spatial_dims()
         return self.attrs["y_dim"]
 
@@ -278,7 +128,7 @@ class XRasterBase(XGeoBase):
                     x_dim = _dims[idim]
                     break
         if x_dim and x_dim in _dims:
-            self.set_attrs(x_dim=x_dim)
+            self.attrs.update(x_dim=x_dim)
         else:
             raise ValueError(
                 "x dimension not found. Use 'set_spatial_dims'"
@@ -292,7 +142,7 @@ class XRasterBase(XGeoBase):
                     y_dim = _dims[idim]
                     break
         if y_dim and y_dim in _dims:
-            self.set_attrs(y_dim=y_dim)
+            self.attrs.update(y_dim=y_dim)
         else:
             raise ValueError(
                 "y dimension not found. Use 'set_spatial_dims'"
@@ -320,9 +170,9 @@ class XRasterBase(XGeoBase):
     @property
     def dim0(self) -> str:
         """Return the non geospatial dimension name."""
-        if self.get_attrs("dim0") not in self._obj.dims:
+        if self.get_attr("dim0") not in self._obj.dims:
             self._check_dimensions()
-        return self.get_attrs("dim0")
+        return self.get_attr("dim0")
 
     @property
     def dims(self) -> tuple[str, str]:
@@ -559,7 +409,7 @@ class XRasterBase(XGeoBase):
         # check if all extra dims are the same
         extra_dims = list(set(extra_dims))
         if len(extra_dims) == 1:
-            self.set_attrs(dim0=extra_dims[0])
+            self.attrs.update(dim0=extra_dims[0])
         else:
             self.attrs.pop("dim0", None)
 
@@ -597,7 +447,10 @@ class XRasterBase(XGeoBase):
         )
 
     def gdal_compliant(
-        self, rename_dims=True, force_sn=False
+        self,
+        rename_dims: bool = True,
+        force_sn: bool = False,
+        write_transform: bool = False,
     ) -> Union[xr.DataArray, xr.Dataset]:
         """Update attributes to get GDAL compliant NetCDF files.
 
@@ -608,6 +461,10 @@ class XRasterBase(XGeoBase):
             (x/y for projected and lat/lon for geographic).
         force_sn: bool, optional
             If True, forces the dataset to have South -> North orientation.
+        write_transform : bool, optional
+            Whether or not to write the geotransform as an attribute of the
+            'spatial_ref' information coordinate. Writing this can make life easier for
+            GDAL, but it can also cause conflict. Use with caution. By default False.
 
         Returns
         -------
@@ -638,14 +495,14 @@ class XRasterBase(XGeoBase):
         crs_wkt = crs.to_wkt()
         grid_map_attrs["spatial_ref"] = crs_wkt
         grid_map_attrs["crs_wkt"] = crs_wkt
-        if transform is not None:
+        if transform is not None and write_transform:
             grid_map_attrs["GeoTransform"] = " ".join(
                 [str(item) for item in transform.to_gdal()]
             )
         grid_map_attrs.update({"x_dim": x_dim, "y_dim": y_dim})
         # reset and write grid mapping attributes
         obj_out.drop_vars(GEO_MAP_COORD, errors="ignore")
-        obj_out.raster.set_attrs(**grid_map_attrs)
+        obj_out.raster.attrs = grid_map_attrs
         # set grid mapping attribute for each data variable
         if hasattr(obj_out, "data_vars"):
             for var in obj_out.data_vars:
@@ -1405,7 +1262,7 @@ class XRasterBase(XGeoBase):
             name=col_name, dims=self.dims, coords=self.coords, data=raster, attrs=attrs
         )
         da_out.raster.set_nodata(nodata)
-        da_out.raster.set_attrs(**self.attrs)
+        da_out.raster.attrs.update(**self.attrs)
         da_out.raster.set_crs(self.crs)
         da_out.raster._transform = self._transform
         return da_out
