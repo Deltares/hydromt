@@ -2,7 +2,6 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, List, Optional
 
 from pydantic import ConfigDict, Field
 
@@ -25,42 +24,42 @@ class URIResolver(AbstractBaseModel, ABC):
 
     model_config = ConfigDict(extra="forbid")
     filesystem: FSSpecFileSystem = Field(default_factory=FSSpecFileSystem)
-    options: dict[str, Any] = Field(default_factory=dict)
+    options: dict = Field(default_factory=dict)
 
     @abstractmethod
     def resolve(
         self,
         uri: str,
         *,
-        time_range: Optional[TimeRange] = None,
-        mask: Optional[Geom] = None,
-        variables: Optional[List[str]] = None,
-        zoom: Optional[Zoom] = None,
-        metadata: Optional[SourceMetadata] = None,
+        time_range: TimeRange | None = None,
+        mask: Geom | None = None,
+        variables: list[str] | None = None,
+        zoom: Zoom | None = None,
+        metadata: SourceMetadata | None = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-    ) -> List[str]:
+    ) -> list[str]:
         """Resolve a single uri to multiple uris.
 
         Parameters
         ----------
         uri : str
             Unique Resource Identifier
-        time_range : Optional[TimeRange], optional
+        time_range : TimeRange | None, optional
             left-inclusive start end time of the data, by default None
-        mask : Optional[Geom], optional
+        mask : Geom | None, optional
             A geometry defining the area of interest, by default None
-        zoom : Optional[Zoom], optional
+        zoom : Zoom | None  , optional
             zoom of the dataset, by default None
-        variables : Optional[List[str]], optional
+        variables : list[str] | None, optional
             Names of variables to return, or all if None, by default None
-        metadata: Optional[SourceMetadata], optional
+        metadata: SourceMetadata | None, optional
             Metadata of DataSource.
         handle_nodata : NoDataStrategy, optional
             how to react when no data is found, by default NoDataStrategy.RAISE
 
         Returns
         -------
-        List[str]
+        list[str]
             a list of expanded uris
 
         Raises

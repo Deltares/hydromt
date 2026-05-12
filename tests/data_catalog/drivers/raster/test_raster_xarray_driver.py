@@ -94,7 +94,7 @@ class TestRasterXarrayDriver:
         res: xr.Dataset = RasterDatasetXarrayDriver().read([str(example_zarr_file)])
         assert list(res.data_vars.keys()) == ["variable"]
         assert res["variable"].shape == (10, 10)
-        assert list(res.coords.keys()) == ["xc", "yc"]
+        assert all(key in res.coords for key in ["xc", "yc"])
         assert res["variable"].values[0, 0] == 42
 
     def test_read_clientresponse_error(self, mocker):

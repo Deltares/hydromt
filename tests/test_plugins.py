@@ -56,6 +56,7 @@ def _patch_plugin_entry_point(
     mocker: MockerFixture, component_names: List[str], component_class: Type
 ):
     # create a mocked version of hydromt.plugins.entry_points
+    # that only intercepts the "hydromt.components" group
     mock_module = mocker.MagicMock(__hydromt_eps__=component_names)
     if component_class:
         for c in component_names:
@@ -69,8 +70,14 @@ def _patch_plugin_entry_point(
     mock_multiple_entrypoints.__iter__.return_value = [mock_single_entrypoint]
     mock_single_entrypoint.load.return_value = mock_module
 
-    func = mocker.create_autospec(entry_points, spec_set=True)
-    func.return_value = mock_multiple_entrypoints
+    real_entry_points = entry_points
+
+    def _side_effect(**kwargs):
+        if kwargs.get("group") == "hydromt.components":
+            return mock_multiple_entrypoints
+        return real_entry_points(**kwargs)
+
+    func = mocker.MagicMock(side_effect=_side_effect)
 
     return func
 
