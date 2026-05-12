@@ -9,14 +9,15 @@ import numpy as np
 import xarray as xr
 
 from hydromt._utils import (
-    _has_no_data,
     _set_metadata,
     _shift_dataset_time,
     _single_var_as_array,
 )
-from hydromt.data_catalog.adapters.adapter_utils import _create_time_slice
+from hydromt.data_catalog.adapters.adapter_utils import (
+    _slice_temporal_dimension,
+)
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
-from hydromt.error import NoDataStrategy, exec_nodata_strat
+from hydromt.error import NoDataStrategy
 from hydromt.typing import (
     Data,
     SourceMetadata,
@@ -39,6 +40,7 @@ class DatasetAdapter(DataAdapterBase):
         *,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
+        inclusive: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         single_var_as_array: bool = True,
     ) -> Optional[xr.Dataset]:
@@ -53,7 +55,7 @@ class DatasetAdapter(DataAdapterBase):
         ds = self._shift_time(ds)
         # slice
         ds = DatasetAdapter._slice_data(
-            ds, variables, time_range, handle_nodata=handle_nodata
+            ds, variables, time_range, handle_nodata=handle_nodata, inclusive=inclusive
         )
         if ds is None:
             return None
@@ -110,6 +112,7 @@ class DatasetAdapter(DataAdapterBase):
         ds: Data,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
+        inclusive: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> Optional[Data]:
         """Slice the dataset in space and time.
@@ -123,6 +126,8 @@ class DatasetAdapter(DataAdapterBase):
         time_range: tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
+        inclusive : bool, optional
+            Whether to include the start and end times in the slice, by default True
         handle_nodata : NoDataStrategy, optional
             how to handle no data being present in the result, by default NoDataStrategy.RAISE
 
@@ -144,34 +149,10 @@ class DatasetAdapter(DataAdapterBase):
                 ds = ds[variables]
 
         if time_range is not None:
-            ds = DatasetAdapter._slice_temporal_dimension(
-                ds, time_range, handle_nodata=handle_nodata
+            ds = _slice_temporal_dimension(
+                ds, time_range, handle_nodata=handle_nodata, inclusive=inclusive
             )
             if ds is None:
                 return None
 
-        return ds
-
-    @staticmethod
-    def _slice_temporal_dimension(
-        ds: Data,
-        time_range: TimeRange,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-    ) -> Optional[Data]:
-        if (
-            "time" in ds.dims
-            and ds["time"].size > 1
-            and np.issubdtype(ds["time"].dtype, np.datetime64)
-        ):
-            logger.debug(f"Slicing time dim {time_range}")
-            time_slice = _create_time_slice(
-                ds, time_range.start, time_range.end, handle_nodata=handle_nodata
-            )
-            if time_slice is None:
-                return None
-
-            ds = ds.sel(time=time_slice)
-            if _has_no_data(ds):
-                exec_nodata_strat("No data left after time slicing.", handle_nodata)
-                return None
         return ds
