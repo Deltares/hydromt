@@ -6,6 +6,7 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
+from hydromt.data_catalog.adapters.adapter_utils import _create_time_slice
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.typing import (
@@ -130,9 +131,14 @@ class DataFrameAdapter(DataAdapterBase):
             df = df.loc[:, variables]
 
         if time_range is not None and np.dtype(df.index).type == np.datetime64:
-            logger.debug(f"Slicing time dime {time_range}")
-            idx = df.index.slice_indexer(time_range.start, time_range.end)
-            df = df.iloc[idx]
+            logger.debug(f"Slicing time dim {time_range}")
+            time_slice = _create_time_slice(
+                df, time_range.start, time_range.end, handle_nodata=handle_nodata
+            )
+            if time_slice is None:
+                return None
+
+            df = df.loc[time_slice]
             if df.empty:
                 exec_nodata_strat(
                     "DataFrame has no data after time slicing.", handle_nodata
