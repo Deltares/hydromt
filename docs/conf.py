@@ -183,6 +183,8 @@ extensions = [
     "nbsphinx",
     "sphinx_click",
     "sphinxcontrib.autodoc_pydantic",
+    "myst_parser",
+    "sphinxcontrib.mermaid",
 ]
 suppress_warnings = [
     'autosummary.import_cycle',
@@ -194,8 +196,11 @@ templates_path = ["_templates", sphinx_autosummary_accessors.templates_path]
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-# source_suffix = ['.rst', '.md']
-source_suffix = ".rst"
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".md": "markdown",
+}
+myst_fence_as_directive = ["mermaid"]
 # The master toctree document.
 master_doc = "index"
 

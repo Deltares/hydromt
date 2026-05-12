@@ -4,24 +4,64 @@
 Creating a release
 ------------------
 
-Releases are produced by four GitHub Actions workflows that work together:
+.. toctree::
+   :hidden:
 
-- ``create-release-branch.yml`` — creates a long-lived ``release/vX.Y`` branch (major/minor only).
-- ``create-release.yml`` — tags the release on a release branch and creates the GitHub release (major / minor / patch / rc).
-- ``post-release-cleanup.yml`` — opens a follow-up PR after a release PR is merged into ``main``.
-- ``publish-pypi.yml`` — publishes to PyPI; runs automatically when a GitHub release is published.
+   ../../RELEASE_PROCESS
 
-Before tagging a major, minor, or patch release, run the :ref:`plugin compatibility test <plugin_compat_test>` against the release branch.
+For an in-depth overview of how the workflows and branches fit together, see
+:doc:`../../RELEASE_PROCESS`.
+
+Releases are produced by three GitHub Actions workflows:
+
+- ``create-release-branch.yml`` — creates a long-lived ``release/vX.Y`` branch
+  from ``main`` at version ``X.Y.0`` (major/minor only). Main is **not** bumped
+  here.
+- ``create-release.yml`` — tags the release on a release branch, creates the
+  GitHub release, publishes docs, and opens a ``record-release/v…`` PR that
+  merges the release branch back into ``main`` (major / minor / patch).
+- ``publish-pypi.yml`` — publishes to PyPI; triggered automatically when a
+  GitHub release is published.
+
+.. important::
+
+   After each full release, the ``record-release/v…`` PR merges the release
+   branch back into ``main``. This PR bumps ``main`` to ``X.(Y+1).0.dev0``
+   (if it isn't already higher), adds a fresh ``Unreleased`` changelog section,
+   and carries any code changes from the release branch. Use a **regular merge**
+   (not squash) to preserve the branch relationship.
+
+Before tagging a major, minor, or patch release, run the
+:ref:`plugin compatibility test <plugin_compat_test>` against the release branch.
 
 Major / minor release
 ^^^^^^^^^^^^^^^^^^^^^
 
-1. Go to the ``Actions`` tab on GitHub, select **Create release branch (minor/major)**, click **Run workflow** and choose ``minor`` or ``major``.
-2. The workflow creates a ``release/vX.Y`` branch off ``main`` (e.g. ``release/v1.4``), bumps the version to ``X.Y.0``, and updates ``docs/changelog.rst`` and ``docs/_static/switcher.json``. The branch is pushed but no PR is opened yet.
-3. Push any final fixes or changelog tweaks directly to the release branch. When you are happy with the release content, run the **Create release** workflow on this branch with type ``major`` or ``minor``. This tags the branch HEAD as ``vX.Y.0``, creates a GitHub release marked as latest, opens a PR from ``release/vX.Y`` into ``main``, comments the ``pyproject.toml`` diff since the previous tag on that PR, and publishes the versioned docs to GitHub Pages.
-4. Publishing the GitHub release automatically triggers ``publish-pypi.yml`` which uploads the package to PyPI.
-5. Merge the release PR into ``main`` **WITHOUT SQUASHING**! This automatically triggers **Post-release cleanup**, which opens a follow-up PR resetting the version in source to ``X.Y.Z.dev0`` and adding a fresh ``Unreleased`` section to ``docs/changelog.rst``.
-6. The newly published PyPI package will trigger a new PR to the `HydroMT feedstock repo on conda-forge <https://github.com/conda-forge/hydromt-feedstock>`_. Use the ``pyproject.toml`` diff comment from step 3 to check whether ``meta.yml`` needs updating. Merge the PR to release on conda-forge.
+1. Go to the ``Actions`` tab on GitHub, select **Create release branch
+   (minor/major)**, click **Run workflow** and choose ``minor`` or ``major``.
+2. The workflow creates ``release/vX.Y`` from ``main``, bumps it to ``X.Y.0``,
+   and updates ``docs/changelog.rst`` and ``docs/_static/switcher.json``
+   (via ``setup-release.sh``). The branch is pushed but no tag is created yet.
+   Main is **not** modified.
+3. Push any final fixes or changelog tweaks directly to the release branch.
+   When the release content is ready, run the **Create release** workflow with
+   ``release_branch = release/vX.Y`` and ``release_type = major`` or ``minor``.
+
+   - Leave **mark_as_latest** checked (default) to make this the new ``stable``
+     docs version.
+   - The workflow tags ``HEAD`` as ``vX.Y.0``, creates a GitHub release marked
+     as latest, publishes versioned docs to GitHub Pages, and opens a
+     ``record-release/vX.Y.0`` PR that merges the release branch back into
+     ``main`` (bumping version + changelog + switcher).
+
+4. Publishing the GitHub release automatically triggers ``publish-pypi.yml``
+   which uploads the package to PyPI.
+5. Merge the auto-opened ``record-release/vX.Y.0`` PR into ``main`` using a
+   **regular merge** (not squash).
+6. The newly published PyPI package will trigger a new PR to the
+   `HydroMT feedstock repo on conda-forge <https://github.com/conda-forge/hydromt-feedstock>`_.
+   Check whether ``meta.yml`` needs updating and merge the PR to release on
+   conda-forge.
 7. Celebrate the new release!
 
 
@@ -30,12 +70,31 @@ Major / minor release
 Patch release
 ^^^^^^^^^^^^^
 
-Patch releases are made against an already-existing ``release/vX.Y`` branch rather than creating a new one.
+Patch releases are made against an already-existing ``release/vX.Y`` branch.
+No new branch needs to be created.
 
-1. Go to the ``Actions`` tab on GitHub, select **Create release**, click **Run workflow**.
-2. Enter the release branch (e.g. ``release/v1.4``) and choose ``patch`` as the release type.
-3. The workflow increments the patch version (reading the current version from the branch), updates the changelog and ``switcher.json``, commits the bump, tags HEAD as ``vX.Y.Z``, creates a GitHub release marked as latest, opens a PR from ``release/vX.Y`` into ``main``, comments the ``pyproject.toml`` diff since the previous tag, and publishes the versioned docs to GitHub Pages. The package is published to PyPI automatically.
-4. Merge the auto-opened PR. Once merged, **Post-release cleanup** opens its follow-up PR.
+If the patch fixes a bug that exists on ``main``, commit the fix to ``main``
+first, then cherry-pick the squashed commit onto the release branches that are
+currently supported (or open a PR targeting the release branch directly).
+
+1. Go to the ``Actions`` tab on GitHub, select **Create release**, click
+   **Run workflow**.
+2. Enter the release branch (e.g. ``release/v1.4``) and choose ``patch`` as
+   the release type.
+3. Decide whether to check **mark_as_latest**:
+
+   - If this is the newest release family (the one ``main`` was prepared
+     from), leave it checked.
+   - If this is a patch on an older family (e.g. patching ``release/v1.4``
+     while ``main`` is preparing ``1.6``), **uncheck it** so that the docs
+     ``stable`` symlink stays on the newer family.
+
+4. The workflow increments the patch version, runs ``setup-release.sh`` (bump,
+   changelog, switcher), commits, tags ``vX.Y.Z``, creates the GitHub release,
+   publishes versioned docs, and opens a ``record-release/vX.Y.Z`` PR. The
+   package is published to PyPI automatically.
+5. Merge the auto-opened ``record-release/vX.Y.Z`` PR into ``main`` using a
+   **regular merge** (not squash).
 
 
 .. _create_pre_release:
@@ -43,11 +102,20 @@ Patch releases are made against an already-existing ``release/vX.Y`` branch rath
 Release candidate
 ^^^^^^^^^^^^^^^^^
 
-Release candidates are feature-complete builds expected to become the final release unless critical issues are found. They are produced from a ``release/vX.Y`` branch using the same **Create release** workflow.
+Release candidates are feature-complete builds expected to become the final
+release unless critical issues are found. They are produced from a
+``release/vX.Y`` branch using the same **Create release** workflow.
 
-1. Go to the ``Actions`` tab on GitHub, select **Create release**, click **Run workflow**.
-2. Enter the release branch (e.g. ``release/v1.4``) and choose ``rc`` as the release type.
-3. The workflow computes the next available rc version of the form ``X.Y.ZrcN`` based on existing tags, commits the version bump on the release branch, tags it as ``vX.Y.ZrcN`` and creates a GitHub *pre-release*. The package is published to PyPI automatically.
+1. Go to the ``Actions`` tab on GitHub, select **Create release**, click
+   **Run workflow**.
+2. Enter the release branch (e.g. ``release/v1.4``) and choose ``rc`` as the
+   release type. Leave **mark_as_latest** unchecked (it has no effect for
+   pre-releases, but it is good practice).
+3. The workflow computes the next available rc version of the form
+   ``X.Y.ZrcN`` based on existing tags, commits the version bump on the release
+   branch, tags it as ``vX.Y.ZrcN``, and creates a GitHub *pre-release*. No
+   record-on-main PR is opened; no docs are published. The package is published
+   to PyPI automatically.
 4. Anyone can install the release candidate with::
 
        pip install hydromt==X.Y.ZrcN
@@ -55,10 +123,15 @@ Release candidates are feature-complete builds expected to become the final rele
    The exact install command is shown in the body of the GitHub pre-release.
 
 .. note::
-   Release candidates are built from a ``release/vX.Y`` branch only. They share the same long-lived branch as the eventual full release, so the rc commits become part of the release history.
+   Release candidates share the same long-lived ``release/vX.Y`` branch as the
+   eventual full release, so the rc commits become part of the release history.
 
 .. warning::
-   Pre-release versions are marked as pre-releases on GitHub and are not promoted as the latest stable release. They are intended for testing purposes only. Do not use a release candidate as the basis for a full release; run **Create release** with type ``major`` / ``minor`` / ``patch`` to produce the actual release.
+   Pre-releases are marked as pre-releases on GitHub and are not promoted as the
+   latest stable release. Do not use an rc as the basis for a full release; run
+   **Create release** with type ``major`` / ``minor`` / ``patch`` to produce the
+   actual release.
+
 
 
 .. _plugin_compat_test:

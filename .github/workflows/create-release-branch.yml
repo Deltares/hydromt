@@ -1,12 +1,7 @@
 name: Create release branch (minor/major)
 
-# Creates a long-lived `release/vX.Y` branch off `main` for a major or minor
-# release. Bumps the version to X.Y.0, updates the changelog header and
-# switcher.json, commits, and pushes the branch.
-#
-# This workflow does NOT create tags, GitHub releases, or PRs. Use
-# `create-release.yml` once the release branch is ready to tag the release;
-# that workflow opens the PR back into `main` and publishes everything.
+# Creates `release/vX.Y` from main at X.Y.0 (version, changelog, switcher).
+# Main is NOT bumped here; the record-release PR does that after the release.
 
 on:
   workflow_dispatch:
@@ -41,19 +36,10 @@ jobs:
           fetch-depth: 0
           ref: main
 
-      - name: Check there are no pre-existing release PRs
-        run: |
-          EXISTING=$(gh pr list --state open --base main --json number,title,headRefName \
-            --jq '[.[] | select(.headRefName | startswith("release/"))]')
-          if [ "$(echo "$EXISTING" | jq 'length')" -gt 0 ]; then
-            echo "An open release PR already exists; finish or close it before creating a new one."
-            echo "$EXISTING" | jq
-            exit 1
-          fi
-
       - name: Compute new version and branch
         id: version
         run: |
+          # For minor: use main's current version. For major: bump major, reset minor.
           CURRENT_VERSION=$(bash .github/scripts/get-version.sh \
             | sed -E 's/^([0-9]+\.[0-9]+\.[0-9]+).*$/\1/')
           MAJOR=$(echo "$CURRENT_VERSION" | cut -d'.' -f 1)
@@ -62,7 +48,7 @@ jobs:
           case "${{ inputs.bump }}" in
             minor)
               NEW_MAJOR=$MAJOR
-              NEW_MINOR=$((MINOR + 1))
+              NEW_MINOR=$MINOR
               ;;
             major)
               NEW_MAJOR=$((MAJOR + 1))
