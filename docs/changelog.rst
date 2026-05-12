@@ -31,6 +31,8 @@ Fixed
 - Normalize geometries before comparing them in ``test_equal`` for ``SpatialModelComponent``, ``GeomsComponent`` and ``VectorComponent`` (#1415).
 - ``pet_debruin`` now keeps all inputs lazy-loaded instead of reading in the entire array. (#1439)
 - The functions ``_strip_scheme`` and ``_strip_vsi`` in ``hydromt._utils.uris`` no longer use ``lstrip`` to remove leading characters, but now remove only the exact prefix. (#1438)
+- ``Datacatalog.export_data`` no longer applies unit conversion twice. (#1459)
+- ``RasterioDriver.write`` now always produces filenames that are parseable by ``readers.open_mfraster`` when provided with a bare wildcard. (#1459)
 
 Deprecated
 ----------
