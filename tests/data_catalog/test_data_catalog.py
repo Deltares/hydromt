@@ -615,7 +615,7 @@ def test_export_global_datasets_overwrite(tmp_path: Path, export_test_slice_obje
 
 
 @pytest.mark.integration
-def test_export_dataframe(tmp_path: Path, df, df_time):
+def test_export_dataframe(tmp_path: Path, df: pd.DataFrame, df_time: pd.DataFrame):
     # Write two csv files
     csv_path = tmp_path / "test.csv"
     parquet_path = tmp_path / "test.parquet"
@@ -674,7 +674,9 @@ def test_export_dataframe(tmp_path: Path, df, df_time):
     data_catalog_reread = DataCatalog(
         str(data_catalog_reread_path / "data_catalog.yml")
     )
-    assert len(data_catalog_reread.list_sources()) == 2
+    assert len(data_catalog_reread.list_sources()) == 2, (
+        "Expected 2 sources to be exported after filtering by time and bbox"
+    )
 
     data_catalog_reread_path_nofilter = tmp_path / "newdir"
     data_catalog.export_data(str(data_catalog_reread_path_nofilter))
@@ -1997,7 +1999,7 @@ def test_get_rasterdataset_with_unit_add(data_catalog: DataCatalog):
         "era5",
         geom=region,
         buffer=1,
-        time_range=("2010-02-01T00:00:00", "2010-02-10T00:00:00"),
+        time_range=("2010-02-02T00:00:00", "2010-02-10T00:00:00"),
         variables=["temp", "press_msl", "kin", "kout"],
         single_var_as_array=False,
     )

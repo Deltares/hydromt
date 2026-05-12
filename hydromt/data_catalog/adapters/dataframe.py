@@ -6,6 +6,7 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
+from hydromt.data_catalog.adapters.adapter_utils import _create_time_slice
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.typing import (
@@ -27,6 +28,7 @@ class DataFrameAdapter(DataAdapterBase):
         *,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
+        inclusive: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> pd.DataFrame:
         """Transform data to HydroMT standards.
@@ -41,6 +43,8 @@ class DataFrameAdapter(DataAdapterBase):
             filter for variables, by default None
         time_range : Optional[TimeRange], optional
             filter for start and end times, by default None
+        inclusive : bool, optional
+            whether to include the start and end times in the slice, by default True
         handle_nodata : NoDataStrategy, optional
             how to handle no data being present in the result, by default NoDataStrategy.RAISE
 
@@ -61,7 +65,7 @@ class DataFrameAdapter(DataAdapterBase):
         df = self._set_nodata(df, metadata)
         # slice data
         df = DataFrameAdapter._slice_data(
-            df, variables, time_range, handle_nodata=handle_nodata
+            df, variables, time_range, handle_nodata=handle_nodata, inclusive=inclusive
         )
         if df is None:
             return None
@@ -96,6 +100,7 @@ class DataFrameAdapter(DataAdapterBase):
         df: pd.DataFrame,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
+        inclusive: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> Optional[pd.DataFrame]:
         """Filter the DataFrame.
@@ -108,6 +113,8 @@ class DataFrameAdapter(DataAdapterBase):
             variables to include, or all if None, by default None
         time_range : Optional[TimeRange], optional
             start and end times to include, or all if None, by default None
+        inclusive : bool, optional
+            whether to include the start and end times in the slice, by default True
         handle_nodata : NoDataStrategy, optional
             how to handle no data being present in the result, by default NoDataStrategy.RAISE
 
@@ -130,9 +137,18 @@ class DataFrameAdapter(DataAdapterBase):
             df = df.loc[:, variables]
 
         if time_range is not None and np.dtype(df.index).type == np.datetime64:
-            logger.debug(f"Slicing time dime {time_range}")
-            idx = df.index.slice_indexer(time_range.start, time_range.end)
-            df = df.iloc[idx]
+            logger.debug(f"Slicing time dim {time_range}")
+            time_slice = _create_time_slice(
+                df,
+                time_range.start,
+                time_range.end,
+                handle_nodata=handle_nodata,
+                inclusive=inclusive,
+            )
+            if time_slice is None:
+                return None
+
+            df = df.loc[time_slice]
             if df.empty:
                 exec_nodata_strat(
                     "DataFrame has no data after time slicing.", handle_nodata

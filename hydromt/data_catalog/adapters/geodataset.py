@@ -45,6 +45,7 @@ class GeoDatasetAdapter(DataAdapterBase):
         predicate: Predicate = "intersects",
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
+        inclusive: bool = True,
         single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> Optional[Union[xr.Dataset, xr.DataArray]]:
@@ -64,6 +65,8 @@ class GeoDatasetAdapter(DataAdapterBase):
             variable filter, by default None
         time_range : Optional[TimeRange], optional
             filter start and end times, by default None
+        inclusive : bool, optional
+            whether to include the start and end times in the slice, by default True
         single_var_as_array : bool, optional
             whether to return a xr.DataArray if only a single variable is present, by default True
         handle_nodata : NoDataStrategy, optional
@@ -98,6 +101,7 @@ class GeoDatasetAdapter(DataAdapterBase):
             mask=mask,
             predicate=predicate,
             time_range=time_range,
+            inclusive=inclusive,
             handle_nodata=handle_nodata,
         )
         if ds is None:
@@ -148,6 +152,7 @@ class GeoDatasetAdapter(DataAdapterBase):
         predicate: Predicate = "intersects",
         time_range: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        inclusive: bool = True,
     ) -> Optional[xr.Dataset]:
         """Filter the GeoDataset.
 
@@ -163,6 +168,10 @@ class GeoDatasetAdapter(DataAdapterBase):
             predicate to use for the mask filter, by default "intersects"
         time_range : Optional[TimeRange], optional
             filter start and end times, by default None
+        handle_nodata : NoDataStrategy, optional
+            how to handle no data being present in the result, by default NoDataStrategy.RAI
+        inclusive : bool, optional
+            whether to include the start and end times in the slice, by default True
 
         Returns
         -------
@@ -193,7 +202,9 @@ class GeoDatasetAdapter(DataAdapterBase):
                 ds = ds[variables]
 
         if time_range is not None:
-            ds = _slice_temporal_dimension(ds, time_range, handle_nodata=handle_nodata)
+            ds = _slice_temporal_dimension(
+                ds, time_range, handle_nodata=handle_nodata, inclusive=inclusive
+            )
             if ds is None:
                 return None
         if mask is not None:

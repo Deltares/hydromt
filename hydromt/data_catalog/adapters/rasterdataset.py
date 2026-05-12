@@ -48,6 +48,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         single_var_as_array: bool = True,
         buffer: int = 0,
+        inclusive: bool = True,
     ) -> xr.Dataset | xr.DataArray | None:
         """Filter and harmonize the input RasterDataset.
 
@@ -70,6 +71,8 @@ class RasterDatasetAdapter(DataAdapterBase):
         buffer : int, optional
             Buffer around the `bbox` or `geom` area of interest expressed in resolution multiplicity,
             by default 0
+        inclusive : bool, optional
+            Whether to include the start and end times in the slice, by default True
 
         Returns
         -------
@@ -98,6 +101,7 @@ class RasterDatasetAdapter(DataAdapterBase):
             time_range,
             buffer=buffer,
             handle_nodata=handle_nodata,
+            inclusive=inclusive,
         )
         if ds is None:
             return None  # if handle_nodata ignore
@@ -148,6 +152,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         mask: Optional[Geom] = None,
         align: Optional[float] = None,
         time_range: Optional[TimeRange] = None,
+        inclusive: bool = True,
         buffer: int = 0,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> Optional[xr.Dataset]:
@@ -165,6 +170,8 @@ class RasterDatasetAdapter(DataAdapterBase):
             resolution to align the bounding box, by default None
         time_range : Optional[TimeRange], optional
             filter start and end times, by default None
+        inclusive : bool, optional
+            whether to include the start and end times in the slice, by default True
         buffer : int, optional
             Buffer around the `bbox` or `geom` area of interest expressed in resolution multiplicity,
             by default 0
@@ -198,7 +205,9 @@ class RasterDatasetAdapter(DataAdapterBase):
                 ds = ds[variables]
 
         if time_range is not None:
-            ds = _slice_temporal_dimension(ds, time_range, handle_nodata=handle_nodata)
+            ds = _slice_temporal_dimension(
+                ds, time_range, handle_nodata=handle_nodata, inclusive=inclusive
+            )
             if ds is None:
                 return None
 
