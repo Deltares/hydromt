@@ -237,9 +237,6 @@ hydromt = { path = ".", editable = true }
 [tool.pixi.feature.doc.dependencies]
 pandoc = "*"
 
-# [tool.pixi.feature.io.dependencies]
-# pyflwdir = ">=0.5.4"
-
 [tool.pixi.feature.vrt.dependencies]
 gdal = ">=3.5.0"
 
