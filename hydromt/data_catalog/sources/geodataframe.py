@@ -4,7 +4,7 @@ import logging
 from datetime import datetime
 from os.path import basename, splitext
 from pathlib import Path
-from typing import Any, ClassVar, List, Literal, Optional
+from typing import ClassVar, List, Literal, Optional
 
 import geopandas as gpd
 from pydantic import Field
@@ -101,7 +101,7 @@ class GeoDataFrameSource(DataSource):
         variables: list[str] | None = None,
         predicate: str = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        write_kwargs: dict[str, Any] | None = None,
+        write_kwargs: dict | None = None,
     ) -> "GeoDataFrameSource | None":
         """
         Write the GeoDataFrameSource to a local file.
