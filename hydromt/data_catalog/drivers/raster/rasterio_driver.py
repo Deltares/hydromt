@@ -257,7 +257,9 @@ class RasterioDriver(RasterDatasetDriver):
         Parameters
         ----------
         path : Path | str
-            Destination path for the raster dataset.
+            Destination path for the raster dataset. Must have a supported file extension.
+            Can include 1 wildcard `*` for writing multiple files when data has at least 3
+            dimensions, or when writing a Dataset with multiple data variables.
         data : xr.DataArray | xr.Dataset
             The xarray DataArray or Dataset to write.
         write_kwargs : dict[str, Any] | None, optional
