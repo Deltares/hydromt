@@ -283,7 +283,7 @@ jobs:
         run: echo "DOC_VERSION=v$(bash .github/scripts/get-version.sh)" >> "$GITHUB_ENV"
 
       - name: Upload to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4.0.0
+        uses: peaceiris/actions-gh-pages@v4.1.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/_build/html
