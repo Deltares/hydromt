@@ -371,7 +371,7 @@ class AzureBlobResolver(URIResolver):
         return result
 
 
-def _fetch_sas_token(url: str) -> str:
+def _fetch_sas_token(url: str, retries: int = 3) -> str:
     """Fetch a SAS token from a token endpoint.
 
     Parameters
@@ -379,6 +379,8 @@ def _fetch_sas_token(url: str) -> str:
     url : str
         URL of the token endpoint (e.g. the Planetary Computer SAS API).
         Must return JSON with a ``"token"`` key.
+    retries : int, optional
+        Number of times to retry the request in case of failure, by default 3.
 
     Returns
     -------
@@ -390,15 +392,17 @@ def _fetch_sas_token(url: str) -> str:
     PermissionError
         If the request fails or the response cannot be parsed.
     """
-    try:
-        with urllib.request.urlopen(url, timeout=10) as resp:  # noqa: S310
-            data = json.loads(resp.read())
-        return data["token"]
-    except Exception as exc:
-        raise PermissionError(
-            f"AzureBlobResolver: failed to fetch SAS token from '{url}'. "
-            "Check that the URL is correct and reachable."
-        ) from exc
+    for i in range(retries):
+        try:
+            with urllib.request.urlopen(url, timeout=10) as resp:  # noqa: S310
+                data = json.loads(resp.read())
+            return data["token"]
+        except Exception as exc:
+            if i >= retries - 1:
+                raise PermissionError(
+                    f"AzureBlobResolver: failed to fetch SAS token from '{url}' after {retries} attempts. "
+                    "Check that the URL is correct and reachable."
+                ) from exc
 
 
 def _abfs_to_https(uri: str, account_name: str, sas_token: str) -> str:
