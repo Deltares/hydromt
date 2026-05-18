@@ -8,11 +8,15 @@ import time
 from os.path import basename, isfile, join
 from typing import Any, Dict, List, Optional
 
+import cdsapi
 import dask
 import numpy as np
 import pandas as pd
 import xarray as xr
+import zarr
+from cftime import date2num
 from dask.diagnostics import ProgressBar
+from zarr.codecs import BloscCodec
 
 _JOULE_PER_M_SQ = "J m**-2"
 
@@ -104,8 +108,6 @@ def download_era5_year(
     days: (list)
         List of days to download data for. Use None to downloads data for all days.
     """
-    import cdsapi
-
     if not isfile(write_path):
         # Set default months, days and hours options
         _months = [f"{m:02d}" for m in range(1, 13)]
@@ -158,7 +160,7 @@ def flatten_era5_temp(
             # while expver1 might contain large odd values
             # https://confluence.ecmwf.int/display/CUSF/ERA5+CDS+requests+which+return+a+mixture+of+ERA5+and+ERA5T+data
             ds_out = ds.sel(expver=5).combine_first(ds.sel(expver=1)).fillna(nodata)
-            chunksizes = tuple([s[0] for s in ds_out.chunks.values()])
+            chunksizes = tuple(s[0] for s in ds_out.chunks.values())
             e0 = {
                 "zlib": True,
                 "dtype": "float32",
@@ -221,7 +223,7 @@ def resample_year(
     dask_kwargs = dask_kwargs or {}
 
     # nc out settings
-    chunksizes = tuple([s for s in chunks.values()])
+    chunksizes = tuple(s for _, s in chunks.items())
     e0 = {
         "zlib": True,
         "dtype": "float32",
@@ -232,14 +234,14 @@ def resample_year(
     paths = []
     # read hourly data for year and year-1!
     for _year in [year - 1, year]:
-        path = join(ddir, var, f"era5_{var:s}_{year:d}_hourly.nc")
+        path = join(ddir, var, f"era5_{var:s}_{_year:d}_hourly.nc")
         if isfile(path):
             paths.append(path)
-    kwargs = dict(
-        compat="no_conflicts",
-        parallel=True,
-        decode_times=True,
-    )
+    kwargs = {
+        "compat": "no_conflicts",
+        "parallel": True,
+        "decode_times": True,
+    }
     ds = xr.open_mfdataset(paths, chunks=chunks, **kwargs)
     assert "expver" not in ds.coords
     ds = ds.sel(time=slice(f"{year - 1}-12-31 01:00", f"{year}-12-31 00:00"))
@@ -250,7 +252,7 @@ def resample_year(
         )
 
     # resample to daily freq
-    kwargs = dict(time="1D", label="right", closed="right")
+    kwargs = {"time": "1D", "label": "right", "closed": "right"}
     dvars = {}
     if "tp" in ds:
         # NOTE unit conversion m to mm
@@ -350,18 +352,18 @@ def append_zarr(
     append_dim : str, optional
         dimension along wicht to append, by default 'time'
     """
-    import zarr
-    from cftime import date2num
-    from numcodecs import Blosc
-
-    compressor = Blosc(cname="zstd", clevel=3, shuffle=1)
-
     encoding = {}
     ds.encoding = {}
     for v in ds.data_vars:
         ds[v].encoding = {}
-        if compressor is not None:
-            encoding[v] = {"compressor": compressor}
+        encoding[v] = {
+            "compressors": [BloscCodec(cname="zstd", clevel=3, shuffle="shuffle")],
+            "_FillValue": float("nan"),
+        }
+
+    # default chunks: use dataset shape per dimension
+    if not chunks_out:
+        chunks_out = dict(ds.sizes.items())
 
     # pre-allocate new zarr store
     if not os.path.isdir(store):
@@ -376,7 +378,7 @@ def append_zarr(
     for v in ds.data_vars:
         # pre-allocate new zarr variables
         if v not in ds0:
-            _da0 = ds0[list(ds0.data_vars.keys())[0]]
+            _da0 = ds0[next(iter(ds0.data_vars.keys()))]
             _ds = xr.DataArray(
                 name=v,
                 data=dask.array.empty_like(_da0),
@@ -435,7 +437,7 @@ def append_zarr(
     # write output using to_zarr with region argument
     # drop dims (already written)
     region_out = {append_dim: slice(offset, offset + ds[append_dim].size)}
-    ds.drop(ds0[v].dims).to_zarr(
+    ds.chunk(chunks_out).drop_vars(ds0[v].dims).to_zarr(
         store,
         region=region_out,
         compute=True,
@@ -655,7 +657,7 @@ def update_zarr(
         # get zarr chunks to read and process data
         if chunks is None and os.path.exists(zarr_path):
             with xr.open_zarr(zarr_path, consolidated=False) as ds_zarr:
-                var0 = var if var in ds_zarr else list(ds_zarr.data_vars.keys())[0]
+                var0 = var if var in ds_zarr else next(iter(ds_zarr.data_vars.keys()))
                 chunks = {
                     dim: ds_zarr[var0].chunks[i][0]
                     for i, dim in enumerate(ds_zarr[var0].dims)
@@ -664,9 +666,13 @@ def update_zarr(
         # process year by year a.k.a. file by file
         years = np.unique(pd.date_range(t0, t1, freq="1d").year).tolist()
         for year in years:
-            path = glob.glob(join(ddir, var, f"era5_{var}_{year}_*.nc"))[0]
-            with xr.open_dataset(
-                path, chunks=chunks, mode="r", autoclose=True
+            # match both yearly (era5_tp_2021_daily.nc) and monthly (era5_tp_202201_daily.nc)
+            paths = sorted(glob.glob(join(ddir, var, f"era5_{var}_{year}*.nc")))
+            if not paths:
+                print(f"{var}: no files found for {year} - skipping")
+                continue
+            with xr.open_mfdataset(
+                paths, chunks=chunks, mode="r", autoclose=True
             ) as ds_nc:
                 ds_nc = ds_nc.sel(time=slice(t0, t1))
                 if ds_nc["time"].size > 0:
