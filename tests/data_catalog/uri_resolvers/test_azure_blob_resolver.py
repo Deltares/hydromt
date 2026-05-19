@@ -522,9 +522,9 @@ class TestFetchSasToken:
             mock_urlopen.return_value = mock_resp
             assert _fetch_sas_token("https://example.com/token") == "sv=2021&sig=xyz"
 
-    def test_failure_raises_permission_error(self):
-        with patch("urllib.request.urlopen", side_effect=Exception("timeout")):
-            with pytest.raises(PermissionError, match="failed to fetch SAS token"):
+    def test_failure_reraises_error(self):
+        with patch("urllib.request.urlopen", side_effect=TimeoutError("timeout")):
+            with pytest.raises(TimeoutError, match="timeout"):
                 _fetch_sas_token("https://example.com/token")
 
 
