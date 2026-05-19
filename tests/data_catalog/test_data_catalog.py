@@ -740,6 +740,84 @@ def test_export_tiff_files_wild_card(tmp_path: Path, rioda: xr.DataArray):
     xr.testing.assert_equal(da_reread, data_catalog.get_rasterdataset("modis"))
 
 
+@pytest.mark.integration
+def test_export_tiff_bare_wildcard(tmp_path: Path):
+    data_catalog = DataCatalog(data_libs=["artifact_data"])
+    da = data_catalog.get_rasterdataset("modis_lai")
+
+    # Write one .tiff per time step with LAI_ prefix
+    files_dir = tmp_path / "modis_lai_bare"
+    files_dir.mkdir(exist_ok=True)
+    for i in da.time.values:
+        da_sel = da.sel(time=i).expand_dims("time")
+        da_sel.raster.to_raster(str(files_dir / f"LAI_{i}.tif"))
+
+    # Build catalog with bare wildcard
+    data_dict = {
+        "modis_lai": {
+            "uri": str(files_dir / "*.tif"),
+            "driver": {
+                "name": "rasterio",
+                "options": {"concat": True},
+            },
+            "data_type": "RasterDataset",
+            "data_adapter": {"unit_mult": {"LAI": 0.1}},
+        }
+    }
+
+    data_catalog = DataCatalog()
+    data_catalog.from_dict(data_dict, root=tmp_path)
+
+    # Read original data
+    original = data_catalog.get_rasterdataset("modis_lai")
+    assert original.name == "LAI"
+    original_dim0 = original.dims[0]
+    original_values = list(original.coords[original_dim0].values)
+
+    # Export
+    export_path = tmp_path / "exported"
+    data_catalog.export_data(new_root=str(export_path), source_names=["modis_lai"])
+
+    # Re-read from exported catalog
+    new_catalog = DataCatalog(str(export_path / "data_catalog.yml"))
+    exported = new_catalog.get_rasterdataset("modis_lai")
+
+    # Variable name should be preserved
+    assert exported.name == "LAI"
+    # Dimension values should be preserved
+    dim0_name = exported.dims[0]
+    assert list(exported.coords[dim0_name].values) == original_values
+    # Data values should match
+    xr.testing.assert_equal(exported, original)
+
+
+@pytest.mark.integration
+def test_export_unit_conversion_not_applied_twice(tmp_path: Path):
+    """Test that unit_conversion=True does not double-apply conversions on re-read."""
+    data_catalog = DataCatalog(data_libs=["artifact_data"])
+    # Read original with unit conversion applied
+    original = data_catalog.get_rasterdataset("modis_lai")
+
+    # Export with unit_conversion=True (default) — data is written converted,
+    # and the exported catalog must NOT re-apply conversion on read.
+    export_true = tmp_path / "export_true"
+    data_catalog.export_data(new_root=str(export_true), source_names=["modis_lai"])
+    cat_true = DataCatalog(str(export_true / "data_catalog.yml"))
+    reread_true = cat_true.get_rasterdataset("modis_lai")
+    xr.testing.assert_equal(reread_true, original)
+
+    # Export with unit_conversion=False — raw data is written, and the exported
+    # catalog also has no conversion. Re-reading gives unconverted values.
+    export_false = tmp_path / "export_false"
+    data_catalog.export_data(
+        new_root=str(export_false), source_names=["modis_lai"], unit_conversion=False
+    )
+    cat_false = DataCatalog(str(export_false / "data_catalog.yml"))
+    reread_false = cat_false.get_rasterdataset("modis_lai")
+    # Raw values should be 10x the converted values (unit_mult was 0.1)
+    xr.testing.assert_allclose(reread_false, original / 0.1, atol=1e-5)
+
+
 def test_export_dataset_rasterio(tmp_path: Path):
     dc = DataCatalog(data_libs=["artifact_data=v1.0.0"])
     new_root = tmp_path / "exported_vrt"
