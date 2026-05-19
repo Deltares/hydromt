@@ -37,6 +37,7 @@ dependencies = [
 	"rioxarray>=0.18",         # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
 	"scipy>=1.14",             # scientific utilities
 	"shapely>=2.1.2",          # geometry transforms
+	"tenacity>=9.1",           # general-purpose retrying library
 	"tomli>=2.0",              # parsing toml files
 	"tomli-w>=1.0",            # writing toml files
 	"universal_pathlib>=0.2",  # provides path compatability between different filesystems
