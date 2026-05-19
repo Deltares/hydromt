@@ -235,21 +235,17 @@ python = "3.14.*"
 [tool.pixi.pypi-dependencies]
 hydromt = { path = ".", editable = true }
 
+# pypi does not have these binary wheels for osx-arm64
+[tool.pixi.target.osx-arm64.dependencies]
+netcdf4 = "*"
+rasterio = ">=1.4.4,<1.5"
+libgdal-hdf5 = ">=3.12.1,<4"
+libgdal-netcdf = ">=3.12.1,<4"
+
 [tool.pixi.feature.lowest-deps]
 solve-strategy = "lowest-direct"
-
-# Conda-side constraints to match the lower bounds declared in [project.dependencies].
-# Without these, lowest-direct can resolve packages below the PyPI floor if another dependency also uses it.
-[tool.pixi.feature.lowest-deps.dependencies]
-numpy = ">=2.0"
-cartopy = ">=0.23"
-shapely = ">=2.1.2"
-
-[tool.pixi.feature.lowest-deps.pypi-options]
-no-build = true
-
-[tool.pixi.feature.lowest-deps.tasks]
-test = { cmd = ["pytest", "-W", "default"] }
+pypi-options = { no-build = true }
+tasks = { test = { cmd = ["pytest", "-W", "default"] } }
 
 [tool.pixi.feature.doc.tasks]
 doctest = { cmd = [
@@ -412,10 +408,3 @@ low-py312 = { features = [
 	"examples",
 ] }
 min-py312 = { features = ["py312", "test"], solve-group = "py312" }
-
-# pypi does not have these binary wheels for osx-arm64
-[tool.pixi.target.osx-arm64.dependencies]
-netcdf4 = "*"
-rasterio = ">=1.4.4,<1.5"
-libgdal-hdf5 = ">=3.12.1,<4"
-libgdal-netcdf = ">=3.12.1,<4"
