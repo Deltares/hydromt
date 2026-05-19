@@ -523,7 +523,7 @@ class TestFetchSasToken:
             assert _fetch_sas_token("https://example.com/token") == "sv=2021&sig=xyz"
 
     def test_failure_raises_permission_error(self):
-        with patch("urllib.request.urlopen", side_effect=Exception("timeout")):
+        with patch("urllib.request.urlopen", side_effect=TimeoutError("timeout")):
             with pytest.raises(PermissionError, match="failed to fetch SAS token"):
                 _fetch_sas_token("https://example.com/token")
 
