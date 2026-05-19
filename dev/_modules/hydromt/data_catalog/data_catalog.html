@@ -2094,6 +2094,13 @@ window.runMermaid = runMermaid;</script>
         <span class="k">if</span> <span class="n">new_source</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
+        <span class="c1"># When unit_conversion=True, the written data already has conversions</span>
+        <span class="c1"># applied (read_data applies the adapter transform). Clear them on the</span>
+        <span class="c1"># exported source to avoid double-application on re-read.</span>
+        <span class="k">if</span> <span class="n">unit_conversion</span><span class="p">:</span>
+            <span class="n">new_source</span><span class="o">.</span><span class="n">data_adapter</span><span class="o">.</span><span class="n">unit_mult</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">new_source</span><span class="o">.</span><span class="n">data_adapter</span><span class="o">.</span><span class="n">unit_add</span> <span class="o">=</span> <span class="p">{}</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_register_source</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">new_source</span><span class="p">,</span> <span class="n">registry</span><span class="o">=</span><span class="n">registry</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">new_source</span>
 

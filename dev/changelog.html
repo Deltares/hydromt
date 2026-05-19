@@ -462,6 +462,8 @@
 <li><p>Normalize geometries before comparing them in <code class="docutils literal notranslate"><span class="pre">test_equal</span></code> for <code class="docutils literal notranslate"><span class="pre">SpatialModelComponent</span></code>, <code class="docutils literal notranslate"><span class="pre">GeomsComponent</span></code> and <code class="docutils literal notranslate"><span class="pre">VectorComponent</span></code> (#1415).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pet_debruin</span></code> now keeps all inputs lazy-loaded instead of reading in the entire array. (#1439)</p></li>
 <li><p>The functions <code class="docutils literal notranslate"><span class="pre">_strip_scheme</span></code> and <code class="docutils literal notranslate"><span class="pre">_strip_vsi</span></code> in <code class="docutils literal notranslate"><span class="pre">hydromt._utils.uris</span></code> no longer use <code class="docutils literal notranslate"><span class="pre">lstrip</span></code> to remove leading characters, but now remove only the exact prefix. (#1438)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Datacatalog.export_data</span></code> no longer applies unit conversion twice. (#1459)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RasterioDriver.write</span></code> now always produces filenames that are parseable by <code class="docutils literal notranslate"><span class="pre">readers.open_mfraster</span></code> when provided with a pattern with no prefix e.g. <code class="docutils literal notranslate"><span class="pre">*.tif</span></code>. (#1459)</p></li>
 </ul>
 </section>
 <section id="deprecated">

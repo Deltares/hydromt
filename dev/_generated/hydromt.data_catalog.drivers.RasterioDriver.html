@@ -982,7 +982,9 @@ must provide a way to write raster datasets to supported formats.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span> <span class="pre">|</span> <span class="pre">str</span></code>) – Destination path for the raster dataset.</p></li>
+<li><p><strong>path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span> <span class="pre">|</span> <span class="pre">str</span></code>) – Destination path for the raster dataset. Must have a supported file extension.
+Can include 1 wildcard <cite>*</cite> for writing multiple files when data has at least 3
+dimensions, or when writing a Dataset with multiple data variables.</p></li>
 <li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">xr.DataArray</span> <span class="pre">|</span> <span class="pre">xr.Dataset</span></code>) – The xarray DataArray or Dataset to write.</p></li>
 <li><p><strong>write_kwargs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict[str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Any]</span> <span class="pre">|</span> <span class="pre">None</span></code>, <em>optional</em>) – Additional keyword arguments for writing. Default is None.</p></li>
 </ul>
