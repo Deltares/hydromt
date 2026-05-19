@@ -45,7 +45,8 @@ def _create_time_slice(
     -------
     slice | None
         A slice object that can be used to index the time dimension of data.
-        If no data is left after slicing, the behavior depends on handle_nodata:
+        The requested range is clamped to the data extent when it partially overlaps.
+        If there is no overlap at all, the behavior depends on handle_nodata:
         - If handle_nodata is NoDataStrategy.RAISE, a NoDataException is raised.
         - If handle_nodata is NoDataStrategy.IGNORE | NoDataStrategy.WARN, None is returned.
     """
@@ -64,40 +65,44 @@ def _create_time_slice(
         data_tstart = xr_tstartstop.index[0]
         data_tstop = xr_tstartstop.index[-1]
 
-    if pd_tstart < data_tstart:
+    # No overlap: requested range is entirely before or after available data
+    if pd_tstop < data_tstart or pd_tstart > data_tstop:
         exec_nodata_strat(
-            f"Requested tstart {pd_tstart} outside of available range '{data_tstart}' to '{data_tstop}'.",
-            handle_nodata,
-        )
-        return None
-    if pd_tstop > data_tstop:
-        exec_nodata_strat(
-            f"Requested tstop {pd_tstop} outside of available range '{data_tstart}' to '{data_tstop}'.",
+            f"Requested time range ({pd_tstart}, {pd_tstop}) has no overlap with available range '{data_tstart}' to '{data_tstop}'.",
             handle_nodata,
         )
         return None
 
+    # Clamp requested range to data extent
+    true_tstart = max(pd_tstart, data_tstart)
+    true_tstop = min(pd_tstop, data_tstop)
+
+    if true_tstart != pd_tstart or true_tstop != pd_tstop:
+        logger.warning(
+            f"Requested time range ({pd_tstart}, {pd_tstop}) partially overlaps with available range '{data_tstart}' to '{data_tstop}'. Clamping to ({true_tstart}, {true_tstop})."
+        )
+
     if isinstance(data, pd.DataFrame):
         if inclusive:
             # pad: last value <= tstart
-            start_idx = time_index.searchsorted(pd_tstart, side="right") - 1
+            start_idx = time_index.searchsorted(true_tstart, side="right") - 1
             # backfill: first value >= tstop
-            stop_idx = time_index.searchsorted(pd_tstop, side="left")
+            stop_idx = time_index.searchsorted(true_tstop, side="left")
         else:
             # backfill: first value >= tstart
-            start_idx = time_index.searchsorted(pd_tstart, side="left")
+            start_idx = time_index.searchsorted(true_tstart, side="left")
             # pad: last value <= tstop
-            stop_idx = time_index.searchsorted(pd_tstop, side="right") - 1
+            stop_idx = time_index.searchsorted(true_tstop, side="right") - 1
         start_idx = max(0, start_idx)
         stop_idx = min(len(time_index) - 1, stop_idx)
         return slice(time_index[start_idx], time_index[stop_idx])
     else:
         if inclusive:
-            minimum = data.sel(time=pd_tstart, method="pad")
-            maximum = data.sel(time=pd_tstop, method="backfill")
+            minimum = data.sel(time=true_tstart, method="pad")
+            maximum = data.sel(time=true_tstop, method="backfill")
         else:
-            minimum = data.sel(time=pd_tstart, method="backfill")
-            maximum = data.sel(time=pd_tstop, method="pad")
+            minimum = data.sel(time=true_tstart, method="backfill")
+            maximum = data.sel(time=true_tstop, method="pad")
         return slice(minimum.time.values, maximum.time.values)
 
 
