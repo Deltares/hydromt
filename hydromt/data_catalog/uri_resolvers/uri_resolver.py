@@ -2,6 +2,7 @@
 
 import logging
 from abc import ABC, abstractmethod
+from typing import Any
 
 from pydantic import ConfigDict, Field
 
@@ -24,7 +25,7 @@ class URIResolver(AbstractBaseModel, ABC):
 
     model_config = ConfigDict(extra="forbid")
     filesystem: FSSpecFileSystem = Field(default_factory=FSSpecFileSystem)
-    options: dict = Field(default_factory=dict)
+    options: dict[str, Any] = Field(default_factory=dict)
 
     @abstractmethod
     def resolve(
