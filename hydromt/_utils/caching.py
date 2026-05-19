@@ -10,19 +10,13 @@ from typing import List, Optional, cast
 
 import geopandas as gpd
 import numpy as np
+import rasterio
 from affine import Affine
 from fsspec import AbstractFileSystem, url_to_fs
 from pyproj import CRS
 
-from hydromt._compat import HAS_GDAL
 from hydromt._utils.uris import _strip_scheme, _strip_vsi
 from hydromt.config import SETTINGS
-
-if HAS_GDAL:
-    from osgeo import gdal
-
-    gdal.UseExceptions()
-
 
 logger = logging.getLogger(__name__)
 
@@ -113,9 +107,6 @@ def cache_vrt_tiles(
     vrt_destination_path : Path
         Path to cached vrt
     """
-    if not HAS_GDAL:
-        raise ImportError("Can't cache vrt's without GDAL installed.")
-
     # Get the filesystem type
     fs = fs if fs is not None else url_to_fs(vrt_uri)[0]
 
@@ -171,17 +162,146 @@ def cache_vrt_tiles(
         new = new + cur
         os.unlink(vrt_destination_path)
 
-    # Build the vrt with gdal
-    out_ds = gdal.BuildVRT(
-        destName=vrt_destination_path.as_posix(),
-        srcDSOrSrcDSTab=new,
-    )
-
-    # Close and dereference the gdal dataset
-    out_ds.Close()
-    out_ds = None
+    # Build the vrt
+    _build_vrt(vrt_destination_path, new)
 
     return vrt_destination_path
+
+
+def _build_vrt(dest: Path, src_files: List[Path]) -> None:
+    """Build a VRT file from a list of raster source files.
+
+    Parameters
+    ----------
+    dest : Path
+        Destination path for the VRT file.
+    src_files : List[Path]
+        List of source raster file paths to include in the VRT.
+    """
+    # Read metadata from all source files
+    datasets_info = []
+    for src in src_files:
+        with rasterio.open(src) as ds:
+            datasets_info.append(
+                {
+                    "path": src,
+                    "transform": ds.transform,
+                    "crs": ds.crs,
+                    "width": ds.width,
+                    "height": ds.height,
+                    "count": ds.count,
+                    "dtype": ds.dtypes[0],
+                    "nodata": ds.nodata,
+                }
+            )
+
+    if not datasets_info:
+        return
+
+    # Compute mosaic extent and resolution from all tiles
+    first = datasets_info[0]
+    res_x = first["transform"].a
+    res_y = first["transform"].e  # negative
+
+    x_min = min(d["transform"].c for d in datasets_info)
+    y_max = max(d["transform"].f for d in datasets_info)
+    x_max = max(d["transform"].c + d["width"] * res_x for d in datasets_info)
+    y_min = min(d["transform"].f + d["height"] * res_y for d in datasets_info)
+
+    total_width = round((x_max - x_min) / res_x)
+    total_height = round((y_min - y_max) / res_y)
+
+    # Build VRT XML
+    root = ET.Element(
+        "VRTDataset",
+        attrib={"rasterXSize": str(total_width), "rasterYSize": str(total_height)},
+    )
+
+    srs_el = ET.SubElement(root, "SRS", attrib={"dataAxisToSRSAxisMapping": "2,1"})
+    srs_el.text = first["crs"].to_wkt()
+
+    gt = Affine(res_x, 0.0, x_min, 0.0, res_y, y_max)
+    gt_el = ET.SubElement(root, "GeoTransform")
+    gt_el.text = ", ".join(str(v) for v in gt.to_gdal())
+
+    for band_idx in range(1, first["count"] + 1):
+        band_el = ET.SubElement(
+            root,
+            "VRTRasterBand",
+            attrib={
+                "dataType": _numpy_to_gdal_type(first["dtype"]),
+                "band": str(band_idx),
+            },
+        )
+        if first["nodata"] is not None:
+            nd_el = ET.SubElement(band_el, "NoDataValue")
+            nd_el.text = str(first["nodata"])
+
+        for info in datasets_info:
+            src_el = ET.SubElement(band_el, "SimpleSource")
+
+            fname_el = ET.SubElement(
+                src_el, "SourceFilename", attrib={"relativeToVRT": "1"}
+            )
+            # Store path relative to the VRT file
+            try:
+                fname_el.text = os.path.relpath(info["path"], dest.parent).replace(
+                    "\\", "/"
+                )
+            except ValueError:
+                # Cross-drive on Windows — fall back to absolute
+                fname_el.text = info["path"].as_posix()
+
+            sb_el = ET.SubElement(src_el, "SourceBand")
+            sb_el.text = str(band_idx)
+
+            ET.SubElement(
+                src_el,
+                "SrcRect",
+                attrib={
+                    "xOff": "0",
+                    "yOff": "0",
+                    "xSize": str(info["width"]),
+                    "ySize": str(info["height"]),
+                },
+            )
+
+            # Compute pixel offset within the mosaic
+            x_off = round((info["transform"].c - x_min) / res_x)
+            y_off = round((info["transform"].f - y_max) / res_y)
+            ET.SubElement(
+                src_el,
+                "DstRect",
+                attrib={
+                    "xOff": str(x_off),
+                    "yOff": str(y_off),
+                    "xSize": str(info["width"]),
+                    "ySize": str(info["height"]),
+                },
+            )
+
+    tree = ET.ElementTree(root)
+    ET.indent(tree)
+    tree.write(dest, xml_declaration=True, encoding="UTF-8")
+
+
+def _numpy_to_gdal_type(dtype: str) -> str:
+    """Map numpy dtype string to GDAL type name."""
+    mapping = {
+        "uint8": "Byte",
+        "int8": "Int8",
+        "uint16": "UInt16",
+        "int16": "Int16",
+        "uint32": "UInt32",
+        "int32": "Int32",
+        "uint64": "UInt64",
+        "int64": "Int64",
+        "float32": "Float32",
+        "float64": "Float64",
+        "complex64": "CFloat32",
+        "complex128": "CFloat64",
+    }
+    return mapping.get(dtype, "Float32")
 
 
 def __get_vrt_file_paths(
