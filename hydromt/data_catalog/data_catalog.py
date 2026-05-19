@@ -1194,6 +1194,13 @@ class DataCatalog(object):
         if new_source is None:
             return None
 
+        # When unit_conversion=True, the written data already has conversions
+        # applied (read_data applies the adapter transform). Clear them on the
+        # exported source to avoid double-application on re-read.
+        if unit_conversion:
+            new_source.data_adapter.unit_mult = {}
+            new_source.data_adapter.unit_add = {}
+
         self._register_source(source=new_source, registry=registry)
         return new_source
 
