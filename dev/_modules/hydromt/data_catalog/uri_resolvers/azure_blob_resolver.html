@@ -860,6 +860,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">urllib.error</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">urllib.request</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">product</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterable</span>
@@ -868,6 +869,12 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fsspec</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractFileSystem</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fsspec.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">split_protocol</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tenacity</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">retry</span><span class="p">,</span>
+    <span class="n">retry_if_exception_type</span><span class="p">,</span>
+    <span class="n">stop_after_attempt</span><span class="p">,</span>
+    <span class="n">wait_exponential</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.naming_convention</span><span class="w"> </span><span class="kn">import</span> <span class="n">_expand_uri_placeholders</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.uri_resolvers.uri_resolver</span><span class="w"> </span><span class="kn">import</span> <span class="n">URIResolver</span>
@@ -1101,7 +1108,14 @@ window.runMermaid = runMermaid;</script>
         <span class="c1"># Auto-fetch SAS token when sas_token_url is provided.</span>
         <span class="n">sas_token_url</span> <span class="o">=</span> <span class="n">effective_options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;sas_token_url&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">sas_token_url</span> <span class="ow">and</span> <span class="s2">&quot;sas_token&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">effective_options</span><span class="p">:</span>
-            <span class="n">effective_options</span><span class="p">[</span><span class="s2">&quot;sas_token&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_fetch_sas_token</span><span class="p">(</span><span class="n">sas_token_url</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">effective_options</span><span class="p">[</span><span class="s2">&quot;sas_token&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_fetch_sas_token</span><span class="p">(</span><span class="n">sas_token_url</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">,</span> <span class="n">urllib</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">URLError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">PermissionError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;AzureBlobResolver: failed to fetch SAS token from &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">sas_token_url</span><span class="si">}</span><span class="s2">&#39; after multiple retries. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Expected JSON with a &#39;token&#39; field.&quot;</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
 
         <span class="c1"># Expand placeholders</span>
         <span class="n">uri_expanded</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_expand_uri_placeholders</span><span class="p">(</span>
@@ -1233,6 +1247,14 @@ window.runMermaid = runMermaid;</script>
 
 
 
+<span class="nd">@retry</span><span class="p">(</span>
+    <span class="n">retry</span><span class="o">=</span><span class="n">retry_if_exception_type</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">urllib</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">URLError</span><span class="p">,</span> <span class="ne">TimeoutError</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">)</span>
+    <span class="p">),</span>
+    <span class="n">wait</span><span class="o">=</span><span class="n">wait_exponential</span><span class="p">(</span><span class="n">multiplier</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span>
+    <span class="n">stop</span><span class="o">=</span><span class="n">stop_after_attempt</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
+    <span class="n">reraise</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_fetch_sas_token</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch a SAS token from a token endpoint.</span>
 
@@ -1249,18 +1271,16 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
-<span class="sd">    PermissionError</span>
-<span class="sd">        If the request fails or the response cannot be parsed.</span>
+<span class="sd">    urllib.error.URLError</span>
+<span class="sd">        If the request fails after retries.</span>
+<span class="sd">    KeyError</span>
+<span class="sd">        If the response JSON does not contain a ``&quot;token&quot;`` key.</span>
+<span class="sd">    json.JSONDecodeError</span>
+<span class="sd">        If the response is not valid JSON.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">with</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span> <span class="k">as</span> <span class="n">resp</span><span class="p">:</span>  <span class="c1"># noqa: S310</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
-        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;token&quot;</span><span class="p">]</span>
-    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">PermissionError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;AzureBlobResolver: failed to fetch SAS token from &#39;</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
-            <span class="s2">&quot;Check that the URL is correct and reachable.&quot;</span>
-        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+    <span class="k">with</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span> <span class="k">as</span> <span class="n">resp</span><span class="p">:</span>  <span class="c1"># noqa: S310</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;token&quot;</span><span class="p">]</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_abfs_to_https</span><span class="p">(</span><span class="n">uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">account_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sas_token</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
