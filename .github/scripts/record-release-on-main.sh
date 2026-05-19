@@ -80,9 +80,13 @@ if [[ "$MERGE_FAILED" == "true" ]]; then
   fi
 fi
 
-# Complete the merge commit (--no-commit requires explicit commit).
-git commit --no-edit -m "Merge main into record-release/v$NEW_VERSION" \
-  --allow-empty 2>/dev/null || true
+# Complete the merge commit when the merge created a pending merge state.
+# If origin/main is already up to date, `git merge --no-commit` does not
+# leave MERGE_HEAD and there is nothing to commit.
+if git rev-parse -q --verify MERGE_HEAD >/dev/null 2>&1; then
+  git commit --no-edit -m "Merge main into record-release/v$NEW_VERSION" \
+    --allow-empty 2>/dev/null
+fi
 
 # Set correct version.
 VERSION_BUMPED=false

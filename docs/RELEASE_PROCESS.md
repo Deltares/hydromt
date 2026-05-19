@@ -89,8 +89,9 @@ A **release family** is the set of releases that share the same
    squash) to preserve the branch relationship in history.
 3. **All development lands on `main` first.** Features and bugfixes are
    merged into `main` via normal PRs. When a fix needs to ship in an older
-   release family, cherry-pick the merge commit onto the relevant
-   `release/vX.Y` branch(es) and dispatch `create-release.yml` with
+   release family, cherry-pick the commit that landed on `main` for the
+   fix (that is, the PR merge result) onto the relevant `release/vX.Y`
+   branch(es) and dispatch `create-release.yml` with
    `release_type = patch` against that branch. If a cherry-pick does not
    apply cleanly, the `record-release/v…` PR will carry the fix back to
    `main` after the patch release.

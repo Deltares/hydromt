@@ -164,6 +164,8 @@ jobs:
         run: |
           git fetch origin main --quiet
           git fetch origin "$RELEASE_BRANCH" --quiet
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
 
           RECORD_BRANCH=$(bash .github/scripts/record-release-on-main.sh \
             "$RELEASE_BRANCH" "$NEW_VERSION" | tail -n 1)
