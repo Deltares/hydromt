@@ -242,9 +242,11 @@ def test_cli_build_unknown_option(tmp_path: Path):
     ]
     r = CliRunner().invoke(hydromt_cli, cmd)
 
-    # Check that "Error: No such option: --opt" is in the output
+    # Check that an error about '--opt' is raised.
+    # (error string changes between click versions, so we check for parts)
     assert r.exit_code == 2
-    assert "Error: No such option '--opt'." in r.output
+    assert "Error: No such option" in r.output
+    assert "--opt" in r.output
 
 
 @pytest.mark.usefixtures("_reset_log_level")
