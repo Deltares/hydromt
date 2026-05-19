@@ -214,26 +214,18 @@ jobs:
           IS_PRERELEASE: ${{ steps.version.outputs.IS_PRERELEASE }}
           MARK_AS_LATEST: ${{ inputs.mark_as_latest }}
         run: |
-          TITLE="$TAG"
-
           if [ "$IS_PRERELEASE" = "true" ]; then
             gh release create "$TAG" \
               --target "$RELEASE_BRANCH" \
-              --title "$TITLE" \
+              --title "$TAG" \
               --notes-file release_notes.md \
               --prerelease
-          elif [ "$MARK_AS_LATEST" = "true" ]; then
-            gh release create "$TAG" \
-              --target "$RELEASE_BRANCH" \
-              --title "$TITLE" \
-              --notes-file release_notes.md \
-              --latest
           else
             gh release create "$TAG" \
               --target "$RELEASE_BRANCH" \
-              --title "$TITLE" \
+              --title "$TAG" \
               --notes-file release_notes.md \
-              --latest=false
+              --latest="$MARK_AS_LATEST"
           fi
 
   publish-docs:
@@ -270,7 +262,7 @@ jobs:
           full_commit_message: Deploy ${{ env.DOC_VERSION }} docs to GitHub Pages
 
       - name: Update `stable` symlink
-        if: ${{ inputs.mark_as_latest }}
+        if: ${{ inputs.mark_as_latest == true }}
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"

@@ -28,7 +28,7 @@ flowchart TD
     D2 --> F
     D3 --> F
 
-    F -->|No| G1[gh release create --latest<br/>or --latest=false]
+    F -->|No| G1[gh release create --latest=true/false]
     F -->|Yes: rc| G2[gh release create --prerelease]
 
     G1 --> H{mark_as_latest?}
