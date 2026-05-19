@@ -257,7 +257,9 @@ class RasterioDriver(RasterDatasetDriver):
         Parameters
         ----------
         path : Path | str
-            Destination path for the raster dataset.
+            Destination path for the raster dataset. Must have a supported file extension.
+            Can include 1 wildcard `*` for writing multiple files when data has at least 3
+            dimensions, or when writing a Dataset with multiple data variables.
         data : xr.DataArray | xr.Dataset
             The xarray DataArray or Dataset to write.
         write_kwargs : dict[str, Any] | None, optional
@@ -295,6 +297,22 @@ class RasterioDriver(RasterDatasetDriver):
                 )
 
             dim0 = data.dims[0]
+
+            # When the wildcard IS the entire stem (e.g. "*.tif"), filenames like
+            # "1.tif" cannot be parsed by open_mfraster for index/variable name.
+            # Prefix with the DataArray name to produce "<name>_<index>.<ext>" which
+            # open_mfraster can parse correctly for concat operations.
+            if path.stem == "*":
+                if not data.name:
+                    raise ValueError(
+                        "Cannot write a DataArray with bare wildcard path "
+                        f"'{path.name}' when the DataArray has no name. "
+                        "Either set `data.name` or use a URI with a prefix "
+                        "(e.g. 'prefix_*.tif')."
+                    )
+                # Replace bare wildcard with "<name>_*" pattern
+                new_name = f"{data.name}_*{path.suffix}"
+                path = path.with_name(new_name)
 
             for label in data[dim0]:
                 ds_sel = data.sel({dim0: label})
