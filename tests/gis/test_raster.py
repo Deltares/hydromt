@@ -105,7 +105,7 @@ def test_crs():
     assert da.raster.crs.to_epsg() == 9518  # return horizontal crs
 
 
-def test_gdal(tmp_path: Path):
+def test_gdal_compliant(tmp_path: Path):
     da = raster_utils.full_from_transform(*testdata[0], name="test")
     # Add crs
     da.attrs.update(crs=4326)
@@ -129,6 +129,24 @@ def test_gdal(tmp_path: Path):
     with rasterio.open(netcdf_path) as src:
         src.read()
         assert ds2.raster.crs == src.crs
+
+
+def test_gdal_compliant_gtf(tmp_path: Path):
+    # Create a dummy dataset
+    da = raster_utils.full_from_transform(*testdata[0], name="test")
+    # Add crs
+    da.raster.set_crs(4326)
+
+    # Make gdal compliant without gtf (default)
+    da = da.raster.gdal_compliant()
+    # Assert the state
+    assert "GeoTransform" not in da.spatial_ref.attrs
+
+    # Make gdal compliant with gtf
+    da = da.raster.gdal_compliant(write_transform=True)
+    # Assert the state
+    assert "GeoTransform" in da.spatial_ref.attrs
+    assert da.spatial_ref.attrs["GeoTransform"] == "3.0 0.5 0.0 -9.0 0.0 -0.5"
 
 
 def test_attrs_errors(rioda):

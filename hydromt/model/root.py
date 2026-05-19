@@ -50,10 +50,9 @@ class ModelRoot:
 
     def _cleanup(self) -> None:
         """Clean up the afterwards."""
-        if self.path is None:
+        if self.path is None or not self.path.exists():
             return
-        items = list(self.path.iterdir())
-        if len(items) == 0:
+        if len(list(self.path.iterdir())) == 0:
             self.path.rmdir()
 
     ## Properties

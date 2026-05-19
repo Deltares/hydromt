@@ -227,7 +227,7 @@ def full_like(
         crs=other.raster.crs,
         lazy=lazy,
     )
-    da.raster.set_attrs(**other.raster.attrs)
+    da.raster.attrs.update(**other.raster.attrs)
     da.raster._transform = other.raster.transform
     return da
 
