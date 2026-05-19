@@ -4,7 +4,6 @@ import json
 import logging
 import os
 import re
-import time
 import urllib.error
 import urllib.request
 from itertools import product
@@ -14,6 +13,12 @@ import geopandas as gpd
 import pandas as pd
 from fsspec import AbstractFileSystem
 from fsspec.core import split_protocol
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
 
 from hydromt._utils.naming_convention import _expand_uri_placeholders
 from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
@@ -243,7 +248,14 @@ class AzureBlobResolver(URIResolver):
         # Auto-fetch SAS token when sas_token_url is provided.
         sas_token_url = effective_options.pop("sas_token_url", None)
         if sas_token_url and "sas_token" not in effective_options:
-            effective_options["sas_token"] = _fetch_sas_token(sas_token_url)
+            try:
+                effective_options["sas_token"] = _fetch_sas_token(sas_token_url)
+            except (json.JSONDecodeError, KeyError, urllib.error.URLError) as exc:
+                raise PermissionError(
+                    f"AzureBlobResolver: failed to fetch SAS token from "
+                    f"'{sas_token_url}' after multiple retries. "
+                    f"Expected JSON with a 'token' field."
+                ) from exc
 
         # Expand placeholders
         uri_expanded, keys, _ = _expand_uri_placeholders(
@@ -373,7 +385,15 @@ class AzureBlobResolver(URIResolver):
         return result
 
 
-def _fetch_sas_token(url: str, retries: int = 3) -> str:
+@retry(
+    retry=retry_if_exception_type(
+        (urllib.error.URLError, TimeoutError, json.JSONDecodeError, KeyError)
+    ),
+    wait=wait_exponential(multiplier=1, min=1, max=10),
+    stop=stop_after_attempt(3),
+    reraise=True,
+)
+def _fetch_sas_token(url: str) -> str:
     """Fetch a SAS token from a token endpoint.
 
     Parameters
@@ -381,8 +401,6 @@ def _fetch_sas_token(url: str, retries: int = 3) -> str:
     url : str
         URL of the token endpoint (e.g. the Planetary Computer SAS API).
         Must return JSON with a ``"token"`` key.
-    retries : int, optional
-        Number of times to retry the request in case of failure, by default 3.
 
     Returns
     -------
@@ -391,26 +409,16 @@ def _fetch_sas_token(url: str, retries: int = 3) -> str:
 
     Raises
     ------
-    PermissionError
-        If the request fails or the response cannot be parsed.
+    urllib.error.URLError
+        If the request fails after retries.
+    KeyError
+        If the response JSON does not contain a ``"token"`` key.
+    json.JSONDecodeError
+        If the response is not valid JSON.
     """
-    for i in range(retries):
-        try:
-            with urllib.request.urlopen(url, timeout=10) as resp:  # noqa: S310
-                data = json.loads(resp.read())
-            return data["token"]
-        except (urllib.error.URLError, TimeoutError) as exc:
-            if i >= retries - 1:
-                raise PermissionError(
-                    f"AzureBlobResolver: failed to fetch SAS token from '{url}' "
-                    f"after {retries} attempts. Check that the URL is correct and reachable."
-                ) from exc
-            time.sleep(2**i)  # exponential backoff between retries
-        except (json.JSONDecodeError, KeyError) as exc:
-            raise PermissionError(
-                f"AzureBlobResolver: unexpected response from '{url}'. "
-                "Expected JSON with a 'token' field."
-            ) from exc
+    with urllib.request.urlopen(url, timeout=10) as resp:  # noqa: S310
+        data = json.loads(resp.read())
+    return data["token"]
 
 
 def _abfs_to_https(uri: str, account_name: str, sas_token: str) -> str:
