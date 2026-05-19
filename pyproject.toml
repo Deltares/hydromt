@@ -110,7 +110,7 @@ doc = [
 	"sphinx_design>=0.6",                 # doc layout
 	"sbom4python>=0.12",                  # generate software bill of materials
 	"pydata-sphinx-theme>=0.17.0",        # theme
-	"myst-parser>=5.0",                        # markdown support in Sphinx
+	"myst-parser>=5.0",                   # markdown support in Sphinx
 ]
 examples = [
 	"cartopy>=0.23",   # plotting examples
@@ -235,9 +235,6 @@ python = "3.14.*"
 
 [tool.pixi.pypi-dependencies]
 hydromt = { path = ".", editable = true }
-
-[tool.pixi.feature.doc.dependencies]
-pandoc = "*"
 
 [tool.pixi.feature.vrt.dependencies]
 gdal = ">=3.5.0"
