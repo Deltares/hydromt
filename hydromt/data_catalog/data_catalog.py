@@ -1328,7 +1328,6 @@ class DataCatalog(object):
         data_like: Union[
             str, SourceSpecDict, Path, xr.Dataset, xr.DataArray, RasterDatasetSource
         ],
-        *,
         bbox: Optional[Bbox] = None,
         geom: Optional[gpd.GeoDataFrame] = None,
         zoom: Optional[Union[int, tuple]] = None,
@@ -1490,7 +1489,6 @@ class DataCatalog(object):
         data_like: Union[
             str, SourceSpecDict, Path, xr.Dataset, xr.DataArray, GeoDataFrameSource
         ],
-        *,
         bbox: Optional[List] = None,
         geom: Optional[gpd.GeoDataFrame] = None,
         buffer: Union[float, int] = 0,
@@ -1598,7 +1596,6 @@ class DataCatalog(object):
         data_like: Union[
             str, SourceSpecDict, Path, xr.Dataset, xr.DataArray, GeoDatasetSource
         ],
-        *,
         bbox: Optional[Bbox] = None,
         geom: Optional[gpd.GeoDataFrame] = None,
         buffer: Union[float, int] = 0,
@@ -1741,7 +1738,6 @@ class DataCatalog(object):
         data_like: Union[
             str, SourceSpecDict, Path, xr.Dataset, xr.DataArray, DatasetSource
         ],
-        *,
         variables: Optional[List] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         time_range: TimeRange | tuple | dict | None = None,
@@ -1845,7 +1841,6 @@ class DataCatalog(object):
     def get_dataframe(
         self,
         data_like: Union[str, SourceSpecDict, Path, pd.DataFrame, DataFrameSource],
-        *,
         variables: Optional[List] = None,
         time_range: TimeRange | tuple | dict | None = None,
         inclusive: bool = True,
