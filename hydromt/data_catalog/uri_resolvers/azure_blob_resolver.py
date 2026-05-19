@@ -4,6 +4,8 @@ import json
 import logging
 import os
 import re
+import time
+import urllib.error
 import urllib.request
 from itertools import product
 from typing import Any, Iterable
@@ -397,12 +399,18 @@ def _fetch_sas_token(url: str, retries: int = 3) -> str:
             with urllib.request.urlopen(url, timeout=10) as resp:  # noqa: S310
                 data = json.loads(resp.read())
             return data["token"]
-        except Exception as exc:
+        except (urllib.error.URLError, TimeoutError) as exc:
             if i >= retries - 1:
                 raise PermissionError(
-                    f"AzureBlobResolver: failed to fetch SAS token from '{url}' after {retries} attempts. "
-                    "Check that the URL is correct and reachable."
+                    f"AzureBlobResolver: failed to fetch SAS token from '{url}' "
+                    f"after {retries} attempts. Check that the URL is correct and reachable."
                 ) from exc
+            time.sleep(2**i)  # exponential backoff between retries
+        except (json.JSONDecodeError, KeyError) as exc:
+            raise PermissionError(
+                f"AzureBlobResolver: unexpected response from '{url}'. "
+                "Expected JSON with a 'token' field."
+            ) from exc
 
 
 def _abfs_to_https(uri: str, account_name: str, sas_token: str) -> str:
