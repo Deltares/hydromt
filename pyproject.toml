@@ -100,15 +100,17 @@ test = [
 	"pytest-timeout>=2.4", # darn hanging tests
 ]
 doc = [
+	"autodoc_pydantic>=2.0",              # pydantic autodoc
 	"hydromt[examples,extra]",            # examples are included in the docs
 	"nbsphinx>=0.9",                      # build notebooks in docs
-	"pydata-sphinx-theme>=0.17.0",        # theme
 	"sphinx_autosummary_accessors>=2025", # doc layout
 	"sphinx>=8,<9",                       # build docs, v9 is not compatible with sphinx_autosummary_accessors: https://github.com/xarray-contrib/sphinx-autosummary-accessors/issues/165
-	"sphinx_design>=0.6",                 # doc layout
+	"sphinxcontrib-mermaid>=2.0",         # mermaid diagram rendering
 	"sphinx-click>=6.0",                  # click integration
+	"sphinx_design>=0.6",                 # doc layout
 	"sbom4python>=0.12",                  # generate software bill of materials
-	"autodoc_pydantic>=2.0",              # pydantic autodoc
+	"pydata-sphinx-theme>=0.17.0",        # theme
+	"myst-parser>=5.0",                        # markdown support in Sphinx
 ]
 examples = [
 	"cartopy>=0.23",   # plotting examples

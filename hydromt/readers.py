@@ -749,7 +749,7 @@ def open_vector_from_table(
     else:
         raise IOError(f"Driver or extension {driver} unknown for vector table.")
     # infer points from table
-    df.columns = [c.lower() for c in df.columns]
+    df.columns = [str(c).lower() for c in df.columns]
 
     if x_dim is None:
         for dim in raster.XDIMS:
