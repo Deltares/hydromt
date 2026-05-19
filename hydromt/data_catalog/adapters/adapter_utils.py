@@ -78,7 +78,6 @@ def _create_time_slice(
         return None
 
     if isinstance(data, pd.DataFrame):
-        time_index = data.index
         if inclusive:
             # pad: last value <= tstart
             start_idx = time_index.searchsorted(pd_tstart, side="right") - 1

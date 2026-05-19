@@ -169,7 +169,7 @@ class GeoDatasetAdapter(DataAdapterBase):
         time_range : Optional[TimeRange], optional
             filter start and end times, by default None
         handle_nodata : NoDataStrategy, optional
-            how to handle no data being present in the result, by default NoDataStrategy.RAI
+            how to handle no data being present in the result, by default NoDataStrategy.RAISE
         inclusive : bool, optional
             whether to include the start and end times in the slice, by default True
 
