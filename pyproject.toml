@@ -70,7 +70,7 @@ io = [
 	"adlfs>=2024",          # Azure Data Lake / Blob Storage file system
 	"gcsfs>=2023.12.1",     # google cloud file system
 	"fastparquet>=2024",    # parquet IO
-	"openpyxl>=3.1",        # excel IO
+	"openpyxl>=3.1.3",        # excel IO
 	"pillow>=11.0",         # image IO
 	"s3fs>=2024",           # S3 file system
 ]
@@ -157,13 +157,15 @@ filterwarnings = [
 	"ignore:numpy.ndarray size changed:RuntimeWarning",
 	# "ignore::rasterio.errors.NotGeoreferencedWarning",                              # upstream issue with rasterio, see https://github.com/rasterio/rasterio/issues/2497
 	"ignore:Detected a customized `__new__` method in subclass:DeprecationWarning", #upstream error in universal_pathlib see https://github.com/fsspec/universal_pathlib?tab=readme-ov-file#migrating-to-v020
-	"ignore::ResourceWarning",                                                      # upstream issue with aoihttp, can remove once aoihttp 4.0 is stable: https://github.com/aio-libs/aiohttp/issues/5426
+	"ignore::ResourceWarning",                                                      # upstream issue with aiohttp, can remove once aiohttp 4.0 is stable: https://github.com/aio-libs/aiohttp/issues/5426
 	"ignore::pytest.PytestUnraisableExceptionWarning",                              # combine with the above: https://github.com/pytest-dev/pytest/issues/9825
 	'ignore:pathlib\.Path\.__enter__:DeprecationWarning',                           # xugrid in python 3.11
 	#   "ignore:Implicit None on return values is deprecated and will raise KeyErrors:DeprecationWarning"
 	"ignore:__array_wrap__ must accept context and return_scalar arguments \\(positionally\\) in the future:DeprecationWarning",
 	'ignore:Python 3.14 will, by default, filter extracted tar archives:DeprecationWarning',                                     # pooch tarfile in python 3.12
 	"ignore:'mode' parameter is deprecated and will be removed in Pillow 13:DeprecationWarning",                                 # Pillow 13
+	"ignore:The 'shapely\\.geos' module is deprecated, and will be removed in a future version. All attributes of 'shapely\\.geos' are available directly from the top-level 'shapely' namespace \\(since shapely 2\\.0\\.0\\)\\.:DeprecationWarning", # shapely 2.1.2
+	"ignore:'parseString' deprecated \\- use 'parse_string':pyparsing.warnings.PyparsingDeprecationWarning",
 
 	# numpy itself silences these
 	# https://github.com/numpy/numpy/blob/46268caa719db95ab2198bcd619f0e3120d7c52e/numpy/__init__.py#L704-L707
@@ -177,6 +179,7 @@ filterwarnings = [
 	# macos specific, see https://github.com/shapely/shapely/issues/2215
 	"ignore:divide by zero encountered in oriented_envelope:RuntimeWarning:shapely",
 	"ignore:invalid value encountered in oriented_envelope:RuntimeWarning:shapely",
+
 ]
 
 [tool.mypy]
