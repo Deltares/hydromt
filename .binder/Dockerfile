@@ -1,4 +1,4 @@
-FROM ghcr.io/prefix-dev/pixi:0.61.0-focal
+FROM ghcr.io/prefix-dev/pixi:0.68.1-focal
 RUN groupadd deltares && useradd deltares --uid 1000 -m -g deltares
 
 USER deltares
