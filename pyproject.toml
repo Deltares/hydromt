@@ -167,6 +167,7 @@ filterwarnings = [
 	"ignore:The 'shapely\\.geos' module is deprecated, and will be removed in a future version. All attributes of 'shapely\\.geos' are available directly from the top-level 'shapely' namespace \\(since shapely 2\\.0\\.0\\)\\.:DeprecationWarning", # shapely 2.1.2
 	"ignore:'parseString' deprecated \\- use 'parse_string':pyparsing.warnings.PyparsingDeprecationWarning",
 	"ignore:'oneOf' deprecated \\- use 'one_of':pyparsing.warnings.PyparsingDeprecationWarning",
+	"ignore:'asyncio\\.get_event_loop_policy' is deprecated and slated for removal in Python 3\\.16:DeprecationWarning",
 
 	# numpy itself silences these
 	# https://github.com/numpy/numpy/blob/46268caa719db95ab2198bcd619f0e3120d7c52e/numpy/__init__.py#L704-L707
