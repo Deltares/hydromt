@@ -6,6 +6,7 @@ platforms = ["linux-64", "win-64", "osx-arm64"]
 hydromt = { path = ".", editable = true }
 
 [dependencies]
+aiohttp = ">=3.10,<4"        # async http client
 affine = ">=2.4"             # Spatial rasterers affine transformations (bbox pixel coalision)
 bottleneck = ">=1.4"         # Spearmen rank computation
 click = ">=8.2"              # CLI configuration
