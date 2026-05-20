@@ -10,6 +10,7 @@ affine = ">=2.4"             # Spatial rasterers affine transformations (bbox pi
 bottleneck = ">=1.4"         # Spearmen rank computation
 click = ">=8.2"              # CLI configuration
 dask = ">=2024"              # lazy computing
+flit-core = ">=3.4.0,<4"     # build backend for editable local package (flit)
 fsspec = ">=2025"            # general file systems utilities
 geopandas = ">=1.0"          # pandas but geo, wraps fiona and shapely
 importlib_metadata = ">=8.0" # entrypoints backport
