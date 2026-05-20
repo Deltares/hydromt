@@ -73,7 +73,9 @@ io = [
 	"pillow>=11.0",         # image IO
 	"s3fs>=2024",           # S3 file system
 ]
-
+vrt = [
+	"gdal>=3.5.0", # vrt for caching of mosaic raster
+]
 extra = [
 	"matplotlib>=3.0", # plotting; required for slippy tiles
 	"pyet>=1.3",       # calc evapotranspiration, quite well used, used in all wflow models but domain specific
@@ -235,17 +237,15 @@ python = "3.14.*"
 [tool.pixi.pypi-dependencies]
 hydromt = { path = ".", editable = true }
 
-# pypi does not have these binary wheels for osx-arm64
-[tool.pixi.target.osx-arm64.dependencies]
-netcdf4 = "*"
-rasterio = ">=1.4.4,<1.5"
-libgdal-hdf5 = ">=3.12.1,<4"
-libgdal-netcdf = ">=3.12.1,<4"
+[tool.pixi.pypi-options]
+no-build = ["matplotlib"]
+
+[tool.pixi.feature.vrt.dependencies]
+gdal = ">=3.5.0"
+numpy = ">=2.0"  # numpy requires 1.0, but we need to pin numpy as requirement of gdal.
 
 [tool.pixi.feature.lowest-deps]
 solve-strategy = "lowest-direct"
-pypi-options = { no-build = true }
-tasks = { test = { cmd = ["pytest", "-W", "default"] } }
 
 [tool.pixi.feature.doc.tasks]
 doctest = { cmd = [
@@ -333,6 +333,7 @@ clean-docs-examples = { cmd = ["rm", "-rf", "docs/examples"] }
 default = { features = [
 	"py314",
 	"io",
+	"vrt",
 	"extra",
 	"dev",
 	"test",
@@ -343,6 +344,7 @@ default = { features = [
 binder = { features = [
 	"py313",
 	"io",
+	"vrt",
 	"extra",
 	"examples",
 ], solve-group = "py313" } # cannot do 3.14 yet, cartopy does not provide wheels for 3.14 yet.
@@ -350,6 +352,7 @@ binder = { features = [
 full-py314 = { features = [
 	"py314",
 	"io",
+	"vrt",
 	"extra",
 	"dev",
 	"test",
@@ -360,6 +363,7 @@ low-py314 = { features = [
 	"lowest-deps",
 	"py314",
 	"io",
+	"vrt",
 	"extra",
 	"dev",
 	"test",
@@ -370,6 +374,7 @@ min-py314 = { features = ["py314", "test"], solve-group = "py314" }
 full-py313 = { features = [
 	"py313",
 	"io",
+	"vrt",
 	"extra",
 	"dev",
 	"test",
@@ -380,6 +385,7 @@ low-py313 = { features = [
 	"lowest-deps",
 	"py313",
 	"io",
+	"vrt",
 	"extra",
 	"dev",
 	"test",
@@ -391,6 +397,7 @@ min-py313 = { features = ["py313", "test"], solve-group = "py313" }
 full-py312 = { features = [
 	"py312",
 	"io",
+	"vrt",
 	"extra",
 	"dev",
 	"test",
@@ -401,6 +408,7 @@ low-py312 = { features = [
 	"lowest-deps",
 	"py312",
 	"io",
+	"vrt",
 	"extra",
 	"dev",
 	"test",

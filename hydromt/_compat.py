@@ -4,6 +4,7 @@ __all__: list[str] = []
 
 HAS_ADLFS = False
 HAS_GCSFS = False
+HAS_GDAL = False
 HAS_OPENPYXL = False
 HAS_PYET = False
 HAS_S3FS = False
@@ -12,6 +13,13 @@ try:
     import gcsfs
 
     HAS_GCSFS = True
+except ImportError:
+    pass
+
+try:
+    from osgeo import gdal
+
+    HAS_GDAL = True
 except ImportError:
     pass
 

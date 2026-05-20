@@ -25,7 +25,7 @@ from pystac import Item as StacItem
 from shapely import box
 from yaml import dump
 
-from hydromt._compat import HAS_ADLFS, HAS_GCSFS, HAS_OPENPYXL, HAS_S3FS
+from hydromt._compat import HAS_ADLFS, HAS_GCSFS, HAS_GDAL, HAS_OPENPYXL, HAS_S3FS
 from hydromt._utils import temp_env
 from hydromt.config import Settings
 from hydromt.data_catalog.adapters import (
@@ -1209,6 +1209,7 @@ class TestGetRasterDataset:
 
         assert isinstance(da, xr.DataArray)
 
+    @pytest.mark.skipif(not HAS_GDAL, reason="GDAL not installed.")
     @pytest.mark.skipif(not HAS_S3FS, reason="S3FS not installed.")
     def test_aws_worldcover(self, test_settings: Settings, catalog_dir: Path):
         catalog_fn = catalog_dir / "aws_data" / "v1.0.0" / "data_catalog.yml"
@@ -1260,6 +1261,7 @@ class TestGetRasterDataset:
         assert not np.any(ds[ds.raster.x_dim] > 180)
 
     @pytest.mark.integration
+    @pytest.mark.skipif(not HAS_GDAL, reason="GDAL not installed.")
     def test_reads_slippy_map_output(self, test_data_dir: Path):
         # write vrt data
         name = "tiled"
