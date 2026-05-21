@@ -165,8 +165,7 @@ filterwarnings = [
 	'ignore:Python 3.14 will, by default, filter extracted tar archives:DeprecationWarning',                                                                                                                                                           # pooch tarfile in python 3.12
 	"ignore:'mode' parameter is deprecated and will be removed in Pillow 13:DeprecationWarning",                                                                                                                                                       # Pillow 13
 	"ignore:The 'shapely\\.geos' module is deprecated, and will be removed in a future version. All attributes of 'shapely\\.geos' are available directly from the top-level 'shapely' namespace \\(since shapely 2\\.0\\.0\\)\\.:DeprecationWarning", # shapely 2.1.2
-	"ignore:'parseString' deprecated \\- use 'parse_string':pyparsing.warnings.PyparsingDeprecationWarning",
-	"ignore:'oneOf' deprecated \\- use 'one_of':pyparsing.warnings.PyparsingDeprecationWarning",
+	"ignore:.*:pyparsing.warnings.PyparsingDeprecationWarning",
 	"ignore:'asyncio\\.get_event_loop_policy' is deprecated and slated for removal in Python 3\\.16:DeprecationWarning",
 
 	# numpy itself silences these
