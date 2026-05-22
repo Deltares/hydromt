@@ -1,11 +1,9 @@
 {
     "python.testing.pytestArgs": [
-        "-rs",
         "tests"
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
-    "python.testing.pytestPath": "${env:CONDA_PREFIX}/Scripts/pytest",
     "[python]": {
         "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.codeActionsOnSave": {

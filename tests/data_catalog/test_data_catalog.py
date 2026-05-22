@@ -2,7 +2,6 @@
 
 import glob
 import os
-import sys
 import warnings
 import xml.etree.ElementTree as ET
 from datetime import datetime
@@ -2091,19 +2090,18 @@ def require_earthdatahub_credentials():
     import netrc
 
     try:
-        netrc_path = (
-            os.path.join(os.environ["USERPROFILE"], "_netrc")
-            if sys.platform == "win32"
-            else None
-        )
-        credentials = netrc.netrc(netrc_path)
-        if "api.earthdatahub.destine.eu" not in credentials.hosts:
-            pytest.skip(
-                "No Earth Data Hub credentials found in netrc file (.netrc/_netrc) for host api.earthdatahub.destine.eu."
-            )
+        credentials = netrc.netrc()
     except FileNotFoundError:
+        try:
+            credentials = netrc.netrc(Path.home() / "_netrc")
+        except FileNotFoundError:
+            pytest.skip(
+                "No netrc file found (.netrc/_netrc) for Earth Data Hub mirror authentication."
+            )
+
+    if "api.earthdatahub.destine.eu" not in credentials.hosts:
         pytest.skip(
-            "No netrc file found (.netrc/_netrc) for Earth Data Hub mirror authentication."
+            "No Earth Data Hub credentials found in netrc file (.netrc/_netrc) for host api.earthdatahub.destine.eu."
         )
 
 
