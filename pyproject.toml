@@ -237,6 +237,11 @@ hydromt = { path = ".", editable = true }
 
 [tool.pixi.feature.lowest-deps]
 solve-strategy = "lowest-direct"
+pypi-options.no-build = true
+pypi-options.no-binary = ["cartopy"]
+
+[tool.pixi.system-requirements]
+macos = "14.0"
 
 [tool.pixi.feature.doc.tasks]
 doctest = { cmd = [
