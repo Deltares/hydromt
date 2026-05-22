@@ -34,6 +34,7 @@ dependencies = [
 	"pyyaml>=6.0.2",           # yaml interface (6.0.2 adds py3.13 wheels, older builds fail)
 	"rasterio>=1.4",           # raster wrapper around gdal
 	"requests>=2.32.2",        # donwload stuff
+	"rio-vrt>=0.3.1",          # building vrt files for caching of mosaic rasters
 	"rioxarray>=0.18",         # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
 	"scipy>=1.14",             # scientific utilities
 	"shapely>=2.1.2",          # geometry transforms
@@ -72,9 +73,6 @@ io = [
 	"openpyxl>=3.1",        # excel IO
 	"pillow>=11.0",         # image IO
 	"s3fs>=2024",           # S3 file system
-]
-vrt = [
-	"gdal>=3.5.0", # vrt for caching of mosaic raster
 ]
 extra = [
 	"matplotlib>=3.0", # plotting; required for slippy tiles
@@ -237,13 +235,6 @@ python = "3.14.*"
 [tool.pixi.pypi-dependencies]
 hydromt = { path = ".", editable = true }
 
-[tool.pixi.pypi-options]
-no-build = ["matplotlib"]
-
-[tool.pixi.feature.vrt.dependencies]
-gdal = ">=3.5.0"
-numpy = ">=2.0"  # numpy requires 1.0, but we need to pin numpy as requirement of gdal.
-
 [tool.pixi.feature.lowest-deps]
 solve-strategy = "lowest-direct"
 
@@ -333,7 +324,6 @@ clean-docs-examples = { cmd = ["rm", "-rf", "docs/examples"] }
 default = { features = [
 	"py314",
 	"io",
-	"vrt",
 	"extra",
 	"dev",
 	"test",
@@ -344,7 +334,6 @@ default = { features = [
 binder = { features = [
 	"py313",
 	"io",
-	"vrt",
 	"extra",
 	"examples",
 ], solve-group = "py313" } # cannot do 3.14 yet, cartopy does not provide wheels for 3.14 yet.
@@ -352,7 +341,6 @@ binder = { features = [
 full-py314 = { features = [
 	"py314",
 	"io",
-	"vrt",
 	"extra",
 	"dev",
 	"test",
@@ -363,7 +351,6 @@ low-py314 = { features = [
 	"lowest-deps",
 	"py314",
 	"io",
-	"vrt",
 	"extra",
 	"dev",
 	"test",
@@ -374,7 +361,6 @@ min-py314 = { features = ["py314", "test"], solve-group = "py314" }
 full-py313 = { features = [
 	"py313",
 	"io",
-	"vrt",
 	"extra",
 	"dev",
 	"test",
@@ -385,7 +371,6 @@ low-py313 = { features = [
 	"lowest-deps",
 	"py313",
 	"io",
-	"vrt",
 	"extra",
 	"dev",
 	"test",
@@ -397,7 +382,6 @@ min-py313 = { features = ["py313", "test"], solve-group = "py313" }
 full-py312 = { features = [
 	"py312",
 	"io",
-	"vrt",
 	"extra",
 	"dev",
 	"test",
@@ -408,7 +392,6 @@ low-py312 = { features = [
 	"lowest-deps",
 	"py312",
 	"io",
-	"vrt",
 	"extra",
 	"dev",
 	"test",

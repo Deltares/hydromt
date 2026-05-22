@@ -13,16 +13,10 @@ import numpy as np
 from affine import Affine
 from fsspec import AbstractFileSystem, url_to_fs
 from pyproj import CRS
+from rio_vrt import build_vrt
 
-from hydromt._compat import HAS_GDAL
 from hydromt._utils.uris import _strip_scheme, _strip_vsi
 from hydromt.config import SETTINGS
-
-if HAS_GDAL:
-    from osgeo import gdal
-
-    gdal.UseExceptions()
-
 
 logger = logging.getLogger(__name__)
 
@@ -113,9 +107,6 @@ def cache_vrt_tiles(
     vrt_destination_path : Path
         Path to cached vrt
     """
-    if not HAS_GDAL:
-        raise ImportError("Can't cache vrt's without GDAL installed.")
-
     # Get the filesystem type
     fs = fs if fs is not None else url_to_fs(vrt_uri)[0]
 
@@ -171,15 +162,8 @@ def cache_vrt_tiles(
         new = new + cur
         os.unlink(vrt_destination_path)
 
-    # Build the vrt with gdal
-    out_ds = gdal.BuildVRT(
-        destName=vrt_destination_path.as_posix(),
-        srcDSOrSrcDSTab=new,
-    )
-
-    # Close and dereference the gdal dataset
-    out_ds.Close()
-    out_ds = None
+    # Build the vrt with rio_vrt
+    build_vrt(vrt_destination_path, new)
 
     return vrt_destination_path
 
