@@ -44,7 +44,7 @@ class TestCreateTimeSliceXarray:
     """Tests for _create_time_slice with xr.Dataset input."""
 
     @pytest.mark.parametrize(
-        "tstart, tstop, inclusive, expected_start, expected_stop",
+        ("tstart", "tstop", "inclusive", "expected_start", "expected_stop"),
         [
             # exact match on data points, inclusive
             ("2020-01-03", "2020-01-07", True, "2020-01-03", "2020-01-07"),
@@ -86,7 +86,7 @@ class TestCreateTimeSliceXarray:
         assert result.stop == np.datetime64(expected_stop)
 
     @pytest.mark.parametrize(
-        "tstart, tstop, expected_start, expected_stop",
+        ("tstart", "tstop", "expected_start", "expected_stop"),
         [
             # tstart before data: clamps to data start
             ("2019-12-25", "2020-01-05", "2020-01-01", "2020-01-05"),
@@ -107,7 +107,7 @@ class TestCreateTimeSliceXarray:
         assert result.stop == np.datetime64(expected_stop)
 
     @pytest.mark.parametrize(
-        "tstart, tstop, strategy, expect_raises",
+        ("tstart", "tstop", "strategy", "expect_raises"),
         [
             # no overlap before data, RAISE raises
             ("2019-01-01", "2019-06-01", NoDataStrategy.RAISE, True),
@@ -132,7 +132,7 @@ class TestCreateTimeSliceXarray:
             assert result is None
 
     @pytest.mark.parametrize(
-        "tstart, tstop, expected_start, expected_stop",
+        ("tstart", "tstop", "expected_start", "expected_stop"),
         [
             # range encompassing single time step
             ("2020-01-01", "2020-01-10", "2020-01-05", "2020-01-05"),
@@ -176,7 +176,7 @@ class TestCreateTimeSliceDataFrame:
     """Tests for _create_time_slice with pd.DataFrame input."""
 
     @pytest.mark.parametrize(
-        "tstart, tstop, inclusive, expected_start, expected_stop",
+        ("tstart", "tstop", "inclusive", "expected_start", "expected_stop"),
         [
             # exact match on data points, inclusive
             ("2020-01-03", "2020-01-07", True, "2020-01-03", "2020-01-07"),
@@ -216,7 +216,7 @@ class TestCreateTimeSliceDataFrame:
         assert result.stop == pd.Timestamp(expected_stop)
 
     @pytest.mark.parametrize(
-        "tstart, tstop, expected_start, expected_stop",
+        ("tstart", "tstop", "expected_start", "expected_stop"),
         [
             # tstart before data: clamps to data start
             ("2019-12-25", "2020-01-05", "2020-01-01", "2020-01-05"),
@@ -237,7 +237,7 @@ class TestCreateTimeSliceDataFrame:
         assert result.stop == pd.Timestamp(expected_stop)
 
     @pytest.mark.parametrize(
-        "tstart, tstop, strategy, expect_raises",
+        ("tstart", "tstop", "strategy", "expect_raises"),
         [
             # no overlap before data, RAISE raises
             ("2019-01-01", "2019-06-01", NoDataStrategy.RAISE, True),
@@ -262,7 +262,7 @@ class TestCreateTimeSliceDataFrame:
             assert result is None
 
     @pytest.mark.parametrize(
-        "tstart, tstop, expected_start, expected_stop",
+        ("tstart", "tstop", "expected_start", "expected_stop"),
         [
             # range encompassing single time step
             ("2020-01-01", "2020-01-10", "2020-01-05", "2020-01-05"),
