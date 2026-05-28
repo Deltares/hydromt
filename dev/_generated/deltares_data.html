@@ -1784,7 +1784,7 @@ meteo</label><div class="sd-tab-content docutils">
 <span class="sd-summary-text">era5</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
 <dl class="field-list simple">
 <dt class="field-odd">uri<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text">meteo/era5_daily.zarr</p>
+<dd class="field-odd"><p class="sd-card-text">meteo/era5_daily/nc_merged/era5_{year}_daily.nc</p>
 </dd>
 <dt class="field-even">data_type<span class="colon">:</span></dt>
 <dd class="field-even"><p class="sd-card-text">RasterDataset</p>
@@ -1800,84 +1800,6 @@ meteo</label><div class="sd-tab-content docutils">
 </dd>
 <dt class="field-even">notes<span class="colon">:</span></dt>
 <dd class="field-even"><p class="sd-card-text">Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency using right label for time.</p>
-</dd>
-<dt class="field-odd">paper_doi<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text">10.1002/qj.3803</p>
-</dd>
-<dt class="field-even">paper_ref<span class="colon">:</span></dt>
-<dd class="field-even"><p class="sd-card-text">Hersbach et al. (2019)</p>
-</dd>
-<dt class="field-odd">processing_script<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text"><a class="reference external" href="https://github.com/Deltares/hydromt/blob/main/data/src/era5_download_resample_convert.py">https://github.com/Deltares/hydromt/blob/main/data/src/era5_download_resample_convert.py</a></p>
-</dd>
-<dt class="field-even">url<span class="colon">:</span></dt>
-<dd class="field-even"><p class="sd-card-text"><a class="reference external" href="https://doi.org/10.24381/cds.bd0915c6">https://doi.org/10.24381/cds.bd0915c6</a></p>
-</dd>
-<dt class="field-odd">license<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text"><a class="reference external" href="https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products">https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products</a></p>
-</dd>
-</dl>
-</div>
-</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
-<summary class="sd-summary-title sd-card-header">
-<span class="sd-summary-text">era5</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
-<dl class="field-list simple">
-<dt class="field-odd">uri<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text">meteo/era5_daily.zarr</p>
-</dd>
-<dt class="field-even">data_type<span class="colon">:</span></dt>
-<dd class="field-even"><p class="sd-card-text">RasterDataset</p>
-</dd>
-<dt class="field-odd">driver<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text">RasterDatasetXarrayDriver</p>
-</dd>
-<dt class="field-even">crs<span class="colon">:</span></dt>
-<dd class="field-even"><p class="sd-card-text">4326</p>
-</dd>
-<dt class="field-odd">extent<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text">{‘bbox’: {‘West’: -0.125, ‘South’: -90.125, ‘East’: 359.875, ‘North’: 90.125}, ‘time_range’: {‘start’: ‘1950-01-02’, ‘end’: ‘2023-11-30’}}</p>
-</dd>
-<dt class="field-even">notes<span class="colon">:</span></dt>
-<dd class="field-even"><p class="sd-card-text">Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency using right label for time.</p>
-</dd>
-<dt class="field-odd">paper_doi<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text">10.1002/qj.3803</p>
-</dd>
-<dt class="field-even">paper_ref<span class="colon">:</span></dt>
-<dd class="field-even"><p class="sd-card-text">Hersbach et al. (2019)</p>
-</dd>
-<dt class="field-odd">processing_script<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text"><a class="reference external" href="https://github.com/Deltares/hydromt/blob/main/data/src/era5_download_resample_convert.py">https://github.com/Deltares/hydromt/blob/main/data/src/era5_download_resample_convert.py</a></p>
-</dd>
-<dt class="field-even">url<span class="colon">:</span></dt>
-<dd class="field-even"><p class="sd-card-text"><a class="reference external" href="https://doi.org/10.24381/cds.bd0915c6">https://doi.org/10.24381/cds.bd0915c6</a></p>
-</dd>
-<dt class="field-odd">license<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text"><a class="reference external" href="https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products">https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products</a></p>
-</dd>
-</dl>
-</div>
-</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
-<summary class="sd-summary-title sd-card-header">
-<span class="sd-summary-text">era5_hourly</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
-<dl class="field-list simple">
-<dt class="field-odd">uri<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text">meteo/era5.zarr</p>
-</dd>
-<dt class="field-even">data_type<span class="colon">:</span></dt>
-<dd class="field-even"><p class="sd-card-text">RasterDataset</p>
-</dd>
-<dt class="field-odd">driver<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text">RasterDatasetXarrayDriver</p>
-</dd>
-<dt class="field-even">crs<span class="colon">:</span></dt>
-<dd class="field-even"><p class="sd-card-text">4326</p>
-</dd>
-<dt class="field-odd">extent<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text">{‘bbox’: {‘West’: -0.125, ‘South’: -90.125, ‘East’: 359.875, ‘North’: 90.125}, ‘time_range’: {‘start’: ‘1950-01-01’, ‘end’: ‘2023-03-01’}}</p>
-</dd>
-<dt class="field-even">notes<span class="colon">:</span></dt>
-<dd class="field-even"><p class="sd-card-text">Extracted from Copernicus Climate Data Store</p>
 </dd>
 <dt class="field-odd">paper_doi<span class="colon">:</span></dt>
 <dd class="field-odd"><p class="sd-card-text">10.1002/qj.3803</p>
@@ -1886,7 +1808,7 @@ meteo</label><div class="sd-tab-content docutils">
 <dd class="field-even"><p class="sd-card-text">Hersbach et al. (2019)</p>
 </dd>
 <dt class="field-odd">url<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text"><a class="reference external" href="https://doi.org/10.24381/cds.adbb2d47">https://doi.org/10.24381/cds.adbb2d47</a></p>
+<dd class="field-odd"><p class="sd-card-text"><a class="reference external" href="https://doi.org/10.24381/cds.bd0915c6">https://doi.org/10.24381/cds.bd0915c6</a></p>
 </dd>
 <dt class="field-even">license<span class="colon">:</span></dt>
 <dd class="field-even"><p class="sd-card-text"><a class="reference external" href="https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products">https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products</a></p>
@@ -1898,7 +1820,7 @@ meteo</label><div class="sd-tab-content docutils">
 <span class="sd-summary-text">era5_hourly</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
 <dl class="field-list simple">
 <dt class="field-odd">uri<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text">meteo/era5.zarr</p>
+<dd class="field-odd"><p class="sd-card-text">meteo/era5/{variable}/era5_{variable}_{year}_hourly.nc</p>
 </dd>
 <dt class="field-even">data_type<span class="colon">:</span></dt>
 <dd class="field-even"><p class="sd-card-text">RasterDataset</p>
@@ -4394,7 +4316,7 @@ all</label><div class="sd-tab-content docutils">
 <span class="sd-summary-text">era5</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
 <dl class="field-list simple">
 <dt class="field-odd">uri<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text">meteo/era5_daily.zarr</p>
+<dd class="field-odd"><p class="sd-card-text">meteo/era5_daily/nc_merged/era5_{year}_daily.nc</p>
 </dd>
 <dt class="field-even">data_type<span class="colon">:</span></dt>
 <dd class="field-even"><p class="sd-card-text">RasterDataset</p>
@@ -4413,90 +4335,6 @@ all</label><div class="sd-tab-content docutils">
 </dd>
 <dt class="field-odd">notes<span class="colon">:</span></dt>
 <dd class="field-odd"><p class="sd-card-text">Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency using right label for time.</p>
-</dd>
-<dt class="field-even">paper_doi<span class="colon">:</span></dt>
-<dd class="field-even"><p class="sd-card-text">10.1002/qj.3803</p>
-</dd>
-<dt class="field-odd">paper_ref<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text">Hersbach et al. (2019)</p>
-</dd>
-<dt class="field-even">processing_script<span class="colon">:</span></dt>
-<dd class="field-even"><p class="sd-card-text"><a class="reference external" href="https://github.com/Deltares/hydromt/blob/main/data/src/era5_download_resample_convert.py">https://github.com/Deltares/hydromt/blob/main/data/src/era5_download_resample_convert.py</a></p>
-</dd>
-<dt class="field-odd">url<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text"><a class="reference external" href="https://doi.org/10.24381/cds.bd0915c6">https://doi.org/10.24381/cds.bd0915c6</a></p>
-</dd>
-<dt class="field-even">license<span class="colon">:</span></dt>
-<dd class="field-even"><p class="sd-card-text"><a class="reference external" href="https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products">https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products</a></p>
-</dd>
-</dl>
-</div>
-</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
-<summary class="sd-summary-title sd-card-header">
-<span class="sd-summary-text">era5</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
-<dl class="field-list simple">
-<dt class="field-odd">uri<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text">meteo/era5_daily.zarr</p>
-</dd>
-<dt class="field-even">data_type<span class="colon">:</span></dt>
-<dd class="field-even"><p class="sd-card-text">RasterDataset</p>
-</dd>
-<dt class="field-odd">driver<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text">RasterDatasetXarrayDriver</p>
-</dd>
-<dt class="field-even">crs<span class="colon">:</span></dt>
-<dd class="field-even"><p class="sd-card-text">4326</p>
-</dd>
-<dt class="field-odd">extent<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text">{‘bbox’: {‘West’: -0.125, ‘South’: -90.125, ‘East’: 359.875, ‘North’: 90.125}, ‘time_range’: {‘start’: ‘1950-01-02’, ‘end’: ‘2023-11-30’}}</p>
-</dd>
-<dt class="field-even">category<span class="colon">:</span></dt>
-<dd class="field-even"><p class="sd-card-text">meteo</p>
-</dd>
-<dt class="field-odd">notes<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text">Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency using right label for time.</p>
-</dd>
-<dt class="field-even">paper_doi<span class="colon">:</span></dt>
-<dd class="field-even"><p class="sd-card-text">10.1002/qj.3803</p>
-</dd>
-<dt class="field-odd">paper_ref<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text">Hersbach et al. (2019)</p>
-</dd>
-<dt class="field-even">processing_script<span class="colon">:</span></dt>
-<dd class="field-even"><p class="sd-card-text"><a class="reference external" href="https://github.com/Deltares/hydromt/blob/main/data/src/era5_download_resample_convert.py">https://github.com/Deltares/hydromt/blob/main/data/src/era5_download_resample_convert.py</a></p>
-</dd>
-<dt class="field-odd">url<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text"><a class="reference external" href="https://doi.org/10.24381/cds.bd0915c6">https://doi.org/10.24381/cds.bd0915c6</a></p>
-</dd>
-<dt class="field-even">license<span class="colon">:</span></dt>
-<dd class="field-even"><p class="sd-card-text"><a class="reference external" href="https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products">https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products</a></p>
-</dd>
-</dl>
-</div>
-</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
-<summary class="sd-summary-title sd-card-header">
-<span class="sd-summary-text">era5_hourly</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
-<dl class="field-list simple">
-<dt class="field-odd">uri<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text">meteo/era5.zarr</p>
-</dd>
-<dt class="field-even">data_type<span class="colon">:</span></dt>
-<dd class="field-even"><p class="sd-card-text">RasterDataset</p>
-</dd>
-<dt class="field-odd">driver<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text">RasterDatasetXarrayDriver</p>
-</dd>
-<dt class="field-even">crs<span class="colon">:</span></dt>
-<dd class="field-even"><p class="sd-card-text">4326</p>
-</dd>
-<dt class="field-odd">extent<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text">{‘bbox’: {‘West’: -0.125, ‘South’: -90.125, ‘East’: 359.875, ‘North’: 90.125}, ‘time_range’: {‘start’: ‘1950-01-01’, ‘end’: ‘2023-03-01’}}</p>
-</dd>
-<dt class="field-even">category<span class="colon">:</span></dt>
-<dd class="field-even"><p class="sd-card-text">meteo</p>
-</dd>
-<dt class="field-odd">notes<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text">Extracted from Copernicus Climate Data Store</p>
 </dd>
 <dt class="field-even">paper_doi<span class="colon">:</span></dt>
 <dd class="field-even"><p class="sd-card-text">10.1002/qj.3803</p>
@@ -4505,7 +4343,7 @@ all</label><div class="sd-tab-content docutils">
 <dd class="field-odd"><p class="sd-card-text">Hersbach et al. (2019)</p>
 </dd>
 <dt class="field-even">url<span class="colon">:</span></dt>
-<dd class="field-even"><p class="sd-card-text"><a class="reference external" href="https://doi.org/10.24381/cds.adbb2d47">https://doi.org/10.24381/cds.adbb2d47</a></p>
+<dd class="field-even"><p class="sd-card-text"><a class="reference external" href="https://doi.org/10.24381/cds.bd0915c6">https://doi.org/10.24381/cds.bd0915c6</a></p>
 </dd>
 <dt class="field-odd">license<span class="colon">:</span></dt>
 <dd class="field-odd"><p class="sd-card-text"><a class="reference external" href="https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products">https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products</a></p>
@@ -4517,7 +4355,7 @@ all</label><div class="sd-tab-content docutils">
 <span class="sd-summary-text">era5_hourly</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
 <dl class="field-list simple">
 <dt class="field-odd">uri<span class="colon">:</span></dt>
-<dd class="field-odd"><p class="sd-card-text">meteo/era5.zarr</p>
+<dd class="field-odd"><p class="sd-card-text">meteo/era5/{variable}/era5_{variable}_{year}_hourly.nc</p>
 </dd>
 <dt class="field-even">data_type<span class="colon">:</span></dt>
 <dd class="field-even"><p class="sd-card-text">RasterDataset</p>
