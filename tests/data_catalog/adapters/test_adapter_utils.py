@@ -8,6 +8,9 @@ import xarray as xr
 from hydromt.data_catalog.adapters.adapter_utils import _create_time_slice
 from hydromt.error import NoDataException, NoDataStrategy
 
+# Default value of `inclusive` in _create_time_slice; update here if the default changes.
+DEFAULT_INCLUSIVE = False
+
 
 @pytest.fixture
 def daily_xr_dataset():
@@ -40,167 +43,115 @@ def single_step_dataframe():
 class TestCreateTimeSliceXarray:
     """Tests for _create_time_slice with xr.Dataset input."""
 
-    def test_exact_match_inclusive(self, daily_xr_dataset):
-        """Exact timestamps that match data points."""
+    @pytest.mark.parametrize(
+        "tstart, tstop, inclusive, expected_start, expected_stop",
+        [
+            # exact match on data points, inclusive
+            ("2020-01-03", "2020-01-07", True, "2020-01-03", "2020-01-07"),
+            # exact match on data points, exclusive (same result)
+            ("2020-01-03", "2020-01-07", False, "2020-01-03", "2020-01-07"),
+            # tstart between points, inclusive pads to earlier point
+            ("2020-01-03T12:00:00", "2020-01-07", True, "2020-01-03", "2020-01-07"),
+            # tstart between points, exclusive backfills to later point
+            ("2020-01-03T12:00:00", "2020-01-07", False, "2020-01-04", "2020-01-07"),
+            # tstop between points, inclusive backfills to later point
+            ("2020-01-03", "2020-01-07T12:00:00", True, "2020-01-03", "2020-01-08"),
+            # tstop between points, exclusive pads to earlier point
+            ("2020-01-03", "2020-01-07T12:00:00", False, "2020-01-03", "2020-01-07"),
+            # both between points, inclusive widens range
+            (
+                "2020-01-03T12:00:00",
+                "2020-01-07T12:00:00",
+                True,
+                "2020-01-03",
+                "2020-01-08",
+            ),
+            # both between points, exclusive narrows range
+            (
+                "2020-01-03T12:00:00",
+                "2020-01-07T12:00:00",
+                False,
+                "2020-01-04",
+                "2020-01-07",
+            ),
+        ],
+    )
+    def test_time_alignment(
+        self, daily_xr_dataset, tstart, tstop, inclusive, expected_start, expected_stop
+    ):
         result = _create_time_slice(
-            daily_xr_dataset, "2020-01-03", "2020-01-07", inclusive=True
+            daily_xr_dataset, tstart, tstop, inclusive=inclusive
         )
-        assert result.start == np.datetime64("2020-01-03")
-        assert result.stop == np.datetime64("2020-01-07")
+        assert result.start == np.datetime64(expected_start)
+        assert result.stop == np.datetime64(expected_stop)
 
-    def test_exact_match_exclusive(self, daily_xr_dataset):
-        """Exact timestamps that match data points, exclusive mode."""
+    @pytest.mark.parametrize(
+        "tstart, tstop, expected_start, expected_stop",
+        [
+            # tstart before data: clamps to data start
+            ("2019-12-25", "2020-01-05", "2020-01-01", "2020-01-05"),
+            # tstop after data: clamps to data end
+            ("2020-01-05", "2020-02-01", "2020-01-05", "2020-01-10"),
+            # both beyond data: clamps to full data extent
+            ("2019-12-01", "2020-02-01", "2020-01-01", "2020-01-10"),
+        ],
+    )
+    def test_clamping(
+        self, daily_xr_dataset, tstart, tstop, expected_start, expected_stop
+    ):
         result = _create_time_slice(
-            daily_xr_dataset, "2020-01-03", "2020-01-07", inclusive=False
-        )
-        assert result.start == np.datetime64("2020-01-03")
-        assert result.stop == np.datetime64("2020-01-07")
-
-    def test_tstart_between_points_inclusive(self, daily_xr_dataset):
-        """Tstart falls between data points with inclusive=True should pad (use earlier point)."""
-        result = _create_time_slice(
-            daily_xr_dataset, "2020-01-03T12:00:00", "2020-01-07", inclusive=True
-        )
-        # inclusive: pad -> last value <= tstart -> 2020-01-03
-        assert result.start == np.datetime64("2020-01-03")
-        assert result.stop == np.datetime64("2020-01-07")
-
-    def test_tstart_between_points_exclusive(self, daily_xr_dataset):
-        """Tstart falls between data points with inclusive=False should backfill (use later point)."""
-        result = _create_time_slice(
-            daily_xr_dataset, "2020-01-03T12:00:00", "2020-01-07", inclusive=False
-        )
-        # exclusive: backfill -> first value >= tstart -> 2020-01-04
-        assert result.start == np.datetime64("2020-01-04")
-        assert result.stop == np.datetime64("2020-01-07")
-
-    def test_tstop_between_points_inclusive(self, daily_xr_dataset):
-        """Tstop falls between data points with inclusive=True should backfill (use later point)."""
-        result = _create_time_slice(
-            daily_xr_dataset, "2020-01-03", "2020-01-07T12:00:00", inclusive=True
-        )
-        # inclusive: backfill -> first value >= tstop -> 2020-01-08
-        assert result.start == np.datetime64("2020-01-03")
-        assert result.stop == np.datetime64("2020-01-08")
-
-    def test_tstop_between_points_exclusive(self, daily_xr_dataset):
-        """Tstop falls between data points with inclusive=False should pad (use earlier point)."""
-        result = _create_time_slice(
-            daily_xr_dataset, "2020-01-03", "2020-01-07T12:00:00", inclusive=False
-        )
-        # exclusive: pad -> last value <= tstop -> 2020-01-07
-        assert result.start == np.datetime64("2020-01-03")
-        assert result.stop == np.datetime64("2020-01-07")
-
-    def test_both_between_points_inclusive(self, daily_xr_dataset):
-        """Both tstart and tstop between data points, inclusive."""
-        result = _create_time_slice(
-            daily_xr_dataset,
-            "2020-01-03T12:00:00",
-            "2020-01-07T12:00:00",
-            inclusive=True,
-        )
-        assert result.start == np.datetime64("2020-01-03")
-        assert result.stop == np.datetime64("2020-01-08")
-
-    def test_both_between_points_exclusive(self, daily_xr_dataset):
-        """Both tstart and tstop between data points, exclusive."""
-        result = _create_time_slice(
-            daily_xr_dataset,
-            "2020-01-03T12:00:00",
-            "2020-01-07T12:00:00",
-            inclusive=False,
-        )
-        assert result.start == np.datetime64("2020-01-04")
-        assert result.stop == np.datetime64("2020-01-07")
-
-    def test_tstart_before_data_clamps(self, daily_xr_dataset):
-        """Tstart before data extent should clamp to data start."""
-        result = _create_time_slice(
-            daily_xr_dataset, "2019-12-25", "2020-01-05", inclusive=True
+            daily_xr_dataset, tstart, tstop, inclusive=DEFAULT_INCLUSIVE
         )
         assert result is not None
-        assert result.start == np.datetime64("2020-01-01")
-        assert result.stop == np.datetime64("2020-01-05")
+        assert result.start == np.datetime64(expected_start)
+        assert result.stop == np.datetime64(expected_stop)
 
-    def test_tstop_after_data_clamps(self, daily_xr_dataset):
-        """Tstop after data extent should clamp to data end."""
-        result = _create_time_slice(
-            daily_xr_dataset, "2020-01-05", "2020-02-01", inclusive=True
-        )
-        assert result is not None
-        assert result.start == np.datetime64("2020-01-05")
-        assert result.stop == np.datetime64("2020-01-10")
-
-    def test_both_beyond_data_clamps(self, daily_xr_dataset):
-        """Both tstart and tstop beyond data extent should clamp both."""
-        result = _create_time_slice(
-            daily_xr_dataset, "2019-12-01", "2020-02-01", inclusive=True
-        )
-        assert result is not None
-        assert result.start == np.datetime64("2020-01-01")
-        assert result.stop == np.datetime64("2020-01-10")
-
-    def test_no_overlap_before_raises(self, daily_xr_dataset):
-        """Completely out-of-range (before) with RAISE strategy."""
-        with pytest.raises(NoDataException):
-            _create_time_slice(
-                daily_xr_dataset,
-                "2019-01-01",
-                "2019-06-01",
-                handle_nodata=NoDataStrategy.RAISE,
+    @pytest.mark.parametrize(
+        "tstart, tstop, strategy, expect_raises",
+        [
+            # no overlap before data, RAISE raises
+            ("2019-01-01", "2019-06-01", NoDataStrategy.RAISE, True),
+            # no overlap after data, RAISE raises
+            ("2021-01-01", "2021-06-01", NoDataStrategy.RAISE, True),
+            # no overlap, IGNORE returns None
+            ("2021-01-01", "2021-06-01", NoDataStrategy.IGNORE, False),
+            # no overlap, WARN returns None
+            ("2021-01-01", "2021-06-01", NoDataStrategy.WARN, False),
+        ],
+    )
+    def test_no_overlap(self, daily_xr_dataset, tstart, tstop, strategy, expect_raises):
+        if expect_raises:
+            with pytest.raises(NoDataException):
+                _create_time_slice(
+                    daily_xr_dataset, tstart, tstop, handle_nodata=strategy
+                )
+        else:
+            result = _create_time_slice(
+                daily_xr_dataset, tstart, tstop, handle_nodata=strategy
             )
+            assert result is None
 
-    def test_no_overlap_after_raises(self, daily_xr_dataset):
-        """Completely out-of-range (after) with RAISE strategy."""
-        with pytest.raises(NoDataException):
-            _create_time_slice(
-                daily_xr_dataset,
-                "2021-01-01",
-                "2021-06-01",
-                handle_nodata=NoDataStrategy.RAISE,
-            )
-
-    def test_no_overlap_ignore_returns_none(self, daily_xr_dataset):
-        """Completely out-of-range with IGNORE strategy returns None."""
+    @pytest.mark.parametrize(
+        "tstart, tstop, expected_start, expected_stop",
+        [
+            # range encompassing single time step
+            ("2020-01-01", "2020-01-10", "2020-01-05", "2020-01-05"),
+            # exact match on single time step
+            ("2020-01-05", "2020-01-05", "2020-01-05", "2020-01-05"),
+        ],
+    )
+    def test_single_time_step(
+        self, single_step_xr_dataset, tstart, tstop, expected_start, expected_stop
+    ):
         result = _create_time_slice(
-            daily_xr_dataset,
-            "2021-01-01",
-            "2021-06-01",
-            handle_nodata=NoDataStrategy.IGNORE,
-        )
-        assert result is None
-
-    def test_no_overlap_warn_returns_none(self, daily_xr_dataset):
-        """Completely out-of-range with WARN strategy returns None."""
-        result = _create_time_slice(
-            daily_xr_dataset,
-            "2021-01-01",
-            "2021-06-01",
-            handle_nodata=NoDataStrategy.WARN,
-        )
-        assert result is None
-
-    def test_single_time_step(self, single_step_xr_dataset):
-        """Dataset with single time step, range encompassing it."""
-        result = _create_time_slice(
-            single_step_xr_dataset, "2020-01-01", "2020-01-10", inclusive=True
+            single_step_xr_dataset, tstart, tstop, inclusive=DEFAULT_INCLUSIVE
         )
         assert result is not None
-        assert result.start == np.datetime64("2020-01-05")
-        assert result.stop == np.datetime64("2020-01-05")
-
-    def test_single_time_step_exact(self, single_step_xr_dataset):
-        """Dataset with single time step, exact match."""
-        result = _create_time_slice(
-            single_step_xr_dataset, "2020-01-05", "2020-01-05", inclusive=True
-        )
-        assert result is not None
-        assert result.start == np.datetime64("2020-01-05")
-        assert result.stop == np.datetime64("2020-01-05")
+        assert result.start == np.datetime64(expected_start)
+        assert result.stop == np.datetime64(expected_stop)
 
     def test_single_time_step_no_overlap(self, single_step_xr_dataset):
-        """Dataset with single time step, no overlap raises."""
+        """No overlap with single time step raises."""
         with pytest.raises(NoDataException):
             _create_time_slice(
                 single_step_xr_dataset,
@@ -209,171 +160,128 @@ class TestCreateTimeSliceXarray:
                 handle_nodata=NoDataStrategy.RAISE,
             )
 
+    def test_unsorted_time_sorts_and_slices(self):
+        """Descending time dimension is sorted internally."""
+        times = pd.date_range("2020-01-01", "2020-01-10", freq="D")[::-1]
+        ds = xr.Dataset(
+            {"var": ("time", np.arange(len(times)))}, coords={"time": times}
+        )
+        result = _create_time_slice(ds, "2020-01-03", "2020-01-07")
+        assert result is not None
+        assert result.start == np.datetime64("2020-01-03")
+        assert result.stop == np.datetime64("2020-01-07")
+
 
 class TestCreateTimeSliceDataFrame:
     """Tests for _create_time_slice with pd.DataFrame input."""
 
-    def test_exact_match_inclusive(self, daily_dataframe):
-        """Exact timestamps that match data points."""
-        result = _create_time_slice(
-            daily_dataframe, "2020-01-03", "2020-01-07", inclusive=True
-        )
-        assert result.start == pd.Timestamp("2020-01-03")
-        assert result.stop == pd.Timestamp("2020-01-07")
+    @pytest.mark.parametrize(
+        "tstart, tstop, inclusive, expected_start, expected_stop",
+        [
+            # exact match on data points, inclusive
+            ("2020-01-03", "2020-01-07", True, "2020-01-03", "2020-01-07"),
+            # exact match on data points, exclusive (same result)
+            ("2020-01-03", "2020-01-07", False, "2020-01-03", "2020-01-07"),
+            # tstart between points, inclusive pads to earlier point
+            ("2020-01-03T12:00:00", "2020-01-07", True, "2020-01-03", "2020-01-07"),
+            # tstart between points, exclusive backfills to later point
+            ("2020-01-03T12:00:00", "2020-01-07", False, "2020-01-04", "2020-01-07"),
+            # tstop between points, inclusive backfills to later point
+            ("2020-01-03", "2020-01-07T12:00:00", True, "2020-01-03", "2020-01-08"),
+            # tstop between points, exclusive pads to earlier point
+            ("2020-01-03", "2020-01-07T12:00:00", False, "2020-01-03", "2020-01-07"),
+            # both between points, inclusive widens range
+            (
+                "2020-01-03T12:00:00",
+                "2020-01-07T12:00:00",
+                True,
+                "2020-01-03",
+                "2020-01-08",
+            ),
+            # both between points, exclusive narrows range
+            (
+                "2020-01-03T12:00:00",
+                "2020-01-07T12:00:00",
+                False,
+                "2020-01-04",
+                "2020-01-07",
+            ),
+        ],
+    )
+    def test_time_alignment(
+        self, daily_dataframe, tstart, tstop, inclusive, expected_start, expected_stop
+    ):
+        result = _create_time_slice(daily_dataframe, tstart, tstop, inclusive=inclusive)
+        assert result.start == pd.Timestamp(expected_start)
+        assert result.stop == pd.Timestamp(expected_stop)
 
-    def test_exact_match_exclusive(self, daily_dataframe):
-        """Exact timestamps, exclusive mode."""
+    @pytest.mark.parametrize(
+        "tstart, tstop, expected_start, expected_stop",
+        [
+            # tstart before data: clamps to data start
+            ("2019-12-25", "2020-01-05", "2020-01-01", "2020-01-05"),
+            # tstop after data: clamps to data end
+            ("2020-01-05", "2020-02-01", "2020-01-05", "2020-01-10"),
+            # both beyond data: clamps to full data extent
+            ("2019-12-01", "2020-02-01", "2020-01-01", "2020-01-10"),
+        ],
+    )
+    def test_clamping(
+        self, daily_dataframe, tstart, tstop, expected_start, expected_stop
+    ):
         result = _create_time_slice(
-            daily_dataframe, "2020-01-03", "2020-01-07", inclusive=False
-        )
-        assert result.start == pd.Timestamp("2020-01-03")
-        assert result.stop == pd.Timestamp("2020-01-07")
-
-    def test_tstart_between_points_inclusive(self, daily_dataframe):
-        """Tstart between data points with inclusive=True pads to earlier."""
-        result = _create_time_slice(
-            daily_dataframe, "2020-01-03T12:00:00", "2020-01-07", inclusive=True
-        )
-        # inclusive: pad -> last value <= tstart -> 2020-01-03
-        assert result.start == pd.Timestamp("2020-01-03")
-        assert result.stop == pd.Timestamp("2020-01-07")
-
-    def test_tstart_between_points_exclusive(self, daily_dataframe):
-        """Tstart between data points with inclusive=False backfills to later."""
-        result = _create_time_slice(
-            daily_dataframe, "2020-01-03T12:00:00", "2020-01-07", inclusive=False
-        )
-        # exclusive: backfill -> first value >= tstart -> 2020-01-04
-        assert result.start == pd.Timestamp("2020-01-04")
-        assert result.stop == pd.Timestamp("2020-01-07")
-
-    def test_tstop_between_points_inclusive(self, daily_dataframe):
-        """Tstop between data points with inclusive=True backfills to later."""
-        result = _create_time_slice(
-            daily_dataframe, "2020-01-03", "2020-01-07T12:00:00", inclusive=True
-        )
-        # inclusive: backfill -> first value >= tstop -> 2020-01-08
-        assert result.start == pd.Timestamp("2020-01-03")
-        assert result.stop == pd.Timestamp("2020-01-08")
-
-    def test_tstop_between_points_exclusive(self, daily_dataframe):
-        """Tstop between data points with inclusive=False pads to earlier."""
-        result = _create_time_slice(
-            daily_dataframe, "2020-01-03", "2020-01-07T12:00:00", inclusive=False
-        )
-        # exclusive: pad -> last value <= tstop -> 2020-01-07
-        assert result.start == pd.Timestamp("2020-01-03")
-        assert result.stop == pd.Timestamp("2020-01-07")
-
-    def test_both_between_points_inclusive(self, daily_dataframe):
-        """Both between data points, inclusive."""
-        result = _create_time_slice(
-            daily_dataframe,
-            "2020-01-03T12:00:00",
-            "2020-01-07T12:00:00",
-            inclusive=True,
-        )
-        assert result.start == pd.Timestamp("2020-01-03")
-        assert result.stop == pd.Timestamp("2020-01-08")
-
-    def test_both_between_points_exclusive(self, daily_dataframe):
-        """Both between data points, exclusive."""
-        result = _create_time_slice(
-            daily_dataframe,
-            "2020-01-03T12:00:00",
-            "2020-01-07T12:00:00",
-            inclusive=False,
-        )
-        assert result.start == pd.Timestamp("2020-01-04")
-        assert result.stop == pd.Timestamp("2020-01-07")
-
-    def test_tstart_before_data_clamps(self, daily_dataframe):
-        """Tstart before data extent clamps to data start."""
-        result = _create_time_slice(
-            daily_dataframe, "2019-12-25", "2020-01-05", inclusive=True
+            daily_dataframe, tstart, tstop, inclusive=DEFAULT_INCLUSIVE
         )
         assert result is not None
-        assert result.start == pd.Timestamp("2020-01-01")
-        assert result.stop == pd.Timestamp("2020-01-05")
+        assert result.start == pd.Timestamp(expected_start)
+        assert result.stop == pd.Timestamp(expected_stop)
 
-    def test_tstop_after_data_clamps(self, daily_dataframe):
-        """Tstop after data extent clamps to data end."""
-        result = _create_time_slice(
-            daily_dataframe, "2020-01-05", "2020-02-01", inclusive=True
-        )
-        assert result is not None
-        assert result.start == pd.Timestamp("2020-01-05")
-        assert result.stop == pd.Timestamp("2020-01-10")
-
-    def test_both_beyond_data_clamps(self, daily_dataframe):
-        """Both beyond data extent clamps both."""
-        result = _create_time_slice(
-            daily_dataframe, "2019-12-01", "2020-02-01", inclusive=True
-        )
-        assert result is not None
-        assert result.start == pd.Timestamp("2020-01-01")
-        assert result.stop == pd.Timestamp("2020-01-10")
-
-    def test_no_overlap_before_raises(self, daily_dataframe):
-        """Completely out-of-range (before) with RAISE strategy."""
-        with pytest.raises(NoDataException):
-            _create_time_slice(
-                daily_dataframe,
-                "2019-01-01",
-                "2019-06-01",
-                handle_nodata=NoDataStrategy.RAISE,
+    @pytest.mark.parametrize(
+        "tstart, tstop, strategy, expect_raises",
+        [
+            # no overlap before data, RAISE raises
+            ("2019-01-01", "2019-06-01", NoDataStrategy.RAISE, True),
+            # no overlap after data, RAISE raises
+            ("2021-01-01", "2021-06-01", NoDataStrategy.RAISE, True),
+            # no overlap, IGNORE returns None
+            ("2021-01-01", "2021-06-01", NoDataStrategy.IGNORE, False),
+            # no overlap, WARN returns None
+            ("2021-01-01", "2021-06-01", NoDataStrategy.WARN, False),
+        ],
+    )
+    def test_no_overlap(self, daily_dataframe, tstart, tstop, strategy, expect_raises):
+        if expect_raises:
+            with pytest.raises(NoDataException):
+                _create_time_slice(
+                    daily_dataframe, tstart, tstop, handle_nodata=strategy
+                )
+        else:
+            result = _create_time_slice(
+                daily_dataframe, tstart, tstop, handle_nodata=strategy
             )
+            assert result is None
 
-    def test_no_overlap_after_raises(self, daily_dataframe):
-        """Completely out-of-range (after) with RAISE strategy."""
-        with pytest.raises(NoDataException):
-            _create_time_slice(
-                daily_dataframe,
-                "2021-01-01",
-                "2021-06-01",
-                handle_nodata=NoDataStrategy.RAISE,
-            )
-
-    def test_no_overlap_ignore_returns_none(self, daily_dataframe):
-        """Completely out-of-range with IGNORE strategy returns None."""
+    @pytest.mark.parametrize(
+        "tstart, tstop, expected_start, expected_stop",
+        [
+            # range encompassing single time step
+            ("2020-01-01", "2020-01-10", "2020-01-05", "2020-01-05"),
+            # exact match on single time step
+            ("2020-01-05", "2020-01-05", "2020-01-05", "2020-01-05"),
+        ],
+    )
+    def test_single_time_step(
+        self, single_step_dataframe, tstart, tstop, expected_start, expected_stop
+    ):
         result = _create_time_slice(
-            daily_dataframe,
-            "2021-01-01",
-            "2021-06-01",
-            handle_nodata=NoDataStrategy.IGNORE,
-        )
-        assert result is None
-
-    def test_no_overlap_warn_returns_none(self, daily_dataframe):
-        """Completely out-of-range with WARN strategy returns None."""
-        result = _create_time_slice(
-            daily_dataframe,
-            "2021-01-01",
-            "2021-06-01",
-            handle_nodata=NoDataStrategy.WARN,
-        )
-        assert result is None
-
-    def test_single_time_step(self, single_step_dataframe):
-        """DataFrame with single time step, range encompassing it."""
-        result = _create_time_slice(
-            single_step_dataframe, "2020-01-01", "2020-01-10", inclusive=True
+            single_step_dataframe, tstart, tstop, inclusive=DEFAULT_INCLUSIVE
         )
         assert result is not None
-        assert result.start == pd.Timestamp("2020-01-05")
-        assert result.stop == pd.Timestamp("2020-01-05")
-
-    def test_single_time_step_exact(self, single_step_dataframe):
-        """DataFrame with single time step, exact match."""
-        result = _create_time_slice(
-            single_step_dataframe, "2020-01-05", "2020-01-05", inclusive=True
-        )
-        assert result is not None
-        assert result.start == pd.Timestamp("2020-01-05")
-        assert result.stop == pd.Timestamp("2020-01-05")
+        assert result.start == pd.Timestamp(expected_start)
+        assert result.stop == pd.Timestamp(expected_stop)
 
     def test_single_time_step_no_overlap(self, single_step_dataframe):
-        """DataFrame with single time step, no overlap raises."""
+        """No overlap with single time step raises."""
         with pytest.raises(NoDataException):
             _create_time_slice(
                 single_step_dataframe,
@@ -387,3 +295,12 @@ class TestCreateTimeSliceDataFrame:
         df = pd.DataFrame({"var": [1, 2, 3]}, index=[0, 1, 2])
         with pytest.raises(ValueError, match="DatetimeIndex"):
             _create_time_slice(df, "2020-01-01", "2020-01-05")
+
+    def test_unsorted_index_sorts_and_slices(self):
+        """Descending DatetimeIndex is sorted internally."""
+        times = pd.date_range("2020-01-01", "2020-01-10", freq="D")[::-1]
+        df = pd.DataFrame({"var": np.arange(len(times))}, index=times)
+        result = _create_time_slice(df, "2020-01-03", "2020-01-07")
+        assert result is not None
+        assert result.start == pd.Timestamp("2020-01-03")
+        assert result.stop == pd.Timestamp("2020-01-07")

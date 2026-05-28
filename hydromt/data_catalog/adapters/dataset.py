@@ -40,7 +40,7 @@ class DatasetAdapter(DataAdapterBase):
         *,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
-        inclusive: bool = True,
+        inclusive: bool = False,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         single_var_as_array: bool = True,
     ) -> Optional[xr.Dataset]:
@@ -112,7 +112,7 @@ class DatasetAdapter(DataAdapterBase):
         ds: Data,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
-        inclusive: bool = True,
+        inclusive: bool = False,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> Optional[Data]:
         """Slice the dataset in space and time.

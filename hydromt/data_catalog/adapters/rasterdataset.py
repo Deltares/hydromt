@@ -48,7 +48,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         single_var_as_array: bool = True,
         buffer: int = 0,
-        inclusive: bool = True,
+        inclusive: bool = False,
     ) -> xr.Dataset | xr.DataArray | None:
         """Filter and harmonize the input RasterDataset.
 
@@ -152,7 +152,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         mask: Optional[Geom] = None,
         align: Optional[float] = None,
         time_range: Optional[TimeRange] = None,
-        inclusive: bool = True,
+        inclusive: bool = False,
         buffer: int = 0,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> Optional[xr.Dataset]:

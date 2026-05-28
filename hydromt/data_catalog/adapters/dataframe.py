@@ -28,7 +28,7 @@ class DataFrameAdapter(DataAdapterBase):
         *,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
-        inclusive: bool = True,
+        inclusive: bool = False,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> pd.DataFrame:
         """Transform data to HydroMT standards.
@@ -100,7 +100,7 @@ class DataFrameAdapter(DataAdapterBase):
         df: pd.DataFrame,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
-        inclusive: bool = True,
+        inclusive: bool = False,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> Optional[pd.DataFrame]:
         """Filter the DataFrame.

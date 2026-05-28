@@ -45,7 +45,7 @@ class GeoDatasetAdapter(DataAdapterBase):
         predicate: Predicate = "intersects",
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
-        inclusive: bool = True,
+        inclusive: bool = False,
         single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> Optional[Union[xr.Dataset, xr.DataArray]]:
@@ -152,7 +152,7 @@ class GeoDatasetAdapter(DataAdapterBase):
         predicate: Predicate = "intersects",
         time_range: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        inclusive: bool = True,
+        inclusive: bool = False,
     ) -> Optional[xr.Dataset]:
         """Filter the GeoDataset.
 
