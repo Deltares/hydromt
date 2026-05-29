@@ -5,8 +5,10 @@ import pandas as pd
 import pytest
 import xarray as xr
 
+from hydromt.data_catalog import DataCatalog
 from hydromt.data_catalog.adapters.adapter_utils import _create_time_slice
 from hydromt.error import NoDataException, NoDataStrategy
+from hydromt.model.processes.region import parse_region_bbox
 
 # Default value of `inclusive` in _create_time_slice; update here if the default changes.
 DEFAULT_INCLUSIVE = False
@@ -173,6 +175,36 @@ class TestCreateTimeSliceXarray:
         assert result is not None
         assert result.start == np.datetime64("2020-01-03")
         assert result.stop == np.datetime64("2020-01-07")
+
+    def test_dataset_integration(self):
+        """Test example from issue #1458."""
+        data_catalog = DataCatalog(data_libs=["artifact_data"])
+        region = dict(bbox=[12.4331, 46.4661, 12.5212, 46.5369])
+        region_crs = 4326
+        geom = parse_region_bbox(region, crs=region_crs)
+        tstart = "2010-02-03 12:00:00"
+        tstop = "2010-02-04 12:00:00"
+        meteo_data = data_catalog.get_rasterdataset(
+            data_like="era5",
+            geom=geom,
+            buffer=2,
+            time_range={"start": tstart, "end": tstop, "inclusive": False},
+            variables=["temp"],
+        )
+
+        assert meteo_data.time.to_pandas().min() == pd.Timestamp("2010-02-04 00:00:00")
+        assert meteo_data.time.to_pandas().max() == pd.Timestamp("2010-02-04 00:00:00")
+
+        meteo_data = data_catalog.get_rasterdataset(
+            data_like="era5",
+            geom=geom,
+            buffer=1,
+            time_range={"start": tstart, "end": tstop, "inclusive": True},
+            variables=["temp"],
+        )
+
+        assert meteo_data.time.to_pandas().min() == pd.Timestamp("2010-02-03 00:00:00")
+        assert meteo_data.time.to_pandas().max() == pd.Timestamp("2010-02-05 00:00:00")
 
 
 class TestCreateTimeSliceDataFrame:
