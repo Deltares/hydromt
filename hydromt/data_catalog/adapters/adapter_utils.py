@@ -80,7 +80,7 @@ def _create_dataset_time_slice(
 
     time_values = pd.to_datetime(ds["time"].values)
     if not time_values.is_monotonic_increasing:
-        logger.warning("Dataset time dimension is not sorted; sorting for slicing.")
+        logger.info("Dataset time dimension is not sorted; sorting for slicing.")
         ds = ds.sortby("time")
         time_values = pd.to_datetime(ds["time"].values)
 
@@ -135,7 +135,7 @@ def _create_dataframe_time_slice(
     if not isinstance(time_index, pd.DatetimeIndex):
         raise ValueError("DataFrame index must be a DatetimeIndex.")
     if not time_index.is_monotonic_increasing:
-        logger.warning("DataFrame DatetimeIndex is not sorted; sorting for slicing.")
+        logger.info("DataFrame DatetimeIndex is not sorted; sorting for slicing.")
         df = df.sort_index()
         time_index = df.index
 
