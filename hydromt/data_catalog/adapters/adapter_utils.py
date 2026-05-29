@@ -49,6 +49,7 @@ def _check_time_overlap(
 
 def _create_dataset_time_slice(
     ds: xr.Dataset,
+    *,
     tstart: pd.Timestamp | datetime | str,
     tstop: pd.Timestamp | datetime | str,
     inclusive: bool = False,
@@ -101,6 +102,7 @@ def _create_dataset_time_slice(
 
 def _create_dataframe_time_slice(
     df: pd.DataFrame,
+    *,
     tstart: pd.Timestamp | datetime | str,
     tstop: pd.Timestamp | datetime | str,
     inclusive: bool = False,
@@ -161,6 +163,7 @@ def _create_dataframe_time_slice(
 
 def _create_time_slice(
     data: xr.Dataset | pd.DataFrame,
+    *,
     tstart: pd.Timestamp | datetime | str,
     tstop: pd.Timestamp | datetime | str,
     inclusive: bool = False,
@@ -173,10 +176,18 @@ def _create_time_slice(
     """
     if isinstance(data, pd.DataFrame):
         return _create_dataframe_time_slice(
-            data, tstart, tstop, inclusive=inclusive, handle_nodata=handle_nodata
+            data,
+            tstart=tstart,
+            tstop=tstop,
+            inclusive=inclusive,
+            handle_nodata=handle_nodata,
         )
     return _create_dataset_time_slice(
-        data, tstart, tstop, inclusive=inclusive, handle_nodata=handle_nodata
+        data,
+        tstart=tstart,
+        tstop=tstop,
+        inclusive=inclusive,
+        handle_nodata=handle_nodata,
     )
 
 
@@ -184,7 +195,6 @@ def _slice_temporal_dimension(
     ds: xr.Dataset,
     time_range: TimeRange,
     handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-    inclusive: bool = False,
 ) -> xr.Dataset | None:
     """Slice the time dimension of the dataset to the requested time range, if it exists.
 
@@ -196,8 +206,6 @@ def _slice_temporal_dimension(
         The time range to slice to.
     handle_nodata : NoDataStrategy, optional
         The strategy to handle the case where no data is left after slicing, by default NoDataStrategy.RAISE
-    inclusive : bool, optional
-        Whether to include the start and end times in the slice, by default True
     """
     if (
         "time" in ds.dims
@@ -207,9 +215,9 @@ def _slice_temporal_dimension(
         logger.debug(f"Slicing time dim {time_range}")
         time_slice = _create_time_slice(
             ds,
-            time_range.start,
-            time_range.end,
-            inclusive=inclusive,
+            tstart=time_range.start,
+            tstop=time_range.end,
+            inclusive=time_range.inclusive,
             handle_nodata=handle_nodata,
         )
         if time_slice is None:

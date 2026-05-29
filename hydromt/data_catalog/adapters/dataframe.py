@@ -28,7 +28,6 @@ class DataFrameAdapter(DataAdapterBase):
         *,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
-        inclusive: bool = False,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> pd.DataFrame:
         """Transform data to HydroMT standards.
@@ -43,8 +42,6 @@ class DataFrameAdapter(DataAdapterBase):
             filter for variables, by default None
         time_range : Optional[TimeRange], optional
             filter for start and end times, by default None
-        inclusive : bool, optional
-            whether to include the start and end times in the slice, by default True
         handle_nodata : NoDataStrategy, optional
             how to handle no data being present in the result, by default NoDataStrategy.RAISE
 
@@ -65,7 +62,7 @@ class DataFrameAdapter(DataAdapterBase):
         df = self._set_nodata(df, metadata)
         # slice data
         df = DataFrameAdapter._slice_data(
-            df, variables, time_range, handle_nodata=handle_nodata, inclusive=inclusive
+            df, variables, time_range, handle_nodata=handle_nodata
         )
         if df is None:
             return None
@@ -100,7 +97,6 @@ class DataFrameAdapter(DataAdapterBase):
         df: pd.DataFrame,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
-        inclusive: bool = False,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> Optional[pd.DataFrame]:
         """Filter the DataFrame.
@@ -113,8 +109,6 @@ class DataFrameAdapter(DataAdapterBase):
             variables to include, or all if None, by default None
         time_range : Optional[TimeRange], optional
             start and end times to include, or all if None, by default None
-        inclusive : bool, optional
-            whether to include the start and end times in the slice, by default True
         handle_nodata : NoDataStrategy, optional
             how to handle no data being present in the result, by default NoDataStrategy.RAISE
 
@@ -140,10 +134,10 @@ class DataFrameAdapter(DataAdapterBase):
             logger.debug(f"Slicing time dim {time_range}")
             time_slice = _create_time_slice(
                 df,
-                time_range.start,
-                time_range.end,
+                tstart=time_range.start,
+                tstop=time_range.end,
+                inclusive=time_range.inclusive,
                 handle_nodata=handle_nodata,
-                inclusive=inclusive,
             )
             if time_slice is None:
                 return None

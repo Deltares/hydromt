@@ -1343,7 +1343,6 @@ class DataCatalog(object):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         variables: Optional[Union[List, str]] = None,
         time_range: TimeRange | tuple | dict | None = None,
-        inclusive: bool = False,
         single_var_as_array: Optional[bool] = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1392,9 +1391,6 @@ class DataCatalog(object):
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned. If not None, must be parsable by TimeRange.create,
             by default None
-        inclusive : bool, optional
-            Whether the start and end date of `time_range` are included in the returned data,
-            by default True
         single_var_as_array : bool, optional
             Wether to return a xr.DataArray if the dataset consists of a single variable,
             by default True
@@ -1458,7 +1454,6 @@ class DataCatalog(object):
                 variables=variables,
                 mask=mask,
                 time_range=time_range,
-                inclusive=inclusive,
                 buffer=buffer,
                 handle_nodata=handle_nodata,
             )
@@ -1610,7 +1605,6 @@ class DataCatalog(object):
         predicate: str = "intersects",
         variables: Optional[List[str]] = None,
         time_range: TimeRange | tuple | dict | None = None,
-        inclusive: bool = False,
         single_var_as_array: bool = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1657,9 +1651,6 @@ class DataCatalog(object):
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned. If not None, must be parsable by TimeRange.create,
             by default None
-        inclusive : bool, optional
-            Whether the start and end date of `time_range` are included in the returned data,
-            by default True
         single_var_as_array : bool, optional
             Wether to return a xr.DataArray if the dataset consists of a single variable,
             by default True
@@ -1720,7 +1711,6 @@ class DataCatalog(object):
                 mask=mask,
                 predicate=predicate,
                 time_range=time_range,
-                inclusive=inclusive,
                 handle_nodata=handle_nodata,
             )
             if data_like is None:
@@ -1748,7 +1738,6 @@ class DataCatalog(object):
         variables: Optional[List] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         time_range: TimeRange | tuple | dict | None = None,
-        inclusive: bool = False,
         single_var_as_array: bool = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1780,9 +1769,6 @@ class DataCatalog(object):
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned. If not None, must be parsable by TimeRange.create,
             by default None
-        inclusive : bool, optional
-            Whether the start and end date of `time_range` are included in the returned data,
-            by default True
         single_var_as_array : bool, optional
             Wether to return a xr.DataArray if the dataset consists of a single variable,
             by default True
@@ -1829,7 +1815,6 @@ class DataCatalog(object):
                 data_like,
                 variables,
                 time_range,
-                inclusive=inclusive,
                 handle_nodata=handle_nodata,
             )
             if data_like is None:
@@ -1850,7 +1835,6 @@ class DataCatalog(object):
         data_like: Union[str, SourceSpecDict, Path, pd.DataFrame, DataFrameSource],
         variables: Optional[List] = None,
         time_range: TimeRange | tuple | dict | None = None,
-        inclusive: bool = False,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1873,9 +1857,6 @@ class DataCatalog(object):
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned. If not None, must be parsable by TimeRange.create,
             by default None
-        inclusive : bool, optional
-            Whether the start and end date of `time_range` are included in the returned data,
-            by default True
         handle_nodata : NoDataStrategy, optional
             How to react when no data is found, by default NoDataStrategy.RAISE
         provider : Optional[str], optional
@@ -1929,7 +1910,6 @@ class DataCatalog(object):
                 data_like,
                 variables,
                 time_range,
-                inclusive=inclusive,
                 handle_nodata=handle_nodata,
             )
         else:

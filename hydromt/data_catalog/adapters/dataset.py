@@ -40,7 +40,6 @@ class DatasetAdapter(DataAdapterBase):
         *,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
-        inclusive: bool = False,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         single_var_as_array: bool = True,
     ) -> Optional[xr.Dataset]:
@@ -55,7 +54,7 @@ class DatasetAdapter(DataAdapterBase):
         ds = self._shift_time(ds)
         # slice
         ds = DatasetAdapter._slice_data(
-            ds, variables, time_range, handle_nodata=handle_nodata, inclusive=inclusive
+            ds, variables, time_range, handle_nodata=handle_nodata
         )
         if ds is None:
             return None
@@ -112,7 +111,6 @@ class DatasetAdapter(DataAdapterBase):
         ds: Data,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
-        inclusive: bool = False,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> Optional[Data]:
         """Slice the dataset in space and time.
@@ -126,8 +124,6 @@ class DatasetAdapter(DataAdapterBase):
         time_range: tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
-        inclusive : bool, optional
-            Whether to include the start and end times in the slice, by default True
         handle_nodata : NoDataStrategy, optional
             how to handle no data being present in the result, by default NoDataStrategy.RAISE
 
@@ -149,9 +145,7 @@ class DatasetAdapter(DataAdapterBase):
                 ds = ds[variables]
 
         if time_range is not None:
-            ds = _slice_temporal_dimension(
-                ds, time_range, handle_nodata=handle_nodata, inclusive=inclusive
-            )
+            ds = _slice_temporal_dimension(ds, time_range, handle_nodata=handle_nodata)
             if ds is None:
                 return None
 

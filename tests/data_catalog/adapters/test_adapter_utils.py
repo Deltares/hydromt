@@ -80,7 +80,7 @@ class TestCreateTimeSliceXarray:
         self, daily_xr_dataset, tstart, tstop, inclusive, expected_start, expected_stop
     ):
         result = _create_time_slice(
-            daily_xr_dataset, tstart, tstop, inclusive=inclusive
+            daily_xr_dataset, tstart=tstart, tstop=tstop, inclusive=inclusive
         )
         assert result.start == np.datetime64(expected_start)
         assert result.stop == np.datetime64(expected_stop)
@@ -100,7 +100,7 @@ class TestCreateTimeSliceXarray:
         self, daily_xr_dataset, tstart, tstop, expected_start, expected_stop
     ):
         result = _create_time_slice(
-            daily_xr_dataset, tstart, tstop, inclusive=DEFAULT_INCLUSIVE
+            daily_xr_dataset, tstart=tstart, tstop=tstop, inclusive=DEFAULT_INCLUSIVE
         )
         assert result is not None
         assert result.start == np.datetime64(expected_start)
@@ -123,11 +123,11 @@ class TestCreateTimeSliceXarray:
         if expect_raises:
             with pytest.raises(NoDataException):
                 _create_time_slice(
-                    daily_xr_dataset, tstart, tstop, handle_nodata=strategy
+                    daily_xr_dataset, tstart=tstart, tstop=tstop, handle_nodata=strategy
                 )
         else:
             result = _create_time_slice(
-                daily_xr_dataset, tstart, tstop, handle_nodata=strategy
+                daily_xr_dataset, tstart=tstart, tstop=tstop, handle_nodata=strategy
             )
             assert result is None
 
@@ -144,7 +144,10 @@ class TestCreateTimeSliceXarray:
         self, single_step_xr_dataset, tstart, tstop, expected_start, expected_stop
     ):
         result = _create_time_slice(
-            single_step_xr_dataset, tstart, tstop, inclusive=DEFAULT_INCLUSIVE
+            single_step_xr_dataset,
+            tstart=tstart,
+            tstop=tstop,
+            inclusive=DEFAULT_INCLUSIVE,
         )
         assert result is not None
         assert result.start == np.datetime64(expected_start)
@@ -155,8 +158,8 @@ class TestCreateTimeSliceXarray:
         with pytest.raises(NoDataException):
             _create_time_slice(
                 single_step_xr_dataset,
-                "2020-01-06",
-                "2020-01-10",
+                tstart="2020-01-06",
+                tstop="2020-01-10",
                 handle_nodata=NoDataStrategy.RAISE,
             )
 
@@ -166,7 +169,7 @@ class TestCreateTimeSliceXarray:
         ds = xr.Dataset(
             {"var": ("time", np.arange(len(times)))}, coords={"time": times}
         )
-        result = _create_time_slice(ds, "2020-01-03", "2020-01-07")
+        result = _create_time_slice(ds, tstart="2020-01-03", tstop="2020-01-07")
         assert result is not None
         assert result.start == np.datetime64("2020-01-03")
         assert result.stop == np.datetime64("2020-01-07")
@@ -211,7 +214,9 @@ class TestCreateTimeSliceDataFrame:
     def test_time_alignment(
         self, daily_dataframe, tstart, tstop, inclusive, expected_start, expected_stop
     ):
-        result = _create_time_slice(daily_dataframe, tstart, tstop, inclusive=inclusive)
+        result = _create_time_slice(
+            daily_dataframe, tstart=tstart, tstop=tstop, inclusive=inclusive
+        )
         assert result.start == pd.Timestamp(expected_start)
         assert result.stop == pd.Timestamp(expected_stop)
 
@@ -230,7 +235,7 @@ class TestCreateTimeSliceDataFrame:
         self, daily_dataframe, tstart, tstop, expected_start, expected_stop
     ):
         result = _create_time_slice(
-            daily_dataframe, tstart, tstop, inclusive=DEFAULT_INCLUSIVE
+            daily_dataframe, tstart=tstart, tstop=tstop, inclusive=DEFAULT_INCLUSIVE
         )
         assert result is not None
         assert result.start == pd.Timestamp(expected_start)
@@ -253,11 +258,11 @@ class TestCreateTimeSliceDataFrame:
         if expect_raises:
             with pytest.raises(NoDataException):
                 _create_time_slice(
-                    daily_dataframe, tstart, tstop, handle_nodata=strategy
+                    daily_dataframe, tstart=tstart, tstop=tstop, handle_nodata=strategy
                 )
         else:
             result = _create_time_slice(
-                daily_dataframe, tstart, tstop, handle_nodata=strategy
+                daily_dataframe, tstart=tstart, tstop=tstop, handle_nodata=strategy
             )
             assert result is None
 
@@ -274,7 +279,10 @@ class TestCreateTimeSliceDataFrame:
         self, single_step_dataframe, tstart, tstop, expected_start, expected_stop
     ):
         result = _create_time_slice(
-            single_step_dataframe, tstart, tstop, inclusive=DEFAULT_INCLUSIVE
+            single_step_dataframe,
+            tstart=tstart,
+            tstop=tstop,
+            inclusive=DEFAULT_INCLUSIVE,
         )
         assert result is not None
         assert result.start == pd.Timestamp(expected_start)
@@ -285,8 +293,8 @@ class TestCreateTimeSliceDataFrame:
         with pytest.raises(NoDataException):
             _create_time_slice(
                 single_step_dataframe,
-                "2020-01-06",
-                "2020-01-10",
+                tstart="2020-01-06",
+                tstop="2020-01-10",
                 handle_nodata=NoDataStrategy.RAISE,
             )
 
@@ -294,13 +302,13 @@ class TestCreateTimeSliceDataFrame:
         """DataFrame with non-DatetimeIndex raises ValueError."""
         df = pd.DataFrame({"var": [1, 2, 3]}, index=[0, 1, 2])
         with pytest.raises(ValueError, match="DatetimeIndex"):
-            _create_time_slice(df, "2020-01-01", "2020-01-05")
+            _create_time_slice(df, tstart="2020-01-01", tstop="2020-01-05")
 
     def test_unsorted_index_sorts_and_slices(self):
         """Descending DatetimeIndex is sorted internally."""
         times = pd.date_range("2020-01-01", "2020-01-10", freq="D")[::-1]
         df = pd.DataFrame({"var": np.arange(len(times))}, index=times)
-        result = _create_time_slice(df, "2020-01-03", "2020-01-07")
+        result = _create_time_slice(df, tstart="2020-01-03", tstop="2020-01-07")
         assert result is not None
         assert result.start == pd.Timestamp("2020-01-03")
         assert result.stop == pd.Timestamp("2020-01-07")
