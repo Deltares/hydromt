@@ -81,6 +81,10 @@ class TimeRange(BaseModel):
 
     start: datetime = Field(..., description="Start of the time range.")
     end: datetime = Field(..., description="End of the time range.")
+    inclusive: bool = Field(
+        False,
+        description="Whether the time range is inclusive of the start and end times.",
+    )
 
     @field_validator("start", "end", mode="before")
     def parse_datetime(cls, v: Union[str, datetime]) -> datetime:
