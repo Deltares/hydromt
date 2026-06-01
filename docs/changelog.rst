@@ -18,6 +18,8 @@ New
 - More informative error messages when calling ``test_equal`` on ConfigComponent (#1430).
 - Added ``SlippyTileDriver`` for reading XYZ/slippy map tiles stored in ``{zoom}/{x}/{y}.png`` (#1417).
 - Added ``MeshComponent.is_empty`` to check for existing data correctly. (#1437)
+- Added support for Microsoft Azure data stores. (#1406)
+- Optional inclusive time slicing for retrieving data from the data catalog. (#1460)
 
 Changed
 -------
