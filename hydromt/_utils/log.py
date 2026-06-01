@@ -1,6 +1,6 @@
 import warnings
 
-from hydromt import log
+from hydromt.log import *  # noqa: F403
 
 warnings.warn(
     "importing 'log' from 'hydromt._utils' is deprecated. "
@@ -8,5 +8,3 @@ warnings.warn(
     DeprecationWarning,
     stacklevel=2,
 )
-
-__all__ = ["log"]
