@@ -267,6 +267,26 @@ class TestOpenMFRaster:
         ds.rename({"test": f"test/{new_name}"}).raster.to_mapstack(root, driver="GTiff")
         assert (Path(root) / "test" / f"{new_name}.tif").is_file()
 
+    def test_open_mfraster_bare_wildcard_numeric_names(self, tmp_path: Path):
+        # Externally provided files with bare numeric names (e.g. modis_lai
+        # stored as 1.tif .. 12.tif) read via a bare wildcard "*.tif" must use
+        # the numeric stems as the concat index, in numeric order, regardless
+        # of the filesystem glob order (see #1465).
+        for month in range(1, 13):
+            da: xr.DataArray = full_from_transform(
+                [0.5, 0.0, 3.0, 0.0, -0.5, -9.0],
+                (4, 6),
+                nodata=-1,
+                name="month",
+                crs=4326,
+            )
+            da.raster.to_raster(str(tmp_path / f"{month}.tif"))
+
+        ds = open_mfraster(str(tmp_path / "*.tif"), concat=True)
+        concat_dim = next(d for d in ds.dims if str(d).startswith("dim"))
+        # numeric stems, not the 0..11 file-order fallback, and in order
+        assert list(ds[concat_dim].values) == list(range(1, 13))
+
     def test_open_mfraster_not_found(self, tmp_path: Path):
         with pytest.raises(OSError, match="no files to open"):
             open_mfraster(str(tmp_path / "test*.tiffff"))
