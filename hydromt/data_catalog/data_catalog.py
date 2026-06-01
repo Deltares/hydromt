@@ -1906,7 +1906,10 @@ class DataCatalog(object):
                 self.add_source(name, source)
         elif isinstance(data_like, pd.DataFrame):
             return DataFrameAdapter._slice_data(
-                data_like, variables, time_range, handle_nodata=handle_nodata
+                data_like,
+                variables,
+                time_range,
+                handle_nodata=handle_nodata,
             )
         else:
             raise ValueError(f'Unknown tabular data type "{type(data_like).__name__}"')
