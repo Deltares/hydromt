@@ -16,7 +16,6 @@ jobs:
   downstream:
     name: Test ${{ matrix.plugin.name }} (deps=${{ matrix.with_deps }})
     runs-on: ubuntu-latest
-    continue-on-error: true
 
     strategy:
       fail-fast: false
