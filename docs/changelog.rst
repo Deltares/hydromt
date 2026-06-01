@@ -35,6 +35,7 @@ Fixed
 - The functions ``_strip_scheme`` and ``_strip_vsi`` in ``hydromt._utils.uris`` no longer use ``lstrip`` to remove leading characters, but now remove only the exact prefix. (#1438)
 - ``Datacatalog.export_data`` no longer applies unit conversion twice. (#1459)
 - ``RasterioDriver.write`` now always produces filenames that are parseable by ``readers.open_mfraster`` when provided with a pattern with no prefix e.g. ``*.tif``. (#1459)
+- ``preprocessing.harmonise_dims`` no longer applies 0-360 to -180-180 longitude normalisation to projected datasets (x in metres, all > 180), which silently shifted the grid by -360. Normalisation is now only applied for geographic CRS; datasets without a CRS are left unchanged with a warning. (#1476)
 
 Deprecated
 ----------
