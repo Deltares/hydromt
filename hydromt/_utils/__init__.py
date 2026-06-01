@@ -47,22 +47,6 @@ __all__ = [
 ]
 
 
-def __getattr__(name):
-    if name == "log":
-        import warnings
-
-        from hydromt import log
-
-        warnings.warn(
-            "Importing 'log' from 'hydromt._utils' is deprecated. "
-            "Use 'from hydromt import log' instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return log
-    raise AttributeError(f"module 'hydromt._utils' has no attribute {name!r}")
-
-
 class _classproperty(property):
     def __get__(self, owner_self, owner_cls):
         return self.fget(owner_cls)
