@@ -28,6 +28,13 @@ Changed
 deltares_data
 =============
 
+version v1.2.0
+--------------
+
+removed
+^^^^^^^
+- Removed the ERA5 zarr variant. Use earthdatahub_data instead.
+
 version v1.1.1
 --------------
 
