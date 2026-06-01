@@ -312,6 +312,7 @@ pypi-git-clean = { cmd = ["git", "clean", "-xdf"] }
 pypi-git-resore = { cmd = ["git", "restore", "-SW", "."] }
 pypi-flit-build = { cmd = ["flit", "build"] }
 pypi-twine = { cmd = ["python", "-m", "twine", "check", "dist/*"] }
+update-data-catalog-registry = "python data/catalogs/update_versions.py"
 
 # clean
 clean = { depends-on = [

@@ -2,13 +2,13 @@
 # Please follow the instructions at https://earthdatahub.destine.eu/getting-started#configuring-netrc to set up.
 
 meta:
-  version: v1.0.0
+  version: v1.0.1
   name: earthdatahub_data
   hydromt_version: '>1.0a,<2'
 
 era5_land:
   data_type: RasterDataset
-  uri: "https://data.earthdatahub.destine.eu/era5/era5-land-daily-utc-v1.zarr"
+  uri: "https://api.earthdatahub.destine.eu/era5/era5-land-daily-utc-v1.zarr"
   driver:
     name: raster_xarray
     filesystem:
@@ -57,7 +57,7 @@ era5_land:
 
 era5_land_hourly:
   data_type: RasterDataset
-  uri: https://data.earthdatahub.destine.eu/era5/reanalysis-era5-land-no-antartica-v0.zarr
+  uri: https://api.earthdatahub.destine.eu/era5/reanalysis-era5-land-no-antartica-v0.zarr
   driver:
     name: raster_xarray
     filesystem:
@@ -105,7 +105,7 @@ era5_land_hourly:
 
 era5_hourly:
   data_type: RasterDataset
-  uri: https://data.earthdatahub.destine.eu/era5/reanalysis-era5-single-levels-v0.zarr
+  uri: https://api.earthdatahub.destine.eu/era5/reanalysis-era5-single-levels-v0.zarr
   driver:
     name: raster_xarray
     filesystem:
@@ -160,7 +160,7 @@ era5_hourly:
 
 era5_ocean:
   data_type: RasterDataset
-  uri: https://data.earthdatahub.destine.eu/era5/reanalysis-era5-single-levels-ocean-v0.zarr
+  uri: https://api.earthdatahub.destine.eu/era5/reanalysis-era5-single-levels-ocean-v0.zarr
   driver:
     name: raster_xarray
     filesystem:

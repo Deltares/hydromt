@@ -2090,11 +2090,19 @@ def require_earthdatahub_credentials():
     import netrc
 
     try:
-        netrc.netrc()
-        if "data.earthdatahub.destine.eu" not in netrc.netrc().hosts:
-            pytest.skip("No Earth Data Hub credentials found in .netrc file.")
+        credentials = netrc.netrc()
     except FileNotFoundError:
-        pytest.skip("No .netrc file found for Earth Data Hub mirror authentication.")
+        try:
+            credentials = netrc.netrc(Path.home() / "_netrc")
+        except FileNotFoundError:
+            pytest.skip(
+                "No netrc file found (.netrc/_netrc) for Earth Data Hub mirror authentication."
+            )
+
+    if "api.earthdatahub.destine.eu" not in credentials.hosts:
+        pytest.skip(
+            "No Earth Data Hub credentials found in netrc file (.netrc/_netrc) for host api.earthdatahub.destine.eu."
+        )
 
 
 @pytest.mark.integration
