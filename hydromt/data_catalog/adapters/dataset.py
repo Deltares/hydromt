@@ -9,13 +9,15 @@ import numpy as np
 import xarray as xr
 
 from hydromt._utils import (
-    _has_no_data,
     _set_metadata,
     _shift_dataset_time,
     _single_var_as_array,
 )
+from hydromt.data_catalog.adapters.adapter_utils import (
+    _slice_temporal_dimension,
+)
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
-from hydromt.error import NoDataStrategy, exec_nodata_strat
+from hydromt.error import NoDataStrategy
 from hydromt.typing import (
     Data,
     SourceMetadata,
@@ -143,28 +145,8 @@ class DatasetAdapter(DataAdapterBase):
                 ds = ds[variables]
 
         if time_range is not None:
-            ds = DatasetAdapter._slice_temporal_dimension(
-                ds, time_range, handle_nodata=handle_nodata
-            )
+            ds = _slice_temporal_dimension(ds, time_range, handle_nodata=handle_nodata)
             if ds is None:
                 return None
 
-        return ds
-
-    @staticmethod
-    def _slice_temporal_dimension(
-        ds: Data,
-        time_range: TimeRange,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-    ) -> Optional[Data]:
-        if (
-            "time" in ds.dims
-            and ds["time"].size > 1
-            and np.issubdtype(ds["time"].dtype, np.datetime64)
-        ):
-            logger.debug(f"Slicing time dim {time_range}")
-            ds = ds.sel(time=slice(time_range.start, time_range.end))
-            if _has_no_data(ds):
-                exec_nodata_strat("No data left after time slicing.", handle_nodata)
-                return None
         return ds

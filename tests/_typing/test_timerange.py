@@ -77,6 +77,7 @@ def test_serialize():
     assert d == {
         "start": tr.start.strftime(DATETIME_FORMAT),
         "end": tr.end.strftime(DATETIME_FORMAT),
+        "inclusive": False,
     }
 
 
