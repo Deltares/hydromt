@@ -27,16 +27,21 @@ jobs:
             environment: default
             pixi_task: test
             pixi_version: v0.59.0
+            branch: fix/updates-for-hydromt-v1.4.0
+
           - name: hydromt-sfincs
             repo: Deltares/hydromt_sfincs
             environment: default
             pixi_task: tests
             pixi_version: v0.59.0
+            branch: main
+
           - name: hydromt-fiat
             repo: Deltares/hydromt_fiat
             environment: default
             pixi_task: test
             pixi_version: v0.65.0
+            branch: fix/hydromt-v1.4.0
 
     steps:
       - name: Checkout hydromt
@@ -65,6 +70,7 @@ jobs:
           repository: ${{ matrix.plugin.repo }}
           path: plugin
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ matrix.plugin.branch }}
 
       - name: Solve environment for hydromt candidate (with deps)
         if: matrix.with_deps == true
