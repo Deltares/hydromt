@@ -49,6 +49,8 @@ except Exception:
 
 import warnings  # noqa: F401
 
+import netCDF4  # noqa: F401
+
 # submodules
 from hydromt import data_catalog, gis, model, stats
 
