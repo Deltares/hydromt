@@ -1,0 +1,1398 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Release process &#8212; HydroMT  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/theme-deltares.css?v=d7afb10b" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = `pre.mermaid {
+    /* Same as .mermaid-container > pre */
+    display: block;
+    width: 100%;
+}
+
+pre.mermaid > svg {
+    /* Same as .mermaid-container > pre > svg */
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}`;
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = `.mermaid-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.mermaid-container > pre {
+    display: block;
+    width: 100%;
+}
+
+.mermaid-container > pre > svg {
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}
+
+.mermaid-fullscreen-btn {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    color: #333;
+}
+
+.mermaid-fullscreen-btn:hover {
+    opacity: 100% !important;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-btn.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-btn.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal {
+    display: none;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 95vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.98);
+    z-index: 9999;
+    padding: 20px;
+    overflow: auto;
+}
+
+.mermaid-fullscreen-modal.dark-theme {
+    background: rgba(0, 0, 0, 0.98);
+}
+
+.mermaid-fullscreen-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen {
+    position: relative;
+    width: 95vw;
+    height: 90vh;
+    max-width: 95vw;
+    max-height: 90vh;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen.dark-theme {
+    background: #1a1a1a;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+.mermaid-container-fullscreen pre.mermaid {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen .mermaid svg {
+    height: 100% !important;
+    width: 100% !important;
+    cursor: grab;
+}
+
+.mermaid-fullscreen-close {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    font-size: 24px;
+    line-height: 1;
+    color: #333;
+}
+
+.mermaid-fullscreen-close:hover {
+    background: white;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-close.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-close.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal .mermaid-fullscreen-btn {
+    display: none !important;
+}`;
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        all_mermaids.forEach((el) => {
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+        await mermaid.run();
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    const mermaids_processed = document.querySelectorAll(".mermaid[data-processed='true']");
+
+    if ("False" === "True") {
+        const mermaids_to_add_zoom = -1 === -1 ? all_mermaids.length : -1;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("");
+            if(all_mermaids.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            } else if(svgs.size() !== mermaids_to_add_zoom) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            } else {
+                svgs.each(function() {
+                    var svg = d3.select(this);
+                    svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+                    var inner = svg.select("g");
+                    var zoom = d3.zoom().on("zoom", function(event) {
+                        inner.attr("transform", event.transform);
+                    });
+                    svg.call(zoom);
+                });
+            }
+        }
+    } else if(all_mermaids.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if ("True" !== "True") return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = '⛶';
+        fullscreenBtn.style.opacity = '50%';
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scroll, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.sdisplay = 'block';
+
+                if ("False" === "True") {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+const load = async () => {
+    initStyles();
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...JSON.parse(
+                    `{"startOnLoad": false}`
+                ),
+                ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...JSON.parse(
+        `{"startOnLoad": false}`
+    ),
+    ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'dev/core_dev/release';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.4';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="../../_static/hydromt-icon.svg"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="API reference" href="../../api/api.html" />
+    <link rel="prev" title="Test and CI" href="test_ci.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="1.4.0" />
+  
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="light">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../../_static/hydromt-icon.svg" class="logo__image only-light" alt=""/>
+    <img src="../../_static/hydromt-icon.svg" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">HydroMT Core</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/intro.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../overview/intro.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../user_guide/intro.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../intro.html">
+    Developer guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api/api.html">
+    API
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../changelog.html">
+    What's new
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/intro.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../overview/intro.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../user_guide/intro.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../intro.html">
+    Developer guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api/api.html">
+    API
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../changelog.html">
+    What's new
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../architecture/index.html">HydroMT Architecture</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/architecture.html">Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/conventions.html">HydroMT Design Conventions</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../plugin_dev/index.html">Plugin Developer Guide</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/quickstart.html">Starting Your Own HydroMT Plugin</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../plugin_dev/custom_implementation/index.html">Implement your own HydroMT objects</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/model.html">Custom Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/component.html">Custom Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/catalog.html">Custom Data Catalogs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/data_source.html">Custom Data Sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/driver.html">Custom Drivers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/resolver.html">Custom Resolver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/data_adapter.html">Custom DataAdapter</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/register.html">Linking your own custom objects to HydroMT core API</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/testing.html">Testing your plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/migrating_to_v1.html">Migrating to v1</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Core Developer Guide</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="dev_install.html">Developer installation guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="git_conventions.html">Issue conventions</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="code_conventions.html">Code conventions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="documentation.html">Adding Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="test_ci.html">Test and CI</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Release process</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../intro.html" class="nav-link">Developer Guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Core Developer’s guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Release process</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="release-process">
+<span id="create-release"></span><h1>Release process<a class="headerlink" href="#release-process" title="Link to this heading">#</a></h1>
+<p>Releases are produced by three GitHub Actions workflows:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">create-release-branch.yml</span></code> — creates a long-lived <code class="docutils literal notranslate"><span class="pre">release/vX.Y</span></code> branch
+from <code class="docutils literal notranslate"><span class="pre">main</span></code> at version <code class="docutils literal notranslate"><span class="pre">X.Y.0</span></code> (major/minor only). Main is <strong>not</strong> bumped
+here.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> — tags the release on a release branch, creates the
+GitHub release, publishes docs, and opens a <code class="docutils literal notranslate"><span class="pre">record-release/v…</span></code> PR that
+merges the release branch back into <code class="docutils literal notranslate"><span class="pre">main</span></code> (major / minor / patch).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">publish-pypi.yml</span></code> — publishes to PyPI; triggered automatically when a
+GitHub release is published.</p></li>
+</ul>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>After each full release, the <code class="docutils literal notranslate"><span class="pre">record-release/v…</span></code> PR merges the release
+branch back into <code class="docutils literal notranslate"><span class="pre">main</span></code>. This PR bumps <code class="docutils literal notranslate"><span class="pre">main</span></code> to <code class="docutils literal notranslate"><span class="pre">X.(Y+1).0.dev0</span></code>
+(if it isn’t already higher), adds a fresh <code class="docutils literal notranslate"><span class="pre">Unreleased</span></code> changelog section,
+and carries any code changes from the release branch. Use a <strong>regular merge</strong>
+(not squash) to preserve the branch relationship.</p>
+</div>
+<p>Before tagging a major, minor, or patch release, run the
+<a class="reference internal" href="#plugin-compat-test"><span class="std std-ref">plugin compatibility test</span></a> against the release branch.</p>
+<section id="major-minor-release">
+<h2>Major / minor release<a class="headerlink" href="#major-minor-release" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>Go to the <code class="docutils literal notranslate"><span class="pre">Actions</span></code> tab on GitHub, select <strong>Create release branch
+(minor/major)</strong>, click <strong>Run workflow</strong> and choose <code class="docutils literal notranslate"><span class="pre">minor</span></code> or <code class="docutils literal notranslate"><span class="pre">major</span></code>.</p></li>
+<li><p>The workflow creates <code class="docutils literal notranslate"><span class="pre">release/vX.Y</span></code> from <code class="docutils literal notranslate"><span class="pre">main</span></code>, bumps it to <code class="docutils literal notranslate"><span class="pre">X.Y.0</span></code>,
+and updates <code class="docutils literal notranslate"><span class="pre">docs/changelog.rst</span></code> and <code class="docutils literal notranslate"><span class="pre">docs/_static/switcher.json</span></code>
+(via <code class="docutils literal notranslate"><span class="pre">setup-release.sh</span></code>). The branch is pushed but no tag is created yet.
+Main is <strong>not</strong> modified.</p></li>
+<li><p>Push any final fixes or changelog tweaks directly to the release branch.
+When the release content is ready, run the <strong>Create release</strong> workflow with
+<code class="docutils literal notranslate"><span class="pre">release_branch</span> <span class="pre">=</span> <span class="pre">release/vX.Y</span></code> and <code class="docutils literal notranslate"><span class="pre">release_type</span> <span class="pre">=</span> <span class="pre">major</span></code> or <code class="docutils literal notranslate"><span class="pre">minor</span></code>.</p>
+<ul class="simple">
+<li><p>Leave <strong>mark_as_latest</strong> checked (default) to make this the new <code class="docutils literal notranslate"><span class="pre">stable</span></code>
+docs version.</p></li>
+<li><p>The workflow tags <code class="docutils literal notranslate"><span class="pre">HEAD</span></code> as <code class="docutils literal notranslate"><span class="pre">vX.Y.0</span></code>, creates a GitHub release marked
+as latest, publishes versioned docs to GitHub Pages, and opens a
+<code class="docutils literal notranslate"><span class="pre">record-release/vX.Y.0</span></code> PR that merges the release branch back into
+<code class="docutils literal notranslate"><span class="pre">main</span></code> (bumping version + changelog + switcher).</p></li>
+</ul>
+</li>
+<li><p>Publishing the GitHub release automatically triggers <code class="docutils literal notranslate"><span class="pre">publish-pypi.yml</span></code>
+which uploads the package to PyPI.</p></li>
+<li><p>Merge the auto-opened <code class="docutils literal notranslate"><span class="pre">record-release/vX.Y.0</span></code> PR into <code class="docutils literal notranslate"><span class="pre">main</span></code> using a
+<strong>regular merge</strong> (not squash).</p></li>
+<li><p>The newly published PyPI package will trigger a new PR to the
+<a class="reference external" href="https://github.com/conda-forge/hydromt-feedstock">HydroMT feedstock repo on conda-forge</a>.
+Check whether <code class="docutils literal notranslate"><span class="pre">meta.yml</span></code> needs updating and merge the PR to release on
+conda-forge.</p></li>
+<li><p>Celebrate the new release!</p></li>
+</ol>
+</section>
+<section id="patch-release">
+<span id="create-patch-release"></span><h2>Patch release<a class="headerlink" href="#patch-release" title="Link to this heading">#</a></h2>
+<p>Patch releases are made against an already-existing <code class="docutils literal notranslate"><span class="pre">release/vX.Y</span></code> branch.
+No new branch needs to be created.</p>
+<p>If the patch fixes a bug that exists on <code class="docutils literal notranslate"><span class="pre">main</span></code>, commit the fix to <code class="docutils literal notranslate"><span class="pre">main</span></code>
+first, then cherry-pick the relevant fix commit(s) onto the release branches
+that are currently supported (or open a PR targeting the release branch
+directly).</p>
+<ol class="arabic simple">
+<li><p>Go to the <code class="docutils literal notranslate"><span class="pre">Actions</span></code> tab on GitHub, select <strong>Create release</strong>, click
+<strong>Run workflow</strong>.</p></li>
+<li><p>Enter the release branch (e.g. <code class="docutils literal notranslate"><span class="pre">release/v1.4</span></code>) and choose <code class="docutils literal notranslate"><span class="pre">patch</span></code> as
+the release type.</p></li>
+<li><p>Decide whether to check <strong>mark_as_latest</strong>:</p>
+<ul class="simple">
+<li><p>If this is the newest release family (the one <code class="docutils literal notranslate"><span class="pre">main</span></code> was prepared
+from), leave it checked.</p></li>
+<li><p>If this is a patch on an older family (e.g. patching <code class="docutils literal notranslate"><span class="pre">release/v1.4</span></code>
+while <code class="docutils literal notranslate"><span class="pre">main</span></code> is preparing <code class="docutils literal notranslate"><span class="pre">1.6</span></code>), <strong>uncheck it</strong> so that the docs
+<code class="docutils literal notranslate"><span class="pre">stable</span></code> symlink stays on the newer family.</p></li>
+</ul>
+</li>
+<li><p>The workflow increments the patch version, runs <code class="docutils literal notranslate"><span class="pre">setup-release.sh</span></code> (bump,
+changelog, switcher), commits, tags <code class="docutils literal notranslate"><span class="pre">vX.Y.Z</span></code>, creates the GitHub release,
+publishes versioned docs, and opens a <code class="docutils literal notranslate"><span class="pre">record-release/vX.Y.Z</span></code> PR. The
+package is published to PyPI automatically.</p></li>
+<li><p>Merge the auto-opened <code class="docutils literal notranslate"><span class="pre">record-release/vX.Y.Z</span></code> PR into <code class="docutils literal notranslate"><span class="pre">main</span></code> using a
+<strong>regular merge</strong> (not squash).</p></li>
+</ol>
+</section>
+<section id="release-candidate">
+<span id="create-pre-release"></span><h2>Release candidate<a class="headerlink" href="#release-candidate" title="Link to this heading">#</a></h2>
+<p>Release candidates are feature-complete builds expected to become the final
+release unless critical issues are found. They are produced from a
+<code class="docutils literal notranslate"><span class="pre">release/vX.Y</span></code> branch using the same <strong>Create release</strong> workflow.</p>
+<ol class="arabic">
+<li><p>Go to the <code class="docutils literal notranslate"><span class="pre">Actions</span></code> tab on GitHub, select <strong>Create release</strong>, click
+<strong>Run workflow</strong>.</p></li>
+<li><p>Enter the release branch (e.g. <code class="docutils literal notranslate"><span class="pre">release/v1.4</span></code>) and choose <code class="docutils literal notranslate"><span class="pre">rc</span></code> as the
+release type. Leave <strong>mark_as_latest</strong> unchecked (it has no effect for
+pre-releases, but it is good practice).</p></li>
+<li><p>The workflow computes the next available rc version of the form
+<code class="docutils literal notranslate"><span class="pre">X.Y.ZrcN</span></code> based on existing tags, commits the version bump on the release
+branch, tags it as <code class="docutils literal notranslate"><span class="pre">vX.Y.ZrcN</span></code>, and creates a GitHub <em>pre-release</em>. No
+record-on-main PR is opened; no docs are published. The package is published
+to PyPI automatically.</p></li>
+<li><p>Anyone can install the release candidate with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">hydromt</span><span class="o">==</span><span class="n">X</span><span class="o">.</span><span class="n">Y</span><span class="o">.</span><span class="n">ZrcN</span>
+</pre></div>
+</div>
+<p>The exact install command is shown in the body of the GitHub pre-release.</p>
+</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Release candidates share the same long-lived <code class="docutils literal notranslate"><span class="pre">release/vX.Y</span></code> branch as the
+eventual full release, so the rc commits become part of the release history.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Pre-releases are marked as pre-releases on GitHub and are not promoted as the
+latest stable release. Do not use an rc as the basis for a full release; run
+<strong>Create release</strong> with type <code class="docutils literal notranslate"><span class="pre">major</span></code> / <code class="docutils literal notranslate"><span class="pre">minor</span></code> / <code class="docutils literal notranslate"><span class="pre">patch</span></code> to produce the
+actual release.</p>
+</div>
+</section>
+<section id="plugin-compatibility-test">
+<span id="plugin-compat-test"></span><h2>Plugin compatibility test<a class="headerlink" href="#plugin-compatibility-test" title="Link to this heading">#</a></h2>
+<p>Before tagging a major, minor, or patch release, you must run the downstream
+plugin compatibility test against the release branch. This is part of the
+release gate. It checks whether the new HydroMT wheel still works with a set of
+mature plugins.</p>
+<p>The workflow builds the actual wheel that would be published on PyPI and installs
+that wheel into each plugin’s Pixi environment. We do not use an editable
+install. This makes sure we test the real release artifact, including packaging
+metadata and included data files.</p>
+<p>For each plugin, the workflow runs in two modes.</p>
+<p>In the first mode, HydroMT is installed with <code class="docutils literal notranslate"><span class="pre">--no-deps</span></code> (<code class="docutils literal notranslate"><span class="pre">deps=false</span></code>).
+This upgrades only the HydroMT wheel and keeps the plugin’s existing, already
+solved environment unchanged. This simulates a user upgrading HydroMT in an
+existing environment. If this fails, it means the upgrade is not fully drop-in
+compatible. These failures must be reviewed, but they are not automatically
+release blockers.</p>
+<p>In the second mode, HydroMT is installed allowing dependency updates
+(<code class="docutils literal notranslate"><span class="pre">deps=true</span></code>). This allows the environment to re-solve and update third-party
+packages if needed. This simulates a clean installation. If this fails, the
+release is considered broken and must not be finalised. These failures are
+release blockers.</p>
+<section id="how-to-run-the-compatibility-test">
+<h3>How to run the compatibility test<a class="headerlink" href="#how-to-run-the-compatibility-test" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p>Make sure your release branch (for example <code class="docutils literal notranslate"><span class="pre">release/vX.Y</span></code>) is up to date.</p></li>
+<li><p>Go to the GitHub Actions tab.</p></li>
+<li><p>Select the <strong>Downstream plugin compatibility</strong> workflow.</p></li>
+<li><p>Click <strong>Run workflow</strong> and choose the release branch.</p></li>
+</ol>
+<p>If the <code class="docutils literal notranslate"><span class="pre">with</span> <span class="pre">dependencies</span></code> run fails, you must fix the problem before
+continuing the release.</p>
+<p>If the <code class="docutils literal notranslate"><span class="pre">no-deps</span></code> run fails, review the failure and decide what to do. You may
+need to restore backward compatibility in core, coordinate a plugin update, or
+accept that upgrading HydroMT requires re-solving the environment.</p>
+<p>Do not finalise the release until all blocking failures are resolved and advisory
+failures have been reviewed.</p>
+</section>
+</section>
+<section id="architecture-and-design">
+<span id="release-architecture"></span><h2>Architecture and design<a class="headerlink" href="#architecture-and-design" title="Link to this heading">#</a></h2>
+<p>This section describes how the release workflows and branches fit together.</p>
+<section id="workflow-diagram">
+<h3>Workflow diagram<a class="headerlink" href="#workflow-diagram" title="Link to this heading">#</a></h3>
+<pre  class="mermaid">
+        flowchart TD
+    A[Manual dispatch:&lt;br/&gt;create-release-branch.yml&lt;br/&gt;bump = minor or major]
+      --&gt;|Creates release/vX.Y at X.Y.0&lt;br/&gt;setup-release.sh: changelog + switcher&lt;br/&gt;main is NOT bumped here| B[release/vX.Y branch at X.Y.0&lt;br/&gt;main unchanged]
+
+    B --&gt; C{Manual dispatch:&lt;br/&gt;create-release.yml&lt;br/&gt;release_type?}
+
+    C --&gt;|major / minor| D1[Tag vX.Y.0 at HEAD&lt;br/&gt;of release branch]
+    C --&gt;|patch| D2[setup-release.sh bumps Z+1&lt;br/&gt;commit + tag vX.Y.Z]
+    C --&gt;|rc| D3[Commit pre-release version&lt;br/&gt;tag vX.Y.ZrcN]
+
+    D1 --&gt; E[record-release-on-main.sh&lt;br/&gt;opens record-release/v… PR&lt;br/&gt;merges release branch → main&lt;br/&gt;bumps version + changelog + switcher]
+    D2 --&gt; E
+
+    D1 --&gt; F{Pre-release?}
+    D2 --&gt; F
+    D3 --&gt; F
+
+    F --&gt;|No| G1[gh release create --latest=true/false]
+    F --&gt;|Yes: rc| G2[gh release create --prerelease]
+
+    G1 --&gt; H{mark_as_latest?}
+    G2 --&gt; I[release: published event]
+
+    H --&gt;|Yes| H1[Deploy docs to /vX.Y.Z/&lt;br/&gt;+ update stable symlink]
+    H --&gt;|No| H2[Deploy docs to /vX.Y.Z/&lt;br/&gt;no stable update]
+
+    H1 --&gt; I
+    H2 --&gt; I
+
+    I --&gt;|auto-trigger| J[publish-pypi.yml&lt;br/&gt;flit build + twine publish]
+
+    E -.-&gt;|maintainer merges PR| K[Release branch merged into main&lt;br/&gt;main bumped to X.Y+1.0.dev0]
+    </pre><p>The PyPI publish and docs deploy fire <strong>directly off the GitHub release</strong>, not
+off any merge into main. The <code class="docutils literal notranslate"><span class="pre">record-release/v…</span></code> PRs merge the release branch
+back into <code class="docutils literal notranslate"><span class="pre">main</span></code> (carrying code changes, changelog, and switcher) but are not
+on the publishing critical path.</p>
+</section>
+<section id="release-families">
+<h3>Release families<a class="headerlink" href="#release-families" title="Link to this heading">#</a></h3>
+<p>A <strong>release family</strong> is the set of releases that share the same <code class="docutils literal notranslate"><span class="pre">MAJOR.MINOR</span></code>.
+Each <code class="docutils literal notranslate"><span class="pre">release/vX.Y</span></code> branch is the home of exactly one family:</p>
+<ul class="simple">
+<li><p>The <strong>1.4 family</strong> lives on <code class="docutils literal notranslate"><span class="pre">release/v1.4</span></code> and contains every <code class="docutils literal notranslate"><span class="pre">v1.4.*</span></code> tag
+(<code class="docutils literal notranslate"><span class="pre">v1.4.0</span></code>, <code class="docutils literal notranslate"><span class="pre">v1.4.1</span></code>, …).</p></li>
+<li><p>The <strong>1.5 family</strong> lives on <code class="docutils literal notranslate"><span class="pre">release/v1.5</span></code> and contains every <code class="docutils literal notranslate"><span class="pre">v1.5.*</span></code> tag.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">main</span></code> is always preparing the <strong>next</strong> family. When the first release from
+<code class="docutils literal notranslate"><span class="pre">release/v1.5</span></code> is merged back via its record-release PR, main is bumped to
+<code class="docutils literal notranslate"><span class="pre">1.6.0.dev0</span></code>.</p></li>
+</ul>
+</section>
+<section id="key-design-rules">
+<h3>Key design rules<a class="headerlink" href="#key-design-rules" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p><strong>Main is bumped to the next dev version by the record-release PR.</strong> When a
+full release is published, <code class="docutils literal notranslate"><span class="pre">record-release-on-main.sh</span></code> creates a PR that
+merges the release branch back into <code class="docutils literal notranslate"><span class="pre">main</span></code>. This PR bumps main to
+<code class="docutils literal notranslate"><span class="pre">X.(Y+1).0.dev0</span></code> (if it isn’t already higher) and adds a fresh
+<code class="docutils literal notranslate"><span class="pre">Unreleased</span></code> changelog section. Releases never originate from <code class="docutils literal notranslate"><span class="pre">main</span></code>;
+they always come from a <code class="docutils literal notranslate"><span class="pre">release/vX.Y</span></code> branch.</p></li>
+<li><p><strong>Release branches are merged back into main after each full release.</strong> Every
+full release (major, minor, and patch) opens a <code class="docutils literal notranslate"><span class="pre">record-release/v…</span></code> PR that
+starts from the release branch and targets <code class="docutils literal notranslate"><span class="pre">main</span></code>. This PR carries any code
+changes that exist on the release branch back into <code class="docutils literal notranslate"><span class="pre">main</span></code>, along with the
+updated <code class="docutils literal notranslate"><span class="pre">docs/changelog.rst</span></code> and <code class="docutils literal notranslate"><span class="pre">docs/_static/switcher.json</span></code>. The
+version in <code class="docutils literal notranslate"><span class="pre">hydromt/__init__.py</span></code> on <code class="docutils literal notranslate"><span class="pre">main</span></code> is preserved if it is already
+at or above <code class="docutils literal notranslate"><span class="pre">X.(Y+1).0.dev0</span></code>; otherwise it is bumped as a safety net. Use a
+<strong>regular merge</strong> (not squash) to preserve the branch relationship in history.</p></li>
+<li><p><strong>All development lands on ``main`` first.</strong> Features and bugfixes are merged
+into <code class="docutils literal notranslate"><span class="pre">main</span></code> via normal PRs. When a fix needs to ship in an older release
+family, cherry-pick the commit that landed on <code class="docutils literal notranslate"><span class="pre">main</span></code> for the fix (that is,
+the PR merge result) onto the relevant <code class="docutils literal notranslate"><span class="pre">release/vX.Y</span></code> branch(es) and
+dispatch <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> with <code class="docutils literal notranslate"><span class="pre">release_type</span> <span class="pre">=</span> <span class="pre">patch</span></code> against that
+branch. If a cherry-pick does not apply cleanly, the <code class="docutils literal notranslate"><span class="pre">record-release/v…</span></code> PR
+will carry the fix back to <code class="docutils literal notranslate"><span class="pre">main</span></code> after the patch release.</p></li>
+</ol>
+<p>The developer dispatching <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> chooses, via a
+<code class="docutils literal notranslate"><span class="pre">mark_as_latest</span></code> checkbox, whether the GitHub release should be marked as
+<code class="docutils literal notranslate"><span class="pre">latest</span></code> (and the docs <code class="docutils literal notranslate"><span class="pre">stable</span></code> symlink updated). For patches on older
+families the developer normally <strong>un</strong>checks this so that the newest family
+keeps owning <code class="docutils literal notranslate"><span class="pre">stable</span></code>.</p>
+</section>
+<section id="how-the-workflows-fit-together">
+<h3>How the workflows fit together<a class="headerlink" href="#how-the-workflows-fit-together" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>``create-release-branch.yml``</strong>:</p>
+<ul>
+<li><p>Creates <code class="docutils literal notranslate"><span class="pre">release/vX.Y</span></code> at <code class="docutils literal notranslate"><span class="pre">X.Y.0</span></code> using <code class="docutils literal notranslate"><span class="pre">setup-release.sh</span></code> (version
+bump, changelog header rename, switcher entry).</p></li>
+<li><p>Main is <strong>not</strong> bumped here. The version bump and fresh Unreleased section
+are applied when the record-release PR is merged after the first release from
+the family.</p></li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">bump</span> <span class="pre">=</span> <span class="pre">minor</span></code>, takes main’s current version as-is (main is already at
+the right minor). For <code class="docutils literal notranslate"><span class="pre">bump</span> <span class="pre">=</span> <span class="pre">major</span></code>, bumps the major and resets minor to
+0.</p></li>
+<li><p>Run once per family. Older release branches keep living independently.</p></li>
+</ul>
+</li>
+<li><p><strong>``create-release.yml``</strong> takes <code class="docutils literal notranslate"><span class="pre">release_branch</span></code>, <code class="docutils literal notranslate"><span class="pre">release_type</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">mark_as_latest</span></code> as inputs. The same workflow services every release branch
+and every release type uniformly.</p>
+<ul>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">major</span></code>/<code class="docutils literal notranslate"><span class="pre">minor</span></code>: tags the <code class="docutils literal notranslate"><span class="pre">X.Y.0</span></code> commit already on the branch.</p></li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">patch</span></code>: runs <code class="docutils literal notranslate"><span class="pre">setup-release.sh</span></code> to bump the patch, commit, then
+tags.</p></li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">rc</span></code>: commits a pre-release version bump, tags, creates a pre-release
+on GitHub. No record-on-main PR; no docs published.</p></li>
+<li><p>For all full releases: runs <code class="docutils literal notranslate"><span class="pre">record-release-on-main.sh</span></code> to open a
+<code class="docutils literal notranslate"><span class="pre">record-release/v…</span></code> PR that merges the release branch back into main (code
+changes + changelog + switcher). The PR branch starts from the release
+branch, not from main.</p></li>
+<li><p><strong>``mark_as_latest`` checkbox</strong> controls the GitHub release <code class="docutils literal notranslate"><span class="pre">--latest</span></code> flag
+and whether the docs <code class="docutils literal notranslate"><span class="pre">stable</span></code> symlink is updated. Default <code class="docutils literal notranslate"><span class="pre">true</span></code>. Uncheck
+for patches on older families.</p></li>
+</ul>
+</li>
+<li><p>The <strong>``NEW_RELEASE`` concurrency group</strong> serializes release jobs across
+branches.</p></li>
+<li><p><strong>PyPI</strong>: each tag’s <code class="docutils literal notranslate"><span class="pre">release:</span> <span class="pre">published</span></code> event independently triggers
+<code class="docutils literal notranslate"><span class="pre">publish-pypi.yml</span></code>. All families get published regardless of
+<code class="docutils literal notranslate"><span class="pre">mark_as_latest</span></code>.</p></li>
+<li><p><strong>Bugfix cherry-picks</strong>: there is no automated bugfix-commit backport workflow.
+The fix is cherry-picked onto each release branch by hand (or via a PR
+targeting the release branch). Only then is <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> dispatched
+against that branch. If a cherry-pick doesn’t apply cleanly, the fix can be
+applied directly to the release branch — the <code class="docutils literal notranslate"><span class="pre">record-release/v…</span></code> PR will
+carry it back to main after the release.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">create-release-branch.yml</span></code> fails after pushing the release branch, the
+release can still proceed normally — the record-release PR will bump main when
+the release is published.</p></li>
+</ul>
+</section>
+<section id="example-git-history">
+<h3>Example git history<a class="headerlink" href="#example-git-history" title="Link to this heading">#</a></h3>
+<p>A concrete two-family scenario: a bugfix backported from <code class="docutils literal notranslate"><span class="pre">main</span></code> to
+<code class="docutils literal notranslate"><span class="pre">release/v1.5</span></code> and <code class="docutils literal notranslate"><span class="pre">release/v1.4</span></code>.</p>
+<pre  class="mermaid">
+        gitGraph
+   commit id: &quot;feature A (main at 1.4.0)&quot;
+   branch &quot;release/v1.4&quot;
+   commit id: &quot;Bump 1.4.0 + changelog&quot; tag: &quot;v1.4.0&quot;
+   branch &quot;record-release/v1.4.0&quot;
+   commit id: &quot;Update switcher + changelog (1.4.0)&quot;
+   checkout main
+   merge &quot;record-release/v1.4.0&quot; id: &quot;Merge record-release/v1.4.0 (main → 1.5.0.dev0)&quot;
+   commit id: &quot;feature B&quot;
+   commit id: &quot;feature C&quot;
+   branch &quot;release/v1.5&quot;
+   commit id: &quot;Bump 1.5.0 + changelog&quot; tag: &quot;v1.5.0&quot;
+   branch &quot;record-release/v1.5.0&quot;
+   commit id: &quot;add v1.5.0 to main's switcher / changelog&quot;
+   checkout main
+   merge &quot;record-release/v1.5.0&quot; id: &quot;Merge record-release/v1.5.0 (main → 1.6.0.dev0)&quot;
+   commit id: &quot;feature D&quot;
+   commit id: &quot;Bugfix PR&quot; type: HIGHLIGHT
+   checkout &quot;release/v1.5&quot;
+   cherry-pick id: &quot;Bugfix PR&quot;
+   checkout main
+   commit id: &quot;Feature E&quot;
+   checkout &quot;release/v1.5&quot;
+   commit id: &quot;Bump 1.5.1 + changelog&quot; tag: &quot;v1.5.1&quot;
+   branch &quot;record-release/v1.5.1&quot;
+   commit id: &quot;add v1.5.1 to main's switcher / changelog&quot;
+   checkout &quot;release/v1.4&quot;
+   cherry-pick id: &quot;Bugfix PR&quot;
+   checkout main
+   commit id: &quot;Feature F&quot;
+   checkout &quot;release/v1.4&quot;
+   commit id: &quot;Bump 1.4.1 + changelog&quot; tag: &quot;v1.4.1&quot;
+   branch &quot;record-release/v1.4.1&quot;
+   commit id: &quot;add v1.4.1 to main's switcher / changelog&quot;
+   checkout main
+   merge &quot;record-release/v1.5.1&quot; id: &quot;Merge record-release/v1.5.1 (main stays 1.6.0.dev0)&quot;
+   merge &quot;record-release/v1.4.1&quot; id: &quot;Merge record-release/v1.4.1 (main stays 1.6.0.dev0)&quot;
+    </pre></section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="test_ci.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Test and CI</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../../api/api.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">API reference</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#major-minor-release">Major / minor release</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#patch-release">Patch release</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#release-candidate">Release candidate</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plugin-compatibility-test">Plugin compatibility test</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-run-the-compatibility-test">How to run the compatibility test</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#architecture-and-design">Architecture and design</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#workflow-diagram">Workflow diagram</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#release-families">Release families</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#key-design-rules">Key design rules</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-the-workflows-fit-together">How the workflows fit together</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#example-git-history">Example git history</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright Deltares.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
