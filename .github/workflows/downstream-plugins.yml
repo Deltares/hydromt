@@ -27,7 +27,7 @@ jobs:
             environment: default
             pixi_task: test
             pixi_version: v0.59.0
-            branch: fix/updates-for-hydromt-v1.4.0
+            branch: main
 
           - name: hydromt-sfincs
             repo: Deltares/hydromt_sfincs
@@ -41,7 +41,7 @@ jobs:
             environment: default
             pixi_task: test
             pixi_version: v0.65.0
-            branch: fix/hydromt-v1.4.0
+            branch: main
 
     steps:
       - name: Checkout hydromt
