@@ -57,8 +57,6 @@ class Model(object, metaclass=ABCMeta):
         root : str, Path, optional
             Model root, by default the current working directory: ``Path.cwd()``
         components: Dict[str, Any], optional
-
-
             Dictionary of components to add to the model, by default None
             Every entry in this dictionary contains the name of the component as key,
             and the component object as value, or a dictionary with options passed to the component initializers.
