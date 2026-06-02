@@ -95,7 +95,7 @@ jobs:
 
   upload-to-pypi:
     needs: test-built-dist
-    if: ${{ github.event_name == 'release' || github.event_name == 'workflow_call' }}
+    if: ${{ github.event_name == 'release' || github.event_name == 'workflow_call' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v8
