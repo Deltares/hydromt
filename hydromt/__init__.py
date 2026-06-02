@@ -1,7 +1,7 @@
 """HydroMT: Automated and reproducible model building and analysis."""
 
 # version number without 'v' at start
-__version__ = "1.4.0"
+__version__ = "1.5.0.dev0"
 
 import warnings
 
@@ -48,8 +48,6 @@ except Exception:
 # importing xarray
 
 import warnings  # noqa: F401
-
-import netCDF4  # noqa: F401
 
 # submodules
 from hydromt import data_catalog, gis, model, stats
