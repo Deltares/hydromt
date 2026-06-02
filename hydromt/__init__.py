@@ -1,7 +1,7 @@
 """HydroMT: Automated and reproducible model building and analysis."""
 
 # version number without 'v' at start
-__version__ = "1.4.0.dev0"
+__version__ = "1.4.0"
 
 import warnings
 
