@@ -16,6 +16,11 @@ on:
       PYPI_TEST_TOKEN:
         required: false
   workflow_dispatch:
+    inputs:
+      tag:
+        type: string
+        description: "Tag to publish (e.g. v1.4.0)"
+        required: true
 
 defaults:
   run:
@@ -28,6 +33,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: ${{ inputs.tag || github.ref }}
 
       - uses: actions/setup-python@v6
         name: Install Python
