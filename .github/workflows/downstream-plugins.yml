@@ -43,6 +43,13 @@ jobs:
             pixi_version: v0.65.0
             branch: main
 
+          - name: hydromt-delft3dfm
+            repo: Deltares/hydromt_delft3dfm
+            environment: default
+            pixi_task: test
+            pixi_version: v0.67.1
+            branch: main
+
     steps:
       - name: Checkout hydromt
         uses: actions/checkout@v6
