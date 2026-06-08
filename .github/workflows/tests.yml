@@ -47,6 +47,8 @@ jobs:
           pixi-version: "v0.67.0"
           environments: ${{ matrix.dependencies }}-py${{ matrix.python-version }}
       - name: Test
+        env:
+          PYTEST_ADDOPTS: ${{ matrix.dependencies == 'low' && '-p no:warnings' || '' }}
         run: |
           export NUMBA_DISABLE_JIT=1
           pixi run --locked -e ${{ matrix.dependencies }}-py${{ matrix.python-version }} test
