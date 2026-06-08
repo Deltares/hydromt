@@ -5000,7 +5000,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4e/4e/21cd0b8f365449f1576f93de1ec8718ed18a7a3bc086dfbdeb79437bba7a/botocore-1.41.5-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f5/69/9dd1b0e248030fb22e27cb31203a9a8f52fbdd1c24b4f89f3a26b5f6f002/Bottleneck-1.4.0-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/7e/50/fc9680058e63161f2f63165b84c957a0df1415431104c408e8104a3a18ef/branca-0.8.2-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/a5/00/fed048eeb80129908f8bd5f5762e230864abc8a8fbbc493740bafcb696bd/Cartopy-0.23.0.tar.gz
+      - pypi: https://files.pythonhosted.org/packages/82/7d/77f96f369f23182f42b7e124536d7022485c31e51204d0673fc0a43ea28d/Cartopy-0.23.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/59/8c/57e832b7af6d7c5abe66eb3fbe3a3a32f4d11ea23a1aa7131371035be991/certifi-2026.5.20-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/78/2d/7fa73dfa841b5ac06c7b8855cfc18622132e365f5b81d02230333ff26e9e/cffi-2.0.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/db/3c/33bac158f8ab7f89b2e59426d5fe2e4f63f7ed25df84c036890172b412b5/cfgv-3.5.0-py2.py3-none-any.whl
@@ -5323,7 +5323,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4e/4e/21cd0b8f365449f1576f93de1ec8718ed18a7a3bc086dfbdeb79437bba7a/botocore-1.41.5-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d2/e3/ea55ba080e15dd152216ecfb4b601a9eafd3a86fd7b7c2e09dc0211a5e70/Bottleneck-1.4.0-cp312-cp312-macosx_11_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/7e/50/fc9680058e63161f2f63165b84c957a0df1415431104c408e8104a3a18ef/branca-0.8.2-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/a5/00/fed048eeb80129908f8bd5f5762e230864abc8a8fbbc493740bafcb696bd/Cartopy-0.23.0.tar.gz
+      - pypi: https://files.pythonhosted.org/packages/b2/96/f2f271e971185e38e940498421a97cb1e5dac970919bd5d65c2c430fe1f5/Cartopy-0.23.0-cp312-cp312-macosx_11_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/59/8c/57e832b7af6d7c5abe66eb3fbe3a3a32f4d11ea23a1aa7131371035be991/certifi-2026.5.20-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/df/a2/781b623f57358e360d62cdd7a8c681f074a71d445418a776eef0aadb4ab4/cffi-2.0.0-cp312-cp312-macosx_11_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/db/3c/33bac158f8ab7f89b2e59426d5fe2e4f63f7ed25df84c036890172b412b5/cfgv-3.5.0-py2.py3-none-any.whl
@@ -5643,7 +5643,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4e/4e/21cd0b8f365449f1576f93de1ec8718ed18a7a3bc086dfbdeb79437bba7a/botocore-1.41.5-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e1/96/b100d19b55acc2b3cf41c52f31804533534de6e9da445ba11d83fa262d5d/Bottleneck-1.4.0-cp312-cp312-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/7e/50/fc9680058e63161f2f63165b84c957a0df1415431104c408e8104a3a18ef/branca-0.8.2-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/a5/00/fed048eeb80129908f8bd5f5762e230864abc8a8fbbc493740bafcb696bd/Cartopy-0.23.0.tar.gz
+      - pypi: https://files.pythonhosted.org/packages/a2/65/6dae4e0a1414251a7bc3c2d9f87853419f921bac991e35701b938b7713dc/Cartopy-0.23.0-cp312-cp312-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/59/8c/57e832b7af6d7c5abe66eb3fbe3a3a32f4d11ea23a1aa7131371035be991/certifi-2026.5.20-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f8/ed/13bd4418627013bec4ed6e54283b1959cf6db888048c7cf4b4c3b5b36002/cffi-2.0.0-cp312-cp312-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/db/3c/33bac158f8ab7f89b2e59426d5fe2e4f63f7ed25df84c036890172b412b5/cfgv-3.5.0-py2.py3-none-any.whl
@@ -10132,6 +10132,60 @@ packages:
   purls: []
   size: 129868
   timestamp: 1779289852439
+- pypi: https://files.pythonhosted.org/packages/82/7d/77f96f369f23182f42b7e124536d7022485c31e51204d0673fc0a43ea28d/Cartopy-0.23.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+  name: cartopy
+  version: 0.23.0
+  sha256: 550173b91155d4d81cd14b4892cb6cabe3dd32bd34feacaa1ec78c0e56287832
+  requires_dist:
+  - numpy>=1.21
+  - matplotlib>=3.5
+  - shapely>=1.7
+  - packaging>=20
+  - pyshp>=2.3
+  - pyproj>=3.3.1
+  - pydata-sphinx-theme ; extra == 'doc'
+  - sphinx ; extra == 'doc'
+  - sphinx-gallery ; extra == 'doc'
+  - owslib>=0.20.0 ; extra == 'ows'
+  - pillow>=6.1.0 ; extra == 'ows'
+  - pillow>=6.1.0 ; extra == 'plotting'
+  - scipy>=1.3.1 ; extra == 'plotting'
+  - pykdtree ; extra == 'speedups'
+  - fiona ; extra == 'speedups'
+  - beautifulsoup4 ; extra == 'srtm'
+  - pytest>=5.1.2 ; extra == 'test'
+  - pytest-mpl>=0.11 ; extra == 'test'
+  - pytest-xdist ; extra == 'test'
+  - pytest-cov ; extra == 'test'
+  - coveralls ; extra == 'test'
+  requires_python: '>=3.9'
+- pypi: https://files.pythonhosted.org/packages/a2/65/6dae4e0a1414251a7bc3c2d9f87853419f921bac991e35701b938b7713dc/Cartopy-0.23.0-cp312-cp312-win_amd64.whl
+  name: cartopy
+  version: 0.23.0
+  sha256: 55219ee0fb069cc3254426e87382cde03546e86c3f7c6759f076823b1e3a44d9
+  requires_dist:
+  - numpy>=1.21
+  - matplotlib>=3.5
+  - shapely>=1.7
+  - packaging>=20
+  - pyshp>=2.3
+  - pyproj>=3.3.1
+  - pydata-sphinx-theme ; extra == 'doc'
+  - sphinx ; extra == 'doc'
+  - sphinx-gallery ; extra == 'doc'
+  - owslib>=0.20.0 ; extra == 'ows'
+  - pillow>=6.1.0 ; extra == 'ows'
+  - pillow>=6.1.0 ; extra == 'plotting'
+  - scipy>=1.3.1 ; extra == 'plotting'
+  - pykdtree ; extra == 'speedups'
+  - fiona ; extra == 'speedups'
+  - beautifulsoup4 ; extra == 'srtm'
+  - pytest>=5.1.2 ; extra == 'test'
+  - pytest-mpl>=0.11 ; extra == 'test'
+  - pytest-xdist ; extra == 'test'
+  - pytest-cov ; extra == 'test'
+  - coveralls ; extra == 'test'
+  requires_python: '>=3.9'
 - pypi: https://files.pythonhosted.org/packages/a5/00/fed048eeb80129908f8bd5f5762e230864abc8a8fbbc493740bafcb696bd/Cartopy-0.23.0.tar.gz
   name: cartopy
   version: 0.23.0
@@ -10152,6 +10206,33 @@ packages:
   - pillow>=6.1.0 ; extra == 'ows'
   - pillow>=6.1.0 ; extra == 'plotting'
   - scipy>=1.3.1 ; extra == 'plotting'
+  - beautifulsoup4 ; extra == 'srtm'
+  - pytest>=5.1.2 ; extra == 'test'
+  - pytest-mpl>=0.11 ; extra == 'test'
+  - pytest-xdist ; extra == 'test'
+  - pytest-cov ; extra == 'test'
+  - coveralls ; extra == 'test'
+  requires_python: '>=3.9'
+- pypi: https://files.pythonhosted.org/packages/b2/96/f2f271e971185e38e940498421a97cb1e5dac970919bd5d65c2c430fe1f5/Cartopy-0.23.0-cp312-cp312-macosx_11_0_arm64.whl
+  name: cartopy
+  version: 0.23.0
+  sha256: 43e36b8b7e7e373a5698757458fd28fafbbbf5f3ebbe2d378f6a5ec3993d6dc0
+  requires_dist:
+  - numpy>=1.21
+  - matplotlib>=3.5
+  - shapely>=1.7
+  - packaging>=20
+  - pyshp>=2.3
+  - pyproj>=3.3.1
+  - pydata-sphinx-theme ; extra == 'doc'
+  - sphinx ; extra == 'doc'
+  - sphinx-gallery ; extra == 'doc'
+  - owslib>=0.20.0 ; extra == 'ows'
+  - pillow>=6.1.0 ; extra == 'ows'
+  - pillow>=6.1.0 ; extra == 'plotting'
+  - scipy>=1.3.1 ; extra == 'plotting'
+  - pykdtree ; extra == 'speedups'
+  - fiona ; extra == 'speedups'
   - beautifulsoup4 ; extra == 'srtm'
   - pytest>=5.1.2 ; extra == 'test'
   - pytest-mpl>=0.11 ; extra == 'test'
@@ -12692,91 +12773,8 @@ packages:
   requires_python: '>=3.8'
 - pypi: ./
   name: hydromt
-  version: 1.4.0.dev0
-  sha256: ddf99e6ad5dc00bf272295bfeb75536ac0c54b0ce58677e8fb68916b7e1763ab
-  requires_dist:
-  - affine>=2.4
-  - bottleneck>=1.4
-  - click>=8.2
-  - dask>=2024
-  - fsspec[http]>=2025
-  - geopandas[all]>=1.0
-  - importlib-metadata>=8.0
-  - mercantile>=1.0
-  - netcdf4>=1.7
-  - numba>=0.59.0
-  - numpy>=2.0
-  - packaging>=25.0
-  - pandas>=2.3,<4
-  - pooch>=1.8
-  - pyarrow>=17.0
-  - pydantic>=2.11
-  - pydantic-settings>=2.8
-  - pyflwdir>=0.5.10
-  - pyogrio>=0.10
-  - pyproj>=3.7
-  - pystac>=1.11
-  - pyyaml>=6.0.2
-  - rasterio>=1.4
-  - requests>=2.32.2
-  - rio-vrt>=0.3.1
-  - rioxarray>=0.18
-  - scipy>=1.14
-  - shapely>=2.1.2
-  - tenacity>=9.1
-  - tomli>=2.0
-  - tomli-w>=1.0
-  - universal-pathlib>=0.2
-  - xarray>=2025.6
-  - xmltodict>=1.0
-  - xugrid>=0.15.1
-  - zarr>=3.1,<4
-  - flit>=3.10 ; extra == 'dev'
-  - mypy>=2 ; extra == 'dev'
-  - pandas-stubs>=2.3 ; extra == 'dev'
-  - pre-commit>=4.0 ; extra == 'dev'
-  - ruff>=0.15 ; extra == 'dev'
-  - python-dotenv>=1.0 ; extra == 'dev'
-  - twine>=6.0 ; extra == 'dev'
-  - types-openpyxl>=3.0 ; extra == 'dev'
-  - types-pyyaml>=6.0 ; extra == 'dev'
-  - types-pillow>=10.0 ; extra == 'dev'
-  - types-requests>=2.32.2 ; extra == 'dev'
-  - types-xmltodict>=1.0 ; extra == 'dev'
-  - autodoc-pydantic>=2.0 ; extra == 'doc'
-  - hydromt[examples,extra] ; extra == 'doc'
-  - nbsphinx>=0.9 ; extra == 'doc'
-  - sphinx-autosummary-accessors>=2025 ; extra == 'doc'
-  - sphinx>=8,<9 ; extra == 'doc'
-  - sphinxcontrib-mermaid>=2.0 ; extra == 'doc'
-  - sphinx-click>=6.0 ; extra == 'doc'
-  - sphinx-design>=0.6 ; extra == 'doc'
-  - sbom4python>=0.12 ; extra == 'doc'
-  - pydata-sphinx-theme>=0.17.0 ; extra == 'doc'
-  - myst-parser>=5.0 ; extra == 'doc'
-  - cartopy>=0.23 ; extra == 'examples'
-  - jupyterlab>=4.3 ; extra == 'examples'
-  - notebook>=7.4 ; extra == 'examples'
-  - matplotlib>=3.0 ; extra == 'extra'
-  - pyet>=1.3 ; extra == 'extra'
-  - azure-ai-ml>=1.22 ; extra == 'io'
-  - azure-identity>=1.16 ; extra == 'io'
-  - adlfs>=2024 ; extra == 'io'
-  - gcsfs>=2023.12.1 ; extra == 'io'
-  - fastparquet>=2024 ; extra == 'io'
-  - openpyxl>=3.1 ; extra == 'io'
-  - pillow>=11.0 ; extra == 'io'
-  - s3fs>=2024 ; extra == 'io'
-  - hydromt[io,extra,examples] ; extra == 'slim'
-  - pytest>=9.0.3 ; extra == 'test'
-  - pytest-cov>=6.0 ; extra == 'test'
-  - pytest-mock>=3.13 ; extra == 'test'
-  - pytest-timeout>=2.4 ; extra == 'test'
-  requires_python: '>=3.11,<3.15'
-- pypi: ./
-  name: hydromt
   version: 1.5.0.dev0
-  sha256: ddf99e6ad5dc00bf272295bfeb75536ac0c54b0ce58677e8fb68916b7e1763ab
+  sha256: 11f4a01ad19c98fc786531f0fcc5cb4c5a1d5f2db0794e69622732abd6999d65
   requires_dist:
   - affine>=2.4
   - bottleneck>=1.4
