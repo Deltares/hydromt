@@ -6,7 +6,7 @@ on:
       - "v*"
     branches: [release/**]
   pull_request:
-    branches: [release/**]
+    branches: [release/**, main]
   workflow_dispatch:
 
 permissions:
@@ -16,6 +16,12 @@ jobs:
   downstream:
     name: Test ${{ matrix.plugin.name }} (deps=${{ matrix.with_deps }})
     runs-on: ubuntu-latest
+    env:
+      DEFAULT_BRANCH: main
+      DEFAULT_PIXI_FEATURE: default
+      DEFAULT_PIXI_ENVIRONMENT: default
+      DEFAULT_PIXI_TASK: test
+      DEFAULT_PIXI_VERSION: v0.59.0
 
     strategy:
       fail-fast: false
@@ -24,24 +30,20 @@ jobs:
         plugin:
           - name: hydromt-wflow
             repo: Deltares/hydromt_wflow
-            environment: default
-            pixi_task: test
-            pixi_version: v0.59.0
-            branch: main
 
           - name: hydromt-sfincs
             repo: Deltares/hydromt_sfincs
-            environment: default
             pixi_task: tests
-            pixi_version: v0.59.0
-            branch: main
 
           - name: hydromt-fiat
             repo: Deltares/hydromt_fiat
-            environment: default
-            pixi_task: test
             pixi_version: v0.65.0
-            branch: main
+
+          - name: hydromt-delft3dfm
+            repo: Deltares/hydromt_delft3dfm
+            pixi_feature: hydromt_dev
+            pixi_environment: dev-314
+            pixi_version: v0.67.1
 
     steps:
       - name: Checkout hydromt
@@ -50,7 +52,7 @@ jobs:
       - name: Install pixi
         uses: prefix-dev/setup-pixi@v0.9.6
         with:
-          pixi-version: ${{ matrix.plugin.pixi_version }}
+          pixi-version: ${{ matrix.plugin.pixi_version || env.DEFAULT_PIXI_VERSION }}
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
@@ -70,25 +72,25 @@ jobs:
           repository: ${{ matrix.plugin.repo }}
           path: plugin
           token: ${{ secrets.GITHUB_TOKEN }}
-          ref: ${{ matrix.plugin.branch }}
+          ref: ${{ matrix.plugin.branch || env.DEFAULT_BRANCH }}
 
       - name: Solve environment for hydromt candidate (with deps)
         if: matrix.with_deps == true
         working-directory: plugin
         run: |
           wheel_file=$(ls "$HYDROMT_DIST"/hydromt-*.whl)
-          pixi add "hydromt@file:$wheel_file" --pypi
+          pixi add "hydromt@file:$wheel_file" --pypi --feature ${{ matrix.plugin.pixi_feature || env.DEFAULT_PIXI_FEATURE }}
 
       - name: Install plugin env
         working-directory: plugin
         run: |
-          pixi install -e ${{ matrix.plugin.environment }}
+          pixi install -e ${{ matrix.plugin.pixi_environment || env.DEFAULT_PIXI_ENVIRONMENT }}
 
       - name: Install hydromt candidate (no deps)
         if: matrix.with_deps == false
         working-directory: plugin
         run: |
-          pixi run -e ${{ matrix.plugin.environment }} --no-install \
+          pixi run -e ${{ matrix.plugin.pixi_environment || env.DEFAULT_PIXI_ENVIRONMENT }} --no-install \
             uv pip install --force-reinstall --no-deps "$HYDROMT_DIST"/hydromt-*.whl
 
       - name: Echo solved environment
@@ -96,11 +98,11 @@ jobs:
         run: |
           # what pixi thinks is installed
           echo "pixi list output:"
-          pixi list -e ${{ matrix.plugin.environment }} --no-install
+          pixi list -e ${{ matrix.plugin.pixi_environment || env.DEFAULT_PIXI_ENVIRONMENT }} --no-install
 
           # what python will import
           echo "uv pip freeze output:"
-          pixi run -e ${{ matrix.plugin.environment }} --no-install \
+          pixi run -e ${{ matrix.plugin.pixi_environment || env.DEFAULT_PIXI_ENVIRONMENT }} --no-install \
             uv pip freeze
 
       - name: Run plugin compatibility tests
@@ -108,7 +110,7 @@ jobs:
         env:
           PYTEST_ADDOPTS: "-p no:warnings"
         run: |
-          pixi run -e ${{ matrix.plugin.environment }} --no-install ${{ matrix.plugin.pixi_task }}
+          pixi run -e ${{ matrix.plugin.pixi_environment || env.DEFAULT_PIXI_ENVIRONMENT }} --no-install ${{ matrix.plugin.pixi_task || env.DEFAULT_PIXI_TASK }}
 
       - name: Failure guidance
         if: failure()
