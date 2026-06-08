@@ -49,7 +49,7 @@ class URIResolver(AbstractBaseModel, ABC):
             left-inclusive start end time of the data, by default None
         mask : Geom | None, optional
             A geometry defining the area of interest, by default None
-        zoom : Zoom | None  , optional
+        zoom : Zoom | None, optional
             zoom of the dataset, by default None
         variables : list[str] | None, optional
             Names of variables to return, or all if None, by default None
