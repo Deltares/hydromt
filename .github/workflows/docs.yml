@@ -52,7 +52,7 @@ jobs:
         if: ${{ github.event_name != 'pull_request' }}
         run: |
           pixi run --locked docs
-          export CURRENT_VERSION=$(grep "__version__" hydromt/__init__.py | cut -d= -f 2 | tr -d "\" ")
+          export CURRENT_VERSION=$(grep "^__version__" hydromt/__init__.py | cut -d= -f 2 | tr -d "\" ")
 
           if [ -z "$CURRENT_VERSION" ]; then
             echo "Could not determine version, exiting..."

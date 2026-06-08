@@ -272,3 +272,10 @@ jobs:
           git add stable
           git commit -m "Update stable symlink to ${{ env.DOC_VERSION }}" || echo "No symlink change"
           git push
+
+  publish-pypi:
+    name: Publish to PyPI
+    needs: release
+    uses: ./.github/workflows/publish-pypi.yml
+    secrets:
+      PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
