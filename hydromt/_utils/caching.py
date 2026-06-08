@@ -10,7 +10,6 @@ from typing import List, Optional, cast
 
 import geopandas as gpd
 import numpy as np
-import rasterio as rio
 from affine import Affine
 from fsspec import AbstractFileSystem, url_to_fs
 from pyproj import CRS
@@ -165,11 +164,22 @@ def cache_vrt_tiles(
 
     # Build the vrt with rio_vrt
     # Workaround: rio-vrt crashes with single-file lists (min(*[x]) TypeError).
+    # Pass duplicated list, then strip the duplicate source from the written XML.
+    duplicated = False
     if len(new) == 1:
-        with rio.open(new[0]) as src:
-            rio.shutil.copy(src, vrt_destination_path, driver="VRT")
-    else:
-        build_vrt(vrt_destination_path, new)
+        new = new + new
+        duplicated = True
+
+    build_vrt(vrt_destination_path, new)
+
+    # de-duplicate
+    if duplicated:
+        tree = ET.parse(vrt_destination_path)
+        for band in tree.getroot().findall("VRTRasterBand"):
+            source_els = [s for s in band if s.tag.endswith("Source")]
+            if len(source_els) > 1:
+                band.remove(source_els[-1])
+        tree.write(vrt_destination_path, xml_declaration=True, encoding="UTF-8")
 
     return vrt_destination_path
 
