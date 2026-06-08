@@ -6,7 +6,7 @@ on:
       - "v*"
     branches: [release/**]
   pull_request:
-    branches: [release/**, main]
+    branches: [release/**]
   workflow_dispatch:
 
 permissions:
