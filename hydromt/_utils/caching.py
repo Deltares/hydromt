@@ -10,6 +10,7 @@ from typing import List, Optional, cast
 
 import geopandas as gpd
 import numpy as np
+import rasterio as rio
 from affine import Affine
 from fsspec import AbstractFileSystem, url_to_fs
 from pyproj import CRS
@@ -163,7 +164,12 @@ def cache_vrt_tiles(
         os.unlink(vrt_destination_path)
 
     # Build the vrt with rio_vrt
-    build_vrt(vrt_destination_path, new)
+    # Workaround: rio-vrt crashes with single-file lists (min(*[x]) TypeError).
+    if len(new) == 1:
+        with rio.open(new[0]) as src:
+            rio.shutil.copy(src, vrt_destination_path, driver="VRT")
+    else:
+        build_vrt(vrt_destination_path, new)
 
     return vrt_destination_path
 
