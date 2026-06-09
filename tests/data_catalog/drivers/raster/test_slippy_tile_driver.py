@@ -323,6 +323,7 @@ def test_options_defaults():
     assert opts.s3_bucket is None
 
 
+@pytest.mark.skipif(not HAS_S3FS, reason="s3fs/botocore required for credential test")
 def test_has_credentials_handles_provider_error():
     """A failing credential provider (e.g. expired SSO token) must not raise.
 
@@ -340,6 +341,14 @@ def test_has_credentials_handles_provider_error():
     with patch(
         "hydromt.data_catalog.drivers.raster.slippy_tile_driver.botocore.session.get_session",
         return_value=fake_session,
+    ):
+        assert has_credentials() is False
+
+
+def test_has_credentials_returns_false_when_s3fs_missing():
+    """Without s3fs/botocore the function must return False, not NameError."""
+    with patch(
+        "hydromt.data_catalog.drivers.raster.slippy_tile_driver.HAS_S3FS", False
     ):
         assert has_credentials() is False
 
