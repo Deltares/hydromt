@@ -165,6 +165,7 @@ def cache_vrt_tiles(
     # Build the vrt with rio_vrt
     # Workaround: rio-vrt crashes with single-file lists (min(*[x]) TypeError).
     # Pass duplicated list, then strip the duplicate source from the written XML.
+    # See: https://github.com/12rambau/rio-vrt/issues/26
     duplicated = False
     if len(new) == 1:
         new = new + new
