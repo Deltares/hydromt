@@ -22,6 +22,7 @@ from hydromt.data_catalog.drivers.raster.slippy_tile_driver import (
     _num2xy,
     _png2value,
     _xy2num,
+    has_credentials,
 )
 from hydromt.error import NoDataException, NoDataStrategy
 
@@ -320,6 +321,27 @@ def test_options_defaults():
     assert opts.variable_name == "elevation"
     assert opts.max_zoom is None
     assert opts.s3_bucket is None
+
+
+def test_has_credentials_handles_provider_error():
+    """A failing credential provider (e.g. expired SSO token) must not raise.
+
+    botocore can raise ``CredentialRetrievalError`` from ``get_credentials()``
+    when an SSO config is present but the token has expired. ``has_credentials``
+    should swallow that and return ``False`` so anonymous S3 access remains
+    available for public buckets.
+    """
+    from botocore.exceptions import CredentialRetrievalError
+
+    fake_session = MagicMock()
+    fake_session.get_credentials.side_effect = CredentialRetrievalError(
+        provider="sso", error_msg="Token has expired and refresh failed"
+    )
+    with patch(
+        "hydromt.data_catalog.drivers.raster.slippy_tile_driver.botocore.session.get_session",
+        return_value=fake_session,
+    ):
+        assert has_credentials() is False
 
 
 # ---------------------------------------------------------------------------

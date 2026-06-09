@@ -8,6 +8,13 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
+Unreleased
+==========
+
+Fixed
+-----
+- ``SlippyTileDriver`` no longer crashes when an AWS credential provider raises while resolving (e.g. an expired SSO token); it now falls back to anonymous access, so public buckets remain reachable.
+
 v1.4.0 (2026-06-02)
 ===================
 
