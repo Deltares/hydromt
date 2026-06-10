@@ -298,9 +298,22 @@ def _png2value(
 # S3 tile download
 # ---------------------------------------------------------------------------
 def has_credentials() -> bool:
-    """Return True if AWS credentials are available in the environment."""
+    """Return True if AWS credentials are available in the environment.
+
+    Returns ``False`` if ``s3fs``/``botocore`` are not installed, or if a
+    credential provider (e.g. SSO with an expired token) raises while
+    resolving — anonymous S3 access still works for public buckets.
+    """
+    if not HAS_S3FS:
+        return False
     session = botocore.session.get_session()
-    creds = session.get_credentials()
+    try:
+        creds = session.get_credentials()
+    except Exception as e:
+        logger.debug(
+            f"Could not resolve AWS credentials ({e}); using anonymous access."
+        )
+        return False
     return creds is not None and creds.access_key is not None
 
 
