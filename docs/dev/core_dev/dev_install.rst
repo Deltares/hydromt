@@ -30,17 +30,7 @@ Once pixi is installed you can create a developer installation by running the fo
 
 This will automatically install all dependencies needed to develop HydroMT, and it will install pre-commit for this repository.
 
-Building the documentation additionally requires `pandoc <https://pandoc.org/>`_ which is not managed as a Python dependency.
-Install it globally via pixi:
-
-.. code-block:: console
-
-    $ pixi global install pandoc
-
-This makes the ``pandoc`` binary available on your PATH across all environments.
-
-You can use ``open-vscode.bat`` to open the current folder in VSCode with the correct environment activated.
-This bat-file simply runs ``pixi run -e default code .`` to set up the pixi environment before starting VSCode.
+You can run ``pixi run code .`` to set up the pixi environment before starting VSCode.
 The python installation can be found in the ``.pixi`` folder. No need to switch interpreters.
 
 

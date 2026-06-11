@@ -242,6 +242,9 @@ pypi-options.no-binary = ["hydromt"]
 [tool.pixi.system-requirements]
 macos = "14.0"
 
+[tool.pixi.feature.doc.dependencies]
+pandoc = ">=3.9"
+
 [tool.pixi.feature.doc.tasks]
 doctest = { cmd = [
 	"sphinx-build",
