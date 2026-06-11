@@ -1,5 +1,7 @@
 import geopandas as gpd
+import numpy as np
 import pytest
+from shapely import Point
 
 from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
 from hydromt.error import NoDataException, NoDataStrategy
@@ -50,3 +52,20 @@ class TestGeodataFrameAdapter:
             "GeoDataFrame : CRS from data catalog does not match CRS of"
             " data. The original CRS will be used. Please check your data catalog."
         ) in caplog.text
+
+    def test__set_nodata(self):
+        adapter = GeoDataFrameAdapter()
+        gdf = gpd.GeoDataFrame(
+            {
+                "int_col": [1, -99, 3],
+                "geometry": [Point(0, 0), Point(1, 1), Point(2, 2)],
+            }
+        )
+        metadata = SourceMetadata(nodata=-99)
+
+        result = adapter._set_nodata(gdf, metadata)
+
+        assert result["int_col"].dtype == float
+        assert np.isnan(result["int_col"].iloc[1])
+        assert result["int_col"].iloc[0] == 1.0
+        assert result["int_col"].iloc[2] == 3.0
