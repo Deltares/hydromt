@@ -35,8 +35,8 @@ MINOR=$(echo "$NEW_VERSION" | cut -d. -f2)
 COMPUTED_NEXT="${MAJOR}.$((MINOR + 1)).0.dev0"
 
 # Read main's current version.
-MAIN_VERSION=$(git show origin/main:hydromt/__init__.py \
-  | grep "^__version__" | cut -d= -f2 | tr -d "\" ")
+VERSION_LINE=$(git show origin/main:hydromt/__init__.py | grep "^__version__")
+MAIN_VERSION=$(echo "$VERSION_LINE" | cut -d= -f2 | tr -d "\"' \t")
 
 # Pick whichever version is higher.
 MAIN_MAJOR=$(echo "$MAIN_VERSION" | cut -d. -f1)
