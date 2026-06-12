@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
@@ -37,10 +37,10 @@
     <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css?v=d7afb10b" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
 
     <script src="../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
@@ -51,7 +51,7 @@
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_examples/reading_tabular_data';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
+        DOCUMENTATION_OPTIONS.theme_version = '0.18.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/main/docs/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.5.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -502,8 +502,8 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-06-10 08:49:46,308 - hydromt - log - INFO - HydroMT version: 1.5.0.dev0
-2026-06-10 08:49:46,309 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from data/tabular_data_catalog.yml
+2026-06-12 14:23:38,793 - hydromt - log - INFO - HydroMT version: 1.5.0.dev0
+2026-06-12 14:23:38,794 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from data/tabular_data_catalog.yml
 </pre></div></div>
 </div>
 <section id="Pandas-driver">
@@ -546,7 +546,7 @@ DataFrameSource(name=&#39;example_csv_data&#39;, uri=&#39;example_csv_data.csv&#
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-06-10 08:49:46,350 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading example_csv_data DataFrame data from /home/runner/work/hydromt/hydromt/docs/_examples/data/example_csv_data.csv
+2026-06-12 14:23:38,828 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading example_csv_data DataFrame data from /home/runner/work/hydromt/hydromt/docs/_examples/data/example_csv_data.csv
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -655,9 +655,9 @@ DataFrameSource(name=&#39;example_csv_data&#39;, uri=&#39;example_csv_data.csv&#
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-06-10 08:49:46,759 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from data/vito_reclass.yml
-2026-06-10 08:49:46,780 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data latest
-2026-06-10 08:49:46,780 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
+2026-06-12 14:23:39,385 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from data/vito_reclass.yml
+2026-06-12 14:23:39,406 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data latest
+2026-06-12 14:23:39,406 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -683,7 +683,7 @@ DataFrameSource(name=&#39;vito_reclass&#39;, uri=&#39;vito_reclass.csv&#39;, dat
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-06-10 08:49:47,371 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading vito_reclass DataFrame data from /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
+2026-06-12 14:23:39,986 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading vito_reclass DataFrame data from /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -770,7 +770,7 @@ DataFrameSource(name=&#39;vito_reclass&#39;, uri=&#39;vito_reclass.csv&#39;, dat
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-06-10 08:49:47,382 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading vito_2015 RasterDataset data from /home/runner/.hydromt/artifact_data/latest/vito.tif
+2026-06-12 14:23:39,997 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading vito_2015 RasterDataset data from /home/runner/.hydromt/artifact_data/latest/vito.tif
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -779,7 +779,7 @@ DataFrameSource(name=&#39;vito_reclass&#39;, uri=&#39;vito_reclass.csv&#39;, dat
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7fc12811e270&gt;
+&lt;matplotlib.image.AxesImage at 0x7f9a39874ec0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -881,8 +881,8 @@ DataFrameSource(name=&#39;vito_reclass&#39;, uri=&#39;vito_reclass.csv&#39;, dat
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -916,7 +916,7 @@ DataFrameSource(name=&#39;vito_reclass&#39;, uri=&#39;vito_reclass.csv&#39;, dat
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
 </p></div>
       
     </div>

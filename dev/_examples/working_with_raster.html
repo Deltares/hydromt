@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
@@ -37,10 +37,10 @@
     <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css?v=d7afb10b" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
 
     <script src="../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
@@ -51,7 +51,7 @@
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_examples/working_with_raster';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
+        DOCUMENTATION_OPTIONS.theme_version = '0.18.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/main/docs/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.5.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -502,9 +502,9 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-06-10 08:51:01,595 - hydromt - log - INFO - HydroMT version: 1.5.0.dev0
-2026-06-10 08:51:01,621 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data v1.0.0
-2026-06-10 08:51:01,622 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
+2026-06-12 14:24:42,986 - hydromt - log - INFO - HydroMT version: 1.5.0.dev0
+2026-06-12 14:24:43,006 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data v1.0.0
+2026-06-12 14:24:43,007 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
 </pre></div></div>
 </div>
 <p>Here, we illustrate some common GIS problems and how the functionality of the DataArray/Dataset <a class="reference internal" href="../api/gis.html#raster-methods"><span class="std std-ref">raster</span></a> accessor can be used. The data is accessed using the HydroMT <a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.html"><span class="doc">DataCatalog</span></a>. For more information see the <a class="reference internal" href="reading_raster_data.html"><span class="doc">Reading raster data</span></a> example.</p>
@@ -528,7 +528,7 @@ GDAL driver. Currently the key difference between both packages, besides the nam
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-06-10 08:51:02,238 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading ghs_pop_2015 RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/ghs_pop_2015.tif
+2026-06-12 14:24:43,604 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading ghs_pop_2015 RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/ghs_pop_2015.tif
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -537,7 +537,7 @@ GDAL driver. Currently the key difference between both packages, besides the nam
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f6dfec94ec0&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f3c90a04830&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -672,7 +672,7 @@ Error: 0.036%
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f6dfe5d4910&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f3c90131f90&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -713,7 +713,7 @@ Error: 0.036%
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-06-10 08:51:03,490 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading gadm_level3 GeoDataFrame data from /home/runner/.hydromt/artifact_data/v1.0.0/gadm_level3.gpkg
+2026-06-12 14:24:44,922 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading gadm_level3 GeoDataFrame data from /home/runner/.hydromt/artifact_data/v1.0.0/gadm_level3.gpkg
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -842,7 +842,7 @@ gaps is build using voronoi triangulation. Then, values are calculated for each 
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-06-10 08:51:10,823 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading soilgrids RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/soilgrids/{variable}.tif
+2026-06-12 14:24:51,730 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading soilgrids RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/soilgrids/{variable}.tif
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -851,7 +851,7 @@ gaps is build using voronoi triangulation. Then, values are calculated for each 
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f6dad2bfed0&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f3c853b5bd0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -876,7 +876,7 @@ gaps is build using voronoi triangulation. Then, values are calculated for each 
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f6dac02a5d0&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f3c854134d0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -919,11 +919,11 @@ gaps is build using voronoi triangulation. Then, values are calculated for each 
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-06-10 08:51:11,230 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/merit_hydro/{variable}.tif
+2026-06-12 14:24:52,284 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/merit_hydro/{variable}.tif
 resolution MERIT Hydro: 0.00083
-2026-06-10 08:51:11,262 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading gebco RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/gebco.tif
+2026-06-12 14:24:52,311 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading gebco RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/gebco.tif
 resolution GEBCO: 0.00417
-2026-06-10 08:51:11,275 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading mdt_cnes_cls18 RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/mdt_cnes_cls18.tif
+2026-06-12 14:24:52,321 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading mdt_cnes_cls18 RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/mdt_cnes_cls18.tif
 resolution MDT: 0.12500
 </pre></div></div>
 </div>
@@ -933,7 +933,7 @@ resolution MDT: 0.12500
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f6dabf551d0&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f3c85425bd0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -970,7 +970,7 @@ resolution reprojected GEBCO: 0.00083
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f6daac82710&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f3c855c7110&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1089,8 +1089,8 @@ resolution reprojected GEBCO: 0.00083
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1124,7 +1124,7 @@ resolution reprojected GEBCO: 0.00083
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
 </p></div>
       
     </div>

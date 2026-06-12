@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
@@ -37,10 +37,10 @@
     <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css?v=d7afb10b" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
 
     <script src="../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
@@ -51,7 +51,7 @@
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_examples/reading_vector_data';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
+        DOCUMENTATION_OPTIONS.theme_version = '0.18.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/main/docs/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.5.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -506,9 +506,9 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-06-10 08:49:53,884 - hydromt - log - INFO - HydroMT version: 1.5.0.dev0
-2026-06-10 08:49:53,909 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data v1.0.0
-2026-06-10 08:49:53,910 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
+2026-06-12 14:23:44,797 - hydromt - log - INFO - HydroMT version: 1.5.0.dev0
+2026-06-12 14:23:44,817 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data v1.0.0
+2026-06-12 14:23:44,818 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
 </pre></div></div>
 </div>
 <section id="Pyogrio-driver">
@@ -560,7 +560,7 @@ Datum: World Geodetic System 1984 ensemble
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-06-10 08:49:54,527 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading gadm_level3 GeoDataFrame data from /home/runner/.hydromt/artifact_data/v1.0.0/gadm_level3.gpkg
+2026-06-12 14:23:45,422 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading gadm_level3 GeoDataFrame data from /home/runner/.hydromt/artifact_data/v1.0.0/gadm_level3.gpkg
 number of rows: 509
 </pre></div></div>
 </div>
@@ -613,17 +613,17 @@ number of rows: 509
       <td>Italy</td>
       <td>ITA.17_1</td>
       <td>Trentino-Alto Adige</td>
-      <td>NaN</td>
+      <td>None</td>
       <td>ITA.17.2_1</td>
       <td>Trento</td>
-      <td>NaN</td>
+      <td>None</td>
       <td>ITA.17.2.143_1</td>
       <td>Predazzo</td>
-      <td>NaN</td>
-      <td>NaN</td>
+      <td>None</td>
+      <td>None</td>
       <td>Commune</td>
       <td>Commune</td>
-      <td>NaN</td>
+      <td>None</td>
       <td>IT.TN.PA</td>
       <td>MULTIPOLYGON (((11.74692 46.30762, 11.74614 46...</td>
     </tr>
@@ -633,17 +633,17 @@ number of rows: 509
       <td>Italy</td>
       <td>ITA.17_1</td>
       <td>Trentino-Alto Adige</td>
-      <td>NaN</td>
+      <td>None</td>
       <td>ITA.17.2_1</td>
       <td>Trento</td>
-      <td>NaN</td>
+      <td>None</td>
       <td>ITA.17.2.115_1</td>
       <td>Moena</td>
-      <td>NaN</td>
-      <td>NaN</td>
+      <td>None</td>
+      <td>None</td>
       <td>Commune</td>
       <td>Commune</td>
-      <td>NaN</td>
+      <td>None</td>
       <td>IT.TN.MN</td>
       <td>MULTIPOLYGON (((11.82119 46.37751, 11.82013 46...</td>
     </tr>
@@ -653,17 +653,17 @@ number of rows: 509
       <td>Italy</td>
       <td>ITA.17_1</td>
       <td>Trentino-Alto Adige</td>
-      <td>NaN</td>
+      <td>None</td>
       <td>ITA.17.2_1</td>
       <td>Trento</td>
-      <td>NaN</td>
+      <td>None</td>
       <td>ITA.17.2.214_1</td>
       <td>Vigo Di Fassa</td>
-      <td>NaN</td>
-      <td>NaN</td>
+      <td>None</td>
+      <td>None</td>
       <td>Commune</td>
       <td>Commune</td>
-      <td>NaN</td>
+      <td>None</td>
       <td>IT.TN.VD</td>
       <td>MULTIPOLYGON (((11.62028 46.43951, 11.62063 46...</td>
     </tr>
@@ -673,17 +673,17 @@ number of rows: 509
       <td>Italy</td>
       <td>ITA.17_1</td>
       <td>Trentino-Alto Adige</td>
-      <td>NaN</td>
+      <td>None</td>
       <td>ITA.17.2_1</td>
       <td>Trento</td>
-      <td>NaN</td>
+      <td>None</td>
       <td>ITA.17.2.36_1</td>
       <td>Canal San Bovo</td>
-      <td>NaN</td>
-      <td>NaN</td>
+      <td>None</td>
+      <td>None</td>
       <td>Commune</td>
       <td>Commune</td>
-      <td>NaN</td>
+      <td>None</td>
       <td>IT.TN.CB</td>
       <td>MULTIPOLYGON (((11.75179 46.10603, 11.7521 46....</td>
     </tr>
@@ -693,17 +693,17 @@ number of rows: 509
       <td>Italy</td>
       <td>ITA.17_1</td>
       <td>Trentino-Alto Adige</td>
-      <td>NaN</td>
+      <td>None</td>
       <td>ITA.17.2_1</td>
       <td>Trento</td>
-      <td>NaN</td>
+      <td>None</td>
       <td>ITA.17.2.141_1</td>
       <td>Pozza Di Fassa</td>
-      <td>NaN</td>
-      <td>NaN</td>
+      <td>None</td>
+      <td>None</td>
       <td>Commune</td>
       <td>Commune</td>
-      <td>NaN</td>
+      <td>None</td>
       <td>IT.TN.PF</td>
       <td>MULTIPOLYGON (((11.70521 46.401, 11.70519 46.4...</td>
     </tr>
@@ -729,7 +729,7 @@ number of rows: 509
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-06-10 08:49:54,576 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading gadm_level3 GeoDataFrame data from /home/runner/.hydromt/artifact_data/v1.0.0/gadm_level3.gpkg
+2026-06-12 14:23:45,459 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading gadm_level3 GeoDataFrame data from /home/runner/.hydromt/artifact_data/v1.0.0/gadm_level3.gpkg
 number of rows: 28
 </pre></div></div>
 </div>
@@ -968,7 +968,7 @@ Datum: World Geodetic System 1984 ensemble
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-06-10 08:49:54,862 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading GADM_level3_centroids GeoDataFrame data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/xy.csv
+2026-06-12 14:23:45,730 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading GADM_level3_centroids GeoDataFrame data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/xy.csv
 CRS: EPSG:4326
 </pre></div></div>
 </div>
@@ -1148,8 +1148,8 @@ CRS: EPSG:4326
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1183,7 +1183,7 @@ CRS: EPSG:4326
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
 </p></div>
       
     </div>
