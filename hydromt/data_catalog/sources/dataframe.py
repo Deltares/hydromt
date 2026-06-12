@@ -31,6 +31,16 @@ class DataFrameSource(DataSource):
     driver: DataFrameDriver
     data_adapter: DataFrameAdapter = Field(default_factory=DataFrameAdapter)
 
+    @classmethod
+    def _infer_default_driver(
+        cls,
+        uri: str | None = None,
+    ) -> str:
+        # Restrict driver inference to DataFrame drivers; otherwise a driver
+        # from another source type (e.g. "geodataframe_table", which also
+        # claims .csv/.parquet) can be picked and fail validation (#1403).
+        return super()._infer_default_driver(uri, DataFrameDriver)
+
     def read_data(
         self,
         *,
