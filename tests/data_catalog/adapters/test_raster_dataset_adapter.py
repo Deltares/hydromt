@@ -160,3 +160,28 @@ class TestRasterDatasetAdapter:
             handle_nodata=NoDataStrategy.IGNORE,
         )
         assert ds is None
+
+    def test_transform_missing_variables_respects_nodata_strategy(
+        self, example_raster_ds: xr.Dataset
+    ):
+        # Requesting variables that are absent from the source must respect
+        # handle_nodata instead of always raising (#1407).
+        adapter = RasterDatasetAdapter()
+
+        # RAISE (the default) keeps raising
+        with pytest.raises(NoDataException):
+            adapter.transform(
+                example_raster_ds,
+                metadata=SourceMetadata(),
+                variables=["nonexistent_var"],
+            )
+
+        # WARN and IGNORE return None instead of raising
+        for strategy in (NoDataStrategy.WARN, NoDataStrategy.IGNORE):
+            ds = adapter.transform(
+                example_raster_ds,
+                metadata=SourceMetadata(),
+                variables=["nonexistent_var"],
+                handle_nodata=strategy,
+            )
+            assert ds is None
