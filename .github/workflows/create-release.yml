@@ -169,6 +169,10 @@ jobs:
 
           RECORD_BRANCH=$(bash .github/scripts/record-release-on-main.sh \
             "$RELEASE_BRANCH" "$NEW_VERSION" | tail -n 1)
+          if [[ -z "$RECORD_BRANCH" ]]; then
+            echo "ERROR: record-release-on-main.sh did not emit a branch name" >&2
+            exit 1
+          fi
 
           PR_BODY=$(cat <<EOF
           Automated merge-back PR for the **v$NEW_VERSION** release.
