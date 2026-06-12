@@ -10,7 +10,6 @@ import pytest
 import rasterio
 import xarray as xr
 
-from hydromt._compat import HAS_GDAL
 from hydromt.data_catalog.drivers.raster.rasterio_driver import (
     RasterioDriver,
     RasterioOptions,
@@ -29,7 +28,6 @@ class TestRasterioDriver:
         shutil.copytree(test_data_dir / "rioda_tiled", root)
         return str(root)
 
-    @pytest.mark.skipif(not HAS_GDAL, reason="GDAL not installed.")
     @pytest.mark.usefixtures("test_settings")
     def test_caches_tifs_from_vrt(self, vrt_tiled_raster_ds: str):
         cache_dir: str = "tests_caches_tifs_from_vrt"
