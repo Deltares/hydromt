@@ -42,6 +42,7 @@ Fixed
 - The functions ``_strip_scheme`` and ``_strip_vsi`` in ``hydromt._utils.uris`` no longer use ``lstrip`` to remove leading characters, but now remove only the exact prefix. (#1438)
 - ``Datacatalog.export_data`` no longer applies unit conversion twice. (#1459)
 - ``RasterioDriver.write`` now always produces filenames that are parseable by ``readers.open_mfraster`` when provided with a pattern with no prefix e.g. ``*.tif``. (#1459)
+- ``readers.open_mfraster`` now uses the numeric basename as the concatenation index for files matched by a bare wildcard (e.g. ``*.tif`` matching ``1.tif`` .. ``12.tif``) instead of the file-order fallback, and sorts the matched files so the concat order and variable name no longer depend on the filesystem glob order. (#1465)
 
 Deprecated
 ----------
