@@ -1,10 +1,11 @@
 """The GeoDataFrame adapter performs transformations on GeoDataFrames."""
 
 import logging
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Iterable
 
 import geopandas as gpd
 import numpy as np
+import pandas as pd
 import pyproj
 from pyproj import CRS
 
@@ -27,11 +28,11 @@ class GeoDataFrameAdapter(DataAdapterBase):
         gdf: gpd.GeoDataFrame,
         metadata: "SourceMetadata",
         *,
-        mask: Optional[gpd.GeoDataFrame] = None,
-        variables: Optional[List[str]] = None,
+        mask: gpd.GeoDataFrame | None = None,
+        variables: list[str] | None = None,
         predicate: str = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-    ) -> Optional[gpd.GeoDataFrame]:
+    ) -> gpd.GeoDataFrame | None:
         """Read transform data to HydroMT standards.
 
         Parameters
@@ -40,9 +41,9 @@ class GeoDataFrameAdapter(DataAdapterBase):
             input GeoDataFrame
         metadata : SourceMetadata
             source metadata
-        mask : Optional[gpd.GeoDataFrame], optional
+        mask : gpd.GeoDataFrame | None, optional
             mask to filter by geometry, by default None
-        variables : Optional[List[str]], optional
+        variables : list[str] | None, optional
             variable filter, by default None
         predicate : str, optional
             predicate to use for the mask filter, by default "intersects"
@@ -51,7 +52,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
 
         Returns
         -------
-        Optional[gpd.GeoDataFrame]
+        gpd.GeoDataFrame | None
             filtered and harmonized GeoDataFrame
 
         Raises
@@ -66,7 +67,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
         gdf = self._set_crs(gdf, metadata.crs)
         gdf = self._set_nodata(gdf, metadata)
         # slice
-        gdf: Optional[gpd.GeoDataFrame] = GeoDataFrameAdapter._slice_data(
+        gdf: gpd.GeoDataFrame | None = GeoDataFrameAdapter._slice_data(
             gdf,
             variables=variables,
             mask=mask,
@@ -88,7 +89,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
             gdf = gdf.rename(columns=rename)
         return gdf
 
-    def _set_crs(self, gdf: gpd.GeoDataFrame, crs: Optional[CRS]):
+    def _set_crs(self, gdf: gpd.GeoDataFrame, crs: CRS | None):
         if crs is not None and gdf.crs is None:
             gdf.set_crs(crs, inplace=True)
         elif gdf.crs is None:
@@ -103,20 +104,20 @@ class GeoDataFrameAdapter(DataAdapterBase):
     @staticmethod
     def _slice_data(
         gdf: gpd.GeoDataFrame,
-        variables: Optional[Union[str, List[str]]] = None,
-        mask: Optional[Geom] = None,
+        variables: str | list[str] | None = None,
+        mask: Geom | None = None,
         predicate: str = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-    ) -> Optional[gpd.GeoDataFrame]:
+    ) -> gpd.GeoDataFrame | None:
         """Filter the GeoDataFrame.
 
         Parameters
         ----------
         gdf : gpd.GeoDataFrame
             _description_
-        variables : Optional[Union[str, List[str]]], optional
+        variables : str | list[str] | None, optional
             variables to include, all when None, by default None
-        mask : Optional[Geom], optional
+        mask : Geom | None, optional
             filter by geometry, or keep all if None, by default None
         predicate : str, optional
             predicate to use for the geometry filter, by default "intersects"
@@ -127,7 +128,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
 
         Returns
         -------
-        Optional[gpd.GeoDataFrame]
+        gpd.GeoDataFrame | None
             filtered GeoDataFrame, or None if no data remains
 
         Raises
@@ -168,16 +169,20 @@ class GeoDataFrameAdapter(DataAdapterBase):
     def _set_nodata(self, gdf: gpd.GeoDataFrame, metadata: "SourceMetadata"):
         """Parse and apply nodata values from the data catalog."""
         cols: Iterable[str] = gdf.select_dtypes([np.number]).columns
-        no_data_value: Union[Dict[str, Any], str, None]
-        if no_data_value := metadata.nodata is not None and len(cols) > 0:
+        no_data_value: dict[str, Any] | str | None
+        if (no_data_value := metadata.nodata) is not None and len(cols) > 0:
             if not isinstance(no_data_value, dict):
-                no_data_dict: Dict[str, Any] = {c: no_data_value for c in cols}
+                no_data_dict: dict[str, Any] = dict.fromkeys(cols, no_data_value)
             else:
-                no_data_dict: Dict[str, Any] = no_data_value
+                no_data_dict: dict[str, Any] = no_data_value
             for c in cols:
                 mv = no_data_dict.get(c, None)
                 if mv is not None:
                     is_nodata = np.isin(gdf.loc[:, c], np.atleast_1d(mv))
+                    if is_nodata.any() and pd.api.types.is_integer_dtype(gdf[c]):
+                        # setting NaN raises in int dtypes in pandas v3
+                        gdf[c] = gdf[c].astype(float)
+                    # in pandas v2, line below used to silently convert to float anyways
                     gdf.loc[:, c] = np.where(is_nodata, np.nan, gdf.loc[:, c])
         return gdf
 
