@@ -53,7 +53,7 @@ class TestGeodataFrameAdapter:
             " data. The original CRS will be used. Please check your data catalog."
         ) in caplog.text
 
-    def test__set_nodata(self):
+    def test_set_nodata(self):
         adapter = GeoDataFrameAdapter()
         gdf = gpd.GeoDataFrame(
             {
