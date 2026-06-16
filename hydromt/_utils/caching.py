@@ -13,16 +13,10 @@ import numpy as np
 from affine import Affine
 from fsspec import AbstractFileSystem, url_to_fs
 from pyproj import CRS
+from rio_vrt import build_vrt
 
-from hydromt._compat import HAS_GDAL
 from hydromt._utils.uris import _strip_scheme, _strip_vsi
 from hydromt.config import SETTINGS
-
-if HAS_GDAL:
-    from osgeo import gdal
-
-    gdal.UseExceptions()
-
 
 logger = logging.getLogger(__name__)
 
@@ -113,9 +107,6 @@ def cache_vrt_tiles(
     vrt_destination_path : Path
         Path to cached vrt
     """
-    if not HAS_GDAL:
-        raise ImportError("Can't cache vrt's without GDAL installed.")
-
     # Get the filesystem type
     fs = fs if fs is not None else url_to_fs(vrt_uri)[0]
 
@@ -171,15 +162,25 @@ def cache_vrt_tiles(
         new = new + cur
         os.unlink(vrt_destination_path)
 
-    # Build the vrt with gdal
-    out_ds = gdal.BuildVRT(
-        destName=vrt_destination_path.as_posix(),
-        srcDSOrSrcDSTab=new,
-    )
+    # Build the vrt with rio_vrt
+    # Workaround: rio-vrt crashes with single-file lists (min(*[x]) TypeError).
+    # Pass duplicated list, then strip the duplicate source from the written XML.
+    # See: https://github.com/12rambau/rio-vrt/issues/26
+    duplicated = False
+    if len(new) == 1:
+        new = new + new
+        duplicated = True
 
-    # Close and dereference the gdal dataset
-    out_ds.Close()
-    out_ds = None
+    build_vrt(vrt_destination_path, new)
+
+    # de-duplicate
+    if duplicated:
+        tree = ET.parse(vrt_destination_path)
+        for band in tree.getroot().findall("VRTRasterBand"):
+            source_els = [s for s in band if s.tag.endswith("Source")]
+            if len(source_els) > 1:
+                band.remove(source_els[-1])
+        tree.write(vrt_destination_path, xml_declaration=True, encoding="UTF-8")
 
     return vrt_destination_path
 
