@@ -857,10 +857,11 @@ window.runMermaid = runMermaid;</script>
 <span></span><span class="sd">&quot;&quot;&quot;The GeoDataFrame adapter performs transformations on GeoDataFrames.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterable</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pyproj</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
 
@@ -887,11 +888,11 @@ window.runMermaid = runMermaid;</script>
         <span class="n">gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
         <span class="n">metadata</span><span class="p">:</span> <span class="s2">&quot;SourceMetadata&quot;</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
-        <span class="n">mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mask</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">variables</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">predicate</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;intersects&quot;</span><span class="p">,</span>
         <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read transform data to HydroMT standards.</span>
 
 <span class="sd">        Parameters</span>
@@ -900,9 +901,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">            input GeoDataFrame</span>
 <span class="sd">        metadata : SourceMetadata</span>
 <span class="sd">            source metadata</span>
-<span class="sd">        mask : Optional[gpd.GeoDataFrame], optional</span>
+<span class="sd">        mask : gpd.GeoDataFrame | None, optional</span>
 <span class="sd">            mask to filter by geometry, by default None</span>
-<span class="sd">        variables : Optional[List[str]], optional</span>
+<span class="sd">        variables : list[str] | None, optional</span>
 <span class="sd">            variable filter, by default None</span>
 <span class="sd">        predicate : str, optional</span>
 <span class="sd">            predicate to use for the mask filter, by default &quot;intersects&quot;</span>
@@ -911,7 +912,7 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Optional[gpd.GeoDataFrame]</span>
+<span class="sd">        gpd.GeoDataFrame | None</span>
 <span class="sd">            filtered and harmonized GeoDataFrame</span>
 
 <span class="sd">        Raises</span>
@@ -926,7 +927,7 @@ window.runMermaid = runMermaid;</script>
         <span class="n">gdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_crs</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">metadata</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
         <span class="n">gdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_nodata</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">metadata</span><span class="p">)</span>
         <span class="c1"># slice</span>
-        <span class="n">gdf</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="n">GeoDataFrameAdapter</span><span class="o">.</span><span class="n">_slice_data</span><span class="p">(</span>
+        <span class="n">gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">GeoDataFrameAdapter</span><span class="o">.</span><span class="n">_slice_data</span><span class="p">(</span>
             <span class="n">gdf</span><span class="p">,</span>
             <span class="n">variables</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span>
             <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
@@ -949,7 +950,7 @@ window.runMermaid = runMermaid;</script>
             <span class="n">gdf</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">rename</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">gdf</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_set_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CRS</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">crs</span><span class="p">:</span> <span class="n">CRS</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">gdf</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">gdf</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">gdf</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -964,20 +965,20 @@ window.runMermaid = runMermaid;</script>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_slice_data</span><span class="p">(</span>
         <span class="n">gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
-        <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Geom</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">variables</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mask</span><span class="p">:</span> <span class="n">Geom</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">predicate</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;intersects&quot;</span><span class="p">,</span>
         <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Filter the GeoDataFrame.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        gdf : gpd.GeoDataFrame</span>
 <span class="sd">            _description_</span>
-<span class="sd">        variables : Optional[Union[str, List[str]]], optional</span>
+<span class="sd">        variables : str | list[str] | None, optional</span>
 <span class="sd">            variables to include, all when None, by default None</span>
-<span class="sd">        mask : Optional[Geom], optional</span>
+<span class="sd">        mask : Geom | None, optional</span>
 <span class="sd">            filter by geometry, or keep all if None, by default None</span>
 <span class="sd">        predicate : str, optional</span>
 <span class="sd">            predicate to use for the geometry filter, by default &quot;intersects&quot;</span>
@@ -988,7 +989,7 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Optional[gpd.GeoDataFrame]</span>
+<span class="sd">        gpd.GeoDataFrame | None</span>
 <span class="sd">            filtered GeoDataFrame, or None if no data remains</span>
 
 <span class="sd">        Raises</span>
@@ -1029,16 +1030,20 @@ window.runMermaid = runMermaid;</script>
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_nodata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="s2">&quot;SourceMetadata&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse and apply nodata values from the data catalog.&quot;&quot;&quot;</span>
         <span class="n">cols</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span>
-        <span class="n">no_data_value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">no_data_value</span> <span class="o">:=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">no_data_value</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">no_data_value</span> <span class="o">:=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">nodata</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">no_data_value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-                <span class="n">no_data_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">c</span><span class="p">:</span> <span class="n">no_data_value</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cols</span><span class="p">}</span>
+                <span class="n">no_data_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">cols</span><span class="p">,</span> <span class="n">no_data_value</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">no_data_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">no_data_value</span>
+                <span class="n">no_data_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">no_data_value</span>
             <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cols</span><span class="p">:</span>
                 <span class="n">mv</span> <span class="o">=</span> <span class="n">no_data_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">mv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">is_nodata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">c</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">mv</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">is_nodata</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">and</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_integer_dtype</span><span class="p">(</span><span class="n">gdf</span><span class="p">[</span><span class="n">c</span><span class="p">]):</span>
+                        <span class="c1"># setting NaN raises in int dtypes in pandas v3</span>
+                        <span class="n">gdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                    <span class="c1"># in pandas v2, line below used to silently convert to float anyways</span>
                     <span class="n">gdf</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">is_nodata</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">gdf</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">c</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">gdf</span>
 
