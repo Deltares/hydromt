@@ -16,7 +16,12 @@ jobs:
   downstream:
     name: Test ${{ matrix.plugin.name }} (deps=${{ matrix.with_deps }})
     runs-on: ubuntu-latest
-    continue-on-error: true
+    env:
+      DEFAULT_BRANCH: main
+      DEFAULT_PIXI_FEATURE: default
+      DEFAULT_PIXI_ENVIRONMENT: default
+      DEFAULT_PIXI_TASK: test
+      DEFAULT_PIXI_VERSION: v0.59.0
 
     strategy:
       fail-fast: false
@@ -25,16 +30,20 @@ jobs:
         plugin:
           - name: hydromt-wflow
             repo: Deltares/hydromt_wflow
-            pixi_task: test
-            environment: default
+
           - name: hydromt-sfincs
             repo: Deltares/hydromt_sfincs
             pixi_task: tests
-            environment: default
+
           - name: hydromt-fiat
             repo: Deltares/hydromt_fiat
-            pixi_task: test
-            environment: default
+            pixi_version: v0.65.0
+
+          - name: hydromt-delft3dfm
+            repo: Deltares/hydromt_delft3dfm
+            pixi_feature: hydromt_dev
+            pixi_environment: dev-314
+            pixi_version: v0.67.1
 
     steps:
       - name: Checkout hydromt
@@ -43,12 +52,16 @@ jobs:
       - name: Install pixi
         uses: prefix-dev/setup-pixi@v0.9.6
         with:
-          pixi-version: "v0.59.0"
+          pixi-version: ${{ matrix.plugin.pixi_version || env.DEFAULT_PIXI_VERSION }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.11.17"
 
       - name: Build hydromt wheel
         run: |
-          pixi run python -m pip install --upgrade pip build
-          pixi run python -m build --wheel
+          pixi run uv build --wheel
 
       - name: Record hydromt dist path
         run: echo "HYDROMT_DIST=$GITHUB_WORKSPACE/dist" >> $GITHUB_ENV
@@ -59,46 +72,45 @@ jobs:
           repository: ${{ matrix.plugin.repo }}
           path: plugin
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ matrix.plugin.branch || env.DEFAULT_BRANCH }}
 
       - name: Solve environment for hydromt candidate (with deps)
         if: matrix.with_deps == true
         working-directory: plugin
         run: |
           wheel_file=$(ls "$HYDROMT_DIST"/hydromt-*.whl)
-          pixi add "hydromt@file:$wheel_file" --pypi
+          pixi add "hydromt@file:$wheel_file" --pypi --feature ${{ matrix.plugin.pixi_feature || env.DEFAULT_PIXI_FEATURE }}
 
       - name: Install plugin env
         working-directory: plugin
         run: |
-          pixi install -e ${{ matrix.plugin.environment }}
+          pixi install -e ${{ matrix.plugin.pixi_environment || env.DEFAULT_PIXI_ENVIRONMENT }}
 
       - name: Install hydromt candidate (no deps)
         if: matrix.with_deps == false
         working-directory: plugin
         run: |
-          pixi run -e ${{ matrix.plugin.environment }} --no-install \
-            python -m ensurepip --upgrade
-          pixi run -e ${{ matrix.plugin.environment }} --no-install \
-            python -m pip install --force-reinstall --no-deps "$HYDROMT_DIST"/hydromt-*.whl
+          pixi run -e ${{ matrix.plugin.pixi_environment || env.DEFAULT_PIXI_ENVIRONMENT }} --no-install \
+            uv pip install --force-reinstall --no-deps "$HYDROMT_DIST"/hydromt-*.whl
 
       - name: Echo solved environment
         working-directory: plugin
         run: |
           # what pixi thinks is installed
           echo "pixi list output:"
-          pixi list -e ${{ matrix.plugin.environment }} --no-install
+          pixi list -e ${{ matrix.plugin.pixi_environment || env.DEFAULT_PIXI_ENVIRONMENT }} --no-install
 
           # what python will import
-          echo "pip freeze output:"
-          pixi run -e ${{ matrix.plugin.environment }} --no-install \
-            python -m pip freeze
+          echo "uv pip freeze output:"
+          pixi run -e ${{ matrix.plugin.pixi_environment || env.DEFAULT_PIXI_ENVIRONMENT }} --no-install \
+            uv pip freeze
 
       - name: Run plugin compatibility tests
         working-directory: plugin
         env:
           PYTEST_ADDOPTS: "-p no:warnings"
         run: |
-          pixi run -e ${{ matrix.plugin.environment }} --no-install ${{ matrix.plugin.pixi_task }}
+          pixi run -e ${{ matrix.plugin.pixi_environment || env.DEFAULT_PIXI_ENVIRONMENT }} --no-install ${{ matrix.plugin.pixi_task || env.DEFAULT_PIXI_TASK }}
 
       - name: Failure guidance
         if: failure()
