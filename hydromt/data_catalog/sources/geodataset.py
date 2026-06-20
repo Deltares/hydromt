@@ -16,6 +16,7 @@ from pystac import MediaType
 from hydromt.data_catalog.adapters.geodataset import GeoDatasetAdapter
 from hydromt.data_catalog.drivers.geodataset.geodataset_driver import GeoDatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
+from hydromt.data_catalog.uri_resolvers import ConventionResolver
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
 from hydromt.typing import (
@@ -81,6 +82,8 @@ class GeoDatasetSource(DataSource):
         )
         if ds is None:  # handle_nodata == ignore
             return None
+        if isinstance(self.uri_resolver, ConventionResolver):
+            self._check_multifile_is_complete(uris, ds, handle_nodata)
 
         return self.data_adapter.transform(
             ds,
@@ -196,13 +199,13 @@ class GeoDatasetSource(DataSource):
     ) -> TimeRange | None:
         """Detect the temporal range of the dataset.
 
-        If no dataset is provided, it will be fetched accodring to the settings in the
-        addapter. also see :py:meth:`hydromt.GeoDatasetAdapter.get_data`.
+        If no dataset is provided, it will be fetched according to the settings in the
+        adapter. also see :py:meth:`hydromt.GeoDatasetAdapter.get_data`.
 
         Parameters
         ----------
         ds: xr.Dataset, xr.DataArray, Optional
-            the dataset to detect the time range of. It must have a time dimentsion set.
+            the dataset to detect the time range of. It must have a time dimension set.
             If none is provided, :py:meth:`hydromt.GeoDatasetAdapter.get_data`
             will be used to fetch the it before detecting.
 

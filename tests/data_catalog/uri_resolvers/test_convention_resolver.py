@@ -1,3 +1,4 @@
+import logging
 from itertools import product
 from string import Formatter
 from typing import Any, Dict, Iterator
@@ -69,6 +70,21 @@ class TestConventionResolver:
         uri = "/{unknown_key}_precip_2020_01.nc"
         resolver = ConventionResolver(filesystem=test_filesystem)
         assert resolver.resolve(uri) == [uri]
+
+    def test_resolver_logs_all_expanded_uris(
+        self, test_filesystem: FSSpecFileSystem, caplog: pytest.LogCaptureFixture
+    ):
+        caplog.set_level(logging.DEBUG, logger="hydromt")
+        resolver = ConventionResolver(filesystem=test_filesystem)
+        uri = "/{unknown_key}_{variable}_{year}_{month:02d}.nc"
+        resolved_uris = resolver.resolve(uri)
+
+        assert (
+            "Resolver 'convention' found 48 files at /{unknown_key}_*_*_*.nc:"
+            in caplog.text
+        )
+        for resolved_uri in resolved_uris:
+            assert resolved_uri in caplog.text
 
     def test_capture_regex(self):
         pat = "here-is-some-more-leading-{year}-text-for-{month}-you-{variable}.pq"

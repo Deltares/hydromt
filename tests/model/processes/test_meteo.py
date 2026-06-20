@@ -1,6 +1,9 @@
 """Test hydromt.model.processes.meteo submodule."""
 
+import logging
+
 import numpy as np
+import pandas as pd
 import pytest
 import xarray as xr
 
@@ -15,6 +18,7 @@ from hydromt.model.processes.meteo import (
     precip,
     press,
     press_correction,
+    resample_time,
     temp,
     temp_correction,
     wind,
@@ -60,6 +64,35 @@ def test_precip(data_catalog):
     # Testing with freq argument
     pout_freq = precip(p_precip, grid, freq="h")
     assert pout_freq.sizes["time"] == 313
+
+
+def test_resample_time_rejects_output_sized_gap(caplog: pytest.LogCaptureFixture):
+    time = pd.to_datetime(
+        [
+            "2000-01-01",
+            "2000-01-02",
+            "2000-01-03",
+            "2000-01-11",
+            "2000-01-12",
+            "2000-01-13",
+        ]
+    )
+    da = xr.DataArray(
+        np.ones(time.size, dtype=np.float32),
+        dims=["time"],
+        coords={"time": time},
+        name="precip",
+    )
+
+    caplog.set_level(logging.DEBUG, logger="hydromt")
+    with pytest.raises(
+        ValueError, match="Time dimension should be monotonic for resampling"
+    ):
+        resample_time(da, freq="7D", downsampling="sum")
+    assert (
+        "Unique time differences: 1 days occurs 4 times, 8 days occurs 1 time."
+        in caplog.text
+    )
 
 
 def test_temp(era5_data, era5_dem):

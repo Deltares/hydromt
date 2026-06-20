@@ -7,6 +7,7 @@ from typing import Any, Iterable, Optional
 
 import pandas as pd
 from fsspec.core import split_protocol
+from pydantic import PrivateAttr
 
 from hydromt._utils.naming_convention import _expand_uri_placeholders
 from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
@@ -32,6 +33,7 @@ class _SafeDict(dict):
 class ConventionResolver(URIResolver):
     """URIDataResolver using HydroMT naming conventions."""
 
+    _resolved_uri_placeholders: list[dict[str, str]] = PrivateAttr(default_factory=list)
     _uri_placeholders = frozenset(
         {"year", "month", "variable", "name", "overview_level"}
     )
@@ -131,7 +133,7 @@ class ConventionResolver(URIResolver):
         if metadata is None:
             metadata: SourceMetadata = SourceMetadata()
 
-        uri_expanded, keys, _ = _expand_uri_placeholders(
+        uri_expanded, keys, regex = _expand_uri_placeholders(
             uri,
             placeholders=self._uri_placeholders,
             time_range=time_range,
@@ -166,11 +168,20 @@ class ConventionResolver(URIResolver):
                 map(lambda fmt: uri_expanded.format_map(_SafeDict(**fmt)), fmts)
             )
         )
+        self._resolved_uri_placeholders = [
+            dict(zip(keys, match.groups(), strict=True))
+            for u in uris
+            if (match := regex.match(u)) is not None
+        ]
         if not uris:
             exec_nodata_strat(
                 f"Resolver '{self.name}' found no files at {uri_expanded}.",
                 strategy=handle_nodata,
             )
             return []  # if ignore
+        else:
+            logger.debug(
+                f"Resolver '{self.name}' found {len(uris)} files at {uri_expanded}: {uris}"
+            )
 
         return uris

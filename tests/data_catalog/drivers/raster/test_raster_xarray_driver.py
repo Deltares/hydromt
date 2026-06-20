@@ -5,6 +5,7 @@ from typing import List
 from unittest.mock import MagicMock, Mock
 from uuid import uuid4
 
+import dask
 import numpy as np
 import pytest
 import xarray as xr
@@ -54,6 +55,13 @@ def test_driver_options():
     assert isinstance(read_options, XarrayDriverOptions)
     for option in options:
         assert getattr(read_options, option) == options[option]
+
+
+def test_driver_options_allow_parallel_without_lock_until_read_time():
+    options = XarrayDriverOptions(parallel=True, lock=False)
+
+    assert options.get_kwargs()["parallel"] is True
+    assert options.get_kwargs()["lock"] is False
 
 
 class TestRasterXarrayDriver:
@@ -154,6 +162,49 @@ class TestRasterXarrayDriver:
         driver = RasterDatasetXarrayDriver()
         _ = driver.read(uris)
         assert mock_xr_open.call_count == 1
+
+    def test_parallel_without_lock_rejects_threaded_scheduler(
+        self, mocker: MockerFixture
+    ):
+        mock_xr_open: mocker.MagicMock = mocker.patch(
+            "hydromt.data_catalog.drivers.raster.raster_xarray_driver.xr.open_mfdataset",
+            spec=open_mfdataset,
+        )
+        driver = RasterDatasetXarrayDriver(options={"parallel": True, "lock": False})
+
+        # Default scheduler is threaded
+        with (
+            dask.config.set(scheduler=None),
+            pytest.raises(ValueError, match="threaded dask scheduler"),
+        ):
+            driver.read(["file.netcdf"])
+
+        with (
+            dask.config.set(scheduler="threads"),
+            pytest.raises(ValueError, match="threaded dask scheduler"),
+        ):
+            driver.read(["file.netcdf"])
+
+        mock_xr_open.assert_not_called()
+
+    def test_parallel_without_lock_allows_non_threaded_scheduler(
+        self, mocker: MockerFixture
+    ):
+        mock_xr_open: mocker.MagicMock = mocker.patch(
+            "hydromt.data_catalog.drivers.raster.raster_xarray_driver.xr.open_mfdataset",
+            spec=open_mfdataset,
+        )
+        mock_xr_open.return_value = xr.Dataset()
+        driver = RasterDatasetXarrayDriver(options={"parallel": True, "lock": False})
+
+        with dask.config.set(scheduler="synchronous"):
+            res = driver.read(["file.netcdf"])
+
+        with dask.config.set(scheduler="processes"):
+            res = driver.read(["file.netcdf"])
+
+        assert res.sizes == {}
+        assert mock_xr_open.call_count == 2
 
     def test_calls_nc_func_with_nc_ext_override(self, mocker: MockerFixture):
         mock_xr_open: mocker.MagicMock = mocker.patch(

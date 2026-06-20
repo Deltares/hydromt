@@ -3,7 +3,10 @@
 import enum
 import logging
 from os.path import splitext
+from typing import Any
 
+from dask import delayed
+from dask.base import get_scheduler
 from pydantic import Field
 
 from hydromt.data_catalog.drivers.base_driver import DriverOptions
@@ -107,3 +110,19 @@ class XarrayDriverOptions(DriverOptions):
             else:
                 filtered_uris.append(_uri)
         return filtered_uris, io_format
+
+    def get_kwargs(self) -> dict[str, Any]:
+        """Return attributes set that are not explicitly declared fields."""
+        kwargs = super().model_dump(
+            exclude=self.get_excluded_kwarg_names_for_open(), exclude_unset=True
+        )
+        if kwargs.get("parallel") is True and kwargs.get("lock") is False:
+            scheduler = get_scheduler(collections=[delayed(lambda: None)()])
+            if getattr(scheduler, "__module__", None) == "dask.threaded":
+                raise ValueError(
+                    "Cannot use xarray open_mfdataset parallel=True with lock=False "
+                    "with a threaded dask scheduler. Use lock=True or a non-threaded "
+                    "scheduler such as distributed."
+                )
+
+        return kwargs
