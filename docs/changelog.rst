@@ -11,6 +11,12 @@ The format is based on `Keep a Changelog`_, and this project adheres to
 Unreleased
 ==========
 
+Changed
+-------
+- ``resample_time`` now requires regular monotonic time steps by default when resampling. Irregular time coordinates that were previously resampled based on their mean timestep now raise a ``ValueError`` unless ``require_monotonic=False`` is passed.
+- Xarray-based drivers now reject ``parallel=True`` with ``lock=False`` when the active Dask scheduler is threaded, instead of forwarding an unsafe keyword-argument combination to ``xarray.open_mfdataset``.
+- Multi-file ``Dataset``, ``GeoDataset`` and ``RasterDataset`` sources with ``{year}`` or ``{month}`` URI placeholders now check that all resolved periods are present in the opened data, including when local path separators differ between platforms.
+
 Fixed
 -----
 - ``SlippyTileDriver`` no longer crashes when an AWS credential provider raises while resolving (e.g. an expired SSO token); it now falls back to anonymous access, so public buckets remain reachable.

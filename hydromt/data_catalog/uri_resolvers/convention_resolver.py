@@ -1,8 +1,10 @@
 """URIResolver using HydroMT naming conventions."""
 
 import logging
+import os
 from functools import reduce
 from itertools import chain, product
+from pathlib import PureWindowsPath
 from typing import Any, Iterable, Optional
 
 import pandas as pd
@@ -28,6 +30,24 @@ class _SafeDict(dict):
 
     def __missing__(self, key):
         return "{" + key + "}"
+
+
+def _normalize_local_path(uri: str) -> str:
+    r"""Normalize Windows local paths for matching filesystem glob results.
+
+    Examples
+    --------
+    On Windows, ``C:\data\data_{year}.nc`` becomes
+    ``C:/data/data_{year}.nc``.
+    ``/data/data_{year}.nc`` stays ``/data/data_{year}.nc``.
+    On non-Windows systems, ``/data\data_{year}.nc`` is unchanged because
+    backslashes can be valid filename characters.
+    ``abfs://container/data_{year}.nc`` is unchanged.
+    """
+    protocol, _ = split_protocol(uri)
+    if protocol is None and os.name == "nt":
+        return PureWindowsPath(uri).as_posix()
+    return uri
 
 
 class ConventionResolver(URIResolver):
@@ -134,7 +154,7 @@ class ConventionResolver(URIResolver):
             metadata: SourceMetadata = SourceMetadata()
 
         uri_expanded, keys, regex = _expand_uri_placeholders(
-            uri,
+            _normalize_local_path(uri),
             placeholders=self._uri_placeholders,
             time_range=time_range,
             variables=variables,
@@ -171,7 +191,7 @@ class ConventionResolver(URIResolver):
         self._resolved_uri_placeholders = [
             dict(zip(keys, match.groups(), strict=True))
             for u in uris
-            if (match := regex.match(u)) is not None
+            if (match := regex.match(_normalize_local_path(u))) is not None
         ]
         if not uris:
             exec_nodata_strat(

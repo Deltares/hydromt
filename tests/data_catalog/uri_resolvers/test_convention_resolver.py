@@ -1,4 +1,5 @@
 import logging
+import os
 from itertools import product
 from string import Formatter
 from typing import Any, Dict, Iterator
@@ -7,7 +8,10 @@ import pytest
 from fsspec.implementations.memory import MemoryFileSystem
 
 from hydromt._utils.naming_convention import _expand_uri_placeholders
-from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
+from hydromt.data_catalog.uri_resolvers.convention_resolver import (
+    ConventionResolver,
+    _normalize_local_path,
+)
 from hydromt.error import NoDataException
 from hydromt.typing.fsspec_types import FSSpecFileSystem
 from hydromt.typing.type_def import TimeRange
@@ -85,6 +89,33 @@ class TestConventionResolver:
         )
         for resolved_uri in resolved_uris:
             assert resolved_uri in caplog.text
+
+    def test_resolver_normalizes_windows_paths(self, monkeypatch: pytest.MonkeyPatch):
+
+        # Patch wildcards to fake a Windows filesystem
+        def _resolve_wildcards(
+            self,
+            uris: Iterator[str],  # noqa: ARG001
+        ) -> list[str]:
+            return [
+                "C:/data/data_2020_01.nc",
+                "C:/data/data_2020_02.nc",
+            ]
+
+        monkeypatch.setattr(
+            ConventionResolver, "_resolve_wildcards", _resolve_wildcards
+        )
+        resolver = ConventionResolver()
+
+        monkeypatch.setattr(os, "name", "nt")
+        resolver.resolve(r"C:\data\data_{year}_{month:02d}.nc")
+        assert resolver._resolved_uri_placeholders == [
+            {"year": "2020", "month": "01"},
+            {"year": "2020", "month": "02"},
+        ]
+
+        monkeypatch.setattr(os, "name", "posix")
+        assert _normalize_local_path(r"/data/data\2020.nc") == r"/data/data\2020.nc"
 
     def test_capture_regex(self):
         pat = "here-is-some-more-leading-{year}-text-for-{month}-you-{variable}.pq"

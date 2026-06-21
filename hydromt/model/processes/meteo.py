@@ -767,6 +767,9 @@ def resample_time(
         to input frequency.
     conserve_mass: bool, optional
         If True multiply output with relative change in frequency to conserve mass
+    require_monotonic: bool, optional
+        If True, require regular monotonic time steps before resampling. Set to False
+        to allow resampling based on the mean timestep.
 
     Returns
     -------
