@@ -11,6 +11,12 @@ The format is based on `Keep a Changelog`_, and this project adheres to
 Unreleased
 ==========
 
+Changed
+-------
+- ``resample_time`` now requires uniform time steps by default when resampling. Irregular time coordinates that were previously resampled based on their mean timestep now raise a ``ValueError`` unless ``require_uniform_spacing=False`` is passed.
+- Xarray-based drivers now reject ``parallel=True`` with ``lock=False`` when the active Dask scheduler is threaded, instead of forwarding an unsafe keyword-argument combination to ``xarray.open_mfdataset``.
+- Multi-file ``Dataset``, ``GeoDataset`` and ``RasterDataset`` sources with ``{year}`` or ``{month}`` URI placeholders now check that all resolved periods are present in the opened data, including when local path separators differ between platforms.
+
 Fixed
 -----
 - ``SlippyTileDriver`` no longer crashes when an AWS credential provider raises while resolving (e.g. an expired SSO token); it now falls back to anonymous access, so public buckets remain reachable.
@@ -42,6 +48,8 @@ Fixed
 - The functions ``_strip_scheme`` and ``_strip_vsi`` in ``hydromt._utils.uris`` no longer use ``lstrip`` to remove leading characters, but now remove only the exact prefix. (#1438)
 - ``Datacatalog.export_data`` no longer applies unit conversion twice. (#1459)
 - ``RasterioDriver.write`` now always produces filenames that are parseable by ``readers.open_mfraster`` when provided with a pattern with no prefix e.g. ``*.tif``. (#1459)
+- ``RasterDatasetAdapter`` now respects ``handle_nodata`` when requested ``variables`` are missing from the source: ``NoDataStrategy.WARN`` and ``NoDataStrategy.IGNORE`` return ``None`` (and warn) instead of always raising ``NoDataException``. (#1407)
+- A ``DataFrame`` source without an explicit driver now defaults to the ``pandas`` driver instead of incorrectly inferring ``geodataframe_table`` (which also claims ``.csv``/``.parquet``) and failing validation. (#1403)
 
 Deprecated
 ----------
