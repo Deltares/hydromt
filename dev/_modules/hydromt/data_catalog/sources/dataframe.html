@@ -889,6 +889,16 @@ window.runMermaid = runMermaid;</script>
     <span class="n">driver</span><span class="p">:</span> <span class="n">DataFrameDriver</span>
     <span class="n">data_adapter</span><span class="p">:</span> <span class="n">DataFrameAdapter</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">DataFrameAdapter</span><span class="p">)</span>
 
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_infer_default_driver</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="c1"># Restrict driver inference to DataFrame drivers; otherwise a driver</span>
+        <span class="c1"># from another source type (e.g. &quot;geodataframe_table&quot;, which also</span>
+        <span class="c1"># claims .csv/.parquet) can be picked and fail validation (#1403).</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_infer_default_driver</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">DataFrameDriver</span><span class="p">)</span>
+
 <div class="viewcode-block" id="DataFrameSource.read_data">
 <a class="viewcode-back" href="../../../../_generated/hydromt.data_catalog.sources.DataFrameSource.html#hydromt.data_catalog.sources.DataFrameSource.read_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">read_data</span><span class="p">(</span>
