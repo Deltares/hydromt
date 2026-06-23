@@ -672,6 +672,9 @@ See list of recognized <a class="reference internal" href="#dimensions">dimensio
 <p>To read a raster dataset from a multiple file netcdf archive the following data entry
 is used, where the <code class="docutils literal notranslate"><span class="pre">options</span></code> are passed to <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html#xarray.open_mfdataset" title="(in xarray v2026.4.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_mfdataset()</span></code></a>
 (or <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_zarr.html#xarray.open_zarr" title="(in xarray v2026.4.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_zarr()</span></code></a> for zarr data).
+HydroMT validates xarray driver options before opening the data. For example,
+<code class="docutils literal notranslate"><span class="pre">parallel=True</span></code> with <code class="docutils literal notranslate"><span class="pre">lock=False</span></code> is rejected when the active Dask scheduler is
+threaded; use <code class="docutils literal notranslate"><span class="pre">lock=True</span></code> or a non-threaded scheduler for that combination.
 In case the CRS cannot be inferred from the netcdf metadata it should be defined with
 the <code class="docutils literal notranslate"><span class="pre">crs</span></code> <code class="docutils literal notranslate"><span class="pre">metadata</span></code> here.
 The path to multiple files can be set using a glob string or several keys,

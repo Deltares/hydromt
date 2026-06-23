@@ -873,6 +873,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.adapters.rasterdataset</span><span class="w"> </span><span class="kn">import</span> <span class="n">RasterDatasetAdapter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.drivers</span><span class="w"> </span><span class="kn">import</span> <span class="n">RasterDatasetDriver</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.sources.data_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSource</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.uri_resolvers</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConventionResolver</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="n">exec_nodata_strat</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.gis.gis_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_parse_geom_bbox_buffer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -952,6 +953,8 @@ window.runMermaid = runMermaid;</script>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">ds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># handle_nodata == ignore</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uri_resolver</span><span class="p">,</span> <span class="n">ConventionResolver</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">uri_resolver</span><span class="o">.</span><span class="n">_check_multifile_is_complete</span><span class="p">(</span><span class="n">uris</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">handle_nodata</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_adapter</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
             <span class="n">ds</span><span class="p">,</span>

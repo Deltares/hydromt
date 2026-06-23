@@ -857,12 +857,15 @@ window.runMermaid = runMermaid;</script>
 <span></span><span class="sd">&quot;&quot;&quot;URIResolver using HydroMT naming conventions.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">reduce</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">chain</span><span class="p">,</span> <span class="n">product</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">PureWindowsPath</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fsspec.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">split_protocol</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">PrivateAttr</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.naming_convention</span><span class="w"> </span><span class="kn">import</span> <span class="n">_expand_uri_placeholders</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.uri_resolvers.uri_resolver</span><span class="w"> </span><span class="kn">import</span> <span class="n">URIResolver</span>
@@ -885,11 +888,30 @@ window.runMermaid = runMermaid;</script>
         <span class="k">return</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_normalize_local_path</span><span class="p">(</span><span class="n">uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Normalize Windows local paths for matching filesystem glob results.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    On Windows, ``C:\data\data_{year}.nc`` becomes</span>
+<span class="sd">    ``C:/data/data_{year}.nc``.</span>
+<span class="sd">    ``/data/data_{year}.nc`` stays ``/data/data_{year}.nc``.</span>
+<span class="sd">    On non-Windows systems, ``/data\data_{year}.nc`` is unchanged because</span>
+<span class="sd">    backslashes can be valid filename characters.</span>
+<span class="sd">    ``abfs://container/data_{year}.nc`` is unchanged.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">protocol</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">split_protocol</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">protocol</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;nt&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">PureWindowsPath</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">uri</span>
+
+
 <div class="viewcode-block" id="ConventionResolver">
 <a class="viewcode-back" href="../../../../_generated/hydromt.data_catalog.uri_resolvers.ConventionResolver.html#hydromt.data_catalog.uri_resolvers.ConventionResolver">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ConventionResolver</span><span class="p">(</span><span class="n">URIResolver</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;URIDataResolver using HydroMT naming conventions.&quot;&quot;&quot;</span>
 
+    <span class="n">_resolved_uri_placeholders</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="n">PrivateAttr</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
     <span class="n">_uri_placeholders</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span>
         <span class="p">{</span><span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">,</span> <span class="s2">&quot;variable&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;overview_level&quot;</span><span class="p">}</span>
     <span class="p">)</span>
@@ -991,8 +1013,8 @@ window.runMermaid = runMermaid;</script>
         <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">metadata</span><span class="p">:</span> <span class="n">SourceMetadata</span> <span class="o">=</span> <span class="n">SourceMetadata</span><span class="p">()</span>
 
-        <span class="n">uri_expanded</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_expand_uri_placeholders</span><span class="p">(</span>
-            <span class="n">uri</span><span class="p">,</span>
+        <span class="n">uri_expanded</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">regex</span> <span class="o">=</span> <span class="n">_expand_uri_placeholders</span><span class="p">(</span>
+            <span class="n">_normalize_local_path</span><span class="p">(</span><span class="n">uri</span><span class="p">),</span>
             <span class="n">placeholders</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_uri_placeholders</span><span class="p">,</span>
             <span class="n">time_range</span><span class="o">=</span><span class="n">time_range</span><span class="p">,</span>
             <span class="n">variables</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span>
@@ -1026,15 +1048,85 @@ window.runMermaid = runMermaid;</script>
                 <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">fmt</span><span class="p">:</span> <span class="n">uri_expanded</span><span class="o">.</span><span class="n">format_map</span><span class="p">(</span><span class="n">_SafeDict</span><span class="p">(</span><span class="o">**</span><span class="n">fmt</span><span class="p">)),</span> <span class="n">fmts</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_resolved_uri_placeholders</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">match</span><span class="o">.</span><span class="n">groups</span><span class="p">(),</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">uris</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">match</span> <span class="o">:=</span> <span class="n">regex</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_normalize_local_path</span><span class="p">(</span><span class="n">u</span><span class="p">)))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">uris</span><span class="p">:</span>
             <span class="n">exec_nodata_strat</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Resolver &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; found no files at </span><span class="si">{</span><span class="n">uri_expanded</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">,</span>
                 <span class="n">strategy</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="p">[]</span>  <span class="c1"># if ignore</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="s2">&quot;Resolver &#39;</span><span class="si">%s</span><span class="s2">&#39; found </span><span class="si">%d</span><span class="s2"> files at </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">uris</span><span class="p">),</span>
+                <span class="n">uri_expanded</span><span class="p">,</span>
+                <span class="n">uris</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">uris</span></div>
-</div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_multifile_is_complete</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">uris</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check multi-file time placeholders against the opened xarray data.&quot;&quot;&quot;</span>
+        <span class="c1"># Only check with multiple URIs and the expected range from placeholders.</span>
+
+        <span class="k">if</span> <span class="s2">&quot;time&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">found</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolved_uri_placeholders</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># For data_{year}_{month:02d}.nc `found` looks like:</span>
+        <span class="c1"># [{&quot;year&quot;: &quot;2020&quot;, &quot;month&quot;: &quot;12&quot;}, {&quot;year&quot;: &quot;2021&quot;, &quot;month&quot;: &quot;01&quot;}].</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">found</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">({</span><span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">}</span> <span class="o">&amp;</span> <span class="n">keys</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_handle_missing</span><span class="p">(</span><span class="n">msg</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">exec_nodata_strat</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Source &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; is missing data for URI placeholders: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">,</span>
+                <span class="n">strategy</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">time</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+        <span class="k">if</span> <span class="p">{</span><span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">}</span> <span class="o">&lt;=</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="n">expected</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">Period</span><span class="p">(</span><span class="n">year</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;year&quot;</span><span class="p">]),</span> <span class="n">month</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;month&quot;</span><span class="p">]),</span> <span class="n">freq</span><span class="o">=</span><span class="s2">&quot;M&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">found</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span>
+                <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;month&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span>
+            <span class="p">}</span>
+            <span class="c1"># A time coord with 2020-12-15 and 2021-01-15 becomes monthly</span>
+            <span class="c1"># periods &quot;2020-12&quot; and &quot;2021-01&quot;, matching `expected`.</span>
+            <span class="n">got</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">to_period</span><span class="p">(</span><span class="s2">&quot;M&quot;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">missing_months</span> <span class="o">:=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">expected</span> <span class="o">-</span> <span class="n">got</span><span class="p">):</span>
+                <span class="n">_handle_missing</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;missing months: </span><span class="si">{</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">m</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">missing_months</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="s2">&quot;year&quot;</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="n">expected</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;year&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">found</span> <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span>
+            <span class="p">}</span>
+            <span class="n">got</span> <span class="o">=</span> <span class="p">{</span><span class="nb">int</span><span class="p">(</span><span class="n">year</span><span class="p">)</span> <span class="k">for</span> <span class="n">year</span> <span class="ow">in</span> <span class="n">time</span><span class="o">.</span><span class="n">year</span><span class="p">}</span>
+            <span class="k">if</span> <span class="n">missing_years</span> <span class="o">:=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">expected</span> <span class="o">-</span> <span class="n">got</span><span class="p">):</span>
+                <span class="n">_handle_missing</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;missing years: </span><span class="si">{</span><span class="n">missing_years</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="s2">&quot;month&quot;</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="n">expected</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;month&#39;</span><span class="p">])</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">found</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;month&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span>
+            <span class="p">}</span>
+            <span class="n">got</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">month</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">month</span> <span class="ow">in</span> <span class="n">time</span><span class="o">.</span><span class="n">month</span><span class="p">}</span>
+            <span class="k">if</span> <span class="n">missing_months</span> <span class="o">:=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">expected</span> <span class="o">-</span> <span class="n">got</span><span class="p">):</span>
+                <span class="n">_handle_missing</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;missing months: </span><span class="si">{</span><span class="n">missing_months</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 </pre></div>
 

@@ -1634,6 +1634,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">upsampling</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;bfill&quot;</span><span class="p">,</span>
     <span class="n">downsampling</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
     <span class="n">conserve_mass</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">require_uniform_spacing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Resample data to destination frequency.</span>
 
@@ -1654,6 +1655,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        to input frequency.</span>
 <span class="sd">    conserve_mass: bool, optional</span>
 <span class="sd">        If True multiply output with relative change in frequency to conserve mass</span>
+<span class="sd">    require_uniform_spacing: bool, optional</span>
+<span class="sd">        If True, require regular uniform time steps before resampling. Set to False</span>
+<span class="sd">        to allow resampling based on the mean timestep.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -1663,6 +1667,8 @@ window.runMermaid = runMermaid;</script>
     <span class="n">da_out</span> <span class="o">=</span> <span class="n">da</span>
     <span class="n">dfreq</span> <span class="o">=</span> <span class="n">delta_freq</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">freq</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">dfreq</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">require_uniform_spacing</span><span class="p">:</span>
+            <span class="n">require_uniform_spacing_time</span><span class="p">(</span><span class="n">da</span><span class="p">)</span>
         <span class="n">resample</span> <span class="o">=</span> <span class="n">upsampling</span> <span class="k">if</span> <span class="n">dfreq</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">downsampling</span>
         <span class="n">pre</span> <span class="o">=</span> <span class="s2">&quot;up&quot;</span> <span class="k">if</span> <span class="n">dfreq</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;down&quot;</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
@@ -1704,9 +1710,12 @@ window.runMermaid = runMermaid;</script>
     <span class="k">return</span> <span class="n">freq</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">da_to_timedelta</span><span class="p">(</span><span class="n">da</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert time dimenstion in dataset to timedelta.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">time</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">da_to_timedelta</span><span class="p">(</span>
+    <span class="n">da</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">reducer</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert time dimension spacing in dataset to a timedelta.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">reducer</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">time</span><span class="p">)))</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">freq_to_timedelta</span><span class="p">(</span><span class="n">freq</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">:</span>
@@ -1717,6 +1726,27 @@ window.runMermaid = runMermaid;</script>
 
     <span class="c1"># Convert str to datetime.timedelta</span>
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">require_uniform_spacing_time</span><span class="p">(</span><span class="n">da</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if time dimension has uniform spacing.&quot;&quot;&quot;</span>
+    <span class="n">values</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique_counts</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">time</span><span class="p">))</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+        <span class="nb">zip</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">differences</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">value</span><span class="p">))</span><span class="o">.</span><span class="n">removesuffix</span><span class="p">(</span><span class="s1">&#39; 00:00:00&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> occurs &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">count</span><span class="p">)</span><span class="si">}</span><span class="s2"> time</span><span class="si">{</span><span class="s1">&#39;s&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">count</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">for</span> <span class="n">value</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">data</span>
+        <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s2">&quot;Time dimension has no uniform spacing. Unique time differences: </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span>
+            <span class="n">differences</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Time dimension should have uniform spacing for resampling.&quot;</span><span class="p">)</span>
 </pre></div>
 
                 </article>

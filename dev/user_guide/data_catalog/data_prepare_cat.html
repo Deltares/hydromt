@@ -572,7 +572,7 @@ category. Usual categories within HydroMT are <em>geography</em>, <em>topography
 user is free to define its own categories.</p></li>
 </ul>
 <p>The following are <strong>required arguments for each data source</strong>:</p>
-<ul class="simple">
+<ul>
 <li><p><strong>data_type</strong>: type of input data. Either <em>RasterDataset</em>, <em>GeoDataset</em>, <em>Dataset</em>
 <em>GeoDataFrame</em> or <em>DataFrame</em>.</p></li>
 <li><p><strong>driver</strong>: data_type specific <code class="xref py py-class docutils literal notranslate"><span class="pre">Driver</span></code> to read a dataset. If the default
@@ -591,7 +591,13 @@ keys to limit which files are being read based on the get_data request in the fo
 string to define how the key should be read. For example, in a path written as
 <code class="docutils literal notranslate"><span class="pre">&quot;path/to/my/files/{variable}_{year}_{month:02d}.nc&quot;</span></code>, the month always has two
 digits and is zero-padded for Jan-Sep (e.g. January 2012 is stored as
-<code class="docutils literal notranslate"><span class="pre">&quot;path/to/my/files/{variable}_2012_01.nc&quot;</span></code>).</p></li>
+<code class="docutils literal notranslate"><span class="pre">&quot;path/to/my/files/{variable}_2012_01.nc&quot;</span></code>).</p>
+<p>For multi-file <code class="docutils literal notranslate"><span class="pre">Dataset</span></code>, <code class="docutils literal notranslate"><span class="pre">GeoDataset</span></code> and <code class="docutils literal notranslate"><span class="pre">RasterDataset</span></code> sources, HydroMT
+compares resolved <code class="docutils literal notranslate"><span class="pre">{year}</span></code> and <code class="docutils literal notranslate"><span class="pre">{month}</span></code> placeholders with the opened time
+coordinate. If resolved files cover periods that are missing from the data,
+HydroMT handles this according to the <code class="docutils literal notranslate"><span class="pre">handle_nodata</span></code> strategy instead of
+silently returning partial time coverage.</p>
+</li>
 </ul>
 <p>A full list of <strong>optional arguments for each data source</strong> is given below</p>
 <ul class="simple">
