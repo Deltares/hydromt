@@ -1026,13 +1026,18 @@ def read_toml(path: str | Path) -> dict[str, Any]:
 
 
 def _yml_from_uri_or_path(uri_or_path: str | Path) -> dict[str, Any]:
+    # From a url
     if _is_valid_url(str(uri_or_path)):
+        # Stream that bad boy
         with requests.get(str(uri_or_path), stream=True) as r:
             r.raise_for_status()
             yml = _parse_yaml(r.text)
 
+    # (Local) Path
     else:
-        yml = read_yaml(uri_or_path)
+        # Ensure typing
+        uri_or_path = Path(uri_or_path)
+        yml = read_yaml(uri_or_path.expanduser())  # Expand the user (~)
     return yml
 
 

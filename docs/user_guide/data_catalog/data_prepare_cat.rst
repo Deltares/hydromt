@@ -82,6 +82,12 @@ The following are **required arguments for each data source**:
   digits and is zero-padded for Jan-Sep (e.g. January 2012 is stored as
   ``"path/to/my/files/{variable}_2012_01.nc"``).
 
+  For multi-file ``Dataset``, ``GeoDataset`` and ``RasterDataset`` sources, HydroMT
+  compares resolved ``{year}`` and ``{month}`` placeholders with the opened time
+  coordinate. If resolved files cover periods that are missing from the data,
+  HydroMT handles this according to the ``handle_nodata`` strategy instead of
+  silently returning partial time coverage.
+
 A full list of **optional arguments for each data source** is given below
 
 - **version** (recommended): data source version

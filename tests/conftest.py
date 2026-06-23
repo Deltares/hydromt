@@ -35,16 +35,38 @@ from hydromt.model.components.vector import VectorComponent
 from hydromt.model.root import ModelRoot
 from hydromt.plugins import Plugins
 
-dask_config.set(scheduler="single-threaded")
-xr.set_options(use_new_combine_kwarg_defaults=True)
 
-# This is the recommended by pandas and will become default behaviour in pandas 3.0.
-# https://pandas.pydata.org/pandas-docs/stable/user_guide/copy_on_write.html#copy-on-write-chained-assignment
-# https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-if Version(pd.__version__) < Version("3.0.0"):
-    pd.options.mode.copy_on_write = True
+@pytest.fixture(scope="session", autouse=True)
+def _configure_dask():
+    """Configure dask to use the single-threaded scheduler for testing to avoid issues with parallel execution in tests."""
+    dask_config.set(scheduler="single-threaded")
 
-xr.set_options(use_new_combine_kwarg_defaults=True)
+
+@pytest.fixture(scope="session", autouse=True)
+def _configure_xarray():
+    """Configure xarray to use the new default settings for the combine_kwargs in xarray 2025.08.0 and later.
+
+    See Also
+    --------
+    https://docs.xarray.dev/en/stable/whats-new.html#v2025-08-0-aug-14-2025
+    """
+    if Version(xr.__version__) >= Version("2025.08.0"):
+        xr.set_options(use_new_combine_kwarg_defaults=True)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _configure_pandas():
+    """Enable copy-on-write in pandas to avoid SettingWithCopyWarning and ensure that chained assignments return views instead of copies.
+
+    This is the recommended by pandas and will become default behaviour in pandas 3.0.
+
+    See Also
+    --------
+        https://pandas.pydata.org/pandas-docs/stable/user_guide/copy_on_write.html#copy-on-write-chained-assignment
+        https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+    """
+    if Version(pd.__version__) < Version("3.0.0"):
+        pd.options.mode.copy_on_write = True
 
 
 @pytest.fixture(scope="session")
