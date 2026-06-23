@@ -873,7 +873,7 @@ window.runMermaid = runMermaid;</script>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.adapters.adapter_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_slice_temporal_dimension</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.adapters.data_adapter_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataAdapterBase</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDataException</span><span class="p">,</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="n">exec_nodata_strat</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="n">exec_nodata_strat</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.gis.raster</span><span class="w"> </span><span class="kn">import</span> <span class="n">GEO_MAP_COORD</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.gis.raster_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_meridian_offset</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -1053,9 +1053,14 @@ window.runMermaid = runMermaid;</script>
         <span class="k">elif</span> <span class="n">variables</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># xr.Dataset has variables</span>
             <span class="n">variables</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">List</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">mvars</span> <span class="o">=</span> <span class="p">[</span><span class="n">var</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">]</span>
-                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">mvars</span><span class="p">):</span>
-                    <span class="k">raise</span> <span class="n">NoDataException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RasterDataset: variables not found </span><span class="si">{</span><span class="n">mvars</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">mvars</span> <span class="o">=</span> <span class="p">[</span><span class="n">var</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">variables</span> <span class="k">if</span> <span class="n">var</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">mvars</span><span class="p">:</span>
+                    <span class="c1"># respect handle_nodata instead of always raising (#1407):</span>
+                    <span class="c1"># RAISE -&gt; raise, WARN -&gt; warn + return None, IGNORE -&gt; None</span>
+                    <span class="n">exec_nodata_strat</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;RasterDataset: variables not found </span><span class="si">{</span><span class="n">mvars</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">handle_nodata</span>
+                    <span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">None</span>
                 <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">variables</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">time_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
