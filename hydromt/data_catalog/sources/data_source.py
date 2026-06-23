@@ -9,7 +9,6 @@ from os.path import abspath, join, splitext
 from pathlib import Path, PurePath
 from typing import Any, ClassVar, Optional, TypeVar, Union, cast
 
-import pandas as pd
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -26,7 +25,7 @@ from hydromt._utils.uris import _is_valid_url
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.data_catalog.drivers import BaseDriver
 from hydromt.data_catalog.uri_resolvers import ConventionResolver, URIResolver
-from hydromt.error import NoDataStrategy, exec_nodata_strat
+from hydromt.error import NoDataStrategy
 from hydromt.typing import DataType, SourceMetadata
 from hydromt.typing.type_def import TimeRange, TotalBounds
 
@@ -84,60 +83,6 @@ class DataSource(BaseModel, ABC):
     def _log_start_read_data(self):
         """Log the start of the read data process."""
         logger.info(f"Reading {self.name} {self.data_type} data from {self.full_uri}")
-
-    def _check_multifile_is_complete(
-        self, uris: list[str], data: Any, handle_nodata: NoDataStrategy
-    ) -> None:
-        """Check multi-file time placeholders against the opened xarray data."""
-        # Only check with multiple URIs and the expected range from placeholders.
-
-        if "time" not in data:
-            return
-
-        found = self.uri_resolver._resolved_uri_placeholders
-        if len(uris) < 2 or not found:
-            return
-
-        # For data_{year}_{month:02d}.nc `found` looks like:
-        # [{"year": "2020", "month": "12"}, {"year": "2021", "month": "01"}].
-        keys = set().union(*(d.keys() for d in found))
-        if not ({"year", "month"} & keys):
-            return
-
-        def _handle_missing(msg: str) -> None:
-            exec_nodata_strat(
-                f"Source '{self.name}' is missing data for URI placeholders: {msg}.",
-                strategy=handle_nodata,
-            )
-
-        time = pd.DatetimeIndex(pd.to_datetime(data["time"].values))
-        if {"year", "month"} <= keys:
-            expected = {
-                pd.Period(year=int(d["year"]), month=int(d["month"]), freq="M")
-                for d in found
-                if str(d.get("year", "")).isdigit() and str(d.get("month", "")).isdigit()
-            }
-            # A time coord with 2020-12-15 and 2021-01-15 becomes monthly
-            # periods "2020-12" and "2021-01", matching `expected`.
-            got = set(time.to_period("M"))
-            if missing_months := sorted(expected - got):
-                _handle_missing(f"missing months: {[str(m) for m in missing_months]}")
-
-        elif "year" in keys:
-            expected = {int(d["year"]) for d in found if str(d.get("year", "")).isdigit()}
-            got = {int(year) for year in time.year}
-            if missing_years := sorted(expected - got):
-                _handle_missing(f"missing years: {missing_years}")
-
-        elif "month" in keys:
-            expected = {
-                f"{int(d['month']):02d}"
-                for d in found
-                if str(d.get("month", "")).isdigit()
-            }
-            got = {f"{month:02d}" for month in time.month}
-            if missing_months := sorted(expected - got):
-                _handle_missing(f"missing months: {missing_months}")
 
     @model_validator(mode="before")
     @classmethod

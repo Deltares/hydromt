@@ -94,7 +94,7 @@ class RasterDatasetSource(DataSource):
         if ds is None:
             return None  # handle_nodata == ignore
         if isinstance(self.uri_resolver, ConventionResolver):
-            self._check_multifile_is_complete(uris, ds, handle_nodata)
+            self.uri_resolver._check_multifile_is_complete(uris, ds, handle_nodata)
 
         return self.data_adapter.transform(
             ds,

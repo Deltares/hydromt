@@ -60,8 +60,9 @@ def test_driver_options():
 def test_driver_options_allow_parallel_without_lock_until_read_time():
     options = XarrayDriverOptions(parallel=True, lock=False)
 
-    assert getattr(options, "parallel") is True
-    assert getattr(options, "lock") is False
+    assert options.parallel is True
+    assert options.lock is False
+
 
 class TestRasterXarrayDriver:
     def test_calls_preprocess(self, mocker: MockerFixture):

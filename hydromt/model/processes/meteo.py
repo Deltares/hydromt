@@ -746,7 +746,7 @@ def resample_time(
     upsampling: str = "bfill",
     downsampling: str = "mean",
     conserve_mass: bool = True,
-    require_monotonic: bool = True,
+    require_uniform_spacing: bool = True,
 ) -> xr.DataArray:
     """Resample data to destination frequency.
 
@@ -767,8 +767,8 @@ def resample_time(
         to input frequency.
     conserve_mass: bool, optional
         If True multiply output with relative change in frequency to conserve mass
-    require_monotonic: bool, optional
-        If True, require regular monotonic time steps before resampling. Set to False
+    require_uniform_spacing: bool, optional
+        If True, require regular uniform time steps before resampling. Set to False
         to allow resampling based on the mean timestep.
 
     Returns
@@ -779,8 +779,8 @@ def resample_time(
     da_out = da
     dfreq = delta_freq(da, freq)
     if not np.isclose(dfreq, 1.0):
-        if require_monotonic:
-            require_monotonic_time(da)
+        if require_uniform_spacing:
+            require_uniform_spacing_time(da)
         resample = upsampling if dfreq < 1 else downsampling
         pre = "up" if dfreq < 1 else "down"
         logger.debug(
@@ -836,8 +836,8 @@ def freq_to_timedelta(freq: Union[str, pd.Timedelta]) -> pd.Timedelta:
     return pd.to_timedelta(freq)
 
 
-def require_monotonic_time(da: xr.DataArray):
-    """Check if time dimension is monotonic."""
+def require_uniform_spacing_time(da: xr.DataArray):
+    """Check if time dimension has uniform spacing."""
     values, counts = np.unique_counts(np.diff(da.time))
     data = sorted(
         zip(values, counts, strict=True),
@@ -851,7 +851,7 @@ def require_monotonic_time(da: xr.DataArray):
             for value, count in data
         )
         logger.debug(
-            "Time dimension is not monotonic. Unique time differences: %s.",
+            "Time dimension has no uniform spacing. Unique time differences: %s.",
             differences,
         )
-        raise ValueError("Time dimension should be monotonic for resampling.")
+        raise ValueError("Time dimension should have uniform spacing for resampling.")

@@ -86,7 +86,7 @@ def test_resample_time_rejects_output_sized_gap(caplog: pytest.LogCaptureFixture
 
     caplog.set_level(logging.DEBUG, logger="hydromt")
     with pytest.raises(
-        ValueError, match="Time dimension should be monotonic for resampling"
+        ValueError, match="Time dimension should be uniform for resampling"
     ):
         resample_time(da, freq="7D", downsampling="sum")
     assert (
