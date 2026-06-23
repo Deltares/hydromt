@@ -17,7 +17,7 @@ from hydromt._utils import (
 )
 from hydromt.data_catalog.adapters.adapter_utils import _slice_temporal_dimension
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
-from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
+from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.gis.raster_utils import _meridian_offset
 from hydromt.typing import (
@@ -192,9 +192,14 @@ class RasterDatasetAdapter(DataAdapterBase):
         elif variables is not None:  # xr.Dataset has variables
             variables = cast(List, np.atleast_1d(variables).tolist())
             if len(variables) > 1 or len(ds.data_vars) > 1:
-                mvars = [var not in ds.data_vars for var in variables]
-                if any(mvars):
-                    raise NoDataException(f"RasterDataset: variables not found {mvars}")
+                mvars = [var for var in variables if var not in ds.data_vars]
+                if mvars:
+                    # respect handle_nodata instead of always raising (#1407):
+                    # RAISE -> raise, WARN -> warn + return None, IGNORE -> None
+                    exec_nodata_strat(
+                        f"RasterDataset: variables not found {mvars}", handle_nodata
+                    )
+                    return None
                 ds = ds[variables]
 
         if time_range is not None:
