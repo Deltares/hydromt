@@ -113,9 +113,7 @@ class XarrayDriverOptions(DriverOptions):
 
     def get_kwargs(self) -> dict[str, Any]:
         """Return attributes set that are not explicitly declared fields."""
-        kwargs = super().model_dump(
-            exclude=self.get_excluded_kwarg_names_for_open(), exclude_unset=True
-        )
+        kwargs = super().get_kwargs()
         if kwargs.get("parallel") is True and kwargs.get("lock") is False:
             scheduler = get_scheduler(collections=[delayed(lambda: None)()])
             if getattr(scheduler, "__module__", None) == "dask.threaded":

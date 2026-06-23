@@ -201,7 +201,11 @@ class ConventionResolver(URIResolver):
             return []  # if ignore
         else:
             logger.debug(
-                f"Resolver '{self.name}' found {len(uris)} files at {uri_expanded}: {uris}"
+                "Resolver '%s' found %d files at %s: %s",
+                self.name,
+                len(uris),
+                uri_expanded,
+                uris,
             )
 
         return uris

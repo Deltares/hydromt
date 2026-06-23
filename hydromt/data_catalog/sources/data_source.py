@@ -113,12 +113,9 @@ class DataSource(BaseModel, ABC):
         time = pd.DatetimeIndex(pd.to_datetime(data["time"].values))
         if {"year", "month"} <= keys:
             expected = {
-                pd.Period(
-                    year=int(d["year"]),
-                    month=int(d["month"]),
-                    freq="M",
-                )
+                pd.Period(year=int(d["year"]), month=int(d["month"]), freq="M")
                 for d in found
+                if str(d.get("year", "")).isdigit() and str(d.get("month", "")).isdigit()
             }
             # A time coord with 2020-12-15 and 2021-01-15 becomes monthly
             # periods "2020-12" and "2021-01", matching `expected`.
@@ -127,13 +124,17 @@ class DataSource(BaseModel, ABC):
                 _handle_missing(f"missing months: {[str(m) for m in missing_months]}")
 
         elif "year" in keys:
-            expected = {int(d["year"]) for d in found}
+            expected = {int(d["year"]) for d in found if str(d.get("year", "")).isdigit()}
             got = {int(year) for year in time.year}
             if missing_years := sorted(expected - got):
                 _handle_missing(f"missing years: {missing_years}")
 
         elif "month" in keys:
-            expected = {f"{int(d['month']):02d}" for d in found}
+            expected = {
+                f"{int(d['month']):02d}"
+                for d in found
+                if str(d.get("month", "")).isdigit()
+            }
             got = {f"{month:02d}" for month in time.month}
             if missing_months := sorted(expected - got):
                 _handle_missing(f"missing months: {missing_months}")
