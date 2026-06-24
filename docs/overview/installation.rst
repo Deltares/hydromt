@@ -23,7 +23,7 @@ such that different installations do not conflict.
 If you do not yet have such a package manager, we recommend using either:
 
 - `uv <https://docs.astral.sh/uv/>`_: uses `pypi.org <https://pypi.org>`_ for downloading dependencies.
-- `pixi <https://pixi.sh>`_: uses `conda forge <https://conda-forge.org/>`_ for downloading dependencies.
+- `pixi <https://pixi.sh>`_: uses `conda-forge <https://conda-forge.org/>`_ for downloading dependencies.
 
 
 .. _installation_hydromt:
@@ -54,7 +54,7 @@ Therefore we use uv or pixi, which installs Python directly in the project folde
       $ uv sync
 
     .. note::
-      If you want to develop a model plugin, we recommend to :code:`uv init` with the ``--library`` option, which will create a library project instead of an application project.
+      If you want to develop a model plugin, we recommend running :code:`uv init` with the ``--library`` option, which will create a library project instead of an application project.
 
   .. tab-item:: pixi
     :sync: pixi
@@ -65,7 +65,7 @@ Therefore we use uv or pixi, which installs Python directly in the project folde
       $ cd my_hydromt
       $ pixi add hydromt
 
-To test whether the installation was successful, run :code:`uvx hydromt --plugins` on uv, or :code:`pixi run hydromt --plugins` on pixi.
+To test whether the installation was successful, run :code:`uv run hydromt --plugins` on uv, or :code:`pixi run hydromt --plugins` on pixi.
 The output should look similar to the example below:
 
 .. tab-set::
@@ -76,7 +76,7 @@ The output should look similar to the example below:
 
     .. code-block:: console
 
-      $ uvx hydromt --plugins
+      $ uv run hydromt --plugins
         Model plugins:
           - model (hydromt x.y.z)
           - example_model (hydromt x.y.z)
@@ -145,10 +145,10 @@ To install these optional dependencies, you can use the following uv/pip command
 
     .. code-block:: console
 
-      $ uv pip install "hydromt[io]"
-      $ uv pip install "hydromt[extra]"
-      $ uv pip install "hydromt[examples]"
-      $ uv pip install "hydromt[slim]"
+      $ uv add "hydromt[io]"
+      $ uv add "hydromt[extra]"
+      $ uv add "hydromt[examples]"
+      $ uv add "hydromt[slim]"
 
   .. tab-item:: pixi
     :sync: pixi
@@ -194,7 +194,7 @@ check which version you have using:
 
     $ hydromt --version
 
-    hydroMT version: 1.4.0
+    hydroMT version: x.y.z
 
 **Option 1 - Clone the HydroMT GitHub repository**
 
@@ -204,7 +204,7 @@ you have installed:
 .. code-block:: console
 
   $ git clone https://github.com/Deltares/hydromt.git
-  $ git checkout v1.4.0
+  $ git checkout v<x.y.z>
 
 **Option 2 - Download and unzip the examples manually**
 
@@ -212,9 +212,9 @@ To manually download the examples on Windows, do (!replace with your own hydromt
 
 .. code-block:: console
 
-  $ curl https://github.com/Deltares/hydromt/archive/refs/tags/v1.4.0.zip -O -L
-  $ tar -xf v1.4.0.zip
-  $ ren hydromt-1.4.0 hydromt
+  $ curl https://github.com/Deltares/hydromt/archive/refs/tags/v<x.y.z>.zip -O -L
+  $ tar -xf v<x.y.z>.zip
+  $ ren hydromt-<x.y.z> hydromt
 
 You can also download, unzip and rename manually if you prefer, rather than using the windows command prompt.
 
@@ -232,7 +232,7 @@ Alternatively, you can run the notebooks from `Visual Studio Code <https://code.
     .. code-block:: console
 
       $ cd hydromt/examples
-      $ uvx jupyter notebook
+      $ uv run jupyter notebook
 
   .. tab-item:: pixi
     :sync: pixi
