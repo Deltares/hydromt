@@ -1,6 +1,7 @@
 """parse a region from a dict. See parse_region for information on usage."""
 
 import logging
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -324,6 +325,15 @@ def _parse_region_value(
     kwarg: dict[str, Any] = {}
     if isinstance(value, np.ndarray):
         value = value.tolist()
+
+    if kind is None:
+        warnings.warn(
+            "Passing kind=None to `_parse_region_value` is deprecated and will "
+            "be removed in a future release. Pass an explicit kind "
+            "('basin', 'subbasin', 'interbasin', 'bbox', 'xy', etc.) instead.",
+            FutureWarning,
+            stacklevel=2,
+        )
 
     if kind == "bbox":
         if isinstance(value, list) and len(value) == 4:

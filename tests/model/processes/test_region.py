@@ -259,6 +259,9 @@ def test_region_from_model(tmp_path: Path, world, mocker: MockerFixture):
             {"bbox": [12.0, 45.0, 12.25, 45.25]},
             id="bbox_kind",
         ),
+        # This case only shows that the previous behavior described in #751 is preserved, if you pass kind=None.
+        # it will treat a list of ints as basin ids, but it is not the intended behavior.
+        # To not hit this old behaviour, callers must explicitly pass kind as an argument.
         pytest.param(
             [277400, 2749239],
             None,
@@ -280,7 +283,11 @@ def test_region_from_model(tmp_path: Path, world, mocker: MockerFixture):
     ],
 )
 def test_parse_region_value(value, kind, expected_kwarg):
-    kwarg = _parse_region_value(value, data_catalog=DataCatalog(), kind=kind)
+    if kind is None:
+        with pytest.warns(FutureWarning, match="Passing kind=None"):
+            kwarg = _parse_region_value(value, data_catalog=DataCatalog(), kind=kind)
+    else:
+        kwarg = _parse_region_value(value, data_catalog=DataCatalog(), kind=kind)
     assert kwarg == expected_kwarg
 
 
@@ -304,12 +311,13 @@ def test_parse_region_value_errors(value, kind):
         _parse_region_value(value, data_catalog=DataCatalog(), kind=kind)
 
 
-def test_region_value_kind_none_large_ints_are_basid():
-    # kind=None preserves pre-refactor behaviour: large ints are basid.
-    kwarg = _parse_region_value(
-        [277400, 2749239], data_catalog=DataCatalog(), kind=None
-    )
-    assert kwarg == {"basid": [277400, 2749239]}
+def test_region_value_kind_none_warns():
+    with pytest.warns(FutureWarning, match="Passing kind=None"):
+        _parse_region_value(
+            [277400, 2749239],
+            data_catalog=DataCatalog(),
+            kind=None,
+        )
 
 
 def test_region_mesh(griduda):
