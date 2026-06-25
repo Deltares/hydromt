@@ -181,14 +181,14 @@ def test_region_from_model(tmp_path: Path, world, mocker: MockerFixture):
 def test_region_value_basin_ids():
     data_catalog = DataCatalog()
     array = np.array([1001, 1002, 1003, 1004, 1005])
-    kwarg = _parse_region_value(array, data_catalog=data_catalog)
+    kwarg = _parse_region_value(array, data_catalog=data_catalog, kind="basin")
     assert kwarg.get("basid") == array.tolist()
 
 
 def test_region_value_xy():
     data_catalog = DataCatalog()
     xy = (1.0, -1.0)
-    kwarg = _parse_region_value(xy, data_catalog=data_catalog)
+    kwarg = _parse_region_value(xy, data_catalog=data_catalog, kind="xy")
     assert kwarg.get("xy") == xy
 
 
@@ -209,7 +209,7 @@ def test_parse_region_mesh_path(mocker: MockerFixture):
     xu_open_dataset_mock = mocker.patch(
         "hydromt.model.processes.region.xu.open_dataset", return_value=ugrid_mock
     )
-    mocker.patch("hydromt.model.processes.region.isfile", return_value=True)
+    mocker.patch("hydromt.model.processes.region.Path.is_file", return_value=True)
     mesh = parse_region_mesh({"mesh": "path/to/mesh.nc"})
     xu_open_dataset_mock.assert_called_once_with("path/to/mesh.nc")
     assert mesh is ugrid_mock
