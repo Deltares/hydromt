@@ -856,10 +856,13 @@ window.runMermaid = runMermaid;</script>
   <h1>Source code for hydromt.data_catalog.drivers.preprocessing</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Common routines for preprocessing.&quot;&quot;&quot;</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="round_latlon">
@@ -916,8 +919,23 @@ window.runMermaid = runMermaid;</script>
     <span class="n">x_dim</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">x_dim</span>
     <span class="n">lons</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">x_dim</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">lons</span> <span class="o">&gt;</span> <span class="mi">180</span><span class="p">):</span>
-        <span class="n">ds</span><span class="p">[</span><span class="n">x_dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lons</span> <span class="o">&gt;</span> <span class="mi">180</span><span class="p">,</span> <span class="n">lons</span> <span class="o">-</span> <span class="mi">360</span><span class="p">,</span> <span class="n">lons</span><span class="p">))</span>
-        <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">sortby</span><span class="p">(</span><span class="n">x_dim</span><span class="p">)</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span>
+        <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">crs</span><span class="o">.</span><span class="n">is_geographic</span><span class="p">:</span>
+            <span class="c1"># Geographic CRS in the 0-360 convention: wrap to -180-180.</span>
+            <span class="n">ds</span><span class="p">[</span><span class="n">x_dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lons</span> <span class="o">&gt;</span> <span class="mi">180</span><span class="p">,</span> <span class="n">lons</span> <span class="o">-</span> <span class="mi">360</span><span class="p">,</span> <span class="n">lons</span><span class="p">))</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">sortby</span><span class="p">(</span><span class="n">x_dim</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Unknown CRS: do not assume geographic. Projected coordinates</span>
+            <span class="c1"># (e.g. metres, all &gt; 180) would otherwise be silently shifted by</span>
+            <span class="c1"># -360, corrupting the grid. Skip normalisation and warn; the</span>
+            <span class="c1"># caller should set ``crs`` in the data catalog entry to opt in</span>
+            <span class="c1"># for genuinely geographic data. See #1476.</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;harmonise_dims: skipping 0-360 to -180-180 longitude &quot;</span>
+                <span class="s2">&quot;normalisation because the dataset has no CRS. Set &#39;crs&#39; in &quot;</span>
+                <span class="s2">&quot;the data catalog entry if these are geographic coordinates.&quot;</span>
+            <span class="p">)</span>
+        <span class="c1"># Projected CRS: x is not longitude (e.g. metres), so leave it as is.</span>
     <span class="c1"># Latitude</span>
     <span class="n">y_dim</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">y_dim</span>
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="n">y_dim</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
