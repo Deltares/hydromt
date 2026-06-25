@@ -178,25 +178,138 @@ def test_region_from_model(tmp_path: Path, world, mocker: MockerFixture):
     assert read_model.region is world
 
 
-def test_region_value_basin_ids():
-    data_catalog = DataCatalog()
-    array = np.array([1001, 1002, 1003, 1004, 1005])
-    kwarg = _parse_region_value(array, data_catalog=data_catalog, kind="basin")
-    assert kwarg.get("basid") == array.tolist()
+@pytest.mark.parametrize(
+    ("value", "kind", "expected_kwarg"),
+    [
+        pytest.param(
+            np.array([1001, 1002, 1003, 1004, 1005]),
+            "basin",
+            {"basid": [1001, 1002, 1003, 1004, 1005]},
+            id="basin_ids",
+        ),
+        pytest.param(
+            (1.0, -1.0),
+            "xy",
+            {"xy": (1.0, -1.0)},
+            id="xy_tuple",
+        ),
+        pytest.param(
+            "./",
+            None,
+            {"root": "./"},
+            id="root_path",
+        ),
+        pytest.param(
+            42,
+            "basin",
+            {"basid": 42},
+            id="basin_single_id",
+        ),
+        pytest.param(
+            [277400, 2749239],
+            "basin",
+            {"basid": [277400, 2749239]},
+            id="basin_large_int_list",
+        ),
+        pytest.param(
+            [1.0, 2.0, 3.0, 4.0],
+            "basin",
+            {"bbox": [1.0, 2.0, 3.0, 4.0]},
+            id="basin_bbox",
+        ),
+        pytest.param(
+            [1.0, 2.0],
+            "basin",
+            {"xy": [1.0, 2.0]},
+            id="basin_xy_list",
+        ),
+        pytest.param(
+            (1.0, 2.0),
+            "basin",
+            {"xy": (1.0, 2.0)},
+            id="basin_xy_tuple",
+        ),
+        pytest.param(
+            [277400, 2749239],
+            "subbasin",
+            {"xy": [277400, 2749239]},
+            id="subbasin_large_ints_as_xy",
+        ),
+        pytest.param(
+            [277400.0, 2749239.0],
+            "subbasin",
+            {"xy": [277400.0, 2749239.0]},
+            id="subbasin_float_xy",
+        ),
+        pytest.param(
+            [1.0, 2.0, 3.0, 4.0],
+            "subbasin",
+            {"bbox": [1.0, 2.0, 3.0, 4.0]},
+            id="subbasin_bbox",
+        ),
+        pytest.param(
+            [277400, 2749239],
+            "interbasin",
+            {"xy": [277400, 2749239]},
+            id="interbasin_large_ints_as_xy",
+        ),
+        pytest.param(
+            [12.0, 45.0, 12.25, 45.25],
+            "bbox",
+            {"bbox": [12.0, 45.0, 12.25, 45.25]},
+            id="bbox_kind",
+        ),
+        pytest.param(
+            [277400, 2749239],
+            None,
+            {"basid": [277400, 2749239]},
+            id="kind_none_large_ints_as_basid",
+        ),
+        pytest.param(
+            [1.0, 2.0, 3.0, 4.0],
+            None,
+            {"bbox": [1.0, 2.0, 3.0, 4.0]},
+            id="kind_none_bbox",
+        ),
+        pytest.param(
+            np.array([1.0, 2.0, 3.0, 4.0]),
+            "bbox",
+            {"bbox": [1.0, 2.0, 3.0, 4.0]},
+            id="bbox_numpy_array",
+        ),
+    ],
+)
+def test_parse_region_value(value, kind, expected_kwarg):
+    kwarg = _parse_region_value(value, data_catalog=DataCatalog(), kind=kind)
+    assert kwarg == expected_kwarg
 
 
-def test_region_value_xy():
-    data_catalog = DataCatalog()
-    xy = (1.0, -1.0)
-    kwarg = _parse_region_value(xy, data_catalog=data_catalog, kind="xy")
-    assert kwarg.get("xy") == xy
+@pytest.mark.parametrize(
+    ("value", "kind"),
+    [
+        pytest.param(
+            42,
+            "subbasin",
+            id="subbasin_single_int_raises",
+        ),
+        pytest.param(
+            [1.0, 2.0],
+            "bbox",
+            id="bbox_wrong_length_raises",
+        ),
+    ],
+)
+def test_parse_region_value_errors(value, kind):
+    with pytest.raises(ValueError, match="not understood"):
+        _parse_region_value(value, data_catalog=DataCatalog(), kind=kind)
 
 
-def test_region_value_cat():
-    data_catalog = DataCatalog()
-    root = "./"
-    kwarg = _parse_region_value(root, data_catalog=data_catalog)
-    assert kwarg.get("root") == root
+def test_region_value_kind_none_large_ints_are_basid():
+    # kind=None preserves pre-refactor behaviour: large ints are basid.
+    kwarg = _parse_region_value(
+        [277400, 2749239], data_catalog=DataCatalog(), kind=None
+    )
+    assert kwarg == {"basid": [277400, 2749239]}
 
 
 def test_region_mesh(griduda):
