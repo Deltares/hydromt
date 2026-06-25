@@ -53,7 +53,7 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       RELEASE_BRANCH: ${{ inputs.release_branch }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ inputs.release_branch }}
@@ -240,7 +240,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ needs.release.outputs.tag }}

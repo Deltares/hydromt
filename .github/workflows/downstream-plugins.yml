@@ -47,7 +47,7 @@ jobs:
 
     steps:
       - name: Checkout hydromt
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install pixi
         uses: prefix-dev/setup-pixi@v0.9.6
@@ -67,7 +67,7 @@ jobs:
         run: echo "HYDROMT_DIST=$GITHUB_WORKSPACE/dist" >> $GITHUB_ENV
 
       - name: Checkout plugin
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: ${{ matrix.plugin.repo }}
           path: plugin
