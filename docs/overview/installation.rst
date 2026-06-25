@@ -16,14 +16,16 @@ Prerequisite: python installation
 =================================
 
 You'll need **Python 3.11 or greater** and a package manager such as uv, pixi, or others in order to use HydroMT.
-These package managers help you to install (Python) packages and
-`manage environments <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_
-such that different installations do not conflict.
+These package managers help you to install (Python) packages and manage environments such that different installations do not conflict.
 
 If you do not yet have such a package manager, we recommend using either:
 
 - `uv <https://docs.astral.sh/uv/>`_: uses `pypi.org <https://pypi.org>`_ for downloading dependencies.
 - `pixi <https://pixi.sh>`_: uses `conda-forge <https://conda-forge.org/>`_ for downloading dependencies.
+
+It is also possible to use other package managers, such as pip or conda.
+The benefits of uv and pixi over pip and conda are that they install Python directly in the project folder,
+which avoids conflicts with other packages and allows you to have multiple versions of Python installed on your system.
 
 
 .. _installation_hydromt:
@@ -54,7 +56,8 @@ Therefore we use uv or pixi, which installs Python directly in the project folde
       $ uv sync
 
     .. note::
-      If you want to develop a model plugin, we recommend running :code:`uv init` with the ``--library`` option, which will create a library project instead of an application project.
+      If you want to develop a model plugin, we recommend running :code:`uv init` with the ``--library`` option,
+      which will create a library project instead of an application project.
 
   .. tab-item:: pixi
     :sync: pixi
@@ -64,6 +67,11 @@ Therefore we use uv or pixi, which installs Python directly in the project folde
       $ pixi init my_hydromt
       $ cd my_hydromt
       $ pixi add hydromt
+
+    .. note::
+      pixi resolves packages by default via conda-forge.
+      It is also possible to use pypi by calling :code:`pixi add --pypi hydromt`.
+      We recommend to not mix conda-forge and pypi packages in the same environment, but it is possible.
 
 To test whether the installation was successful, run :code:`uv run hydromt --plugins` on uv, or :code:`pixi run hydromt --plugins` on pixi.
 The output should look similar to the example below:
