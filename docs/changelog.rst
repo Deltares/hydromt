@@ -48,6 +48,7 @@ Fixed
 - The functions ``_strip_scheme`` and ``_strip_vsi`` in ``hydromt._utils.uris`` no longer use ``lstrip`` to remove leading characters, but now remove only the exact prefix. (#1438)
 - ``Datacatalog.export_data`` no longer applies unit conversion twice. (#1459)
 - ``RasterioDriver.write`` now always produces filenames that are parseable by ``readers.open_mfraster`` when provided with a pattern with no prefix e.g. ``*.tif``. (#1459)
+- ``preprocessing.harmonise_dims`` no longer applies 0-360 to -180-180 longitude normalisation to projected datasets (x in metres, all > 180), which silently shifted the grid by -360. Normalisation is now only applied for geographic CRS; datasets without a CRS are left unchanged with a warning. (#1476)
 - ``RasterDatasetAdapter`` now respects ``handle_nodata`` when requested ``variables`` are missing from the source: ``NoDataStrategy.WARN`` and ``NoDataStrategy.IGNORE`` return ``None`` (and warn) instead of always raising ``NoDataException``. (#1407)
 - A ``DataFrame`` source without an explicit driver now defaults to the ``pandas`` driver instead of incorrectly inferring ``geodataframe_table`` (which also claims ``.csv``/``.parquet``) and failing validation. (#1403)
 
