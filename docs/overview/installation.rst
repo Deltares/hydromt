@@ -40,7 +40,7 @@ Basic installation
 ------------------
 
 We strongly recommend installing HydroMT in a separate environment to avoid conflicts with other packages.
-Therefore we use uv or pixi, which installs Python directly in the project folder.
+Therefore we use uv or pixi to create a new project folder with Python directly installed. 
 
 .. tab-set::
   :sync-group: package-manager
