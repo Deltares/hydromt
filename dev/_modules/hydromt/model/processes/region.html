@@ -857,9 +857,9 @@ window.runMermaid = runMermaid;</script>
 <span></span><span class="sd">&quot;&quot;&quot;parse a region from a dict. See parse_region for information on usage.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">isdir</span><span class="p">,</span> <span class="n">isfile</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -874,7 +874,6 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.gis</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_crs</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.processes.basin_mask</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_basin_geometry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.plugins</span><span class="w"> </span><span class="kn">import</span> <span class="n">PLUGINS</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.typing.type_def</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrPath</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span>
@@ -898,8 +897,8 @@ window.runMermaid = runMermaid;</script>
     <span class="n">region</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">data_catalog</span><span class="p">:</span> <span class="n">DataCatalog</span><span class="p">,</span>
-    <span class="n">hydrography_path</span><span class="p">:</span> <span class="n">StrPath</span><span class="p">,</span>
-    <span class="n">basin_index_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrPath</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">hydrography_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">basin_index_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse a basin /subbasin / interbasin region and return the GeoDataFrame.</span>
 
@@ -953,9 +952,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        * {&#39;interbasin&#39;: /path/to/polygon_geometry, &#39;outlets&#39;: true}</span>
 <span class="sd">    data_catalog : DataCatalog</span>
 <span class="sd">        DataCatalog object containing the data sources.</span>
-<span class="sd">    hydrography_fn : strPath</span>
+<span class="sd">    hydrography_fn : str | Path</span>
 <span class="sd">        Path of the hydrography raster dataset in the data catalog.</span>
-<span class="sd">    basin_index_path : StrPath, optional</span>
+<span class="sd">    basin_index_path : str | Path, optional</span>
 <span class="sd">        Path of the basin index raster dataset in the data catalog.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">var_thresh_kwargs</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -964,7 +963,7 @@ window.runMermaid = runMermaid;</script>
 
     <span class="n">_assert_parse_key</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="s2">&quot;basin&quot;</span><span class="p">,</span> <span class="s2">&quot;interbasin&quot;</span><span class="p">,</span> <span class="s2">&quot;subbasin&quot;</span><span class="p">)</span>
 
-    <span class="n">kwargs</span> <span class="o">=</span> <span class="n">_parse_region_value</span><span class="p">(</span><span class="n">value0</span><span class="p">,</span> <span class="n">data_catalog</span><span class="o">=</span><span class="n">data_catalog</span><span class="p">)</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="n">_parse_region_value</span><span class="p">(</span><span class="n">value0</span><span class="p">,</span> <span class="n">data_catalog</span><span class="o">=</span><span class="n">data_catalog</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)</span>
     <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">var_thresh_kwargs</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;basin&quot;</span><span class="p">:</span>
@@ -1007,7 +1006,7 @@ window.runMermaid = runMermaid;</script>
 
     <span class="n">_assert_parse_key</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="s2">&quot;bbox&quot;</span><span class="p">)</span>
 
-    <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_parse_region_value</span><span class="p">(</span><span class="n">value0</span><span class="p">,</span> <span class="n">data_catalog</span><span class="o">=</span><span class="kc">None</span><span class="p">))</span>
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_parse_region_value</span><span class="p">(</span><span class="n">value0</span><span class="p">,</span> <span class="n">data_catalog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">))</span>
 
     <span class="n">_assert_parsed_values</span><span class="p">(</span>
         <span class="n">key</span><span class="o">=</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)),</span> <span class="n">region_value</span><span class="o">=</span><span class="n">value0</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;bbox&quot;</span><span class="p">,</span> <span class="n">expected</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;bbox&quot;</span><span class="p">]</span>
@@ -1025,8 +1024,8 @@ window.runMermaid = runMermaid;</script>
 <span class="k">def</span><span class="w"> </span><span class="nf">parse_region_geom</span><span class="p">(</span>
     <span class="n">region</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">data_catalog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DataCatalog</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">crs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">data_catalog</span><span class="p">:</span> <span class="n">DataCatalog</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse a region and return the GeoDataFrame.</span>
 
@@ -1047,7 +1046,7 @@ window.runMermaid = runMermaid;</script>
 
     <span class="n">_assert_parse_key</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="s2">&quot;geom&quot;</span><span class="p">)</span>
 
-    <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_parse_region_value</span><span class="p">(</span><span class="n">value0</span><span class="p">,</span> <span class="n">data_catalog</span><span class="o">=</span><span class="n">data_catalog</span><span class="p">))</span>
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_parse_region_value</span><span class="p">(</span><span class="n">value0</span><span class="p">,</span> <span class="n">data_catalog</span><span class="o">=</span><span class="n">data_catalog</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">))</span>
 
     <span class="n">_assert_parsed_values</span><span class="p">(</span>
         <span class="n">key</span><span class="o">=</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)),</span> <span class="n">region_value</span><span class="o">=</span><span class="n">value0</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;geom&quot;</span><span class="p">,</span> <span class="n">expected</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;geom&quot;</span><span class="p">]</span>
@@ -1057,8 +1056,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">geom</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;geom&quot;</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">geom</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Model region &quot;geom&quot; has no CRS, setting to </span><span class="si">{</span><span class="n">crs</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">_update_crs</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">crs</span><span class="p">)</span>
-
+        <span class="n">geom</span> <span class="o">=</span> <span class="n">_update_crs</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">crs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">geom</span></div>
 
 
@@ -1159,7 +1157,7 @@ window.runMermaid = runMermaid;</script>
 
     <span class="n">_assert_parse_key</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="s2">&quot;mesh&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value0</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">))</span> <span class="ow">and</span> <span class="n">isfile</span><span class="p">(</span><span class="n">value0</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value0</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">))</span> <span class="ow">and</span> <span class="n">Path</span><span class="p">(</span><span class="n">value0</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
         <span class="k">return</span> <span class="n">xu</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">value0</span><span class="p">)</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value0</span><span class="p">,</span> <span class="p">(</span><span class="n">xu</span><span class="o">.</span><span class="n">UgridDataset</span><span class="p">,</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataArray</span><span class="p">)):</span>
         <span class="k">return</span> <span class="n">value0</span>
@@ -1173,8 +1171,8 @@ window.runMermaid = runMermaid;</script>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_update_crs</span><span class="p">(</span>
-    <span class="n">geom</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">CRS</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]:</span>
+    <span class="n">geom</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">crs</span><span class="p">:</span> <span class="n">CRS</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">crs</span> <span class="o">=</span> <span class="n">parse_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="n">geom</span><span class="o">.</span><span class="n">total_bounds</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">geom</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
@@ -1182,33 +1180,72 @@ window.runMermaid = runMermaid;</script>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_parse_region_value</span><span class="p">(</span>
-    <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">data_catalog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DataCatalog</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-    <span class="n">kwarg</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>  <span class="c1"># array to list</span>
+    <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">data_catalog</span><span class="p">:</span> <span class="n">DataCatalog</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse a region value and return a dictionary with the corresponding keyword arguments.</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="n">p0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">180</span> <span class="k">for</span> <span class="n">p0</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]):</span>  <span class="c1"># all int</span>
-            <span class="n">kwarg</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">basid</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>  <span class="c1"># 4 floats</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    value : Any</span>
+<span class="sd">        The value to parse. Can be a string, a list, a tuple, a numpy</span>
+<span class="sd">        array, a GeoDataFrame, or a Path.</span>
+<span class="sd">    data_catalog : DataCatalog | None</span>
+<span class="sd">        DataCatalog object containing the data sources.</span>
+<span class="sd">    kind : str | None, optional</span>
+<span class="sd">        The kind of region value. Can be &#39;bbox&#39;, &#39;xy&#39;, &#39;basin&#39;, &#39;subbasin&#39;,</span>
+<span class="sd">        &#39;interbasin&#39;, or None. If None, the kind will be inferred from the</span>
+<span class="sd">        value. Default is None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">kwarg</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">kind</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;Passing kind=None to `_parse_region_value` is deprecated and will &quot;</span>
+            <span class="s2">&quot;be removed in a future release. Pass an explicit kind &quot;</span>
+            <span class="s2">&quot;(&#39;basin&#39;, &#39;subbasin&#39;, &#39;interbasin&#39;, &#39;bbox&#39;, &#39;xy&#39;, etc.) instead.&quot;</span><span class="p">,</span>
+            <span class="ne">FutureWarning</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;bbox&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
             <span class="n">kwarg</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">bbox</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># 2 floats</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;xy&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">kwarg</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">xy</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># tuple of x and y coords</span>
-        <span class="n">kwarg</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">xy</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>  <span class="c1"># single int</span>
-        <span class="n">kwarg</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">basid</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">))</span> <span class="ow">and</span> <span class="n">isdir</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
-        <span class="n">kwarg</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
-        <span class="n">data_catalog</span> <span class="o">=</span> <span class="n">data_catalog</span> <span class="ow">or</span> <span class="n">DataCatalog</span><span class="p">()</span>
-        <span class="n">geom</span> <span class="o">=</span> <span class="n">data_catalog</span><span class="o">.</span><span class="n">get_geodataframe</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="n">kwarg</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">geom</span><span class="o">=</span><span class="n">geom</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">):</span>  <span class="c1"># geometry</span>
-        <span class="n">kwarg</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">geom</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Region value </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> not understood.&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;basin&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># kind=None preserves backward-compatible behaviour (same as basin)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">kwarg</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">basid</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span>
+            <span class="p">[</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="n">p0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">180</span> <span class="k">for</span> <span class="n">p0</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+        <span class="p">):</span>
+            <span class="n">kwarg</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">basid</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">kwarg</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">bbox</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">kwarg</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">xy</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;subbasin&quot;</span><span class="p">,</span> <span class="s2">&quot;interbasin&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">kwarg</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">bbox</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">kwarg</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">xy</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">kwarg</span><span class="p">:</span>
+        <span class="c1"># shared across all kinds: path/geom/model root</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                <span class="n">kwarg</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">data_catalog</span> <span class="o">=</span> <span class="n">data_catalog</span> <span class="ow">or</span> <span class="n">DataCatalog</span><span class="p">()</span>
+                <span class="n">geom</span> <span class="o">=</span> <span class="n">data_catalog</span><span class="o">.</span><span class="n">get_geodataframe</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="n">kwarg</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">geom</span><span class="o">=</span><span class="n">geom</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">):</span>
+            <span class="n">kwarg</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">geom</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Region value </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> not understood for kind=</span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="s2">&quot;geom&quot;</span> <span class="ow">in</span> <span class="n">kwarg</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">kwarg</span><span class="p">[</span><span class="s2">&quot;geom&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;Point&quot;</span><span class="p">):</span>
         <span class="n">xy</span> <span class="o">=</span> <span class="p">(</span>
@@ -1216,6 +1253,7 @@ window.runMermaid = runMermaid;</script>
             <span class="n">kwarg</span><span class="p">[</span><span class="s2">&quot;geom&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">kwarg</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">xy</span><span class="o">=</span><span class="n">xy</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">kwarg</span>
 
 
@@ -1238,7 +1276,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_assert_parsed_values</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">region_value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">expected</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="o">*</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">region_value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">expected</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">expected</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
