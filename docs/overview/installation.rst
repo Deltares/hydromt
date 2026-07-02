@@ -4,27 +4,28 @@
 Installation guide
 ==================
 
-HydroMT is available on PyPI and conda-forge. The most common usage of HydroMT is
-through a model plugin, e.g. via hydromt_wflow, hydromt_sfincs etc. These plugins
-install HydroMT as a dependency. However, if you want to use HydroMT directly, e.g. to
-develop your own model plugin or to use the HydroMT Python API without a plugin, you can
-install HydroMT using the following steps.
+HydroMT is available on PyPI and conda-forge.
+The most common usage of HydroMT is through a model plugin, e.g. via hydromt_wflow, hydromt_sfincs etc.
+These plugins install HydroMT as a dependency.
+However, if you want to use HydroMT directly, e.g. to develop your own model plugin or to use the HydroMT Python API without a plugin,
+you can install HydroMT using the following steps.
 
 .. _installation_prerequisites:
 
 Prerequisite: python installation
 =================================
 
-You'll need **Python 3.11 or greater** and a package manager such as conda, mamba or
-others in order to use HydroMT. These package managers help you to install (Python)
-packages and
-`manage environments <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_
-such that different installations do not conflict.
+You'll need **Python 3.11 or greater** and a package manager such as uv, pixi, or others in order to use HydroMT.
+These package managers help you to install (Python) packages and manage environments such that different installations do not conflict.
 
 If you do not yet have such a package manager, we recommend using either:
 
-- `Miniforge <https://github.com/conda-forge/miniforge#mambaforge>`_: uses the `mamba package manager <https://github.com/mamba-org/mamba>`_
-- `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_: uses the `conda package manager <https://docs.conda.io/en/latest/>`_
+- `uv <https://docs.astral.sh/uv/>`_: uses `pypi.org <https://pypi.org>`_ for downloading dependencies.
+- `pixi <https://pixi.sh>`_: uses `conda-forge <https://conda-forge.org/>`_ for downloading dependencies.
+
+It is also possible to use other package managers, such as pip or conda.
+The benefits of uv and pixi over pip and conda are that they install Python directly in the project folder,
+which avoids conflicts with other packages and allows you to have multiple versions of Python installed on your system.
 
 
 .. _installation_hydromt:
@@ -32,68 +33,110 @@ If you do not yet have such a package manager, we recommend using either:
 Installing HydroMT
 ==================
 
-HydroMT is available from PyPI and conda-forge, and can be installed using pip, conda or
-mamba. For an even faster installation, we recommend using `uv <https://docs.astral.sh/uv/>`_
-package manager. It is an equivalent to pip but 10-100x faster for installing packages.
-
-Here we will describe the installation using **uv** and the **conda** package
-manager (for mamba just replace `conda` with `mamba` in the commands below).
+HydroMT is available from PyPI and conda-forge, and can be installed using uv, pixi, or others.
+Here we will describe the installation using **uv** and the **pixi** package manager.
 
 Basic installation
 ------------------
 
-We strongly recommend installing HydroMT in a separate environment to avoid conflicts
-with other packages. You can create a new environment and install HydroMT in it
-using the following command:
+We strongly recommend installing HydroMT in a separate environment to avoid conflicts with other packages.
+Therefore we use uv or pixi to create a new project folder with Python directly installed.
 
-.. code-block:: console
+.. tab-set::
+  :sync-group: package-manager
 
-    $ conda create -n hydromt uv python -c conda-forge
-    $ conda activate hydromt
-    $ uv pip install hydromt
+  .. tab-item:: uv
+    :sync: uv
 
-This will create a new isolated environment called **hydromt** and install hydromt into
-it using uv and pip. To test whether the installation was successful you can run
-:code:`hydromt --plugins` and the output should look approximately like the one below:
+    .. code-block:: console
 
-.. code-block:: shell
+      $ uv init my_hydromt
+      $ cd my_hydromt
+      $ uv add hydromt
+      $ uv sync
 
-    $ hydromt --plugins
+    .. note::
+      If you want to develop a model plugin, we recommend running :code:`uv init` with the ``--library`` option,
+      which will create a library project instead of an application project.
+
+  .. tab-item:: pixi
+    :sync: pixi
+
+    .. code-block:: console
+
+      $ pixi init my_hydromt
+      $ cd my_hydromt
+      $ pixi add hydromt
+
+    .. note::
+      pixi resolves packages by default via conda-forge.
+      It is also possible to use pypi by calling :code:`pixi add --pypi hydromt`.
+      We recommend to not mix conda-forge and pypi packages in the same environment, but it is possible.
+
+To test whether the installation was successful, run :code:`uv run hydromt --plugins` on uv, or :code:`pixi run hydromt --plugins` on pixi.
+The output should look similar to the example below:
+
+.. tab-set::
+  :sync-group: package-manager
+
+  .. tab-item:: uv
+    :sync: uv
+
+    .. code-block:: console
+
+      $ uv run hydromt --plugins
         Model plugins:
-                - model (hydromt 1.0.0)
+          - model (hydromt x.y.z)
+          - example_model (hydromt x.y.z)
         Component plugins:
-                - ConfigComponent (hydromt 1.0.0)
-                - GeomsComponent (hydromt 1.0.0)
-                - GridComponent (hydromt 1.0.0)
-                - TablesComponent (hydromt 1.0.0)
-                - VectorComponent (hydromt 1.0.0)
-                - MeshComponent (hydromt 1.0.0)
-                - DatasetsComponent (hydromt 1.0.0)
+          - ConfigComponent (hydromt x.y.z)
+          - DatasetsComponent (hydromt x.y.z)
+          - GeomsComponent (hydromt x.y.z)
         Driver plugins:
-                - geodataframe_table (hydromt 1.0.0)
-                - geodataset_vector (hydromt 1.0.0)
-                - geodataset_xarray (hydromt 1.0.0)
-                - pandas (hydromt 1.0.0)
-                - pyogrio (hydromt 1.0.0)
-                - raster_xarray (hydromt 1.0.0)
-                - rasterio (hydromt 1.0.0)
+          - dataset_xarray (hydromt x.y.z)
+          - geodataframe_table (hydromt x.y.z)
         Catalog plugins:
-                - deltares_data (hydromt 1.0.0)
-                - artifact_data (hydromt 1.0.0)
-                - aws_data (hydromt 1.0.0)
-                - gcs_cmip6_data (hydromt 1.0.0)
+          - deltares_data (hydromt x.y.z)
+          - artifact_data (hydromt x.y.z)
+        Uri_resolver plugins:
+          - azure_blob (hydromt x.y.z)
+          - convention (hydromt x.y.z)
+          - raster_tindex (hydromt x.y.z)
+
+  .. tab-item:: pixi
+    :sync: pixi
+
+    .. code-block:: console
+
+      $ pixi run hydromt --plugins
+        Model plugins:
+          - model (hydromt x.y.z)
+          - example_model (hydromt x.y.z)
+        Component plugins:
+          - ConfigComponent (hydromt x.y.z)
+          - DatasetsComponent (hydromt x.y.z)
+          - GeomsComponent (hydromt x.y.z)
+        Driver plugins:
+          - dataset_xarray (hydromt x.y.z)
+          - geodataframe_table (hydromt x.y.z)
+        Catalog plugins:
+          - deltares_data (hydromt x.y.z)
+          - artifact_data (hydromt x.y.z)
+        Uri_resolver plugins:
+          - azure_blob (hydromt x.y.z)
+          - convention (hydromt x.y.z)
+          - raster_tindex (hydromt x.y.z)
 
 
 
 Installing optional dependencies
 --------------------------------
 
-HydroMT comes with a minimal set of dependencies. However, depending on your use case,
-you might want to install additional optional dependencies. For example, if you want to
-work with cloud data from AWS or Google Cloud Storage.
+HydroMT comes with a minimal set of dependencies.
+However, depending on your use case, you might want to install additional optional dependencies.
+For example, if you want to work with cloud data from AWS or Google Cloud Storage.
 
-Some of the optional dependencies can be installed using uv/pip and predefined lists of
-dependencies:
+Some of the optional dependencies can be installed using uv/pip and predefined lists of dependencies:
 
 - **io**: for additional input data support (e.g. cloud data, parquet or excel files...).
 - **extra**: for additional functionalities. So far includes matplotlib and pyet.
@@ -102,23 +145,23 @@ dependencies:
 
 To install these optional dependencies, you can use the following uv/pip commands:
 
-.. code-block:: console
+.. tab-set::
+  :sync-group: package-manager
 
-    $ uv pip install "hydromt[io]"
-    $ uv pip install "hydromt[extra]"
-    $ uv pip install "hydromt[examples]"
-    $ uv pip install "hydromt[slim]"
+  .. tab-item:: uv
+    :sync: uv
 
-.. note::
+    .. code-block:: console
 
-  If you are using caching of mosaic rasters and vrt files, the gdal library needs to be
-  installed in your conda environment. Unfortunately this cannot be done using pip.
-  Therefore, if you want to use this functionality, please install gdal using conda or
-  mamba:
+      $ uv add "hydromt[io]"
+      $ uv add "hydromt[extra]"
+      $ uv add "hydromt[examples]"
+      $ uv add "hydromt[slim]"
 
-  .. code-block:: console
+  .. tab-item:: pixi
+    :sync: pixi
 
-    $ conda install -c conda-forge gdal
+    Not required, as pixi install via conda-forge, which contains all optional dependencies by default.
 
 
 Developer's installation
@@ -159,7 +202,7 @@ check which version you have using:
 
     $ hydromt --version
 
-    hydroMT version: 1.0.0
+    hydroMT version: x.y.z
 
 **Option 1 - Clone the HydroMT GitHub repository**
 
@@ -169,7 +212,7 @@ you have installed:
 .. code-block:: console
 
   $ git clone https://github.com/Deltares/hydromt.git
-  $ git checkout v1.0.0
+  $ git checkout v<x.y.z>
 
 **Option 2 - Download and unzip the examples manually**
 
@@ -177,9 +220,9 @@ To manually download the examples on Windows, do (!replace with your own hydromt
 
 .. code-block:: console
 
-  $ curl https://github.com/Deltares/hydromt/archive/refs/tags/v1.0.0.zip -O -L
-  $ tar -xf v1.0.0.zip
-  $ ren hydromt-1.0.0 hydromt
+  $ curl https://github.com/Deltares/hydromt/archive/refs/tags/v<x.y.z>.zip -O -L
+  $ tar -xf v<x.y.z>.zip
+  $ ren hydromt-<x.y.z> hydromt
 
 You can also download, unzip and rename manually if you prefer, rather than using the windows command prompt.
 
@@ -188,8 +231,21 @@ You can also download, unzip and rename manually if you prefer, rather than usin
 Finally, start a jupyter notebook inside the ``examples`` folder after activating the ``hydromt`` environment, see below.
 Alternatively, you can run the notebooks from `Visual Studio Code <https://code.visualstudio.com/download>`_ if you have that installed.
 
-.. code-block:: console
+.. tab-set::
+  :sync-group: package-manager
 
-  $ conda activate hydromt
-  $ cd hydromt/examples
-  $ jupyter notebook
+  .. tab-item:: uv
+    :sync: uv
+
+    .. code-block:: console
+
+      $ cd hydromt/examples
+      $ uv run jupyter notebook
+
+  .. tab-item:: pixi
+    :sync: pixi
+
+    .. code-block:: console
+
+      $ cd hydromt/examples
+      $ pixi run jupyter notebook
