@@ -463,78 +463,123 @@
                   
   <section id="installation-guide">
 <span id="id1"></span><h1>Installation guide<a class="headerlink" href="#installation-guide" title="Link to this heading">#</a></h1>
-<p>HydroMT is available on PyPI and conda-forge. The most common usage of HydroMT is
-through a model plugin, e.g. via hydromt_wflow, hydromt_sfincs etc. These plugins
-install HydroMT as a dependency. However, if you want to use HydroMT directly, e.g. to
-develop your own model plugin or to use the HydroMT Python API without a plugin, you can
-install HydroMT using the following steps.</p>
+<p>HydroMT is available on PyPI and conda-forge.
+The most common usage of HydroMT is through a model plugin, e.g. via hydromt_wflow, hydromt_sfincs etc.
+These plugins install HydroMT as a dependency.
+However, if you want to use HydroMT directly, e.g. to develop your own model plugin or to use the HydroMT Python API without a plugin,
+you can install HydroMT using the following steps.</p>
 <section id="prerequisite-python-installation">
 <span id="installation-prerequisites"></span><h2>Prerequisite: python installation<a class="headerlink" href="#prerequisite-python-installation" title="Link to this heading">#</a></h2>
-<p>You’ll need <strong>Python 3.11 or greater</strong> and a package manager such as conda, mamba or
-others in order to use HydroMT. These package managers help you to install (Python)
-packages and
-<a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">manage environments</a>
-such that different installations do not conflict.</p>
+<p>You’ll need <strong>Python 3.11 or greater</strong> and a package manager such as uv, pixi, or others in order to use HydroMT.
+These package managers help you to install (Python) packages and manage environments such that different installations do not conflict.</p>
 <p>If you do not yet have such a package manager, we recommend using either:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="https://github.com/conda-forge/miniforge#mambaforge">Miniforge</a>: uses the <a class="reference external" href="https://github.com/mamba-org/mamba">mamba package manager</a></p></li>
-<li><p><a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">Miniconda</a>: uses the <a class="reference external" href="https://docs.conda.io/en/latest/">conda package manager</a></p></li>
+<li><p><a class="reference external" href="https://docs.astral.sh/uv/">uv</a>: uses <a class="reference external" href="https://pypi.org">pypi.org</a> for downloading dependencies.</p></li>
+<li><p><a class="reference external" href="https://pixi.sh">pixi</a>: uses <a class="reference external" href="https://conda-forge.org/">conda-forge</a> for downloading dependencies.</p></li>
 </ul>
+<p>It is also possible to use other package managers, such as pip or conda.
+The benefits of uv and pixi over pip and conda are that they install Python directly in the project folder,
+which avoids conflicts with other packages and allows you to have multiple versions of Python installed on your system.</p>
 </section>
 <section id="installing-hydromt">
 <span id="installation-hydromt"></span><h2>Installing HydroMT<a class="headerlink" href="#installing-hydromt" title="Link to this heading">#</a></h2>
-<p>HydroMT is available from PyPI and conda-forge, and can be installed using pip, conda or
-mamba. For an even faster installation, we recommend using <a class="reference external" href="https://docs.astral.sh/uv/">uv</a>
-package manager. It is an equivalent to pip but 10-100x faster for installing packages.</p>
-<p>Here we will describe the installation using <strong>uv</strong> and the <strong>conda</strong> package
-manager (for mamba just replace <cite>conda</cite> with <cite>mamba</cite> in the commands below).</p>
+<p>HydroMT is available from PyPI and conda-forge, and can be installed using uv, pixi, or others.
+Here we will describe the installation using <strong>uv</strong> and the <strong>pixi</strong> package manager.</p>
 <section id="basic-installation">
 <h3>Basic installation<a class="headerlink" href="#basic-installation" title="Link to this heading">#</a></h3>
-<p>We strongly recommend installing HydroMT in a separate environment to avoid conflicts
-with other packages. You can create a new environment and install HydroMT in it
-using the following command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>hydromt<span class="w"> </span>uv<span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span>conda-forge
-<span class="gp">$ </span>conda<span class="w"> </span>activate<span class="w"> </span>hydromt
-<span class="gp">$ </span>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>hydromt
+<p>We strongly recommend installing HydroMT in a separate environment to avoid conflicts with other packages.
+Therefore we use uv or pixi to create a new project folder with Python directly installed.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" data-sync-group="package-manager" data-sync-id="uv" for="sd-tab-item-0">
+uv</label><div class="sd-tab-content docutils">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>uv<span class="w"> </span>init<span class="w"> </span>my_hydromt
+<span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>my_hydromt
+<span class="gp">$ </span>uv<span class="w"> </span>add<span class="w"> </span>hydromt
+<span class="gp">$ </span>uv<span class="w"> </span>sync
 </pre></div>
 </div>
-<p>This will create a new isolated environment called <strong>hydromt</strong> and install hydromt into
-it using uv and pip. To test whether the installation was successful you can run
-<code class="code docutils literal notranslate"><span class="pre">hydromt</span> <span class="pre">--plugins</span></code> and the output should look approximately like the one below:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>hydromt<span class="w"> </span>--plugins
-<span class="w">    </span>Model<span class="w"> </span>plugins:
-<span class="w">            </span>-<span class="w"> </span>model<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0<span class="o">)</span>
-<span class="w">    </span>Component<span class="w"> </span>plugins:
-<span class="w">            </span>-<span class="w"> </span>ConfigComponent<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0<span class="o">)</span>
-<span class="w">            </span>-<span class="w"> </span>GeomsComponent<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0<span class="o">)</span>
-<span class="w">            </span>-<span class="w"> </span>GridComponent<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0<span class="o">)</span>
-<span class="w">            </span>-<span class="w"> </span>TablesComponent<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0<span class="o">)</span>
-<span class="w">            </span>-<span class="w"> </span>VectorComponent<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0<span class="o">)</span>
-<span class="w">            </span>-<span class="w"> </span>MeshComponent<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0<span class="o">)</span>
-<span class="w">            </span>-<span class="w"> </span>DatasetsComponent<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0<span class="o">)</span>
-<span class="w">    </span>Driver<span class="w"> </span>plugins:
-<span class="w">            </span>-<span class="w"> </span>geodataframe_table<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0<span class="o">)</span>
-<span class="w">            </span>-<span class="w"> </span>geodataset_vector<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0<span class="o">)</span>
-<span class="w">            </span>-<span class="w"> </span>geodataset_xarray<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0<span class="o">)</span>
-<span class="w">            </span>-<span class="w"> </span>pandas<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0<span class="o">)</span>
-<span class="w">            </span>-<span class="w"> </span>pyogrio<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0<span class="o">)</span>
-<span class="w">            </span>-<span class="w"> </span>raster_xarray<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0<span class="o">)</span>
-<span class="w">            </span>-<span class="w"> </span>rasterio<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0<span class="o">)</span>
-<span class="w">    </span>Catalog<span class="w"> </span>plugins:
-<span class="w">            </span>-<span class="w"> </span>deltares_data<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0<span class="o">)</span>
-<span class="w">            </span>-<span class="w"> </span>artifact_data<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0<span class="o">)</span>
-<span class="w">            </span>-<span class="w"> </span>aws_data<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0<span class="o">)</span>
-<span class="w">            </span>-<span class="w"> </span>gcs_cmip6_data<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0<span class="o">)</span>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you want to develop a model plugin, we recommend running <code class="code docutils literal notranslate"><span class="pre">uv</span> <span class="pre">init</span></code> with the <code class="docutils literal notranslate"><span class="pre">--library</span></code> option,
+which will create a library project instead of an application project.</p>
+</div>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" data-sync-group="package-manager" data-sync-id="pixi" for="sd-tab-item-1">
+pixi</label><div class="sd-tab-content docutils">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pixi<span class="w"> </span>init<span class="w"> </span>my_hydromt
+<span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>my_hydromt
+<span class="gp">$ </span>pixi<span class="w"> </span>add<span class="w"> </span>hydromt
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>pixi resolves packages by default via conda-forge.
+It is also possible to use pypi by calling <code class="code docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">add</span> <span class="pre">--pypi</span> <span class="pre">hydromt</span></code>.
+We recommend to not mix conda-forge and pypi packages in the same environment, but it is possible.</p>
+</div>
+</div>
+</div>
+<p>To test whether the installation was successful, run <code class="code docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span> <span class="pre">hydromt</span> <span class="pre">--plugins</span></code> on uv, or <code class="code docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">hydromt</span> <span class="pre">--plugins</span></code> on pixi.
+The output should look similar to the example below:</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-2" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" data-sync-group="package-manager" data-sync-id="uv" for="sd-tab-item-2">
+uv</label><div class="sd-tab-content docutils">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>hydromt<span class="w"> </span>--plugins
+<span class="go">  Model plugins:</span>
+<span class="go">    - model (hydromt x.y.z)</span>
+<span class="go">    - example_model (hydromt x.y.z)</span>
+<span class="go">  Component plugins:</span>
+<span class="go">    - ConfigComponent (hydromt x.y.z)</span>
+<span class="go">    - DatasetsComponent (hydromt x.y.z)</span>
+<span class="go">    - GeomsComponent (hydromt x.y.z)</span>
+<span class="go">  Driver plugins:</span>
+<span class="go">    - dataset_xarray (hydromt x.y.z)</span>
+<span class="go">    - geodataframe_table (hydromt x.y.z)</span>
+<span class="go">  Catalog plugins:</span>
+<span class="go">    - deltares_data (hydromt x.y.z)</span>
+<span class="go">    - artifact_data (hydromt x.y.z)</span>
+<span class="go">  Uri_resolver plugins:</span>
+<span class="go">    - azure_blob (hydromt x.y.z)</span>
+<span class="go">    - convention (hydromt x.y.z)</span>
+<span class="go">    - raster_tindex (hydromt x.y.z)</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" data-sync-group="package-manager" data-sync-id="pixi" for="sd-tab-item-3">
+pixi</label><div class="sd-tab-content docutils">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pixi<span class="w"> </span>run<span class="w"> </span>hydromt<span class="w"> </span>--plugins
+<span class="go">  Model plugins:</span>
+<span class="go">    - model (hydromt x.y.z)</span>
+<span class="go">    - example_model (hydromt x.y.z)</span>
+<span class="go">  Component plugins:</span>
+<span class="go">    - ConfigComponent (hydromt x.y.z)</span>
+<span class="go">    - DatasetsComponent (hydromt x.y.z)</span>
+<span class="go">    - GeomsComponent (hydromt x.y.z)</span>
+<span class="go">  Driver plugins:</span>
+<span class="go">    - dataset_xarray (hydromt x.y.z)</span>
+<span class="go">    - geodataframe_table (hydromt x.y.z)</span>
+<span class="go">  Catalog plugins:</span>
+<span class="go">    - deltares_data (hydromt x.y.z)</span>
+<span class="go">    - artifact_data (hydromt x.y.z)</span>
+<span class="go">  Uri_resolver plugins:</span>
+<span class="go">    - azure_blob (hydromt x.y.z)</span>
+<span class="go">    - convention (hydromt x.y.z)</span>
+<span class="go">    - raster_tindex (hydromt x.y.z)</span>
+</pre></div>
+</div>
+</div>
 </div>
 </section>
 <section id="installing-optional-dependencies">
 <h3>Installing optional dependencies<a class="headerlink" href="#installing-optional-dependencies" title="Link to this heading">#</a></h3>
-<p>HydroMT comes with a minimal set of dependencies. However, depending on your use case,
-you might want to install additional optional dependencies. For example, if you want to
-work with cloud data from AWS or Google Cloud Storage.</p>
-<p>Some of the optional dependencies can be installed using uv/pip and predefined lists of
-dependencies:</p>
+<p>HydroMT comes with a minimal set of dependencies.
+However, depending on your use case, you might want to install additional optional dependencies.
+For example, if you want to work with cloud data from AWS or Google Cloud Storage.</p>
+<p>Some of the optional dependencies can be installed using uv/pip and predefined lists of dependencies:</p>
 <ul class="simple">
 <li><p><strong>io</strong>: for additional input data support (e.g. cloud data, parquet or excel files…).</p></li>
 <li><p><strong>extra</strong>: for additional functionalities. So far includes matplotlib and pyet.</p></li>
@@ -542,20 +587,21 @@ dependencies:</p>
 <li><p><strong>slim</strong>: installs optional dependencies in io, extra and examples.</p></li>
 </ul>
 <p>To install these optional dependencies, you can use the following uv/pip commands:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;hydromt[io]&quot;</span>
-<span class="gp">$ </span>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;hydromt[extra]&quot;</span>
-<span class="gp">$ </span>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;hydromt[examples]&quot;</span>
-<span class="gp">$ </span>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;hydromt[slim]&quot;</span>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-4" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" data-sync-group="package-manager" data-sync-id="uv" for="sd-tab-item-4">
+uv</label><div class="sd-tab-content docutils">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>uv<span class="w"> </span>add<span class="w"> </span><span class="s2">&quot;hydromt[io]&quot;</span>
+<span class="gp">$ </span>uv<span class="w"> </span>add<span class="w"> </span><span class="s2">&quot;hydromt[extra]&quot;</span>
+<span class="gp">$ </span>uv<span class="w"> </span>add<span class="w"> </span><span class="s2">&quot;hydromt[examples]&quot;</span>
+<span class="gp">$ </span>uv<span class="w"> </span>add<span class="w"> </span><span class="s2">&quot;hydromt[slim]&quot;</span>
 </pre></div>
 </div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If you are using caching of mosaic rasters and vrt files, the gdal library needs to be
-installed in your conda environment. Unfortunately this cannot be done using pip.
-Therefore, if you want to use this functionality, please install gdal using conda or
-mamba:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>gdal
-</pre></div>
+</div>
+<input id="sd-tab-item-5" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" data-sync-group="package-manager" data-sync-id="pixi" for="sd-tab-item-5">
+pixi</label><div class="sd-tab-content docutils">
+<p>Not required, as pixi install via conda-forge, which contains all optional dependencies by default.</p>
 </div>
 </div>
 </section>
@@ -588,7 +634,7 @@ check which version you have using:</p>
 To check the version of HydroMT that you have installed, do:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>hydromt<span class="w"> </span>--version
 
-<span class="go">hydroMT version: 1.0.0</span>
+<span class="go">hydroMT version: x.y.z</span>
 </pre></div>
 </div>
 </div>
@@ -596,24 +642,37 @@ To check the version of HydroMT that you have installed, do:</p>
 <p>For git users, you can also get the examples by cloning the hydromt github repository and checking the version
 you have installed:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Deltares/hydromt.git
-<span class="gp">$ </span>git<span class="w"> </span>checkout<span class="w"> </span>v1.0.0
+<span class="gp">$ </span>git<span class="w"> </span>checkout<span class="w"> </span>v&lt;x.y.z&gt;
 </pre></div>
 </div>
 <p><strong>Option 2 - Download and unzip the examples manually</strong></p>
 <p>To manually download the examples on Windows, do (!replace with your own hydromt version!):</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>curl<span class="w"> </span>https://github.com/Deltares/hydromt/archive/refs/tags/v1.0.0.zip<span class="w"> </span>-O<span class="w"> </span>-L
-<span class="gp">$ </span>tar<span class="w"> </span>-xf<span class="w"> </span>v1.0.0.zip
-<span class="gp">$ </span>ren<span class="w"> </span>hydromt-1.0.0<span class="w"> </span>hydromt
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>curl<span class="w"> </span>https://github.com/Deltares/hydromt/archive/refs/tags/v&lt;x.y.z&gt;.zip<span class="w"> </span>-O<span class="w"> </span>-L
+<span class="gp">$ </span>tar<span class="w"> </span>-xf<span class="w"> </span>v&lt;x.y.z&gt;.zip
+<span class="gp">$ </span>ren<span class="w"> </span>hydromt-&lt;x.y.z&gt;<span class="w"> </span>hydromt
 </pre></div>
 </div>
 <p>You can also download, unzip and rename manually if you prefer, rather than using the windows command prompt.</p>
 <p><strong>Running the examples</strong></p>
 <p>Finally, start a jupyter notebook inside the <code class="docutils literal notranslate"><span class="pre">examples</span></code> folder after activating the <code class="docutils literal notranslate"><span class="pre">hydromt</span></code> environment, see below.
 Alternatively, you can run the notebooks from <a class="reference external" href="https://code.visualstudio.com/download">Visual Studio Code</a> if you have that installed.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>activate<span class="w"> </span>hydromt
-<span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>hydromt/examples
-<span class="gp">$ </span>jupyter<span class="w"> </span>notebook
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-6" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" data-sync-group="package-manager" data-sync-id="uv" for="sd-tab-item-6">
+uv</label><div class="sd-tab-content docutils">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>hydromt/examples
+<span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>jupyter<span class="w"> </span>notebook
 </pre></div>
+</div>
+</div>
+<input id="sd-tab-item-7" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" data-sync-group="package-manager" data-sync-id="pixi" for="sd-tab-item-7">
+pixi</label><div class="sd-tab-content docutils">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>hydromt/examples
+<span class="gp">$ </span>pixi<span class="w"> </span>run<span class="w"> </span>jupyter<span class="w"> </span>notebook
+</pre></div>
+</div>
+</div>
 </div>
 </section>
 </section>
