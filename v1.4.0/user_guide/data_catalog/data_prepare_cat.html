@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
@@ -36,10 +36,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/theme-deltares.css?v=d7afb10b" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
 
     <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
@@ -48,8 +48,8 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/data_catalog/data_prepare_cat';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
-        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_version = '0.18.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/main/docs/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.4';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
@@ -572,7 +572,7 @@ category. Usual categories within HydroMT are <em>geography</em>, <em>topography
 user is free to define its own categories.</p></li>
 </ul>
 <p>The following are <strong>required arguments for each data source</strong>:</p>
-<ul class="simple">
+<ul>
 <li><p><strong>data_type</strong>: type of input data. Either <em>RasterDataset</em>, <em>GeoDataset</em>, <em>Dataset</em>
 <em>GeoDataFrame</em> or <em>DataFrame</em>.</p></li>
 <li><p><strong>driver</strong>: data_type specific <code class="xref py py-class docutils literal notranslate"><span class="pre">Driver</span></code> to read a dataset. If the default
@@ -591,7 +591,13 @@ keys to limit which files are being read based on the get_data request in the fo
 string to define how the key should be read. For example, in a path written as
 <code class="docutils literal notranslate"><span class="pre">&quot;path/to/my/files/{variable}_{year}_{month:02d}.nc&quot;</span></code>, the month always has two
 digits and is zero-padded for Jan-Sep (e.g. January 2012 is stored as
-<code class="docutils literal notranslate"><span class="pre">&quot;path/to/my/files/{variable}_2012_01.nc&quot;</span></code>).</p></li>
+<code class="docutils literal notranslate"><span class="pre">&quot;path/to/my/files/{variable}_2012_01.nc&quot;</span></code>).</p>
+<p>For multi-file <code class="docutils literal notranslate"><span class="pre">Dataset</span></code>, <code class="docutils literal notranslate"><span class="pre">GeoDataset</span></code> and <code class="docutils literal notranslate"><span class="pre">RasterDataset</span></code> sources, HydroMT
+compares resolved <code class="docutils literal notranslate"><span class="pre">{year}</span></code> and <code class="docutils literal notranslate"><span class="pre">{month}</span></code> placeholders with the opened time
+coordinate. If resolved files cover periods that are missing from the data,
+HydroMT handles this according to the <code class="docutils literal notranslate"><span class="pre">handle_nodata</span></code> strategy instead of
+silently returning partial time coverage.</p>
+</li>
 </ul>
 <p>A full list of <strong>optional arguments for each data source</strong> is given below</p>
 <ul class="simple">
@@ -874,8 +880,8 @@ This is parsed to the Python code as a <cite>None</cite>.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -909,7 +915,7 @@ This is parsed to the Python code as a <cite>None</cite>.</p>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
 </p></div>
       
     </div>
