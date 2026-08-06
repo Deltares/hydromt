@@ -11,6 +11,19 @@ The format is based on `Keep a Changelog`_, and this project adheres to
 Unreleased
 ==========
 
+New
+---
+
+Changed
+-------
+
+Fixed
+-----
+
+
+v1.4.1 (2026-08-06)
+===================
+
 Changed
 -------
 - ``resample_time`` now requires uniform time steps by default when resampling. Irregular time coordinates that were previously resampled based on their mean timestep now raise a ``ValueError`` unless ``require_uniform_spacing=False`` is passed.
@@ -24,6 +37,7 @@ Fixed
 - ``preprocessing.harmonise_dims`` no longer applies 0-360 to -180-180 longitude normalisation to projected datasets (x in metres, all > 180), which silently shifted the grid by -360. Normalisation is now only applied for geographic CRS; datasets without a CRS are left unchanged with a warning. (#1476)
 - ``RasterDatasetAdapter`` now respects ``handle_nodata`` when requested ``variables`` are missing from the source: ``NoDataStrategy.WARN`` and ``NoDataStrategy.IGNORE`` return ``None`` (and warn) instead of always raising ``NoDataException``. (#1407)
 - A ``DataFrame`` source without an explicit driver now defaults to the ``pandas`` driver instead of incorrectly inferring ``geodataframe_table`` (which also claims ``.csv``/``.parquet``) and failing validation. (#1403)
+
 
 v1.4.0 (2026-06-02)
 ===================
