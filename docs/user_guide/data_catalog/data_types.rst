@@ -181,6 +181,9 @@ See list of recognized dimensions_ names.
 To read a raster dataset from a multiple file netcdf archive the following data entry
 is used, where the ``options`` are passed to :py:func:`xarray.open_mfdataset`
 (or :py:func:`xarray.open_zarr` for zarr data).
+HydroMT validates xarray driver options before opening the data. For example,
+``parallel=True`` with ``lock=False`` is rejected when the active Dask scheduler is
+threaded; use ``lock=True`` or a non-threaded scheduler for that combination.
 In case the CRS cannot be inferred from the netcdf metadata it should be defined with
 the ``crs`` ``metadata`` here.
 The path to multiple files can be set using a glob string or several keys,

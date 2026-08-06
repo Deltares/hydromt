@@ -14,11 +14,139 @@ from hydromt.data_catalog.sources import (
     GeoDatasetSource,
     RasterDatasetSource,
 )
-from hydromt.data_catalog.uri_resolvers import URIResolver
+from hydromt.data_catalog.uri_resolvers import ConventionResolver, URIResolver
+from hydromt.error import NoDataException, NoDataStrategy
 from hydromt.typing import SourceMetadata
 
 
 class TestValidators:
+    def _source(
+        self,
+        request: pytest.FixtureRequest,
+        source_cls: Type[DataSource],
+        driver_fixture: str,
+        adapter_fixture: str,
+        uri: str,
+    ) -> DataSource:
+        return source_cls(
+            name="test",
+            uri=uri,
+            driver=request.getfixturevalue(driver_fixture)(),
+            data_adapter=request.getfixturevalue(adapter_fixture),
+            uri_resolver=ConventionResolver(),
+            metadata=SourceMetadata(crs=4326),
+        )
+
+    @pytest.mark.parametrize(
+        ("source_cls", "_driver_cls", "_adapter", "fixture_year"),
+        [
+            (DatasetSource, "MockDatasetDriver", "mock_ds_adapter", 2020),
+            (GeoDatasetSource, "MockGeoDatasetDriver", "mock_geo_ds_adapter", 2000),
+            (
+                RasterDatasetSource,
+                "MockRasterDatasetDriver",
+                "mock_raster_ds_adapter",
+                2014,
+            ),
+        ],
+    )
+    def test_read_data_checks_years_from_resolved_multi_file_uris(
+        self,
+        source_cls: Type[DataSource],
+        _driver_cls: str,  # noqa: PT019
+        _adapter: str,  # noqa: PT019
+        fixture_year: int,
+        tmp_path: Path,
+        request: pytest.FixtureRequest,
+    ):
+        # Mock drivers ignore URIs and return fixed fixture data for `fixture_year`;
+        # touched files only make ConventionResolver expect extra years.
+        missing = list(range(fixture_year + 1, fixture_year + 4))
+        for year in [fixture_year, *missing]:
+            (tmp_path / f"data_{year}.nc").touch()
+        source = self._source(
+            request, source_cls, _driver_cls, _adapter, str(tmp_path / "data_{year}.nc")
+        )
+
+        with pytest.raises(NoDataException) as exc:
+            source.read_data()
+        assert "missing years" in str(exc.value)
+        assert all(str(year) in str(exc.value) for year in missing)
+
+    def test_read_data_checks_month_only_placeholders_from_resolved_multi_file_uris(
+        self,
+        tmp_path: Path,
+        request: pytest.FixtureRequest,
+    ):
+        for month in ["09", "10"]:
+            (tmp_path / f"data_{month}.nc").touch()
+        source = self._source(
+            request,
+            RasterDatasetSource,
+            "MockRasterDatasetDriver",
+            "mock_raster_ds_adapter",
+            str(tmp_path / "data_{month:02d}.nc"),
+        )
+
+        with pytest.raises(NoDataException, match=r"missing months.*10"):
+            source.read_data()
+
+    def test_read_data_checks_year_month_placeholders_across_year_boundary(
+        self,
+        tmp_path: Path,
+        request: pytest.FixtureRequest,
+    ):
+        months = [(2020, month) for month in range(1, 13)] + [(2021, 1), (2021, 2)]
+        for year, month in months:
+            (tmp_path / f"data_{year}_{month:02d}.nc").touch()
+        source = self._source(
+            request,
+            DatasetSource,
+            "MockDatasetDriver",
+            "mock_ds_adapter",
+            str(tmp_path / "data_{year}_{month:02d}.nc"),
+        )
+
+        with pytest.raises(NoDataException) as exc:
+            source.read_data()
+        assert "missing months" in str(exc.value)
+        assert "2021-01" in str(exc.value)
+        assert "2021-02" in str(exc.value)
+        assert "missing years" not in str(exc.value)
+
+    def test_read_data_warns_placeholder_mismatch_without_dropping_data(
+        self,
+        tmp_path: Path,
+        request: pytest.FixtureRequest,
+    ):
+        for year in [2020, 2021]:
+            (tmp_path / f"data_{year}.nc").touch()
+        source = self._source(
+            request,
+            DatasetSource,
+            "MockDatasetDriver",
+            "mock_ds_adapter",
+            str(tmp_path / "data_{year}.nc"),
+        )
+
+        assert source.read_data(handle_nodata=NoDataStrategy.WARN) is not None
+
+    def test_read_data_skips_placeholder_check_for_single_uri(
+        self,
+        tmp_path: Path,
+        request: pytest.FixtureRequest,
+    ):
+        (tmp_path / "data_2021.nc").touch()
+        source = self._source(
+            request,
+            DatasetSource,
+            "MockDatasetDriver",
+            "mock_ds_adapter",
+            str(tmp_path / "data_{year}.nc"),
+        )
+
+        source.read_data()
+
     @pytest.mark.parametrize(
         ("source_cls", "_adapter"),
         [

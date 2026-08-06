@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from copy import deepcopy
 from os.path import abspath, join, splitext
 from pathlib import Path, PurePath
-from typing import Any, ClassVar, Dict, List, Optional, TypeVar, Union, cast
+from typing import Any, ClassVar, Optional, TypeVar, Union, cast
 
 from pydantic import (
     BaseModel,
@@ -64,9 +64,9 @@ class DataSource(BaseModel, ABC):
     provider: Optional[str] = Field(default=None)
     metadata: SourceMetadata = Field(default_factory=SourceMetadata)
 
-    def summary(self) -> Dict[str, Any]:
+    def summary(self) -> dict[str, Any]:
         """Return a summary of the DataSource."""
-        summ: Dict[str, Any] = self.model_dump(include={"uri"})
+        summ: dict[str, Any] = self.model_dump(include={"uri"})
         summ.update(
             {
                 "data_type": self.__class__.data_type,
@@ -153,9 +153,9 @@ class DataSource(BaseModel, ABC):
         return _abs_path(self.root, self.uri)
 
     @model_serializer(mode="wrap")
-    def _serialize(self, nxt: SerializerFunctionWrapHandler) -> Dict[str, Any]:
+    def _serialize(self, nxt: SerializerFunctionWrapHandler) -> dict[str, Any]:
         """Serialize data_type."""
-        res: Dict[str, Any] = nxt(self)
+        res: dict[str, Any] = nxt(self)
         res["data_type"] = self.data_type
 
         return res
@@ -164,7 +164,7 @@ class DataSource(BaseModel, ABC):
         uri = PurePath(self.uri)
         if "{" in self.uri:
             # first resolve any placeholders
-            uris: List[str] = self.uri_resolver.resolve(
+            uris: list[str] = self.uri_resolver.resolve(
                 uri=self.full_uri,
                 handle_nodata=handle_nodata,
                 **query_kwargs,

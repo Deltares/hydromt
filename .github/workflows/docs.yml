@@ -34,10 +34,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout code
-        uses: actions/checkout@v6
-      - uses: prefix-dev/setup-pixi@v0.9.6
+        uses: actions/checkout@v7
+      - uses: prefix-dev/setup-pixi@v0.10.0
         with:
-          pixi-version: "v0.59.0"
+          pixi-version: "v0.67.0"
 
       # if we're not publishing we don't have to write them, so we might as well
       # save ourself a bunch of IO time
@@ -49,7 +49,7 @@ jobs:
         if: ${{ github.event_name != 'pull_request' }}
         run: |
           pixi run --locked docs
-          export CURRENT_VERSION=$(grep "__version__" hydromt/__init__.py | cut -d= -f 2 | tr -d "\" ")
+          export CURRENT_VERSION=$(grep "^__version__" hydromt/__init__.py | cut -d= -f 2 | tr -d "\" ")
 
           if [ -z "$CURRENT_VERSION" ]; then
             echo "Could not determine version, exiting..."

@@ -101,7 +101,6 @@ class DataCatalog(object):
         cache: bool, optional
             Set to true to cache data locally before reading.
             Currently only implemented for tiled rasterdatasets.
-            Requires the installation of GDAL and it's python bindings.
             By default False.
         cache_dir: str, Path, optional
             Directory root path to cache data to, by default ~/.hydromt

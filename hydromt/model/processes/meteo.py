@@ -746,6 +746,7 @@ def resample_time(
     upsampling: str = "bfill",
     downsampling: str = "mean",
     conserve_mass: bool = True,
+    require_uniform_spacing: bool = True,
 ) -> xr.DataArray:
     """Resample data to destination frequency.
 
@@ -766,6 +767,9 @@ def resample_time(
         to input frequency.
     conserve_mass: bool, optional
         If True multiply output with relative change in frequency to conserve mass
+    require_uniform_spacing: bool, optional
+        If True, require regular uniform time steps before resampling. Set to False
+        to allow resampling based on the mean timestep.
 
     Returns
     -------
@@ -775,6 +779,8 @@ def resample_time(
     da_out = da
     dfreq = delta_freq(da, freq)
     if not np.isclose(dfreq, 1.0):
+        if require_uniform_spacing:
+            require_uniform_spacing_time(da)
         resample = upsampling if dfreq < 1 else downsampling
         pre = "up" if dfreq < 1 else "down"
         logger.debug(
@@ -812,9 +818,12 @@ def to_timedelta(
     return freq
 
 
-def da_to_timedelta(da: xr.DataArray) -> pd.Timedelta:
-    """Convert time dimenstion in dataset to timedelta."""
-    return pd.to_timedelta(np.diff(da.time).mean())
+def da_to_timedelta(
+    da: xr.DataArray,
+    reducer=np.mean,
+) -> pd.Timedelta:
+    """Convert time dimension spacing in dataset to a timedelta."""
+    return pd.to_timedelta(reducer(np.diff(da.time)))
 
 
 def freq_to_timedelta(freq: Union[str, pd.Timedelta]) -> pd.Timedelta:
@@ -825,3 +834,24 @@ def freq_to_timedelta(freq: Union[str, pd.Timedelta]) -> pd.Timedelta:
 
     # Convert str to datetime.timedelta
     return pd.to_timedelta(freq)
+
+
+def require_uniform_spacing_time(da: xr.DataArray):
+    """Check if time dimension has uniform spacing."""
+    values, counts = np.unique_counts(np.diff(da.time))
+    data = sorted(
+        zip(values, counts, strict=True),
+        key=lambda item: item[1],
+        reverse=True,
+    )
+    if len(counts) > 1:
+        differences = ", ".join(
+            f"{str(pd.to_timedelta(value)).removesuffix(' 00:00:00')} occurs "
+            f"{int(count)} time{'s' if count != 1 else ''}"
+            for value, count in data
+        )
+        logger.debug(
+            "Time dimension has no uniform spacing. Unique time differences: %s.",
+            differences,
+        )
+        raise ValueError("Time dimension should have uniform spacing for resampling.")

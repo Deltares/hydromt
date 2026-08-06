@@ -16,6 +16,11 @@ on:
       PYPI_TEST_TOKEN:
         required: false
   workflow_dispatch:
+    inputs:
+      tag:
+        type: string
+        description: "Tag to publish (e.g. v1.4.0)"
+        required: true
 
 defaults:
   run:
@@ -25,11 +30,12 @@ jobs:
   build-artifacts:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          ref: ${{ inputs.tag || github.ref }}
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         name: Install Python
         with:
           python-version: "3.14"
@@ -53,14 +59,14 @@ jobs:
     needs: build-artifacts
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/download-artifact@v8
         with:
           name: releases
           path: dist
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.14"
 
@@ -79,7 +85,7 @@ jobs:
           name: releases
           path: dist
       - name: Publish package to TestPyPI
-        uses: pypa/gh-action-pypi-publish@v1.14.0
+        uses: pypa/gh-action-pypi-publish@v1.14.2
         with:
           user: __token__
           password: ${{ secrets.PYPI_TEST_TOKEN }}
@@ -89,7 +95,7 @@ jobs:
 
   upload-to-pypi:
     needs: test-built-dist
-    if: ${{ github.event_name == 'release' || github.event_name == 'workflow_call' }}
+    if: ${{ github.event_name == 'release' || github.event_name == 'workflow_call' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v8
@@ -97,7 +103,7 @@ jobs:
           name: releases
           path: dist
       - name: Publish package to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.14.0
+        uses: pypa/gh-action-pypi-publish@v1.14.2
         with:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}

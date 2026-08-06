@@ -295,7 +295,9 @@ def open_mfraster(
     if isinstance(uris, str):
         if "*" in uris:
             prefix, postfix = basename(uris).split(".")[0].split("*")
-        uris = [path for path in glob(uris) if not path.endswith(".xml")]
+        # sort so the concat order and variable name are deterministic and do
+        # not depend on the (filesystem-dependent) glob order (see #1465)
+        uris = sorted(path for path in glob(uris) if not path.endswith(".xml"))
     else:
         uris = [str(p) if isinstance(p, Path) else p for p in uris]
     if len(uris) == 0:
@@ -324,6 +326,10 @@ def open_mfraster(
             # index based on postfix directly after prefix
             elif prefix != "" and bname.split(".")[0].strip(prefix).isdigit():
                 index = int(bname.split(".")[0].strip(prefix))
+            # index based on a purely numeric basename, e.g. a bare wildcard
+            # pattern "*.tif" matching "1.tif", "2.tif", ... (see #1465)
+            elif prefix == "" and postfix == "" and bname.split(".")[0].isdigit():
+                index = int(bname.split(".")[0])
             # index based on file order
             else:
                 index = i
@@ -1020,13 +1026,18 @@ def read_toml(path: str | Path) -> dict[str, Any]:
 
 
 def _yml_from_uri_or_path(uri_or_path: str | Path) -> dict[str, Any]:
+    # From a url
     if _is_valid_url(str(uri_or_path)):
+        # Stream that bad boy
         with requests.get(str(uri_or_path), stream=True) as r:
             r.raise_for_status()
             yml = _parse_yaml(r.text)
 
+    # (Local) Path
     else:
-        yml = read_yaml(uri_or_path)
+        # Ensure typing
+        uri_or_path = Path(uri_or_path)
+        yml = read_yaml(uri_or_path.expanduser())  # Expand the user (~)
     return yml
 
 

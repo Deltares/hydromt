@@ -16,6 +16,7 @@ from pystac import MediaType
 from hydromt.data_catalog.adapters.dataset import DatasetAdapter
 from hydromt.data_catalog.drivers import DatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
+from hydromt.data_catalog.uri_resolvers import ConventionResolver
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.typing import (
     TimeRange,
@@ -82,6 +83,9 @@ class DatasetSource(DataSource):
         ds: xr.Dataset = self.driver.read(uris, handle_nodata=handle_nodata)
         if ds is None:  # handle_nodata == ignore
             return None
+
+        if isinstance(self.uri_resolver, ConventionResolver):
+            self.uri_resolver._check_multifile_is_complete(uris, ds, handle_nodata)
 
         return self.data_adapter.transform(
             ds,

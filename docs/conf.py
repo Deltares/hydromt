@@ -290,7 +290,7 @@ html_theme_options = {
     "logo": {"text": "HydroMT Core"},
     "navbar_end": ["navbar-icon-links"],  # remove dark mode switch
     "switcher": {
-        "json_url": "https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json",
+        "json_url": "https://raw.githubusercontent.com/Deltares/hydromt/main/docs/_static/switcher.json",
         "version_match": doc_version,
     },
     "secondary_sidebar_items": [

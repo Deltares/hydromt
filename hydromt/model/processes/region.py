@@ -1,9 +1,9 @@
 """parse a region from a dict. See parse_region for information on usage."""
 
 import logging
-from os.path import isdir, isfile
+import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 import geopandas as gpd
 import numpy as np
@@ -18,7 +18,6 @@ from hydromt.error import NoDataStrategy
 from hydromt.gis import parse_crs
 from hydromt.model.processes.basin_mask import get_basin_geometry
 from hydromt.plugins import PLUGINS
-from hydromt.typing.type_def import StrPath
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model
@@ -40,8 +39,8 @@ def parse_region_basin(
     region: dict,
     *,
     data_catalog: DataCatalog,
-    hydrography_path: StrPath,
-    basin_index_path: Optional[StrPath] = None,
+    hydrography_path: str | Path,
+    basin_index_path: str | Path | None = None,
 ) -> gpd.GeoDataFrame:
     """Parse a basin /subbasin / interbasin region and return the GeoDataFrame.
 
@@ -95,9 +94,9 @@ def parse_region_basin(
         * {'interbasin': /path/to/polygon_geometry, 'outlets': true}
     data_catalog : DataCatalog
         DataCatalog object containing the data sources.
-    hydrography_fn : strPath
+    hydrography_fn : str | Path
         Path of the hydrography raster dataset in the data catalog.
-    basin_index_path : StrPath, optional
+    basin_index_path : str | Path, optional
         Path of the basin index raster dataset in the data catalog.
     """
     var_thresh_kwargs = region.copy()
@@ -106,7 +105,7 @@ def parse_region_basin(
 
     _assert_parse_key(kind, "basin", "interbasin", "subbasin")
 
-    kwargs = _parse_region_value(value0, data_catalog=data_catalog)
+    kwargs = _parse_region_value(value0, data_catalog=data_catalog, kind=kind)
     kwargs.update(var_thresh_kwargs)
 
     if kind == "basin":
@@ -146,7 +145,7 @@ def parse_region_bbox(region: dict, *, crs: int = 4326) -> gpd.GeoDataFrame:
 
     _assert_parse_key(kind, "bbox")
 
-    kwargs.update(_parse_region_value(value0, data_catalog=None))
+    kwargs.update(_parse_region_value(value0, data_catalog=None, kind=kind))
 
     _assert_parsed_values(
         key=next(iter(kwargs)), region_value=value0, kind="bbox", expected=["bbox"]
@@ -161,8 +160,8 @@ def parse_region_bbox(region: dict, *, crs: int = 4326) -> gpd.GeoDataFrame:
 def parse_region_geom(
     region: dict,
     *,
-    crs: Optional[int] = None,
-    data_catalog: Optional[DataCatalog] = None,
+    crs: int | None = None,
+    data_catalog: DataCatalog | None = None,
 ) -> gpd.GeoDataFrame:
     """Parse a region and return the GeoDataFrame.
 
@@ -183,7 +182,7 @@ def parse_region_geom(
 
     _assert_parse_key(kind, "geom")
 
-    kwargs.update(_parse_region_value(value0, data_catalog=data_catalog))
+    kwargs.update(_parse_region_value(value0, data_catalog=data_catalog, kind=kind))
 
     _assert_parsed_values(
         key=next(iter(kwargs)), region_value=value0, kind="geom", expected=["geom"]
@@ -193,8 +192,7 @@ def parse_region_geom(
     geom = kwargs["geom"]
     if geom.crs is None:
         logger.debug(f'Model region "geom" has no CRS, setting to {crs}')
-        _update_crs(geom, crs)
-
+        geom = _update_crs(geom, crs)
     return geom
 
 
@@ -286,7 +284,7 @@ def parse_region_mesh(region: dict) -> xu.UgridDataset:
 
     _assert_parse_key(kind, "mesh")
 
-    if isinstance(value0, (str, Path)) and isfile(value0):
+    if isinstance(value0, (str, Path)) and Path(value0).is_file():
         return xu.open_dataset(value0)
     elif isinstance(value0, (xu.UgridDataset, xu.UgridDataArray)):
         return value0
@@ -299,8 +297,8 @@ def parse_region_mesh(region: dict) -> xu.UgridDataset:
 
 
 def _update_crs(
-    geom: gpd.GeoDataFrame, crs: Optional[Union[CRS, int]]
-) -> Optional[gpd.GeoDataFrame]:
+    geom: gpd.GeoDataFrame, crs: CRS | int | str | None
+) -> gpd.GeoDataFrame:
     if crs is not None:
         crs = parse_crs(crs, bbox=geom.total_bounds)
         return geom.to_crs(crs)
@@ -308,33 +306,72 @@ def _update_crs(
 
 
 def _parse_region_value(
-    value: Any, *, data_catalog: Optional[DataCatalog]
-) -> Dict[str, Any]:
-    kwarg: Dict[str, Any] = {}
-    if isinstance(value, np.ndarray):
-        value = value.tolist()  # array to list
+    value: Any, *, data_catalog: DataCatalog | None, kind: str | None = None
+) -> dict[str, Any]:
+    """Parse a region value and return a dictionary with the corresponding keyword arguments.
 
-    if isinstance(value, list):
-        if np.all([isinstance(p0, int) and abs(p0) > 180 for p0 in value]):  # all int
-            kwarg = dict(basid=value)
-        elif len(value) == 4:  # 4 floats
+    Parameters
+    ----------
+    value : Any
+        The value to parse. Can be a string, a list, a tuple, a numpy
+        array, a GeoDataFrame, or a Path.
+    data_catalog : DataCatalog | None
+        DataCatalog object containing the data sources.
+    kind : str | None, optional
+        The kind of region value. Can be 'bbox', 'xy', 'basin', 'subbasin',
+        'interbasin', or None. If None, the kind will be inferred from the
+        value. Default is None.
+    """
+    kwarg: dict[str, Any] = {}
+    if isinstance(value, np.ndarray):
+        value = value.tolist()
+
+    if kind is None:
+        warnings.warn(
+            "Passing kind=None to `_parse_region_value` is deprecated and will "
+            "be removed in a future release. Pass an explicit kind "
+            "('basin', 'subbasin', 'interbasin', 'bbox', 'xy', etc.) instead.",
+            FutureWarning,
+            stacklevel=2,
+        )
+
+    if kind == "bbox":
+        if isinstance(value, list) and len(value) == 4:
             kwarg = dict(bbox=value)
-        elif len(value) == 2:  # 2 floats
+    elif kind == "xy":
+        if isinstance(value, (list, tuple)) and len(value) == 2:
             kwarg = dict(xy=value)
-    elif isinstance(value, tuple) and len(value) == 2:  # tuple of x and y coords
-        kwarg = dict(xy=value)
-    elif isinstance(value, int):  # single int
-        kwarg = dict(basid=value)
-    elif isinstance(value, (str, Path)) and isdir(value):
-        kwarg = dict(root=value)
-    elif isinstance(value, (str, Path)):
-        data_catalog = data_catalog or DataCatalog()
-        geom = data_catalog.get_geodataframe(value)
-        kwarg = dict(geom=geom)
-    elif isinstance(value, gpd.GeoDataFrame):  # geometry
-        kwarg = dict(geom=value)
-    else:
-        raise ValueError(f"Region value {value} not understood.")
+    elif kind in ("basin", None):
+        # kind=None preserves backward-compatible behaviour (same as basin)
+        if isinstance(value, int):
+            kwarg = dict(basid=value)
+        elif isinstance(value, list) and np.all(
+            [isinstance(p0, int) and abs(p0) > 180 for p0 in value]
+        ):
+            kwarg = dict(basid=value)
+        elif isinstance(value, list) and len(value) == 4:
+            kwarg = dict(bbox=value)
+        elif isinstance(value, (list, tuple)) and len(value) == 2:
+            kwarg = dict(xy=value)
+    elif kind in ("subbasin", "interbasin"):
+        if isinstance(value, list) and len(value) == 4:
+            kwarg = dict(bbox=value)
+        elif isinstance(value, (list, tuple)) and len(value) == 2:
+            kwarg = dict(xy=value)
+
+    if not kwarg:
+        # shared across all kinds: path/geom/model root
+        if isinstance(value, (str, Path)):
+            if Path(value).is_dir():
+                kwarg = dict(root=value)
+            else:
+                data_catalog = data_catalog or DataCatalog()
+                geom = data_catalog.get_geodataframe(value)
+                kwarg = dict(geom=geom)
+        elif isinstance(value, gpd.GeoDataFrame):
+            kwarg = dict(geom=value)
+        else:
+            raise ValueError(f"Region value {value} not understood for kind={kind}.")
 
     if "geom" in kwarg and np.all(kwarg["geom"].geometry.type == "Point"):
         xy = (
@@ -342,6 +379,7 @@ def _parse_region_value(
             kwarg["geom"].geometry.y.values,
         )
         kwarg = dict(xy=xy)
+
     return kwarg
 
 
@@ -364,7 +402,7 @@ def _assert_parse_key(key: str, *expected: str) -> None:
 
 
 def _assert_parsed_values(
-    *, key: str, region_value: Any, kind: str, expected: List[str]
+    *, key: str, region_value: Any, kind: str, expected: list[str]
 ) -> None:
     if key not in expected:
         raise ValueError(

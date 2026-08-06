@@ -334,7 +334,12 @@ def update(
     mod.update(model_out=model_out, steps=steps, forceful_overwrite=fo)
 
 
-def _validate_catalog(cat_path: Path, fmt: Format, upgrade: bool) -> bool:
+def _validate_catalog(
+    cat_path: Path,
+    fmt: Format,
+    upgrade: bool,
+    sort: bool,
+) -> bool:
     """Validate a catalog file. Returns True if valid, False otherwise."""
     logger.info(f"Validating catalog at {cat_path}")
 
@@ -355,6 +360,7 @@ def _validate_catalog(cat_path: Path, fmt: Format, upgrade: bool) -> bool:
                     exclude_defaults=True,
                     exclude_none=True,
                 ),
+                sort_keys=sort,
                 Dumper=CatalogDumper,
             )
             logger.info(f"Upgraded catalog written to {out_path}")
@@ -406,8 +412,22 @@ def _validate_config(config: Path, model: Optional[str], fmt: Format) -> bool:
 @data_opt
 @quiet_opt
 @verbose_opt
-@click.option("--format", type=click.Choice(list(Format)), default=Format.v1)
-@click.option("--upgrade", is_flag=True)
+@click.option(
+    "--format",
+    type=click.Choice(list(Format)),
+    default=Format.v1,
+    help="The HydroMT major version",
+)
+@click.option(
+    "--upgrade",
+    is_flag=True,
+    help="Whether to upgrade the data catalog from v0 to v1",
+)
+@click.option(
+    "--sort",
+    is_flag=True,
+    help="Whether to sort the data catalog when upgrading",
+)
 @click.pass_context
 def check(
     _ctx: click.Context,
@@ -418,6 +438,7 @@ def check(
     verbose: int,
     format: Format,
     upgrade: bool,
+    sort: bool,
 ):
     """
     Verify that provided data catalog and config files are in the correct format.
@@ -442,7 +463,9 @@ def check(
         log.log_version()
         results = []
         for cat_path in data:
-            results.append(_validate_catalog(Path(cat_path), format, upgrade))
+            results.append(
+                _validate_catalog(Path(cat_path), format, upgrade, sort),
+            )
         if config:
             results.append(_validate_config(Path(config), model, format))
 

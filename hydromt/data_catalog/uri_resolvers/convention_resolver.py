@@ -1,12 +1,15 @@
 """URIResolver using HydroMT naming conventions."""
 
 import logging
+import os
 from functools import reduce
 from itertools import chain, product
+from pathlib import PureWindowsPath
 from typing import Any, Iterable, Optional
 
 import pandas as pd
 from fsspec.core import split_protocol
+from pydantic import PrivateAttr
 
 from hydromt._utils.naming_convention import _expand_uri_placeholders
 from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
@@ -29,9 +32,28 @@ class _SafeDict(dict):
         return "{" + key + "}"
 
 
+def _normalize_local_path(uri: str) -> str:
+    r"""Normalize Windows local paths for matching filesystem glob results.
+
+    Examples
+    --------
+    On Windows, ``C:\data\data_{year}.nc`` becomes
+    ``C:/data/data_{year}.nc``.
+    ``/data/data_{year}.nc`` stays ``/data/data_{year}.nc``.
+    On non-Windows systems, ``/data\data_{year}.nc`` is unchanged because
+    backslashes can be valid filename characters.
+    ``abfs://container/data_{year}.nc`` is unchanged.
+    """
+    protocol, _ = split_protocol(uri)
+    if protocol is None and os.name == "nt":
+        return PureWindowsPath(uri).as_posix()
+    return uri
+
+
 class ConventionResolver(URIResolver):
     """URIDataResolver using HydroMT naming conventions."""
 
+    _resolved_uri_placeholders: list[dict[str, str]] = PrivateAttr(default_factory=list)
     _uri_placeholders = frozenset(
         {"year", "month", "variable", "name", "overview_level"}
     )
@@ -131,8 +153,8 @@ class ConventionResolver(URIResolver):
         if metadata is None:
             metadata: SourceMetadata = SourceMetadata()
 
-        uri_expanded, keys, _ = _expand_uri_placeholders(
-            uri,
+        uri_expanded, keys, regex = _expand_uri_placeholders(
+            _normalize_local_path(uri),
             placeholders=self._uri_placeholders,
             time_range=time_range,
             variables=variables,
@@ -166,11 +188,81 @@ class ConventionResolver(URIResolver):
                 map(lambda fmt: uri_expanded.format_map(_SafeDict(**fmt)), fmts)
             )
         )
+        self._resolved_uri_placeholders = [
+            dict(zip(keys, match.groups(), strict=True))
+            for u in uris
+            if (match := regex.match(_normalize_local_path(u))) is not None
+        ]
         if not uris:
             exec_nodata_strat(
                 f"Resolver '{self.name}' found no files at {uri_expanded}.",
                 strategy=handle_nodata,
             )
             return []  # if ignore
+        else:
+            logger.debug(
+                "Resolver '%s' found %d files at %s: %s",
+                self.name,
+                len(uris),
+                uri_expanded,
+                uris,
+            )
 
         return uris
+
+    def _check_multifile_is_complete(
+        self, uris: list[str], data: Any, handle_nodata: NoDataStrategy
+    ) -> None:
+        """Check multi-file time placeholders against the opened xarray data."""
+        # Only check with multiple URIs and the expected range from placeholders.
+
+        if "time" not in data:
+            return
+
+        found = self._resolved_uri_placeholders
+        if len(uris) < 2 or not found:
+            return
+
+        # For data_{year}_{month:02d}.nc `found` looks like:
+        # [{"year": "2020", "month": "12"}, {"year": "2021", "month": "01"}].
+        keys = set().union(*(d.keys() for d in found))
+        if not ({"year", "month"} & keys):
+            return
+
+        def _handle_missing(msg: str) -> None:
+            exec_nodata_strat(
+                f"Source '{self.name}' is missing data for URI placeholders: {msg}.",
+                strategy=handle_nodata,
+            )
+
+        time = pd.DatetimeIndex(pd.to_datetime(data["time"].values))
+        if {"year", "month"} <= keys:
+            expected = {
+                pd.Period(year=int(d["year"]), month=int(d["month"]), freq="M")
+                for d in found
+                if str(d.get("year", "")).isdigit()
+                and str(d.get("month", "")).isdigit()
+            }
+            # A time coord with 2020-12-15 and 2021-01-15 becomes monthly
+            # periods "2020-12" and "2021-01", matching `expected`.
+            got = set(time.to_period("M"))
+            if missing_months := sorted(expected - got):
+                _handle_missing(f"missing months: {[str(m) for m in missing_months]}")
+
+        elif "year" in keys:
+            expected = {
+                int(d["year"]) for d in found if str(d.get("year", "")).isdigit()
+            }
+            got = {int(year) for year in time.year}
+            if missing_years := sorted(expected - got):
+                _handle_missing(f"missing years: {missing_years}")
+
+        elif "month" in keys:
+            expected = {
+                f"{int(d['month']):02d}"
+                for d in found
+                if str(d.get("month", "")).isdigit()
+            }
+            got = {f"{month:02d}" for month in time.month}
+            if missing_months := sorted(expected - got):
+                _handle_missing(f"missing months: {missing_months}")
