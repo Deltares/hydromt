@@ -205,7 +205,7 @@ class ConventionResolver(URIResolver):
                 self.name,
                 len(uris),
                 uri_expanded,
-                uris,
+                sorted(uris),
             )
 
         return uris
