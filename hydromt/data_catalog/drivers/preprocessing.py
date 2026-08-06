@@ -1,9 +1,12 @@
 """Common routines for preprocessing."""
 
+import logging
 from typing import Callable
 
 import numpy as np
 import xarray as xr
+
+logger = logging.getLogger(__name__)
 
 
 def round_latlon(ds: xr.Dataset, decimals: int = 5) -> xr.Dataset:
@@ -49,8 +52,23 @@ def harmonise_dims(ds: xr.Dataset) -> xr.Dataset:
     x_dim = ds.raster.x_dim
     lons = ds[x_dim].values
     if np.any(lons > 180):
-        ds[x_dim] = xr.Variable(x_dim, np.where(lons > 180, lons - 360, lons))
-        ds = ds.sortby(x_dim)
+        crs = ds.raster.crs
+        if crs is not None and crs.is_geographic:
+            # Geographic CRS in the 0-360 convention: wrap to -180-180.
+            ds[x_dim] = xr.Variable(x_dim, np.where(lons > 180, lons - 360, lons))
+            ds = ds.sortby(x_dim)
+        elif crs is None:
+            # Unknown CRS: do not assume geographic. Projected coordinates
+            # (e.g. metres, all > 180) would otherwise be silently shifted by
+            # -360, corrupting the grid. Skip normalisation and warn; the
+            # caller should set ``crs`` in the data catalog entry to opt in
+            # for genuinely geographic data. See #1476.
+            logger.warning(
+                "harmonise_dims: skipping 0-360 to -180-180 longitude "
+                "normalisation because the dataset has no CRS. Set 'crs' in "
+                "the data catalog entry if these are geographic coordinates."
+            )
+        # Projected CRS: x is not longitude (e.g. metres), so leave it as is.
     # Latitude
     y_dim = ds.raster.y_dim
     if np.diff(ds[y_dim].values)[0] > 0:
