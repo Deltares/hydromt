@@ -37,13 +37,11 @@ jobs:
 
           - name: hydromt-fiat
             repo: Deltares/hydromt_fiat
-            pixi_version: v0.65.0
 
           - name: hydromt-delft3dfm
             repo: Deltares/hydromt_delft3dfm
             pixi_feature: hydromt_dev
             pixi_environment: dev-314
-            pixi_version: v0.67.1
 
     steps:
       - name: Checkout hydromt
