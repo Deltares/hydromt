@@ -21,7 +21,7 @@ jobs:
       DEFAULT_PIXI_FEATURE: default
       DEFAULT_PIXI_ENVIRONMENT: default
       DEFAULT_PIXI_TASK: test
-      DEFAULT_PIXI_VERSION: v0.59.0
+      DEFAULT_PIXI_VERSION: v0.76.0
 
     strategy:
       fail-fast: false
