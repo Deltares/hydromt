@@ -5,7 +5,13 @@
 #
 # Version is set to max(main's current, X.(Y+1).0.dev0).
 #
-# Usage: record-release-on-main.sh <RELEASE_BRANCH> <NEW_VERSION>
+# Usage: record-release-on-main.sh <RELEASE_BRANCH> <NEW_VERSION> <MARK_AS_LATEST>
+#
+# MARK_AS_LATEST ("true"/"false") controls whether this version is marked
+# `preferred` in switcher.json — i.e. the stable release the docs switcher
+# defaults to. Should be passed the same value used for
+# `gh release create --latest=...` and the `stable` symlink update, so all
+# three always agree. When false, existing preferred flags are left alone.
 #
 # Prerequisites:
 #  - origin/main and release branch fetched (full history)
@@ -21,9 +27,10 @@ set -euo pipefail
 
 RELEASE_BRANCH="${1:-}"
 NEW_VERSION="${2:-}"
+MARK_AS_LATEST="${3:-false}"
 
 if [[ -z "$RELEASE_BRANCH" || -z "$NEW_VERSION" ]]; then
-  echo "Usage: record-release-on-main.sh <RELEASE_BRANCH> <NEW_VERSION>" >&2
+  echo "Usage: record-release-on-main.sh <RELEASE_BRANCH> <NEW_VERSION> <MARK_AS_LATEST>" >&2
   exit 1
 fi
 
@@ -149,32 +156,46 @@ if [ ! -s /tmp/section.rst ]; then
   exit 1
 fi
 
-# Insert the section above the matching X.Y.0 heading in main's changelog.
-FAMILY_BASE="v${MAJOR}.${MINOR}.0"
+# Insert the section above the first existing heading whose version is
+# numerically lower than NEW_VERSION, so the changelog stays in strictly
+# descending order regardless of which patch in a family this is.
+NEW_PATCH=$(echo "$NEW_VERSION" | cut -d. -f3)
 
-awk -v family_base="$FAMILY_BASE" -v section_file="/tmp/section.rst" '
+awk -v new_major="$MAJOR" -v new_minor="$MINOR" -v new_patch="$NEW_PATCH" \
+    -v section_file="/tmp/section.rst" '
   BEGIN {
     while ((getline line < section_file) > 0) section = section line "\n"
     close(section_file)
     inserted = 0
   }
-  !inserted && $0 ~ "^"family_base"( |$)" {
-    printf "%s\n", section
-    inserted = 1
-  }
-  !inserted && /^v[0-9]+\.[0-9]+\.[0-9]+/ {
-    # family_base not in changelog; insert before the first version heading.
-    printf "%s\n", section
-    inserted = 1
+  !inserted && $0 ~ /^v[0-9]+\.[0-9]+\.[0-9]+/ {
+    match($0, /^v[0-9]+\.[0-9]+\.[0-9]+/)
+    verstr = substr($0, RSTART + 1, RLENGTH - 1)
+    split(verstr, parts, ".")
+    h_major = parts[1] + 0
+    h_minor = parts[2] + 0
+    h_patch = parts[3] + 0
+
+    is_lower = 0
+    if (h_major != new_major)      { is_lower = (h_major < new_major) }
+    else if (h_minor != new_minor) { is_lower = (h_minor < new_minor) }
+    else                            { is_lower = (h_patch < new_patch) }
+
+    if (is_lower) {
+      printf "%s\n", section
+      inserted = 1
+    }
   }
   { print }
   END {
     if (!inserted) {
-      # No version headings at all; append.
+      # Every existing heading is >= NEW_VERSION, or there are no headings
+      # at all — append at the end.
       printf "\n%s", section
     }
   }
 ' /tmp/main-changelog.rst > /tmp/changelog-merged.rst
+
 cp /tmp/changelog-merged.rst docs/changelog.rst
 
 # Rebuild switcher.json: union of both sides.
@@ -187,6 +208,30 @@ jq -s '
   | sort_by(.version | split(".") | map(tonumber? // 0))
   + [{"name":"latest","version":"latest","url":"https://deltares.github.io/hydromt/latest/"}]
 ' /tmp/main-switcher.json /tmp/release-switcher.json > /tmp/switcher-merged.json
+
+# Mark this version preferred (the "stable" docs default) if requested.
+# unique_by above already keeps main's copy of any entry present on both
+# sides, so existing preferred flags for other versions survive untouched
+# whenever MARK_AS_LATEST is false.
+if [[ "$MARK_AS_LATEST" == "true" ]]; then
+  jq --arg v "$NEW_VERSION" '
+    map(
+      if .version == "latest" then .
+      else .preferred = (.version == $v)
+      end
+    )
+  ' /tmp/switcher-merged.json > /tmp/switcher-preferred.json
+
+  PREFERRED_COUNT=$(jq '[.[] | select(.version != "latest" and .preferred == true)] | length' /tmp/switcher-preferred.json)
+  if [[ "$PREFERRED_COUNT" -ne 1 ]]; then
+    echo "ERROR: switcher.json has $PREFERRED_COUNT preferred entries, expected exactly 1." >&2
+    exit 1
+  fi
+
+  mv /tmp/switcher-preferred.json /tmp/switcher-merged.json
+fi
+
+
 cp /tmp/switcher-merged.json docs/_static/switcher.json
 
 # Commit and push.

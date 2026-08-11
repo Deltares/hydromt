@@ -168,7 +168,7 @@ jobs:
           git config user.email "<>"
 
           RECORD_BRANCH=$(bash .github/scripts/record-release-on-main.sh \
-            "$RELEASE_BRANCH" "$NEW_VERSION" | tail -n 1)
+            "$RELEASE_BRANCH" "$NEW_VERSION" "${{ inputs.mark_as_latest }}" | tail -n 1)
           if [[ -z "$RECORD_BRANCH" ]]; then
             echo "ERROR: record-release-on-main.sh did not emit a branch name" >&2
             exit 1
@@ -239,6 +239,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    concurrency:
+      group: gh-pages-write
+      cancel-in-progress: false
+
     steps:
       - uses: actions/checkout@v7
         with:

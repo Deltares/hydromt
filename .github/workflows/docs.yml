@@ -29,8 +29,7 @@ defaults:
     shell: bash -e -l {0}
 
 jobs:
-  test-docs:
-    timeout-minutes: 30
+  install:
     runs-on: ubuntu-latest
     steps:
       - name: checkout code
@@ -39,6 +38,13 @@ jobs:
         with:
           pixi-version: "v0.76.0"
 
+  build-docs:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    concurrency:
+      group: docs-pr-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    steps:
       # if we're not publishing we don't have to write them, so we might as well
       # save ourself a bunch of IO time
       - name: Generate dummy docs
@@ -52,26 +58,39 @@ jobs:
           export CURRENT_VERSION=$(grep "^__version__" hydromt/__init__.py | cut -d= -f 2 | tr -d "\" ")
 
           if [ -z "$CURRENT_VERSION" ]; then
-            echo "Could not determine version, exiting..."
+            echo "ERROR Could not determine version, exiting..."
             exit 1
           fi
 
-          # Are we a dev version or not?
-          if echo "$CURRENT_VERSION" | grep -q "dev"; then
-            # If it's a dev version, just echo "dev"
-            echo "DOC_VERSION=dev" >> "$GITHUB_ENV"
+          # Docs built from main are the dev docs docs, published as "latest".
+          # Anything else (a release branch) is published under
+          # its own vX.Y.Z folder. Releases are always made from
+          # release branches, so if main, then latest.
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "DOC_VERSION=latest" >> "$GITHUB_ENV"
+          elif echo "$CURRENT_VERSION" | grep -q "dev"; then
+            echo "ERROR: Failed to determine version since it"
+            echo "       contains 'dev' but is not made from main."
+            echo "       version: $CURRENT_VERSION", branch: ${{ github.ref }}
+            exit 1
           else
-            # Otherwise, echo the version number
             echo "DOC_VERSION=v$CURRENT_VERSION" >> "$GITHUB_ENV"
           fi
+          echo "Found version: $DOC_VERSION"
 
-      - name: Upload to GitHub Pages
-        if: ${{ github.event_name != 'pull_request' }}
-        uses: peaceiris/actions-gh-pages@v4.1.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/_build/html
-          exclude_assets: .buildinfo,_sources/*,_examples/*.ipynb
-          destination_dir: ./${{ env.DOC_VERSION }}
-          keep_files: false
-          full_commit_message: Deploy ${{ env.DOC_VERSION }} to GitHub Pages
+  publish-docs:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' }}
+    concurrency:
+      group: gh-pages-write
+      cancel-in-progress: false
+    steps:
+    - name: Upload to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4.1.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs/_build/html
+        exclude_assets: .buildinfo,_sources/*,_examples/*.ipynb
+        destination_dir: ./${{ env.DOC_VERSION }}
+        keep_files: false
+        full_commit_message: Deploy ${{ env.DOC_VERSION }} to GitHub Pages
