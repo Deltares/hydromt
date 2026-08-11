@@ -35,6 +35,8 @@ jobs:
     concurrency:
       group: docs-build-${{ github.event.pull_request.number || github.ref }}
       cancel-in-progress: true
+    outputs:
+      doc_version: ${{ steps.version.outputs.doc_version }}
     steps:
       - name: checkout code
         uses: actions/checkout@v7
@@ -42,14 +44,9 @@ jobs:
         with:
           pixi-version: "v0.76.0"
 
-      - name: Generate dummy docs
-        if: ${{ github.event_name == 'pull_request' }}
-        run: pixi run --locked sphinx-build ./docs ./docs/_build -b dummy -W
-
-      - name: Generate docs
-        if: ${{ github.event_name != 'pull_request' }}
+      - name: Determine version
+        id: version
         run: |
-          pixi run --locked docs
           export CURRENT_VERSION=$(grep "^__version__" hydromt/__init__.py | cut -d= -f 2 | tr -d "\" ")
 
           if [ -z "$CURRENT_VERSION" ]; then
@@ -62,31 +59,51 @@ jobs:
           # its own vX.Y.Z folder. Releases are always made from
           # release branches, so if main, then latest.
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            echo "DOC_VERSION=latest" >> "$GITHUB_ENV"
+            echo "doc_version=latest" >> "$GITHUB_OUTPUT"
           elif echo "$CURRENT_VERSION" | grep -q "dev"; then
-            echo "ERROR: Failed to determine version since it"
-            echo "       contains 'dev' but is not made from main."
-            echo "       version: $CURRENT_VERSION", branch: ${{ github.ref }}
+            echo "ERROR: version contains 'dev' but ref is not main ($CURRENT_VERSION, ${{ github.ref }})"
             exit 1
           else
-            echo "DOC_VERSION=v$CURRENT_VERSION" >> "$GITHUB_ENV"
+            echo "doc_version=v$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
           fi
-          echo "Found version: $DOC_VERSION"
+
+      - name: Generate dummy docs
+        if: ${{ github.event_name == 'pull_request' }}
+        run: pixi run --locked sphinx-build ./docs ./docs/_build -b dummy -W
+
+      - name: Generate docs
+        if: ${{ github.event_name != 'pull_request' }}
+        run: |
+          pixi run --locked docs
+
+      - name: Upload built docs
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: docs-html
+          path: ./docs/_build/html
+          retention-days: 1
 
   publish-docs:
+    needs: [build-docs]
     runs-on: ubuntu-latest
     if: ${{ github.event_name != 'pull_request' }}
     concurrency:
       group: gh-pages-write
       cancel-in-progress: false
-    needs: [build-docs]
     steps:
-    - name: Upload to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v4.1.0
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs/_build/html
-        exclude_assets: .buildinfo,_sources/*,_examples/*.ipynb
-        destination_dir: ./${{ env.DOC_VERSION }}
-        keep_files: false
-        full_commit_message: Deploy ${{ env.DOC_VERSION }} to GitHub Pages
+      - name: Download built docs
+        uses: actions/download-artifact@v8
+        with:
+          name: docs-html
+          path: ./docs/_build/html
+
+      - name: Upload to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4.1.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/_build/html
+          exclude_assets: .buildinfo,_sources/*,_examples/*.ipynb
+          destination_dir: ./${{ needs.build-docs.outputs.doc_version }}
+          keep_files: false
+          full_commit_message: Deploy ${{ needs.build-docs.outputs.doc_version }} to GitHub Pages
