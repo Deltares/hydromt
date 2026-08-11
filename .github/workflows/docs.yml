@@ -45,6 +45,7 @@ jobs:
           pixi-version: "v0.76.0"
 
       - name: Determine version
+        if: ${{ github.event_name != 'pull_request' }}
         id: version
         run: |
           export CURRENT_VERSION=$(grep "^__version__" hydromt/__init__.py | cut -d= -f 2 | tr -d "\" ")
