@@ -29,9 +29,14 @@ defaults:
     shell: bash -e -l {0}
 
 jobs:
-  test-docs:
+  build-docs:
     timeout-minutes: 30
     runs-on: ubuntu-latest
+    concurrency:
+      group: docs-build-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+    outputs:
+      doc_version: ${{ steps.version.outputs.doc_version }}
     steps:
       - name: checkout code
         uses: actions/checkout@v7
@@ -39,8 +44,30 @@ jobs:
         with:
           pixi-version: "v0.76.0"
 
-      # if we're not publishing we don't have to write them, so we might as well
-      # save ourself a bunch of IO time
+      - name: Determine version
+        if: ${{ github.event_name != 'pull_request' }}
+        id: version
+        run: |
+          export CURRENT_VERSION=$(grep "^__version__" hydromt/__init__.py | cut -d= -f 2 | tr -d "\" ")
+
+          if [ -z "$CURRENT_VERSION" ]; then
+            echo "ERROR Could not determine version, exiting..."
+            exit 1
+          fi
+
+          # Docs built from main are the dev docs docs, published as "latest".
+          # Anything else (a release branch) is published under
+          # its own vX.Y.Z folder. Releases are always made from
+          # release branches, so if main, then latest.
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "doc_version=latest" >> "$GITHUB_OUTPUT"
+          elif echo "$CURRENT_VERSION" | grep -q "dev"; then
+            echo "ERROR: version contains 'dev' but ref is not main ($CURRENT_VERSION, ${{ github.ref }})"
+            exit 1
+          else
+            echo "doc_version=v$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Generate dummy docs
         if: ${{ github.event_name == 'pull_request' }}
         run: pixi run --locked sphinx-build ./docs ./docs/_build -b dummy -W
@@ -49,29 +76,35 @@ jobs:
         if: ${{ github.event_name != 'pull_request' }}
         run: |
           pixi run --locked docs
-          export CURRENT_VERSION=$(grep "^__version__" hydromt/__init__.py | cut -d= -f 2 | tr -d "\" ")
 
-          if [ -z "$CURRENT_VERSION" ]; then
-            echo "Could not determine version, exiting..."
-            exit 1
-          fi
+      - name: Upload built docs
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: docs-html
+          path: ./docs/_build/html
+          retention-days: 1
 
-          # Are we a dev version or not?
-          if echo "$CURRENT_VERSION" | grep -q "dev"; then
-            # If it's a dev version, just echo "dev"
-            echo "DOC_VERSION=dev" >> "$GITHUB_ENV"
-          else
-            # Otherwise, echo the version number
-            echo "DOC_VERSION=v$CURRENT_VERSION" >> "$GITHUB_ENV"
-          fi
+  publish-docs:
+    needs: [build-docs]
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' }}
+    concurrency:
+      group: gh-pages-write
+      cancel-in-progress: false
+    steps:
+      - name: Download built docs
+        uses: actions/download-artifact@v8
+        with:
+          name: docs-html
+          path: ./docs/_build/html
 
       - name: Upload to GitHub Pages
-        if: ${{ github.event_name != 'pull_request' }}
         uses: peaceiris/actions-gh-pages@v4.1.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/_build/html
           exclude_assets: .buildinfo,_sources/*,_examples/*.ipynb
-          destination_dir: ./${{ env.DOC_VERSION }}
+          destination_dir: ./${{ needs.build-docs.outputs.doc_version }}
           keep_files: false
-          full_commit_message: Deploy ${{ env.DOC_VERSION }} to GitHub Pages
+          full_commit_message: Deploy ${{ needs.build-docs.outputs.doc_version }} to GitHub Pages
