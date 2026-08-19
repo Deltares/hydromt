@@ -19,6 +19,8 @@ import rioxarray
 import tomli
 import xarray as xr
 import yaml
+from fsspec import AbstractFileSystem
+from fsspec.mapping import FSMap
 from pyogrio import read_dataframe
 from pyproj import CRS
 from shapely.geometry import LineString, Point, Polygon, box
@@ -173,11 +175,12 @@ def open_mfcsv(
 
 
 def open_raster(
-    uri: str | Path | IOBase | rasterio.DatasetReader | rasterio.vrt.WarpedVRT,
+    uri: str | Path | IOBase | rasterio.DatasetReader | rasterio.vrt.WarpedVRT | FSMap,
     *,
     mask_nodata: bool = False,
     chunks: int | tuple[int, ...] | dict[str, int] | None = None,
     nodata: int | float | None = None,
+    fs: FSMap | None = None,
     **kwargs,
 ) -> xr.DataArray:
     """Open a gdal-readable file with rasterio based on.
@@ -186,7 +189,7 @@ def open_raster(
 
     Arguments
     ---------
-    filename : str, path, file-like, rasterio.DatasetReader, or rasterio.WarpedVRT
+    filename : str, path, file-like, rasterio.DatasetReader, rasterio.WarpedVRT, FSMap
         Path to the file to open. Or already open rasterio dataset.
     mask_nodata : bool, optional
         set nodata values to np.nan (xarray default nodata value)
@@ -196,6 +199,8 @@ def open_raster(
         Chunk sizes along each dimension, e.g., ``5``, ``(5, 5)`` or
         ``{'x': 5, 'y': 5}``. If chunks is provided, it used to load the new
         DataArray into a dask array.
+    fs : FSMap, optional
+        fsspec filesystem mapping to read the file from, by default None.
     **kwargs:
         key-word arguments are passed to :py:meth:`xarray.open_dataset` with
         "rasterio" engine.
@@ -213,7 +218,11 @@ def open_raster(
         kwargs.pop("chunks", None)
 
     # keep only 2D DataArray
-    da: xr.DataArray = rioxarray.open_rasterio(uri, **kwargs).squeeze(drop=True)
+    if fs is not None:
+        with fs.open(uri) as fsh:
+            da: xr.DataArray = rioxarray.open_rasterio(fsh, **kwargs).squeeze(drop=True)
+    else:
+        da: xr.DataArray = rioxarray.open_rasterio(uri, **kwargs).squeeze(drop=True)
     # set missing _FillValue
     if mask_nodata:
         da.raster.set_nodata(np.nan)
@@ -240,6 +249,7 @@ def open_mfraster(
     concat_dim: str = "dim0",
     mosaic: bool = False,
     mosaic_kwargs: dict[str, Any] | None = None,
+    fs: AbstractFileSystem | None = None,
     **kwargs,
 ) -> xr.Dataset:
     """Open multiple gdal-readable files as single Dataset with geospatial attributes.
@@ -307,7 +317,7 @@ def open_mfraster(
     index_lst, file_attrs = [], []
     for i, uri in enumerate(uris):
         # read file
-        da = open_raster(uri, chunks=chunks, **kwargs)
+        da = open_raster(uri, chunks=chunks, fs=fs, **kwargs)
 
         # get name, attrs and index (if concat)
         if hasattr(uri, "path"):  # file-like

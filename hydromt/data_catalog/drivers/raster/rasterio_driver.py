@@ -194,7 +194,8 @@ class RasterioDriver(RasterDatasetDriver):
         mosaic_kwargs = open_kwargs.pop("mosaic_kwargs", {})
         if mosaic_kwargs and not mosaic:
             logger.warning(
-                "mosaic_kwargs provided but mosaic is False. Ignoring mosaic_kwargs. To use mosaic_kwargs, set mosaic=True in driver options."
+                "mosaic_kwargs provided but mosaic is False. Ignoring mosaic_kwargs."
+                "To use mosaic_kwargs, set mosaic=True in driver options."
             )
 
         # If the metadata resolver has already resolved the overview level,
@@ -203,8 +204,13 @@ class RasterioDriver(RasterDatasetDriver):
         # Then we can implement looking for a overview level in the driver.
         def _open() -> xr.Dataset:
             try:
+                fs = self.filesystem.get_fs()
                 return open_mfraster(
-                    uris, mosaic=mosaic, mosaic_kwargs=mosaic_kwargs, **open_kwargs
+                    uris,
+                    mosaic=mosaic,
+                    mosaic_kwargs=mosaic_kwargs,
+                    fs=fs,
+                    **open_kwargs,
                 )
             except rasterio.errors.RasterioIOError as e:
                 if "Cannot open overview level" in str(e):
