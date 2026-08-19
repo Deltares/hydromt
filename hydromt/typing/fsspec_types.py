@@ -2,6 +2,7 @@
 
 from typing import Any
 
+import fsspec
 from fsspec import AbstractFileSystem, filesystem
 from pydantic import (
     BaseModel,
@@ -33,6 +34,10 @@ class FSSpecFileSystem(BaseModel):
     def get_fs(self) -> AbstractFileSystem:
         """Get the underlying fsspec filesystem."""
         return self._fs
+
+    def get_fsmap(self, root: str | None = None) -> fsspec.mapping.FSMap:
+        """Get the underlying fsspec FSMap."""
+        return self._fs.get_mapper(root=root)
 
     @model_serializer()
     def serialize(self) -> dict[str, Any]:

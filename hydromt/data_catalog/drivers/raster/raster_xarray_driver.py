@@ -6,6 +6,7 @@ from typing import Any, ClassVar
 
 import xarray as xr
 from aiohttp.client_exceptions import ClientResponseError
+from fsspec.mapping import FSMap
 from pydantic import Field
 
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
@@ -116,17 +117,18 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
 
         preprocessor = self.options.get_preprocessor()
         filtered_uris, io_format = self.options.filter_uris_by_format(uris)
+        fsmaps = [self.filesystem.get_fsmap(uri) for uri in filtered_uris]
 
         # Read and merge
         if io_format == XarrayIOFormat.ZARR:
             datasets = [
                 preprocessor(ds)
-                for ds in self._open_zarrs(filtered_uris, self.options.get_kwargs())
+                for ds in self._open_zarrs(fsmaps, self.options.get_kwargs())
             ]
             ds: xr.Dataset = xr.merge(datasets)
         elif io_format == XarrayIOFormat.NETCDF4:
             ds: xr.Dataset = xr.open_mfdataset(
-                filtered_uris,
+                fsmaps,
                 decode_coords="all",
                 preprocess=preprocessor,
                 **self.options.get_kwargs(),
@@ -196,7 +198,9 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         return Path(path)
 
     @staticmethod
-    def _open_zarrs(uris: list[str], read_kwargs: dict[str, Any]) -> list[xr.Dataset]:
+    def _open_zarrs(
+        uris: list[str | FSMap], read_kwargs: dict[str, Any]
+    ) -> list[xr.Dataset]:
         """Open multiple zarr datasets with error handling."""
         datasets = []
         for _uri in uris:
