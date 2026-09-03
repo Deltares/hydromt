@@ -55,6 +55,7 @@ jobs:
           pixi run aws configure set aws_access_key_id     "$ACCESS_KEY" --profile hydromt-data
           pixi run aws configure set aws_secret_access_key "$SECRET_KEY" --profile hydromt-data
           pixi run aws configure set region eu-west-1 --profile hydromt-data
+          pixi run aws configure set endpoint_url https://s3.deltares.nl --profile hydromt-data
       - name: Test
         env:
           PYTEST_ADDOPTS: ${{ matrix.dependencies == 'low' && '-p no:warnings' || '' }}
