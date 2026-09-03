@@ -25,6 +25,7 @@ from hydromt.typing import (
     Variables,
     Zoom,
 )
+from hydromt.typing.fsspec_types import FSSpecFileSystem
 
 logger = logging.getLogger(__name__)
 
@@ -155,6 +156,10 @@ class RasterioDriver(RasterDatasetDriver):
             metadata = SourceMetadata()
 
         # Caching portion, only when the flag is True and the file format is vrt
+        # cache_vrt_tiles downloads the (remote) source files to local disk, so
+        # any subsequent open needs the local filesystem rather than the
+        # (possibly remote) filesystem the uncached uris live on.
+        read_filesystem = self.filesystem.get_fs()
         if all(uri.endswith(".vrt") for uri in uris) and self.options.cache:
             cache_dir: Path = self.options.get_cache_path(uris)
             uris_cached = []
@@ -164,6 +169,7 @@ class RasterioDriver(RasterDatasetDriver):
                 )
                 uris_cached.append(cached_uri)
             uris = uris_cached
+            read_filesystem = FSSpecFileSystem(protocol="file").get_fs()
 
         if mask is not None:
             self.options.mosaic_kwargs.update({"mask": mask})
@@ -194,7 +200,8 @@ class RasterioDriver(RasterDatasetDriver):
         mosaic_kwargs = open_kwargs.pop("mosaic_kwargs", {})
         if mosaic_kwargs and not mosaic:
             logger.warning(
-                "mosaic_kwargs provided but mosaic is False. Ignoring mosaic_kwargs. To use mosaic_kwargs, set mosaic=True in driver options."
+                "mosaic_kwargs provided but mosaic is False. Ignoring mosaic_kwargs."
+                "To use mosaic_kwargs, set mosaic=True in driver options."
             )
 
         # If the metadata resolver has already resolved the overview level,
@@ -204,13 +211,21 @@ class RasterioDriver(RasterDatasetDriver):
         def _open() -> xr.Dataset:
             try:
                 return open_mfraster(
-                    uris, mosaic=mosaic, mosaic_kwargs=mosaic_kwargs, **open_kwargs
+                    uris,
+                    mosaic=mosaic,
+                    mosaic_kwargs=mosaic_kwargs,
+                    filesystem=read_filesystem,
+                    **open_kwargs,
                 )
             except rasterio.errors.RasterioIOError as e:
                 if "Cannot open overview level" in str(e):
                     open_kwargs.pop("overview_level", None)
                     return open_mfraster(
-                        uris, mosaic=mosaic, mosaic_kwargs=mosaic_kwargs, **open_kwargs
+                        uris,
+                        mosaic=mosaic,
+                        mosaic_kwargs=mosaic_kwargs,
+                        filesystem=read_filesystem,
+                        **open_kwargs,
                     )
                 else:
                     raise

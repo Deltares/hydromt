@@ -14,8 +14,9 @@ from hydromt.data_catalog.drivers.dataset.dataset_driver import DatasetDriver
 from hydromt.data_catalog.drivers.xarray_options import (
     XarrayDriverOptions,
     XarrayIOFormat,
+    _read_xarray,
 )
-from hydromt.error import NoDataStrategy, exec_nodata_strat
+from hydromt.error import NoDataStrategy
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +43,7 @@ class DatasetXarrayDriver(DatasetDriver):
 
     def read(
         self, uris: list[str], *, handle_nodata: NoDataStrategy = NoDataStrategy.RAISE
-    ) -> xr.Dataset:
+    ) -> xr.Dataset | None:
         """
         Read zarr or netCDF data into an xarray Dataset.
 
@@ -60,45 +61,21 @@ class DatasetXarrayDriver(DatasetDriver):
 
         Returns
         -------
-        xr.Dataset
-            The dataset read from the source files.
+        xr.Dataset | None
+            The dataset read from the source files, or None if no data was found and the strategy allows.
 
         Raises
         ------
         ValueError
             If the provided files have mixed or unsupported extensions.
         """
-        preprocessor = self.options.get_preprocessor()
-        filtered_uris, io_format = self.options.filter_uris_by_format(uris)
-
-        # Read and merge
-        if io_format == XarrayIOFormat.ZARR:
-            datasets = [
-                preprocessor(xr.open_zarr(_uri, **self.options.get_kwargs()))
-                for _uri in filtered_uris
-            ]
-            ds: xr.Dataset = xr.merge(datasets)
-        elif io_format == XarrayIOFormat.NETCDF4:
-            ds: xr.Dataset = xr.open_mfdataset(
-                filtered_uris,
-                decode_coords="all",
-                preprocess=preprocessor,
-                **self.options.get_kwargs(),
-                decode_timedelta=True,
-            )
-        else:
-            raise ValueError(
-                f"Unknown extension for DatasetXarrayDriver: {self.options.get_reading_ext(uris[0])}"
-            )
-
-        for variable in ds.data_vars:
-            if ds[variable].size == 0:
-                exec_nodata_strat(
-                    f"No data from driver: '{self.name}' for variable: '{variable}'",
-                    strategy=handle_nodata,
-                )
-                return None  # handle_nodata == ignore
-        return ds
+        return _read_xarray(
+            uris=uris,
+            options=self.options,
+            filesystem=self.filesystem,
+            driver_name=self.name,
+            handle_nodata=handle_nodata,
+        )
 
     def write(
         self,
