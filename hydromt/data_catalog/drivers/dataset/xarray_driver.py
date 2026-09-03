@@ -16,6 +16,7 @@ from hydromt.data_catalog.drivers.xarray_options import (
     XarrayIOFormat,
 )
 from hydromt.error import NoDataStrategy, exec_nodata_strat
+from hydromt.readers import open_mfdataset, open_zarrs
 
 logger = logging.getLogger(__name__)
 
@@ -73,18 +74,19 @@ class DatasetXarrayDriver(DatasetDriver):
 
         # Read and merge
         if io_format == XarrayIOFormat.ZARR:
+            # FSMap carries the fs's credentials; zarr's store protocol supports it
+            # directly, unlike netcdf backends which can't guess/open a Mapping.
+            fsmaps = [self.filesystem.get_fsmap(uri) for uri in filtered_uris]
             datasets = [
-                preprocessor(xr.open_zarr(_uri, **self.options.get_kwargs()))
-                for _uri in filtered_uris
+                preprocessor(ds)
+                for ds in open_zarrs(uris=fsmaps, read_kwargs=self.options.get_kwargs())
             ]
             ds: xr.Dataset = xr.merge(datasets)
         elif io_format == XarrayIOFormat.NETCDF4:
-            ds: xr.Dataset = xr.open_mfdataset(
-                filtered_uris,
-                decode_coords="all",
-                preprocess=preprocessor,
-                **self.options.get_kwargs(),
-                decode_timedelta=True,
+            ds: xr.Dataset = open_mfdataset(
+                uris=filtered_uris,
+                preprocessor=preprocessor,
+                read_kwargs=self.options.get_kwargs(),
             )
         else:
             raise ValueError(

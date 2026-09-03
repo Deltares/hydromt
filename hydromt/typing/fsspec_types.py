@@ -40,9 +40,17 @@ class FSSpecFileSystem(BaseModel):
         return self._fs.get_mapper(root=root)
 
     @model_serializer()
-    def serialize(self) -> dict[str, Any]:
-        """Serialize the filesystem to a dict."""
-        fs_dict: dict[str, str] = self.get_fs().to_dict(include_password=False)
+    def serialize(self, include_credentials: bool = False) -> dict[str, Any]:
+        """Serialize the filesystem to a dict.
+
+        Parameters
+        ----------
+        include_credentials:
+            Whether to include passwords/secrets in the serialized dict.
+        """
+        fs_dict: dict[str, str] = self.get_fs().to_dict(
+            include_password=include_credentials
+        )
         fs_dict.pop("cls", None)  # cls is not required
         if "args" in fs_dict and fs_dict["args"] == []:
             fs_dict.pop("args")  # args is optional

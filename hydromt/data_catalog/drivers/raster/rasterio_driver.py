@@ -204,19 +204,22 @@ class RasterioDriver(RasterDatasetDriver):
         # Then we can implement looking for a overview level in the driver.
         def _open() -> xr.Dataset:
             try:
-                fs = self.filesystem.get_fs()
                 return open_mfraster(
                     uris,
                     mosaic=mosaic,
                     mosaic_kwargs=mosaic_kwargs,
-                    fs=fs,
+                    filesystem=self.filesystem.get_fs(),
                     **open_kwargs,
                 )
             except rasterio.errors.RasterioIOError as e:
                 if "Cannot open overview level" in str(e):
                     open_kwargs.pop("overview_level", None)
                     return open_mfraster(
-                        uris, mosaic=mosaic, mosaic_kwargs=mosaic_kwargs, **open_kwargs
+                        uris,
+                        mosaic=mosaic,
+                        mosaic_kwargs=mosaic_kwargs,
+                        filesystem=self.filesystem.get_fs(),
+                        **open_kwargs,
                     )
                 else:
                     raise

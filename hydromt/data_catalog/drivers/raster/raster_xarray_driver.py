@@ -5,8 +5,6 @@ from pathlib import Path
 from typing import Any, ClassVar
 
 import xarray as xr
-from aiohttp.client_exceptions import ClientResponseError
-from fsspec.mapping import FSMap
 from pydantic import Field
 
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
@@ -21,6 +19,7 @@ from hydromt.data_catalog.drivers.xarray_options import (
     XarrayIOFormat,
 )
 from hydromt.error import NoDataStrategy, exec_nodata_strat
+from hydromt.readers import open_mfdataset, open_zarrs
 from hydromt.typing import (
     Geom,
     SourceMetadata,
@@ -117,22 +116,22 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
 
         preprocessor = self.options.get_preprocessor()
         filtered_uris, io_format = self.options.filter_uris_by_format(uris)
-        fsmaps = [self.filesystem.get_fsmap(uri) for uri in filtered_uris]
 
         # Read and merge
         if io_format == XarrayIOFormat.ZARR:
+            # FSMap carries the fs's credentials; zarr's store protocol supports it
+            # directly, unlike netcdf backends which can't guess/open a Mapping.
+            fsmaps = [self.filesystem.get_fsmap(uri) for uri in filtered_uris]
             datasets = [
                 preprocessor(ds)
-                for ds in self._open_zarrs(fsmaps, self.options.get_kwargs())
+                for ds in open_zarrs(uris=fsmaps, read_kwargs=self.options.get_kwargs())
             ]
             ds: xr.Dataset = xr.merge(datasets)
         elif io_format == XarrayIOFormat.NETCDF4:
-            ds: xr.Dataset = xr.open_mfdataset(
-                fsmaps,
-                decode_coords="all",
-                preprocess=preprocessor,
-                **self.options.get_kwargs(),
-                decode_timedelta=True,
+            ds: xr.Dataset = open_mfdataset(
+                uris=filtered_uris,
+                preprocessor=preprocessor,
+                read_kwargs=self.options.get_kwargs(),
             )
         else:
             raise ValueError(
@@ -196,21 +195,3 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
             data.to_netcdf(path, **write_kwargs)
 
         return Path(path)
-
-    @staticmethod
-    def _open_zarrs(
-        uris: list[str | FSMap], read_kwargs: dict[str, Any]
-    ) -> list[xr.Dataset]:
-        """Open multiple zarr datasets with error handling."""
-        datasets = []
-        for _uri in uris:
-            try:
-                ds = xr.open_zarr(_uri, **read_kwargs)
-                datasets.append(ds)
-            except ClientResponseError as e:
-                if e.status == 401:
-                    raise PermissionError(
-                        f"Unauthorized access to {_uri}. Check your credentials."
-                    ) from e
-                raise
-        return datasets

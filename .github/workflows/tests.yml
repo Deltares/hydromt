@@ -42,6 +42,15 @@ jobs:
       cancel-in-progress: true
     steps:
       - uses: actions/checkout@v7
+      - name: Create aws profile for minio access
+        env:
+          ACCESS_KEY: ${{ secrets.MINIO_ACCESS_KEY_READONLY_HYDROMT_DATA }}
+          SECRET_KEY: ${{ secrets.MINIO_SECRET_KEY_READONLY_HYDROMT_DATA }}
+        run: |
+          mkdir -p ~/.aws
+          aws configure set aws_access_key_id     "$ACCESS_KEY" --profile hydromt-data
+          aws configure set aws_secret_access_key "$SECRET_KEY" --profile hydromt-data
+          aws configure set region eu-west-1 --profile hydromt-data
       - uses: prefix-dev/setup-pixi@v0.10.0
         with:
           pixi-version: "v0.76.0"
