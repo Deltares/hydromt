@@ -453,7 +453,7 @@ class Model(object, metaclass=ABCMeta):
         Parameters
         ----------
             components: Optional[List[str]]
-                the components that should be writen to disk. If None is provided
+                the components that should be written to disk. If None is provided
                 all components will be written.
         """
         components = components or list(self.components.keys())
