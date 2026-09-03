@@ -5,11 +5,20 @@ from pathlib import Path
 
 import pytest
 import xarray as xr
-from botocore.exceptions import ClientError, ProfileNotFound
 
-from hydromt._compat import HAS_BOTO3
+from hydromt._compat import HAS_BOTO3, HAS_S3FS
 from hydromt.data_catalog import DataCatalog
 from hydromt.readers import open_mfdataset, open_zarrs
+
+requires_s3_deps = pytest.mark.skipif(
+    not (HAS_BOTO3 and HAS_S3FS),
+    reason="boto3 and s3fs are required for this test. Install the `io` extra.",
+)
+
+if HAS_BOTO3 and HAS_S3FS:
+    from boto3 import Session
+    from botocore.exceptions import ClientError, ProfileNotFound
+
 
 CATALOG_YAML = """
 meta:
@@ -32,17 +41,12 @@ merit_hydro:
 """
 
 
-def _require_or_skip_aws_profile(profile_name: str) -> None:
-    """In CI, missing profile is a hard failure. Locally, skip the test."""
-    if not HAS_BOTO3:
-        pytest.skip("boto3 is required for this test. Install the `io` extra.")
-    import boto3
-
+def _fail_or_skip_missing_profile(profile_name: str) -> None:
+    """In CI, a missing profile is a hard failure. Locally, skip the test."""
     try:
-        boto3.Session(profile_name=profile_name)
+        Session(profile_name=profile_name)
     except ProfileNotFound:
-        if os.environ.get("CI"):
-            # This env var is always True in gh actions
+        if os.environ.get("CI") == "true":
             # https://docs.github.com/en/actions/reference/workflows-and-actions/variables
             pytest.fail(
                 f"AWS profile '{profile_name}' not configured in CI -- "
@@ -86,6 +90,7 @@ def _make_botocore_403_error():
     )
 
 
+@requires_s3_deps
 def test_open_zarrs_wraps_s3_403_as_permission_error(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -98,6 +103,7 @@ def test_open_zarrs_wraps_s3_403_as_permission_error(
         open_zarrs(["s3://hydromt-data/merit_hydro/merit_hydro.zarr"], {})
 
 
+@requires_s3_deps
 def test_open_mfdataset_wraps_s3_403_as_permission_error(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -112,9 +118,10 @@ def test_open_mfdataset_wraps_s3_403_as_permission_error(
         )
 
 
+@requires_s3_deps
 def test_get_rasterdataset_reads_private_bucket(catalog_yaml_path: Path) -> None:
     """Real end-to-end read against the private bucket."""
-    _require_or_skip_aws_profile("hydromt-data")
+    _fail_or_skip_missing_profile("hydromt-data")
 
     dc = DataCatalog(data_libs=[str(catalog_yaml_path)])
 
