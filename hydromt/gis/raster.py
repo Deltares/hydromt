@@ -1666,7 +1666,7 @@ class RasterDataArray(XRasterBase):
     """GIS extension for xarray.DataArray."""
 
     def __init__(self, xarray_obj):
-        """Initiallize the object based on the provided xarray object."""
+        """Initialize the object based on the provided xarray object."""
         super(RasterDataArray, self).__init__(xarray_obj)
 
     @staticmethod
@@ -1759,7 +1759,7 @@ class RasterDataArray(XRasterBase):
                 raise ValueError(
                     f"Nodata value {nodata} of type {type(nodata).__name__} is "
                     f"incompatible with raster dtype {self._obj.dtype}. Please provide"
-                    " a compatible nodata value for example by specifiying it in the"
+                    " a compatible nodata value for example by specifying it in the"
                     " data catalog."
                 )
         else:
@@ -2348,7 +2348,7 @@ class RasterDataset(XRasterBase):
 
     @property
     def vars(self):
-        """list: Returns non-coordinate varibles."""
+        """list: Returns non-coordinate variables."""
         return list(self._obj.data_vars.keys())
 
     def mask_nodata(self):

@@ -132,7 +132,7 @@ def _parse_geom_bbox_buffer(
         Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
     crs: pyproj.CRS, optional
         projection of the bbox or geometry. If the geometry already has a crs, this
-        argument is ignored. Defaults to EPSG:4236.
+        argument is ignored. Defaults to EPSG:4326.
 
     Returns
     -------
@@ -142,7 +142,7 @@ def _parse_geom_bbox_buffer(
     if crs is None:
         crs = CRS("EPSG:4326")
     if geom is None and bbox is not None:
-        # convert bbox to geom with crs EPGS:4326 to apply buffer later
+        # convert bbox to geom with crs EPSG:4326 to apply buffer later
         geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=crs)
     elif geom is None:
         raise ValueError("No geom or bbox provided.")

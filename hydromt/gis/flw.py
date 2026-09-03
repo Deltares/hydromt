@@ -39,7 +39,7 @@ def flwdir_from_da(
     """Parse dataarray to flow direction raster object.
 
     If a mask coordinate is present this will be passed
-    on the the pyflwdir.from_array method.
+    on the pyflwdir.from_array method.
 
     Parameters
     ----------
@@ -535,7 +535,7 @@ def stream_map(ds, *, stream=None, **stream_kwargs):
     ds : xarray.Dataset
         dataset containing all maps for stream criteria
     stream: 2D array of bool, optional
-        Initial mask of stream cells. If a stream if provided, it is combined with the
+        Initial mask of stream cells. If a stream is provided, it is combined with the
         threshold based map using a logical AND operation.
     stream_kwargs : dict, optional
         Parameter: minimum threshold pairs to define streams.
@@ -592,9 +592,9 @@ def basin_map(
     stream: 2D array of bool, optional
         Mask of stream cells used to snap outlets to, by default None
     stream_kwargs : dict, optional
-        Parameter-treshold pairs to define streams. Multiple threshold will be combined
-        using a logical_and operation. If a stream if provided, it is combined with the
-        threshhold based map as well.
+        Parameter-threshold pairs to define streams. Multiple threshold will be combined
+        using a logical_and operation. If a stream is provided, it is combined with the
+        threshold based map as well.
 
     Returns
     -------

@@ -1,4 +1,4 @@
-"""All of the types for handeling errors within HydroMT."""
+"""All of the types for handling errors within HydroMT."""
 
 import inspect
 import logging

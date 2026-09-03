@@ -249,7 +249,7 @@ def open_mfraster(
     dataset is a merge of the rasters.
     If ``concat`` the DataArrays are concatenated along ``concat_dim`` returning a
     Dataset with a single 3D DataArray.
-    If ``mosaic`` the DataArrays are concatenated along the the spatial dimensions
+    If ``mosaic`` the DataArrays are concatenated along the spatial dimensions
     using :py:meth:`~hydromt.raster.merge`.
 
     Arguments
@@ -398,7 +398,7 @@ def open_raster_from_tindex(
     tindex_path: path, str
         Path to tile index file.
     bbox : tuple of floats, optional
-        (xmin, ymin, xmax, ymax) bounding box in EPGS:4326, by default None.
+        (xmin, ymin, xmax, ymax) bounding box in EPSG:4326, by default None.
     geom : geopandas.GeoDataFrame/Series, optional
         A geometry defining the area of interest, by default None. The geom.crs
         defaults to EPSG:4326 if not set.
@@ -476,7 +476,7 @@ def open_geodataset(
         Note that this MUST be relative to the directory where `loc_path` points to
     var_name: str, optional
         Name of the variable in case of a csv, or parquet data_path file. By default,
-        None and infered from basename.
+        None and inferred from basename.
     crs: str, `pyproj.CRS`, or dict
         Source coordinate reference system, ignored for files with a native crs.
     bbox : array of float, default None
