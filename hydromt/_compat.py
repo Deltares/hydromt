@@ -7,6 +7,7 @@ HAS_GCSFS = False
 HAS_OPENPYXL = False
 HAS_PYET = False
 HAS_S3FS = False
+HAS_BOTO3 = False
 
 try:
     import gcsfs
@@ -42,6 +43,14 @@ try:
     HAS_ADLFS = True
 except ImportError:
     pass
+
+try:
+    import boto3
+
+    HAS_BOTO3 = True
+except ImportError:
+    pass
+
 
 # entrypoints in standard library only compatible from 3.10 onwards
 py_version = sys.version_info

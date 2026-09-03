@@ -3,11 +3,11 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-import boto3
 import pytest
 import xarray as xr
 from botocore.exceptions import ClientError, ProfileNotFound
 
+from hydromt._compat import HAS_BOTO3
 from hydromt.data_catalog import DataCatalog
 from hydromt.readers import open_mfdataset, open_zarrs
 
@@ -34,6 +34,10 @@ merit_hydro:
 
 def _require_or_skip_aws_profile(profile_name: str) -> None:
     """In CI, missing profile is a hard failure. Locally, skip the test."""
+    if not HAS_BOTO3:
+        pytest.skip("boto3 is required for this test. Install the `io` extra.")
+    import boto3
+
     try:
         boto3.Session(profile_name=profile_name)
     except ProfileNotFound:
