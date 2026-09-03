@@ -191,6 +191,13 @@ def open_mfcsv(
     return ds
 
 
+def _is_local_filesystem(fs: AbstractFileSystem) -> bool:
+    """Check whether an fsspec filesystem refers to the local filesystem."""
+    protocol = fs.protocol
+    protocols = (protocol,) if isinstance(protocol, str) else protocol
+    return any(p in ("file", "local") for p in protocols)
+
+
 def open_raster(
     uri: str | Path | IOBase | rasterio.DatasetReader | rasterio.vrt.WarpedVRT | FSMap,
     *,
@@ -235,14 +242,14 @@ def open_raster(
         kwargs.pop("chunks", None)
 
     # keep only 2D DataArray
-    with reraise_as_permission_error(uri):
-        if filesystem is not None:
+    if filesystem is not None and not _is_local_filesystem(filesystem):
+        with reraise_as_permission_error(uri):
             with filesystem.open(uri) as fsh:
                 da: xr.DataArray = rioxarray.open_rasterio(fsh, **kwargs).squeeze(
                     drop=True
                 )
-        else:
-            da: xr.DataArray = rioxarray.open_rasterio(uri, **kwargs).squeeze(drop=True)
+    else:
+        da: xr.DataArray = rioxarray.open_rasterio(uri, **kwargs).squeeze(drop=True)
 
     # set missing _FillValue
     if mask_nodata:

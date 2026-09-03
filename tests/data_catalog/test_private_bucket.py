@@ -67,6 +67,7 @@ def catalog_yaml_path(tmp_path: Path) -> Path:
     return path
 
 
+@requires_s3_deps
 def test_yaml_parses_expected_filesystem_config(catalog_yaml_path: Path) -> None:
     """Pure parsing check -- no network/credentials, runs in normal CI."""
     dc = DataCatalog(data_libs=[str(catalog_yaml_path)])

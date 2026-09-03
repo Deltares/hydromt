@@ -35,8 +35,28 @@ class FSSpecFileSystem(BaseModel):
         """Get the underlying fsspec filesystem."""
         return self._fs
 
-    def get_fsmap(self, root: str | None = None) -> fsspec.mapping.FSMap:
-        """Get the underlying fsspec FSMap."""
+    def get_fsmap(
+        self, root: str | None = None, storage_options: dict[str, Any] | None = None
+    ) -> fsspec.mapping.FSMap:
+        """Get the underlying fsspec FSMap.
+
+        Parameters
+        ----------
+        root : str | None, optional
+            Root path for the FSMap.
+        storage_options : dict[str, Any] | None, optional
+            Additional storage options to merge with this filesystem's own
+            storage options when building the mapper. Useful for driver-level
+            options (e.g. set under a driver's ``options`` rather than its
+            ``filesystem``) that weren't available at filesystem construction
+            time. Default is None, which reuses the filesystem built at
+            construction time.
+        """
+        if storage_options:
+            fs = filesystem(
+                protocol=self.protocol, **{**self.storage_options, **storage_options}
+            )
+            return fs.get_mapper(root=root)
         return self._fs.get_mapper(root=root)
 
     @model_serializer()

@@ -25,6 +25,7 @@ from hydromt.typing import (
     Variables,
     Zoom,
 )
+from hydromt.typing.fsspec_types import FSSpecFileSystem
 
 logger = logging.getLogger(__name__)
 
@@ -155,6 +156,10 @@ class RasterioDriver(RasterDatasetDriver):
             metadata = SourceMetadata()
 
         # Caching portion, only when the flag is True and the file format is vrt
+        # cache_vrt_tiles downloads the (remote) source files to local disk, so
+        # any subsequent open needs the local filesystem rather than the
+        # (possibly remote) filesystem the uncached uris live on.
+        read_filesystem = self.filesystem.get_fs()
         if all(uri.endswith(".vrt") for uri in uris) and self.options.cache:
             cache_dir: Path = self.options.get_cache_path(uris)
             uris_cached = []
@@ -164,6 +169,7 @@ class RasterioDriver(RasterDatasetDriver):
                 )
                 uris_cached.append(cached_uri)
             uris = uris_cached
+            read_filesystem = FSSpecFileSystem(protocol="file").get_fs()
 
         if mask is not None:
             self.options.mosaic_kwargs.update({"mask": mask})
@@ -208,7 +214,7 @@ class RasterioDriver(RasterDatasetDriver):
                     uris,
                     mosaic=mosaic,
                     mosaic_kwargs=mosaic_kwargs,
-                    filesystem=self.filesystem.get_fs(),
+                    filesystem=read_filesystem,
                     **open_kwargs,
                 )
             except rasterio.errors.RasterioIOError as e:
@@ -218,7 +224,7 @@ class RasterioDriver(RasterDatasetDriver):
                         uris,
                         mosaic=mosaic,
                         mosaic_kwargs=mosaic_kwargs,
-                        filesystem=self.filesystem.get_fs(),
+                        filesystem=read_filesystem,
                         **open_kwargs,
                     )
                 else:

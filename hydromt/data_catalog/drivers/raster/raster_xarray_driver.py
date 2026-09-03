@@ -119,12 +119,17 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
 
         # Read and merge
         if io_format == XarrayIOFormat.ZARR:
-            # FSMap carries the fs's credentials; zarr's store protocol supports it
-            # directly, unlike netcdf backends which can't guess/open a Mapping.
-            fsmaps = [self.filesystem.get_fsmap(uri) for uri in filtered_uris]
+            # FSMap contains the filesystem's credentials and storage_options.
+            # xr.open_zarr raises a TypeError if 'storage_options' is passed alongside FSMap.
+            read_kwargs = self.options.get_kwargs()
+            extra_storage_options = read_kwargs.pop("storage_options", None)
+            fsmaps = [
+                self.filesystem.get_fsmap(uri, storage_options=extra_storage_options)
+                for uri in filtered_uris
+            ]
             datasets = [
                 preprocessor(ds)
-                for ds in open_zarrs(uris=fsmaps, read_kwargs=self.options.get_kwargs())
+                for ds in open_zarrs(uris=fsmaps, read_kwargs=read_kwargs)
             ]
             ds: xr.Dataset = xr.merge(datasets)
         elif io_format == XarrayIOFormat.NETCDF4:
