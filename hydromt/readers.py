@@ -471,14 +471,13 @@ def open_raster_from_tindex(
     if "dst_bounds" not in mosaic_kwargs:
         mosaic_kwargs.update(mask=geom)  # limit output domain to bbox/geom
 
-    with reraise_as_permission_error(f"one of {paths}"):
-        ds_out = open_mfraster(
-            paths,
-            mosaic=len(paths) > 1,
-            mosaic_kwargs=mosaic_kwargs,
-            filesystem=filesystem,
-            **kwargs,
-        )
+    ds_out = open_mfraster(
+        paths,
+        mosaic=len(paths) > 1,
+        mosaic_kwargs=mosaic_kwargs,
+        filesystem=filesystem,
+        **kwargs,
+    )
     # clip to extent
     ds_out = ds_out.raster.clip_geom(geom)
     name = ".".join(basename(tindex_path).split(".")[:-1])
