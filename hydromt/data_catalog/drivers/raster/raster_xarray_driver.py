@@ -17,9 +17,9 @@ from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
 from hydromt.data_catalog.drivers.xarray_options import (
     XarrayDriverOptions,
     XarrayIOFormat,
+    _read_xarray,
 )
-from hydromt.error import NoDataStrategy, exec_nodata_strat
-from hydromt.readers import open_mfdataset, open_zarrs
+from hydromt.error import NoDataStrategy
 from hydromt.typing import (
     Geom,
     SourceMetadata,
@@ -59,7 +59,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         zoom: Zoom | None = None,
         chunks: dict[str, Any] | None = None,
         metadata: SourceMetadata | None = None,
-    ) -> xr.Dataset:
+    ) -> xr.Dataset | None:
         """
         Read zarr or netCDF raster data into an xarray Dataset.
 
@@ -87,8 +87,8 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
 
         Returns
         -------
-        xr.Dataset
-            The merged xarray Dataset.
+        xr.Dataset | None
+            The merged xarray Dataset, or None if no data was found and the strategy allows.
 
         Raises
         ------
@@ -114,43 +114,13 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         if len(uris) == 0:
             return None  # handle_nodata == ignore
 
-        preprocessor = self.options.get_preprocessor()
-        filtered_uris, io_format = self.options.filter_uris_by_format(uris)
-
-        # Read and merge
-        if io_format == XarrayIOFormat.ZARR:
-            # FSMap contains the filesystem's credentials and storage_options.
-            # xr.open_zarr raises a TypeError if 'storage_options' is passed alongside FSMap.
-            read_kwargs = self.options.get_kwargs()
-            extra_storage_options = read_kwargs.pop("storage_options", None)
-            fsmaps = [
-                self.filesystem.get_fsmap(uri, storage_options=extra_storage_options)
-                for uri in filtered_uris
-            ]
-            datasets = [
-                preprocessor(ds)
-                for ds in open_zarrs(uris=fsmaps, read_kwargs=read_kwargs)
-            ]
-            ds: xr.Dataset = xr.merge(datasets)
-        elif io_format == XarrayIOFormat.NETCDF4:
-            ds: xr.Dataset = open_mfdataset(
-                uris=filtered_uris,
-                preprocessor=preprocessor,
-                read_kwargs=self.options.get_kwargs(),
-            )
-        else:
-            raise ValueError(
-                f"Unknown extension for RasterDatasetXarrayDriver: {self.options.get_reading_ext(uris[0])} "
-            )
-
-        for variable in ds.data_vars:
-            if ds[variable].size == 0:
-                exec_nodata_strat(
-                    f"No data from driver: '{self.name}' for variable: '{variable}'",
-                    strategy=handle_nodata,
-                )
-                return None  # handle_nodata == ignore
-        return ds
+        return _read_xarray(
+            uris=uris,
+            options=self.options,
+            filesystem=self.filesystem,
+            driver_name=self.name,
+            handle_nodata=handle_nodata,
+        )
 
     def write(
         self,

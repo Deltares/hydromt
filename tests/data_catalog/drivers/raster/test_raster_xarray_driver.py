@@ -133,11 +133,13 @@ class TestRasterXarrayDriver:
         with pytest.raises(PermissionError, match="Unauthorized access"):
             RasterDatasetXarrayDriver().read(test_zarr_uri)
 
-    def test_zarr_write(self, raster_ds: xr.Dataset, managed_tmp_path: Path):
-        zarr_path = managed_tmp_path / "raster.zarr"
+    def test_zarr_write(self, raster_ds: xr.Dataset, tmp_path: Path):
+        zarr_path = tmp_path / "raster.zarr"
         driver = RasterDatasetXarrayDriver()
         driver.write(zarr_path, raster_ds)
-        assert np.all(driver.read([str(zarr_path)]) == raster_ds)
+        read = driver.read([str(zarr_path)])
+        assert read is not None
+        assert np.all(read == raster_ds)
 
     def test_calls_zarr_with_zarr_ext(self, mocker: MockerFixture):
         mock_xr_open: mocker.MagicMock = mocker.patch(
