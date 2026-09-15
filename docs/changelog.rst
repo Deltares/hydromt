@@ -19,7 +19,7 @@ Changed
 
 Fixed
 -----
-
+- Fractions not more than 1 in ``raster.rasterize_geometry`` output.
 
 v1.4.1 (2026-08-06)
 ===================
