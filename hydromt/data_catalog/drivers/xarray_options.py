@@ -5,12 +5,19 @@ import logging
 from os.path import splitext
 from typing import Any
 
+import xarray as xr
 from dask import delayed
 from dask.base import get_scheduler
 from pydantic import Field
 
 from hydromt.data_catalog.drivers.base_driver import DriverOptions
-from hydromt.data_catalog.drivers.preprocessing import Preprocessor, get_preprocessor
+from hydromt.data_catalog.drivers.preprocessing import (
+    Preprocessor,
+    get_preprocessor,
+)
+from hydromt.error import NoDataStrategy, exec_nodata_strat
+from hydromt.readers import open_mfdataset, open_zarrs
+from hydromt.typing.fsspec_types import FSSpecFileSystem
 
 logger = logging.getLogger(__name__)
 
@@ -124,3 +131,75 @@ class XarrayDriverOptions(DriverOptions):
                 )
 
         return kwargs
+
+
+def _read_xarray(
+    uris: list[str],
+    options: XarrayDriverOptions,
+    filesystem: FSSpecFileSystem,
+    driver_name: str,
+    handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+) -> xr.Dataset | None:
+    """Read and merge xarray datasets from the given URIs based on the specified format.
+
+    Parameters
+    ----------
+    uris : list[str]
+        List of URIs to read data from.
+    options : XarrayDriverOptions
+        Driver options containing read configurations.
+    filesystem : FSSpecFileSystem
+        Filesystem object to access the URIs.
+    driver_name : str
+        Name of the driver for logging and error messages.
+    handle_nodata : NoDataStrategy, optional
+        Strategy to handle missing or empty data. Default is NoDataStrategy.RAISE.
+
+    Returns
+    -------
+    xr.Dataset | None
+        The merged xarray Dataset, or None if no data was found and the strategy allows.
+
+    Raises
+    ------
+    ValueError
+        If the file extension is unsupported.
+    NoDataException
+        If no data is found and the handling strategy requires raising an exception.
+    """
+    preprocessor = options.get_preprocessor()
+    filtered_uris, io_format = options.filter_uris_by_format(uris)
+
+    if io_format == XarrayIOFormat.ZARR:
+        # FSMap contains the filesystem's credentials and storage_options.
+        # xr.open_zarr raises a TypeError if 'storage_options' is passed alongside FSMap.
+        read_kwargs = options.get_kwargs()
+        extra_storage_options = read_kwargs.pop("storage_options", None)
+        fsmaps = [
+            filesystem.get_fsmap(uri, storage_options=extra_storage_options)
+            for uri in filtered_uris
+        ]
+        datasets = [
+            preprocessor(ds) for ds in open_zarrs(uris=fsmaps, read_kwargs=read_kwargs)
+        ]
+        ds: xr.Dataset = xr.merge(datasets)
+    elif io_format == XarrayIOFormat.NETCDF4:
+        ds: xr.Dataset = open_mfdataset(
+            uris=filtered_uris,
+            preprocessor=preprocessor,
+            read_kwargs=options.get_kwargs(),
+        )
+    else:
+        raise ValueError(
+            f"Unknown extension for {driver_name}: {options.get_reading_ext(uris[0])} "
+        )
+
+    for variable in ds.data_vars:
+        if ds[variable].size == 0:
+            exec_nodata_strat(
+                f"No data from driver: '{driver_name}' for variable: '{variable}'",
+                strategy=handle_nodata,
+            )
+            return None  # handle_nodata == ignore
+
+    return ds

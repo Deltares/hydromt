@@ -35,7 +35,7 @@ class GeoDatasetDriver(BaseDriver, ABC):
         mask: Geom | None = None,
         predicate: Predicate = "intersects",
         metadata: SourceMetadata | None = None,
-    ) -> xr.Dataset:
+    ) -> xr.Dataset | None:
         """
         Read in data to an xarray Dataset.
 

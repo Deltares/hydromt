@@ -2,6 +2,7 @@
 
 from typing import Any
 
+import fsspec
 from fsspec import AbstractFileSystem, filesystem
 from pydantic import (
     BaseModel,
@@ -34,10 +35,42 @@ class FSSpecFileSystem(BaseModel):
         """Get the underlying fsspec filesystem."""
         return self._fs
 
+    def get_fsmap(
+        self, root: str | None = None, storage_options: dict[str, Any] | None = None
+    ) -> fsspec.mapping.FSMap:
+        """Get the underlying fsspec FSMap.
+
+        Parameters
+        ----------
+        root : str | None, optional
+            Root path for the FSMap.
+        storage_options : dict[str, Any] | None, optional
+            Additional storage options to merge with this filesystem's own
+            storage options when building the mapper. Useful for driver-level
+            options (e.g. set under a driver's ``options`` rather than its
+            ``filesystem``) that weren't available at filesystem construction
+            time. Default is None, which reuses the filesystem built at
+            construction time.
+        """
+        if storage_options:
+            fs = filesystem(
+                protocol=self.protocol, **{**self.storage_options, **storage_options}
+            )
+            return fs.get_mapper(root=root)
+        return self._fs.get_mapper(root=root)
+
     @model_serializer()
-    def serialize(self) -> dict[str, Any]:
-        """Serialize the filesystem to a dict."""
-        fs_dict: dict[str, str] = self.get_fs().to_dict(include_password=False)
+    def serialize(self, include_credentials: bool = False) -> dict[str, Any]:
+        """Serialize the filesystem to a dict.
+
+        Parameters
+        ----------
+        include_credentials:
+            Whether to include passwords/secrets in the serialized dict.
+        """
+        fs_dict: dict[str, str] = self.get_fs().to_dict(
+            include_password=include_credentials
+        )
         fs_dict.pop("cls", None)  # cls is not required
         if "args" in fs_dict and fs_dict["args"] == []:
             fs_dict.pop("args")  # args is optional

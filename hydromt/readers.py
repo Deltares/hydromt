@@ -2,11 +2,12 @@
 
 import logging
 from ast import literal_eval
+from contextlib import contextmanager
 from glob import glob
 from io import IOBase
 from os.path import abspath, basename, dirname, isfile, join, splitext
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Callable, Literal, Optional
 
 import dask
 import geopandas as gpd
@@ -19,6 +20,8 @@ import rioxarray
 import tomli
 import xarray as xr
 import yaml
+from fsspec import AbstractFileSystem
+from fsspec.mapping import FSMap
 from pyogrio import read_dataframe
 from pyproj import CRS
 from shapely.geometry import LineString, Point, Polygon, box
@@ -29,16 +32,32 @@ from hydromt._utils.path import _make_config_paths_absolute
 from hydromt._utils.uris import _is_valid_url
 from hydromt.gis import gis_utils, raster, raster_utils, vector, vector_utils
 
+try:
+    from aiohttp import ClientResponseError
+except ImportError:  # pragma: no cover
+    ClientResponseError = ()  # type: ignore[assignment]
+
+try:
+    from botocore.exceptions import ClientError as BotoClientError
+except ImportError:  # pragma: no cover
+    BotoClientError = ()  # type: ignore[assignment]
+
 if TYPE_CHECKING:
     from hydromt._validators.model_config import HydromtModelStep
 
 
 logger = logging.getLogger(__name__)
 
+# Extend this tuple as more backends are folded in (e.g. google.api_core
+# exceptions if/when a gcsfs-specific path needs different handling).
+PERMISSION_ERROR_TYPES = tuple(t for t in (ClientResponseError, BotoClientError) if t)
+
 __all__ = [
     "open_mfcsv",
     "open_raster",
     "open_mfraster",
+    "open_zarrs",
+    "open_mfdataset",
     "open_ncs",
     "open_nc",
     "open_raster_from_tindex",
@@ -172,12 +191,20 @@ def open_mfcsv(
     return ds
 
 
+def _is_local_filesystem(fs: AbstractFileSystem) -> bool:
+    """Check whether an fsspec filesystem refers to the local filesystem."""
+    protocol = fs.protocol
+    protocols = (protocol,) if isinstance(protocol, str) else protocol
+    return any(p in ("file", "local") for p in protocols)
+
+
 def open_raster(
-    uri: str | Path | IOBase | rasterio.DatasetReader | rasterio.vrt.WarpedVRT,
+    uri: str | Path | IOBase | rasterio.DatasetReader | rasterio.vrt.WarpedVRT | FSMap,
     *,
     mask_nodata: bool = False,
     chunks: int | tuple[int, ...] | dict[str, int] | None = None,
     nodata: int | float | None = None,
+    filesystem: AbstractFileSystem | None = None,
     **kwargs,
 ) -> xr.DataArray:
     """Open a gdal-readable file with rasterio based on.
@@ -186,7 +213,7 @@ def open_raster(
 
     Arguments
     ---------
-    filename : str, path, file-like, rasterio.DatasetReader, or rasterio.WarpedVRT
+    filename : str, path, file-like, rasterio.DatasetReader, rasterio.WarpedVRT, FSMap
         Path to the file to open. Or already open rasterio dataset.
     mask_nodata : bool, optional
         set nodata values to np.nan (xarray default nodata value)
@@ -196,6 +223,8 @@ def open_raster(
         Chunk sizes along each dimension, e.g., ``5``, ``(5, 5)`` or
         ``{'x': 5, 'y': 5}``. If chunks is provided, it used to load the new
         DataArray into a dask array.
+    filesystem : AbstractFileSystem | None, optional
+        fsspec filesystem mapping to read the file from, by default None.
     **kwargs:
         key-word arguments are passed to :py:meth:`xarray.open_dataset` with
         "rasterio" engine.
@@ -213,7 +242,15 @@ def open_raster(
         kwargs.pop("chunks", None)
 
     # keep only 2D DataArray
-    da: xr.DataArray = rioxarray.open_rasterio(uri, **kwargs).squeeze(drop=True)
+    if filesystem is not None and not _is_local_filesystem(filesystem):
+        with reraise_as_permission_error(uri):
+            with filesystem.open(uri) as fsh:
+                da: xr.DataArray = rioxarray.open_rasterio(fsh, **kwargs).squeeze(
+                    drop=True
+                )
+    else:
+        da: xr.DataArray = rioxarray.open_rasterio(uri, **kwargs).squeeze(drop=True)
+
     # set missing _FillValue
     if mask_nodata:
         da.raster.set_nodata(np.nan)
@@ -240,6 +277,7 @@ def open_mfraster(
     concat_dim: str = "dim0",
     mosaic: bool = False,
     mosaic_kwargs: dict[str, Any] | None = None,
+    filesystem: AbstractFileSystem | None = None,
     **kwargs,
 ) -> xr.Dataset:
     """Open multiple gdal-readable files as single Dataset with geospatial attributes.
@@ -307,7 +345,7 @@ def open_mfraster(
     index_lst, file_attrs = [], []
     for i, uri in enumerate(uris):
         # read file
-        da = open_raster(uri, chunks=chunks, **kwargs)
+        da = open_raster(uri, chunks=chunks, filesystem=filesystem, **kwargs)
 
         # get name, attrs and index (if concat)
         if hasattr(uri, "path"):  # file-like
@@ -379,12 +417,13 @@ def open_mfraster(
 
 
 def open_raster_from_tindex(
-    tindex_path,
+    tindex_path: str,
     *,
-    bbox=None,
-    geom=None,
-    tileindex="location",
-    mosaic_kwargs=None,
+    bbox: tuple[float, float, float, float] | None = None,
+    geom: gpd.GeoDataFrame | gpd.GeoSeries | None = None,
+    tileindex: str = "location",
+    mosaic_kwargs: dict | None = None,
+    filesystem: AbstractFileSystem | None = None,
     **kwargs,
 ):
     """Read and merge raster tiles.
@@ -407,13 +446,14 @@ def open_raster_from_tindex(
     mosaic_kwargs: dict, optional
         Mosaic key_word arguments to unify raster crs and/or resolution. See
         :py:meth:`~hydromt.merge.merge()` for options.
+    filesystem : AbstractFileSystem | None, optional
+        Filesystem object to access the raster files, by default None.
     **kwargs:
         key-word arguments are passed to :py:meth:`hydromt.readers.open_mfraster()`
 
-
     Returns
     -------
-    data : Dataset
+    data : xr.Dataset
         A single-variable Dataset of merged raster tiles.
     """
     mosaic_kwargs = mosaic_kwargs or {}
@@ -439,7 +479,11 @@ def open_raster_from_tindex(
         mosaic_kwargs.update(mask=geom)  # limit output domain to bbox/geom
 
     ds_out = open_mfraster(
-        paths, mosaic=len(paths) > 1, mosaic_kwargs=mosaic_kwargs, **kwargs
+        paths,
+        mosaic=len(paths) > 1,
+        mosaic_kwargs=mosaic_kwargs,
+        filesystem=filesystem,
+        **kwargs,
     )
     # clip to extent
     ds_out = ds_out.raster.clip_geom(geom)
@@ -448,16 +492,54 @@ def open_raster_from_tindex(
     return ds_out  # dataset to be consitent with open_mfraster
 
 
+def open_zarrs(
+    uris: list[str | FSMap], read_kwargs: dict[str, Any]
+) -> list[xr.Dataset]:
+    """Open multiple zarr datasets, normalizing 401/403s into PermissionError."""
+    datasets = []
+    for _uri in uris:
+        with reraise_as_permission_error(str(_uri)):
+            datasets.append(xr.open_zarr(_uri, **read_kwargs))
+    return datasets
+
+
+def open_mfdataset(
+    uris: list[str],
+    preprocessor: Callable[[xr.Dataset], xr.Dataset],
+    read_kwargs: dict[str, Any],
+) -> xr.Dataset:
+    """Open a multi-file netCDF dataset, normalizing 401/403s into PermissionError."""
+    with reraise_as_permission_error(f"one of {uris}"):
+        return xr.open_mfdataset(
+            uris,
+            decode_coords="all",
+            preprocess=preprocessor,
+            **read_kwargs,
+            decode_timedelta=True,
+        )
+
+
+def _extract_status_code(exc: Exception) -> Optional[int]:
+    """Normalize 'what HTTP status was this' across aiohttp- and botocore-shaped errors."""
+    status = getattr(exc, "status", None)  # aiohttp.ClientResponseError
+    if status is not None:
+        return status
+    response = getattr(exc, "response", None)  # botocore.exceptions.ClientError
+    if response is not None:
+        return response.get("ResponseMetadata", {}).get("HTTPStatusCode")
+    return None
+
+
 def open_geodataset(
-    loc_path,
+    loc_path: str,
     *,
-    data_path=None,
-    var_name=None,
-    index_dim=None,
-    chunks=None,
-    crs=None,
-    bbox=None,
-    geom=None,
+    data_path: str | None = None,
+    var_name: str | None = None,
+    index_dim: str | None = None,
+    chunks: dict | None = None,
+    crs: str | CRS | dict | None = None,
+    bbox: tuple[float, float, float, float] | None = None,
+    geom: gpd.GeoDataFrame | gpd.GeoSeries | None = None,
     **kwargs,
 ) -> xr.Dataset:
     """Open and combine geometry location GIS file and timeseries file in a xr.Dataset.
@@ -527,7 +609,13 @@ def open_geodataset(
     return ds.chunk(chunks)
 
 
-def open_timeseries_from_table(path, *, name=None, index_dim="index", **kwargs):
+def open_timeseries_from_table(
+    path: str | Path,
+    *,
+    name: str | None = None,
+    index_dim: str = "index",
+    **kwargs,
+):
     """Open timeseries csv or parquet file and parse to xarray.DataArray.
 
     Accepts files with time index on one dimension and numeric location index on the
@@ -947,7 +1035,8 @@ def open_nc(filepath: Path | str, **kwargs) -> xr.Dataset:
     xr.Dataset
         Read dataset. Don't forget to close it when you're done!
     """
-    ds = xr.open_dataset(filepath, **kwargs)
+    with reraise_as_permission_error(str(filepath)):
+        ds = xr.open_dataset(filepath, **kwargs)
     # set geo coord if present as coordinate of dataset
     if raster.GEO_MAP_COORD in ds.data_vars:
         org_close = ds._close
@@ -1079,3 +1168,16 @@ def _expand_wildcards_and_name_placeholder(
         group_dict = dict(zip(keys, m.groups(), strict=True))
         out[path] = group_dict["name"]
     return out
+
+
+@contextmanager
+def reraise_as_permission_error(context: str):
+    """Reraise various errors raised by file or network access as PermissionError."""
+    try:
+        yield
+    except PERMISSION_ERROR_TYPES as e:
+        if _extract_status_code(e) in (401, 403):
+            raise PermissionError(
+                f"Unauthorized access to {context}. Check your credentials."
+            ) from e
+        raise
