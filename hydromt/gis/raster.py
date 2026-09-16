@@ -1362,6 +1362,8 @@ class XRasterBase(XGeoBase):
             da_out = da_area / da_gridarea
             # As not all da_gridarea were computed, cover with zeros
             da_out = da_out.fillna(0)
+            # Small rounding error correction
+            da_out = da_out.clip(0, 1)
             da_out.name = "fraction"
 
         da_out.raster.set_nodata(nodata)
