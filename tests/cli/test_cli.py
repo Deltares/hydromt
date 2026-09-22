@@ -1,6 +1,7 @@
 """Tests for the cli submodule."""
 
 import logging
+import shutil
 from datetime import date
 from pathlib import Path
 from typing import Generator
@@ -476,3 +477,22 @@ def test_cli_check_v0x_workflow(caplog, test_data_dir: Path):
     assert r.exit_code == 1
     error_msg = f"It seems your workflow file at {test_data_dir / 'v0x_workflow.yml'} does not contain a `steps` section. Perhaps you're using a v0.x format?"
     assert error_msg.lower() in caplog.text.lower()
+
+
+@pytest.mark.usefixtures("_reset_log_level")
+def test_cli_upgrade_datacatalog(test_data_dir: Path, tmp_path: Path):
+    target = tmp_path / "test_v0_data_catalog.yml"
+    shutil.copy(test_data_dir / "test_v0_data_catalog.yml", target)
+    r = CliRunner().invoke(
+        hydromt_cli,
+        [
+            "check",
+            "-d",
+            str(target),
+            "--format",
+            "v0",
+            "--upgrade",
+        ],
+        catch_exceptions=False,
+    )
+    assert r.exit_code == 0, r.output
