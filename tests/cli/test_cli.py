@@ -496,3 +496,5 @@ def test_cli_upgrade_datacatalog(test_data_dir: Path, tmp_path: Path):
         catch_exceptions=False,
     )
     assert r.exit_code == 0, r.output
+    out_path = target.with_stem(f"{target.stem}_v1")
+    assert out_path.exists()
