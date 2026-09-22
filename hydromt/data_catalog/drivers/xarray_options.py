@@ -10,7 +10,7 @@ from dask import delayed
 from dask.base import get_scheduler
 from pydantic import Field
 
-from hydromt.data_catalog.drivers.base_driver import DriverOptions
+from hydromt.data_catalog.drivers.base_driver import DriverOptions, resolve_filesystem
 from hydromt.data_catalog.drivers.preprocessing import (
     Preprocessor,
     get_preprocessor,
@@ -170,24 +170,24 @@ def _read_xarray(
     preprocessor = options.get_preprocessor()
     filtered_uris, io_format = options.filter_uris_by_format(uris)
 
+    # storage_options are handled once, here at the driver boundary.
+    read_kwargs = options.get_kwargs()
+    fs = resolve_filesystem(filesystem, read_kwargs)
+
     if io_format == XarrayIOFormat.ZARR:
-        # FSMap contains the filesystem's credentials and storage_options.
-        # xr.open_zarr raises a TypeError if 'storage_options' is passed alongside FSMap.
-        read_kwargs = options.get_kwargs()
-        extra_storage_options = read_kwargs.pop("storage_options", None)
-        fsmaps = [
-            filesystem.get_fsmap(uri, storage_options=extra_storage_options)
-            for uri in filtered_uris
-        ]
         datasets = [
-            preprocessor(ds) for ds in open_zarrs(uris=fsmaps, read_kwargs=read_kwargs)
+            preprocessor(ds)
+            for ds in open_zarrs(
+                uris=filtered_uris, read_kwargs=read_kwargs, filesystem=fs
+            )
         ]
         ds: xr.Dataset = xr.merge(datasets)
     elif io_format == XarrayIOFormat.NETCDF4:
         ds: xr.Dataset = open_mfdataset(
             uris=filtered_uris,
             preprocessor=preprocessor,
-            read_kwargs=options.get_kwargs(),
+            read_kwargs=read_kwargs,
+            filesystem=fs,
         )
     else:
         raise ValueError(
@@ -196,6 +196,7 @@ def _read_xarray(
 
     for variable in ds.data_vars:
         if ds[variable].size == 0:
+            ds.close()  # the dataset may own remote file handles
             exec_nodata_strat(
                 f"No data from driver: '{driver_name}' for variable: '{variable}'",
                 strategy=handle_nodata,

@@ -13,19 +13,18 @@ from pyproj import CRS
 
 from hydromt._utils import _strip_scheme, cache_vrt_tiles, temp_env
 from hydromt.config import SETTINGS
-from hydromt.data_catalog.drivers.base_driver import DriverOptions
+from hydromt.data_catalog.drivers.base_driver import DriverOptions, resolve_filesystem
 from hydromt.data_catalog.drivers.raster import RasterDatasetDriver
 from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
 from hydromt.gis._gdal_drivers import GDAL_DRIVER_CODE_MAP
 from hydromt.gis.gis_utils import zoom_to_overview_level
-from hydromt.readers import open_mfraster
+from hydromt.readers import _attach_closers, _closers_of, open_mfraster
 from hydromt.typing import (
     Geom,
     SourceMetadata,
     Variables,
     Zoom,
 )
-from hydromt.typing.fsspec_types import FSSpecFileSystem
 
 logger = logging.getLogger(__name__)
 
@@ -155,26 +154,28 @@ class RasterioDriver(RasterDatasetDriver):
         if metadata is None:
             metadata = SourceMetadata()
 
+        if mask is not None:
+            self.options.mosaic_kwargs.update({"mask": mask})
+
+        # storage_options are handled once, here at the driver boundary.
+        open_kwargs = self.options.get_kwargs()
+        read_filesystem = resolve_filesystem(self.filesystem, open_kwargs)
+
         # Caching portion, only when the flag is True and the file format is vrt
         # cache_vrt_tiles downloads the (remote) source files to local disk, so
         # any subsequent open needs the local filesystem rather than the
         # (possibly remote) filesystem the uncached uris live on.
-        read_filesystem = self.filesystem.get_fs()
         if all(uri.endswith(".vrt") for uri in uris) and self.options.cache:
             cache_dir: Path = self.options.get_cache_path(uris)
             uris_cached = []
             for uri in uris:
                 cached_uri = cache_vrt_tiles(
-                    uri, geom=mask, fs=self.filesystem.get_fs(), cache_dir=cache_dir
+                    uri, geom=mask, fs=read_filesystem, cache_dir=cache_dir
                 )
                 uris_cached.append(cached_uri)
             uris = uris_cached
-            read_filesystem = FSSpecFileSystem(protocol="file").get_fs()
+            read_filesystem = None
 
-        if mask is not None:
-            self.options.mosaic_kwargs.update({"mask": mask})
-
-        open_kwargs = self.options.get_kwargs()
         if np.issubdtype(type(metadata.nodata), np.number):
             open_kwargs.update({"nodata": metadata.nodata})
 
@@ -237,6 +238,10 @@ class RasterioDriver(RasterDatasetDriver):
         else:
             ds = _open()
 
+        # chunk/rename rebuild the Dataset, which drops the close callback that
+        # keeps (remote) file handles alive; re-attach it afterwards.
+        closers = _closers_of([ds])
+
         # Mosaic's can mess up the chunking, which can error during writing
         # Or maybe setting
         chunks = open_kwargs.get("chunks", None)
@@ -247,8 +252,11 @@ class RasterioDriver(RasterDatasetDriver):
         if variables is not None and len(variables) == 1 and len(ds.data_vars) == 1:
             ds = ds.rename({list(ds.data_vars.keys())[0]: list(variables)[0]})
 
+        ds = _attach_closers(ds, closers)
+
         for variable in ds.data_vars:
             if ds[variable].size == 0:
+                ds.close()  # the dataset may own remote file handles
                 exec_nodata_strat(
                     f"No data from driver: '{self.name}' for variable: '{variable}'",
                     strategy=handle_nodata,

@@ -1,12 +1,15 @@
 """Driver for DataFrames using the pandas library."""
 
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 
 import pandas as pd
+from fsspec import AbstractFileSystem
 
+from hydromt.data_catalog.drivers.base_driver import resolve_filesystem
 from hydromt.data_catalog.drivers.dataframe import DataFrameDriver
 from hydromt.error import NoDataStrategy, exec_nodata_strat
+from hydromt.readers import _read_table
 from hydromt.typing import Variables
 
 
@@ -65,25 +68,28 @@ class PandasDriver(DataFrameDriver):
         uri = uris[0]
         extension: str = uri.split(".")[-1]
 
+        # storage_options are handled once, here at the driver boundary.
+        options = self.options.get_kwargs()
+        fs = resolve_filesystem(self.filesystem, options)
+
         if extension == "csv":
             variables = self._unify_variables_and_pandas_kwargs(
-                uri, pd.read_csv, variables
+                uri, "csv", variables, options, filesystem=fs
             )
-            df = pd.read_csv(uri, usecols=variables, **self.options.get_kwargs())
+            df = _read_table(uri, "csv", filesystem=fs, usecols=variables, **options)
         elif extension == "parquet":
-            df = pd.read_parquet(uri, columns=variables, **self.options.get_kwargs())
+            df = _read_table(
+                uri, "parquet", filesystem=fs, columns=variables, **options
+            )
         elif extension in ["xls", "xlsx"]:
             variables = self._unify_variables_and_pandas_kwargs(
-                uri, pd.read_excel, variables
+                uri, extension, variables, options, filesystem=fs
             )
-            df = pd.read_excel(
-                uri,
-                usecols=variables,
-                engine="openpyxl",
-                **self.options.get_kwargs(),
+            df = _read_table(
+                uri, extension, filesystem=fs, usecols=variables, **options
             )
         elif extension in ["fwf", "txt"]:
-            df = pd.read_fwf(uri, **self.options.get_kwargs())
+            df = _read_table(uri, extension, filesystem=fs, **options)
         else:
             raise IOError(f"DataFrame: extension {extension} unknown.")
 
@@ -152,8 +158,11 @@ class PandasDriver(DataFrameDriver):
     def _unify_variables_and_pandas_kwargs(
         self,
         uri: str,
-        read_method: Callable,
+        fmt: str,
         variables: Optional[Variables],
+        options: dict[str, Any],
+        *,
+        filesystem: AbstractFileSystem | None = None,
     ):
         """Prevent clashes between arguments and hydromt query parameters."""
         # include index_col in variables
@@ -162,9 +171,10 @@ class PandasDriver(DataFrameDriver):
                 self.options.index_col, str
             ):
                 # if index_col is an index, get name of col
-                new_options: dict[str, Any] = self.options.get_kwargs()
-                new_options.pop("index_col", None)
-                df: pd.DataFrame = read_method(uri, **{"nrows": 1, **new_options})
+                probe_options = {k: v for k, v in options.items() if k != "index_col"}
+                df: pd.DataFrame = _read_table(
+                    uri, fmt, filesystem=filesystem, **{"nrows": 1, **probe_options}
+                )
                 return variables + [df.columns[0]]
 
         return variables

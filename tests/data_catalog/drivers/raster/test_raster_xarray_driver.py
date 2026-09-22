@@ -249,9 +249,7 @@ class TestRasterXarrayDriver:
         # No override should read only .zarr
         _ = driver.read(uris)
         assert mock_xr_open.call_count == 1
-        called_names = [
-            Path(call.args[0].root).name for call in mock_xr_open.call_args_list
-        ]
+        called_names = [Path(call.args[0]).name for call in mock_xr_open.call_args_list]
         assert called_names == ["file.zarr"]
 
         # With override should read all as .zarr
@@ -259,7 +257,5 @@ class TestRasterXarrayDriver:
         driver.options.ext_override = ".zarr"
         _ = driver.read(uris)
         assert mock_xr_open.call_count == len(uris)
-        called_names = [
-            Path(call.args[0].root).name for call in mock_xr_open.call_args_list
-        ]
+        called_names = [Path(call.args[0]).name for call in mock_xr_open.call_args_list]
         assert called_names == uris

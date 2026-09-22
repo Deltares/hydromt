@@ -11,6 +11,7 @@ from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers.base_driver import (
     DRIVER_OPTIONS_DESCRIPTION,
     DriverOptions,
+    resolve_filesystem,
 )
 from hydromt.data_catalog.drivers.geodataframe.geodataframe_driver import (
     GeoDataFrameDriver,
@@ -107,12 +108,16 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
             )
 
         _uri: str = uris[0]
+        # storage_options are handled once, here at the driver boundary.
+        options = self.options.get_kwargs()
+        fs = resolve_filesystem(self.filesystem, options)
         gdf = open_vector_from_table(
             path=_uri,
             x_dim=self.options.x_dim,
             y_dim=self.options.y_dim,
             crs=metadata.crs,
-            **self.options.get_kwargs(),
+            filesystem=fs,
+            **options,
         )
         if gdf.index.size == 0:
             exec_nodata_strat(

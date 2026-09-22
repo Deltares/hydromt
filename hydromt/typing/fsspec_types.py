@@ -1,8 +1,8 @@
 """Pydantic compatible fsspec AbstractFileSystem type."""
 
+from copy import deepcopy
 from typing import Any
 
-import fsspec
 from fsspec import AbstractFileSystem, filesystem
 from pydantic import (
     BaseModel,
@@ -10,6 +10,8 @@ from pydantic import (
     PrivateAttr,
     model_serializer,
 )
+
+from hydromt._fsio import is_local
 
 
 class FSSpecFileSystem(BaseModel):
@@ -31,33 +33,34 @@ class FSSpecFileSystem(BaseModel):
         super().__init__(protocol=protocol, storage_options=storage_options)
         self._fs = filesystem(protocol=self.protocol, **self.storage_options)
 
-    def get_fs(self) -> AbstractFileSystem:
-        """Get the underlying fsspec filesystem."""
-        return self._fs
+    @property
+    def is_local(self) -> bool:
+        """Check if the filesystem is local."""
+        return is_local(self._fs)
 
-    def get_fsmap(
-        self, root: str | None = None, storage_options: dict[str, Any] | None = None
-    ) -> fsspec.mapping.FSMap:
-        """Get the underlying fsspec FSMap.
+    def get_fs(
+        self, storage_options: dict[str, Any] | None = None
+    ) -> AbstractFileSystem:
+        """Get the underlying fsspec filesystem.
+
+        This is the single place where driver-level overrides are merged into
+        the filesystem. Readers take the resulting
+        :class:`~fsspec.AbstractFileSystem` and never see ``storage_options``.
 
         Parameters
         ----------
-        root : str | None, optional
-            Root path for the FSMap.
         storage_options : dict[str, Any] | None, optional
             Additional storage options to merge with this filesystem's own
-            storage options when building the mapper. Useful for driver-level
-            options (e.g. set under a driver's ``options`` rather than its
-            ``filesystem``) that weren't available at filesystem construction
-            time. Default is None, which reuses the filesystem built at
-            construction time.
+            storage options. Useful for driver-level options (e.g. set under a
+            driver's ``options`` rather than its ``filesystem``) that weren't
+            available at filesystem construction time. Default is None, which
+            reuses the filesystem built at construction time.
         """
         if storage_options:
-            fs = filesystem(
+            return filesystem(
                 protocol=self.protocol, **{**self.storage_options, **storage_options}
             )
-            return fs.get_mapper(root=root)
-        return self._fs.get_mapper(root=root)
+        return self._fs
 
     @model_serializer()
     def serialize(self, include_credentials: bool = False) -> dict[str, Any]:
@@ -88,8 +91,9 @@ class FSSpecFileSystem(BaseModel):
             # input is dict with build args for fsspec filesystem.
             if "protocol" not in input:
                 raise ValueError(f"Filesystem dict {input} requires 'protocol'.")
-            protocol = input.pop("protocol")
-            return FSSpecFileSystem(protocol=protocol, storage_options=input)
+            storage_options = deepcopy(input)
+            protocol = storage_options.pop("protocol")
+            return FSSpecFileSystem(protocol=protocol, storage_options=storage_options)
         elif isinstance(input, AbstractFileSystem):
             protocol = (
                 input.protocol[0]
