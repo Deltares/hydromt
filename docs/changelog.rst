@@ -20,6 +20,7 @@ Changed
 Fixed
 -----
 - Fractions not more than 1 in ``raster.rasterize_geometry`` output.
+- Format flag for cli command ``check`` now correctly accepts strings instead of enum members.
 
 v1.4.1 (2026-08-06)
 ===================
