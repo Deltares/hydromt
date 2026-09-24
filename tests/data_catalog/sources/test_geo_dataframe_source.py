@@ -27,8 +27,9 @@ class TestGeoDataFrameSource:
         datacatalog.from_predefined_catalogs("artifact_data")
         return datacatalog
 
+    @staticmethod
     @pytest.fixture(scope="class")
-    def example_geojson(self, geodf: gpd.GeoDataFrame, managed_tmp_path: Path) -> str:
+    def example_geojson(geodf: gpd.GeoDataFrame, managed_tmp_path: Path) -> str:
         uri = managed_tmp_path / f"{uuid4().hex}.geojson"
         geodf.to_file(uri, driver="GeoJSON")
         return str(uri)
