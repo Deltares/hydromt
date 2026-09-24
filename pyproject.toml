@@ -11,32 +11,32 @@ authors = [
 ]
 dependencies = [
 	"affine>=2.4",             # Spatial rasterers affine transformations (bbox pixel coalision)
-	"bottleneck>=1.4",         # Spearmen rank computation
+	"bottleneck>=1.6",         # Spearmen rank computation
 	"click>=8.2",              # CLI configuration
 	"dask>=2024",              # lazy computing
 	"fsspec[http]>=2025",      # general file systems utilities
 	"geopandas[all]>=1.0",     # pandas but geo, wraps fiona and shapely
 	"importlib_metadata>=8.0", # entrypoints backport
 	"mercantile>=1.0",         # tile handling
-	"netcdf4>=1.7",            # netcfd IO
+	"netcdf4>=1.7.3",          # netcfd IO
 	"numba>=0.63.0",           # speed up computations (used in e.g. stats)
-	"numpy>=2.0",              # pin necessary to ensure compatability with C headers
+	"numpy>=2.3.2",            # pin necessary to ensure compatability with C headers
 	"packaging>=25.0",         # compare versions of hydromt
-	"pandas>=2.3,<4",          # Dataframes
+	"pandas>=2.3.3,<4",        # Dataframes
 	"pooch>=1.8",              # data fetching
-	"pyarrow>=17.0",           # Apache Arrow bindings
-	"pydantic>=2.11",          # Validation
+	"pyarrow>=22.0",           # Apache Arrow bindings
+	"pydantic>=2.13",          # Validation
 	"pydantic-settings>=2.8",  # Settings Management
 	"pyflwdir>=0.5.10",        # Height models and derivatives
-	"pyogrio>=0.10",           # io for geopandas dataframes
-	"pyproj>=3.7",             # projections for Coordinate reference systems
+	"pyogrio>=0.12",           # io for geopandas dataframes
+	"pyproj>=3.8",             # projections for Coordinate reference systems
 	"pystac>=1.11",            # STAC integration
 	"pyyaml>=6.0.2",           # yaml interface (6.0.2 adds py3.13 wheels, older builds fail)
 	"rasterio>=1.5",           # raster wrapper around gdal
 	"requests>=2.32.2",        # donwload stuff
 	"rio-vrt>=0.3.1",          # building vrt files for caching of mosaic rasters
 	"rioxarray>=0.18",         # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
-	"scipy>=1.14",             # scientific utilities
+	"scipy>=1.16.1",           # scientific utilities
 	"shapely>=2.1.2",          # geometry transforms
 	"tenacity>=9.1",           # general-purpose retrying library
 	"tomli>=2.0",              # parsing toml files
@@ -69,13 +69,13 @@ io = [
 	"azure-identity>=1.16", # Azure credential chain (DefaultAzureCredential)
 	"adlfs>=2024",          # Azure Data Lake / Blob Storage file system
 	"gcsfs>=2023.12.1",     # google cloud file system
-	"fastparquet>=2024",    # parquet IO
+	"fastparquet>=2025.12", # parquet IO
 	"openpyxl>=3.1",        # excel IO
 	"pillow>=11.0",         # image IO
 	"s3fs>=2024",           # S3 file system
 ]
 extra = [
-	"matplotlib>=3.0", # plotting; required for slippy tiles
+	"matplotlib>=3.9", # plotting; required for slippy tiles
 	"pyet>=1.3",       # calc evapotranspiration, quite well used, used in all wflow models but domain specific
 ]
 dev = [
@@ -112,7 +112,7 @@ doc = [
 	"myst-parser>=5.0",                   # markdown support in Sphinx
 ]
 examples = [
-	"cartopy>=0.23",   # plotting examples
+	"cartopy>=0.26",   # plotting examples
 	"jupyterlab>=4.3", # run examples in jupyter notebook
 	"notebook>=7.4",   # jupyter integration
 ]
@@ -238,6 +238,9 @@ hydromt = { path = ".", editable = true }
 [tool.pixi.feature.lowest-deps]
 solve-strategy = "lowest-direct"
 pypi-options.no-binary = ["hydromt"]
+# `no-build = true`will automatically skip any version that lacks a prebuilt wheel
+# and land on the lowest one that has one available
+pypi-options.no-build = true
 
 [tool.pixi.feature.doc.dependencies]
 pandoc = ">=3.9"
