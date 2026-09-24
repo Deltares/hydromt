@@ -8,6 +8,8 @@ HAS_OPENPYXL = False
 HAS_PYET = False
 HAS_S3FS = False
 HAS_BOTO3 = False
+HAS_H5NETCDF = False
+HAS_H5PY = False
 
 try:
     import gcsfs
@@ -51,6 +53,19 @@ try:
 except ImportError:
     pass
 
+try:
+    import h5netcdf
+
+    HAS_H5NETCDF = True
+except ImportError:
+    pass
+
+try:
+    import h5py
+
+    HAS_H5PY = True
+except ImportError:
+    pass
 
 # entrypoints in standard library only compatible from 3.10 onwards
 py_version = sys.version_info

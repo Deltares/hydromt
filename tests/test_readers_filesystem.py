@@ -14,6 +14,7 @@ import pytest
 import xarray as xr
 from fsspec.implementations.memory import MemoryFileSystem
 
+from hydromt._compat import HAS_H5NETCDF, HAS_H5PY
 from hydromt._fsio import is_local
 from hydromt.data_catalog.drivers import PandasDriver
 from hydromt.data_catalog.drivers.base_driver import resolve_filesystem
@@ -309,7 +310,14 @@ class TestOpenTables:
         assert sorted(ds.id.values) == sorted(dfs_segmented_by_points.keys())
 
 
+requires_h5_netcdf_and_h5py = pytest.mark.skipif(
+    not (HAS_H5NETCDF and HAS_H5PY),
+    reason="h5netcdf and h5py are required for this test. Install the `io` extra.",
+)
+
+
 class TestOpenXarray:
+    @requires_h5_netcdf_and_h5py
     def test_open_mfdataset_through_filesystem(
         self, obsda: xr.DataArray, tmp_path: Path, memory_fs: MemoryFileSystem
     ):
