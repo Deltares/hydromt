@@ -10,7 +10,7 @@ authors = [
 	{ name = "Sam Vente", email = "sam.vente@deltares.nl" },
 ]
 dependencies = [
-	"affine>=2.4",             # Spatial rasterers affine transformations (bbox pixel coalision)
+	"affine>=2.4,<3.0",        # Spatial rasterers affine transformations (bbox pixel coalision)
 	"bottleneck>=1.6",         # Spearmen rank computation
 	"click>=8.2",              # CLI configuration
 	"dask>=2024",              # lazy computing
@@ -44,7 +44,7 @@ dependencies = [
 	"universal_pathlib>=0.2",  # provides path compatability between different filesystems
 	"xarray>=2025.06",         # ndim data arrays
 	"xmltodict>=1.0",          # xml parser also used to read VRT
-	"xugrid>=0.15.1",          # xarray wrapper for mesh processing
+	"xugrid[all]>=0.15.1",     # xarray wrapper for mesh processing
 	"zarr>=3.1,<4",            # zarr
 ]
 
@@ -201,6 +201,12 @@ filterwarnings = [
 	# macos specific, see https://github.com/shapely/shapely/issues/2215
 	"ignore:divide by zero encountered in oriented_envelope:RuntimeWarning:shapely",
 	"ignore:invalid value encountered in oriented_envelope:RuntimeWarning:shapely",
+
+	# NetCDF4 Deprecation warning in its cython code.
+	"ignore:Setting the shape on a NumPy array has been deprecated in NumPy 2.5:DeprecationWarning",
+
+	# pandas warning in its cython code
+	"ignore:The 'generic' unit for NumPy timedelta is deprecated:DeprecationWarning",
 ]
 
 [tool.mypy]

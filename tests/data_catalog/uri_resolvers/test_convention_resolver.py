@@ -18,8 +18,9 @@ from hydromt.typing.type_def import TimeRange
 
 
 class TestConventionResolver:
+    @staticmethod
     @pytest.fixture(scope="class")
-    def test_filesystem(self) -> FSSpecFileSystem:
+    def test_filesystem() -> FSSpecFileSystem:
         template = "/{{unknown_key}}_{variable}_{year}_{month:02d}.nc"
         variables = ["precip", "temp"]
         years = ["2020", "2021"]

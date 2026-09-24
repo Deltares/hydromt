@@ -13,26 +13,30 @@ from hydromt.error import NoDataException
 
 
 class TestGeoDataFrameTableDriver:
+    @staticmethod
     @pytest.fixture(scope="class")
-    def uri_csv(self, df: pd.DataFrame, managed_tmp_path: Path) -> str:
+    def uri_csv(df: pd.DataFrame, managed_tmp_path: Path) -> str:
         uri = managed_tmp_path / "test.csv"
         df.to_csv(uri)
         return str(uri)
 
+    @staticmethod
     @pytest.fixture(scope="class")
-    def uri_parquet(self, df: pd.DataFrame, managed_tmp_path: Path) -> str:
+    def uri_parquet(df: pd.DataFrame, managed_tmp_path: Path) -> str:
         uri = managed_tmp_path / "test.parquet"
         df.to_parquet(uri)
         return str(uri)
 
+    @staticmethod
     @pytest.fixture(scope="class")
-    def uri_xls(self, df: pd.DataFrame, managed_tmp_path: Path) -> str:
+    def uri_xls(df: pd.DataFrame, managed_tmp_path: Path) -> str:
         uri = managed_tmp_path / "test.xls"
         df.to_excel(uri, engine="openpyxl")
         return str(uri)
 
+    @staticmethod
     @pytest.fixture(scope="class")
-    def uri_xlsx(self, df: pd.DataFrame, managed_tmp_path: Path) -> str:
+    def uri_xlsx(df: pd.DataFrame, managed_tmp_path: Path) -> str:
         uri = managed_tmp_path / "test.xlsx"
         df.to_excel(uri, engine="openpyxl")
         return str(uri)
@@ -51,8 +55,9 @@ class TestGeoDataFrameTableDriver:
         "uri", ["uri_csv", "uri_parquet", uri_xls_param, uri_xlsx_param]
     )
 
+    @staticmethod
     @pytest.fixture(scope="class")
-    def _raise_gdal_warnings(self):
+    def _raise_gdal_warnings():
         with warnings.catch_warnings():
             warnings.simplefilter("error")
             yield

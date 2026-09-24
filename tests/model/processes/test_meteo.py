@@ -126,7 +126,10 @@ def test_wind(era5_data, era5_dem):
         wind(era5_dem, era5_data["wind10_u"].rename({"time": "test"}))
 
     wind_out = wind(
-        era5_dem, wind_u=era5_data["wind10_u"], wind_v=era5_data["wind10_v"], freq="h"
+        era5_dem,
+        wind_u=era5_data["wind10_u"],
+        wind_v=era5_data["wind10_v"],
+        freq="1H",
     )
     assert wind_out.name == "wind"
     assert wind_out.attrs.get("unit") == "m s-1"
