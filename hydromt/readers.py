@@ -3,27 +3,37 @@
 import logging
 from ast import literal_eval
 from glob import glob
-from io import IOBase
 from os.path import abspath, basename, dirname, isfile, join, splitext
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Callable, Literal, Sequence
 
 import dask
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pyproj
-import rasterio
 import requests
 import rioxarray
 import tomli
 import xarray as xr
 import yaml
+from fsspec import AbstractFileSystem
 from pyogrio import read_dataframe
 from pyproj import CRS
 from shapely.geometry import LineString, Point, Polygon, box
 from shapely.geometry.base import GEOMETRY_TYPES
 
+from hydromt._fsio import (
+    assert_local_uri,
+    attach_close,
+    get_mapper,
+    is_local,
+    is_local_uri,
+    normalize_io_errors,
+    open_handle,
+    open_handles,
+    read_bytes,
+)
 from hydromt._utils.naming_convention import _expand_uri_placeholders
 from hydromt._utils.path import _make_config_paths_absolute
 from hydromt._utils.uris import _is_valid_url
@@ -39,6 +49,8 @@ __all__ = [
     "open_mfcsv",
     "open_raster",
     "open_mfraster",
+    "open_zarrs",
+    "open_mfdataset",
     "open_ncs",
     "open_nc",
     "open_raster_from_tindex",
@@ -56,11 +68,61 @@ OPEN_VECTOR_PREDICATE = Literal[
 ]
 OPEN_VECTOR_DRIVER = Literal["csv", "xls", "xy", "pyogrio", "parquet", "xlsx"]
 
+# kwargs of pyogrio.read_dataframe that pyogrio.read_info also understands
+_READ_INFO_KWARGS = ("layer", "encoding", "force_feature_count", "force_total_bounds")
 
+# OGR formats that need sidecar files, so they cannot be read from bytes
+_SIDECAR_EXTENSIONS = (".shp", ".gdb", ".tab", ".mif", ".000")
+
+
+def _assert_single_file_format(path: str | Path) -> None:
+    """Raise a clear error for formats that need more than the one file's bytes."""
+    ext = splitext(str(path))[-1].lower()
+    if ext in _SIDECAR_EXTENSIONS:
+        raise ValueError(
+            f"Reading '{ext}' from a remote filesystem is not supported: the format "
+            "needs sidecar files, which cannot be read from the bytes of a single "
+            "file. Download the dataset first, or convert it to a single-file "
+            "format such as GeoPackage or FlatGeobuf."
+        )
+
+
+def _read_table(
+    uri: str | Path,
+    fmt: str,
+    *,
+    filesystem: AbstractFileSystem | None = None,
+    **kwargs,
+) -> pd.DataFrame:
+    """Read a tabular file with pandas, through ``filesystem`` when it is remote.
+
+    Local paths are handed to pandas untouched so that its own path handling
+    (compression inference, globbing of storage backends) keeps working.
+    """
+    if fmt in ("csv", "xy"):
+        reader: Callable[..., pd.DataFrame] = pd.read_csv
+    elif fmt == "parquet":
+        reader = pd.read_parquet
+    elif fmt in ("xls", "xlsx"):
+        reader = pd.read_excel
+        kwargs.setdefault("engine", "openpyxl")
+    elif fmt in ("fwf", "txt"):
+        reader = pd.read_fwf
+    else:
+        raise IOError(f"Unknown table file format: {fmt}")
+
+    if is_local(filesystem):
+        return reader(uri, **kwargs)
+    with open_handle(filesystem, str(uri)) as handle:
+        return reader(handle, **kwargs)
+
+
+@normalize_io_errors
 def open_mfcsv(
     paths: dict[str | int, str | Path],
     concat_dim: str,
     *,
+    filesystem: AbstractFileSystem | None = None,
     driver_kwargs: dict[str, Any] | None = None,
     variable_axis: Literal[0, 1] = 1,
     segmented_by: Literal["id", "var"] = "id",
@@ -79,6 +141,9 @@ def open_mfcsv(
     concat_dim : str,
         name of the dimension that will be created by concatinating
         all of the supplied csv files.
+    filesystem : AbstractFileSystem | None, optional
+        fsspec filesystem to read the files from. None (default) means the
+        local filesystem, in which case the paths are passed to pandas as-is.
     driver_kwargs : dict[str, Any],
         Any additional arguments to be passed to pandas' `read_csv` function.
     variable_axis : Literal[0, 1] = 1,
@@ -111,7 +176,7 @@ def open_mfcsv(
     csv_index_name = None
     dfs = []
     for id, path in paths.items():
-        df = pd.read_csv(path, **csv_kwargs)
+        df = _read_table(path, "csv", filesystem=filesystem, **csv_kwargs)
         if variable_axis == 0:
             df = df.T
 
@@ -172,12 +237,14 @@ def open_mfcsv(
     return ds
 
 
+@normalize_io_errors
 def open_raster(
-    uri: str | Path | IOBase | rasterio.DatasetReader | rasterio.vrt.WarpedVRT,
+    uri: str | Path,
     *,
     mask_nodata: bool = False,
     chunks: int | tuple[int, ...] | dict[str, int] | None = None,
     nodata: int | float | None = None,
+    filesystem: AbstractFileSystem | None = None,
     **kwargs,
 ) -> xr.DataArray:
     """Open a gdal-readable file with rasterio based on.
@@ -186,8 +253,8 @@ def open_raster(
 
     Arguments
     ---------
-    filename : str, path, file-like, rasterio.DatasetReader, or rasterio.WarpedVRT
-        Path to the file to open. Or already open rasterio dataset.
+    uri : str, Path
+        Path or URI of the file to open. ``Path`` is only valid for local files.
     mask_nodata : bool, optional
         set nodata values to np.nan (xarray default nodata value)
     nodata: int, float, optional
@@ -196,6 +263,10 @@ def open_raster(
         Chunk sizes along each dimension, e.g., ``5``, ``(5, 5)`` or
         ``{'x': 5, 'y': 5}``. If chunks is provided, it used to load the new
         DataArray into a dask array.
+    filesystem : AbstractFileSystem | None, optional
+        fsspec filesystem to read the file from. None (default) means the local
+        filesystem, in which case the path is handed to GDAL as-is so that its
+        own drivers and fast paths keep working.
     **kwargs:
         key-word arguments are passed to :py:meth:`xarray.open_dataset` with
         "rasterio" engine.
@@ -204,16 +275,33 @@ def open_raster(
     -------
     data : DataArray
         DataArray
+
+    Notes
+    -----
+    Remote files are read lazily through a file handle. The handle is closed
+    when the returned DataArray is closed, so the data stays readable for as
+    long as the DataArray lives.
     """
     kwargs.update(masked=mask_nodata, default_name="data", chunks=chunks)
     if not mask_nodata:  # if mask_and_scale by default True in xarray ?
         kwargs.update(mask_and_scale=False)
-    if isinstance(uri, IOBase):  # file-like does not handle chunks
-        logger.warning("Removing chunks to read and load remote data.")
-        kwargs.pop("chunks", None)
 
-    # keep only 2D DataArray
-    da: xr.DataArray = rioxarray.open_rasterio(uri, **kwargs).squeeze(drop=True)
+    if is_local(filesystem):
+        # keep only 2D DataArray
+        da: xr.DataArray = rioxarray.open_rasterio(uri, **kwargs).squeeze(drop=True)
+    else:
+        # The DataArray stays lazy, so it must not outlive the handle: tie the
+        # handle's lifetime to the DataArray instead of closing it here.
+        (handle,) = open_handles(filesystem, [str(uri)])
+        try:
+            da: xr.DataArray = rioxarray.open_rasterio(handle, **kwargs).squeeze(
+                drop=True
+            )
+        except Exception:
+            handle.close()
+            raise
+        da = attach_close(da, [handle])
+
     # set missing _FillValue
     if mask_nodata:
         da.raster.set_nodata(np.nan)
@@ -232,6 +320,7 @@ def open_raster(
     return da
 
 
+@normalize_io_errors
 def open_mfraster(
     uris: str | list[str | Path],
     *,
@@ -240,6 +329,7 @@ def open_mfraster(
     concat_dim: str = "dim0",
     mosaic: bool = False,
     mosaic_kwargs: dict[str, Any] | None = None,
+    filesystem: AbstractFileSystem | None = None,
     **kwargs,
 ) -> xr.Dataset:
     """Open multiple gdal-readable files as single Dataset with geospatial attributes.
@@ -254,8 +344,8 @@ def open_mfraster(
 
     Arguments
     ---------
-    uris: str, list of str/Path/file-like
-        Paths to the rasterio/gdal files.
+    uris: str, list of str/Path
+        Paths or URIs of the rasterio/gdal files.
         Paths can be provided as list of paths or a path pattern string which is
         interpreted according to the rules used by the Unix shell. The variable name
         is derived from the basename minus extension in case a list of paths:
@@ -280,6 +370,9 @@ def open_mfraster(
     mosaic_kwargs: dict, optional
         Mosaic key_word arguments to unify raster crs and/or resolution. See
         :py:meth:`hydromt.merge.merge` for options.
+    filesystem : AbstractFileSystem | None, optional
+        fsspec filesystem to read the files from. None (default) means the local
+        filesystem.
     **kwargs:
         key-word arguments are passed to :py:meth:`hydromt.raster.open_raster`
 
@@ -297,94 +390,146 @@ def open_mfraster(
             prefix, postfix = basename(uris).split(".")[0].split("*")
         # sort so the concat order and variable name are deterministic and do
         # not depend on the (filesystem-dependent) glob order (see #1465)
-        uris = sorted(path for path in glob(uris) if not path.endswith(".xml"))
+        if filesystem is not None and not is_local(filesystem):
+            matches = filesystem.glob(uris)
+        else:
+            matches = glob(uris)
+        uris = sorted(str(path) for path in matches if not str(path).endswith(".xml"))
     else:
-        uris = [str(p) if isinstance(p, Path) else p for p in uris]
+        uris = [str(p) for p in uris]
     if len(uris) == 0:
         raise OSError("no files to open")
 
     da_lst: list[xr.DataArray] = []
     index_lst, file_attrs = [], []
-    for i, uri in enumerate(uris):
-        # read file
-        da = open_raster(uri, chunks=chunks, **kwargs)
+    try:
+        for i, uri in enumerate(uris):
+            # read file; take ownership of its handle straight away so that a
+            # failure further down still closes it
+            da = open_raster(uri, chunks=chunks, filesystem=filesystem, **kwargs)
+            da_lst.append(da)
 
-        # get name, attrs and index (if concat)
-        if hasattr(uri, "path"):  # file-like
-            bname = basename(uri.path)
-        else:
+            # get name, attrs and index (if concat)
             bname = basename(uri)
-        if concat:
-            # name based on basename until postfix or _
-            vname = bname.split(".")[0].replace(postfix, "").split("_")[0]
-            # index based on postfix behind "_"
-            if "_" in bname and bname.split(".")[0].split("_")[1].isdigit():
-                index = int(bname.split(".")[0].split("_")[1])
-            # index based on file extension (PCRaster style)
-            elif "." in bname and bname.split(".")[1].isdigit():
-                index = int(bname.split(".")[1])
-            # index based on postfix directly after prefix
-            elif prefix != "" and bname.split(".")[0].strip(prefix).isdigit():
-                index = int(bname.split(".")[0].strip(prefix))
-            # index based on a purely numeric basename, e.g. a bare wildcard
-            # pattern "*.tif" matching "1.tif", "2.tif", ... (see #1465)
-            elif prefix == "" and postfix == "" and bname.split(".")[0].isdigit():
-                index = int(bname.split(".")[0])
-            # index based on file order
+            if concat:
+                # name based on basename until postfix or _
+                vname = bname.split(".")[0].replace(postfix, "").split("_")[0]
+                # index based on postfix behind "_"
+                if "_" in bname and bname.split(".")[0].split("_")[1].isdigit():
+                    index = int(bname.split(".")[0].split("_")[1])
+                # index based on file extension (PCRaster style)
+                elif "." in bname and bname.split(".")[1].isdigit():
+                    index = int(bname.split(".")[1])
+                # index based on postfix directly after prefix
+                elif prefix != "" and bname.split(".")[0].strip(prefix).isdigit():
+                    index = int(bname.split(".")[0].strip(prefix))
+                # index based on a purely numeric basename, e.g. a bare wildcard
+                # pattern "*.tif" matching "1.tif", "2.tif", ... (see #1465)
+                elif prefix == "" and postfix == "" and bname.split(".")[0].isdigit():
+                    index = int(bname.split(".")[0])
+                # index based on file order
+                else:
+                    index = i
+                index_lst.append(index)
             else:
-                index = i
-            index_lst.append(index)
+                # name based on basename minus pre- & postfix
+                vname = bname.split(".")[0].replace(prefix, "").replace(postfix, "")
+                da.attrs.update(source_file=bname)
+            file_attrs.append(bname)
+            da.name = vname
+
+            if i > 0:
+                if not mosaic:
+                    # check if transform, shape and crs are close
+                    if not da_lst[0].raster.identical_grid(da):
+                        raise xr.MergeError("Geotransform and/or shape do not match")
+                    # copy coordinates from first raster
+                    da[da.raster.x_dim] = da_lst[0][da.raster.x_dim]
+                    da[da.raster.y_dim] = da_lst[0][da.raster.y_dim]
+                if concat or mosaic:
+                    # copy name from first raster
+                    da.name = da_lst[0].name
+
+        if concat or mosaic:
+            if concat:
+                with dask.config.set(
+                    kwargs={"array.slicing.split_large_chunks": False}
+                ):
+                    da = xr.concat(da_lst, dim=concat_dim)
+                    da.coords[concat_dim] = xr.IndexVariable(concat_dim, index_lst)
+                    da = da.sortby(concat_dim).transpose(concat_dim, ...)
+                    da.attrs.update(da_lst[0].attrs)
+            else:
+                da = raster_utils.merge(da_lst, **mosaic_kwargs)  # spatial merge
+                da.attrs.update({"source_file": "; ".join(file_attrs)})
+            ds = da.to_dataset()  # dataset for consistency
         else:
-            # name based on basename minus pre- & postfix
-            vname = bname.split(".")[0].replace(prefix, "").replace(postfix, "")
-            da.attrs.update(source_file=bname)
-        file_attrs.append(bname)
-        da.name = vname
+            ds = xr.merge(
+                da_lst
+            )  # seems that with rioxarray drops all datarrays atrributes not just ds
+            ds.attrs = {}
 
-        if i > 0:
-            if not mosaic:
-                # check if transform, shape and crs are close
-                if not da_lst[0].raster.identical_grid(da):
-                    raise xr.MergeError("Geotransform and/or shape do not match")
-                # copy coordinates from first raster
-                da[da.raster.x_dim] = da_lst[0][da.raster.x_dim]
-                da[da.raster.y_dim] = da_lst[0][da.raster.y_dim]
-            if concat or mosaic:
-                # copy name from first raster
-                da.name = da_lst[0].name
-        da_lst.append(da)
+        # update spatial attributes
+        if da_lst[0].rio.crs is not None:
+            ds.rio.write_crs(da_lst[0].rio.crs, inplace=True)
+        ds.rio.write_transform(inplace=True)
+    except Exception:
+        # the DataArrays own the (remote) file handles opened so far
+        _close_all_sources(da_lst)
+        raise
 
-    if concat or mosaic:
-        if concat:
-            with dask.config.set(kwargs={"array.slicing.split_large_chunks": False}):
-                da = xr.concat(da_lst, dim=concat_dim)
-                da.coords[concat_dim] = xr.IndexVariable(concat_dim, index_lst)
-                da = da.sortby(concat_dim).transpose(concat_dim, ...)
-                da.attrs.update(da_lst[0].attrs)
-        else:
-            da = raster_utils.merge(da_lst, **mosaic_kwargs)  # spatial merge
-            da.attrs.update({"source_file": "; ".join(file_attrs)})
-        ds = da.to_dataset()  # dataset for consistency
-    else:
-        ds = xr.merge(
-            da_lst
-        )  # seems that with rioxarray drops all datarrays atrributes not just ds
-        ds.attrs = {}
+    # merge/concat drop the per-DataArray closers, so re-attach them: the
+    # dataset can stay lazily backed by (remote) file handles.
+    return _attach_closers(ds, _closers_of(da_lst))
 
-    # update spatial attributes
-    if da_lst[0].rio.crs is not None:
-        ds.rio.write_crs(da_lst[0].rio.crs, inplace=True)
-    ds.rio.write_transform(inplace=True)
+
+def _closers_of(
+    sources: Sequence[xr.DataArray | xr.Dataset],
+) -> list[Callable[[], None]]:
+    """Collect the close callbacks of the given xarray objects."""
+    return [
+        closer
+        for closer in (getattr(obj, "_close", None) for obj in sources)
+        if closer is not None
+    ]
+
+
+def _close_all_sources(sources: Sequence[xr.DataArray | xr.Dataset]) -> None:
+    for closer in _closers_of(sources):
+        try:
+            closer()
+        except Exception:  # pragma: no cover - best effort cleanup
+            logger.debug("Could not close data source", exc_info=True)
+
+
+def _attach_closers(
+    ds: xr.Dataset, closers: Sequence[Callable[[], None]]
+) -> xr.Dataset:
+    """Run ``closers`` when ``ds`` is closed.
+
+    xarray rebuilds the Dataset on ``chunk``, ``rename``, ``clip_geom`` and
+    friends, which drops ``_close``, so re-attach it after such steps.
+    """
+    if not closers:
+        return ds
+
+    def _close() -> None:
+        for closer in closers:
+            closer()
+
+    ds.set_close(_close)
     return ds
 
 
+@normalize_io_errors
 def open_raster_from_tindex(
-    tindex_path,
+    tindex_path: str,
     *,
-    bbox=None,
-    geom=None,
-    tileindex="location",
-    mosaic_kwargs=None,
+    bbox: tuple[float, float, float, float] | None = None,
+    geom: gpd.GeoDataFrame | gpd.GeoSeries | None = None,
+    tileindex: str = "location",
+    mosaic_kwargs: dict | None = None,
+    filesystem: AbstractFileSystem | None = None,
     **kwargs,
 ):
     """Read and merge raster tiles.
@@ -396,7 +541,7 @@ def open_raster_from_tindex(
     Arguments
     ---------
     tindex_path: path, str
-        Path to tile index file.
+        Path or URI of the tile index file.
     bbox : tuple of floats, optional
         (xmin, ymin, xmax, ymax) bounding box in EPGS:4326, by default None.
     geom : geopandas.GeoDataFrame/Series, optional
@@ -407,13 +552,15 @@ def open_raster_from_tindex(
     mosaic_kwargs: dict, optional
         Mosaic key_word arguments to unify raster crs and/or resolution. See
         :py:meth:`~hydromt.merge.merge()` for options.
+    filesystem : AbstractFileSystem | None, optional
+        fsspec filesystem to read the tile index and the tiles from. None
+        (default) means the local filesystem.
     **kwargs:
         key-word arguments are passed to :py:meth:`hydromt.readers.open_mfraster()`
 
-
     Returns
     -------
-    data : Dataset
+    data : xr.Dataset
         A single-variable Dataset of merged raster tiles.
     """
     mosaic_kwargs = mosaic_kwargs or {}
@@ -421,43 +568,160 @@ def open_raster_from_tindex(
         geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
     if geom is None:
         raise ValueError("bbox or geom required in combination with tile_index")
-    gdf = gpd.read_file(tindex_path)
+    gdf = open_vector(tindex_path, filesystem=filesystem)
     gdf = gdf.iloc[gdf.sindex.query(geom.to_crs(gdf.crs).union_all())]
     if gdf.index.size == 0:
         raise IOError("No intersecting tiles found.")
     elif tileindex not in gdf.columns:
         raise IOError(f'Tile index "{tileindex}" column missing in tile index file.')
-    else:
-        root = dirname(tindex_path)
-        paths = []
-        for path in gdf[tileindex]:
-            path = Path(str(path))
-            if not path.is_absolute():
-                paths.append(Path(abspath(join(root, path))))
+
+    root = dirname(str(tindex_path))
+    uris = [_resolve_tile_uri(root, tile, filesystem) for tile in gdf[tileindex]]
+
     # read & merge data
     if "dst_bounds" not in mosaic_kwargs:
         mosaic_kwargs.update(mask=geom)  # limit output domain to bbox/geom
 
     ds_out = open_mfraster(
-        paths, mosaic=len(paths) > 1, mosaic_kwargs=mosaic_kwargs, **kwargs
+        uris,
+        mosaic=len(uris) > 1,
+        mosaic_kwargs=mosaic_kwargs,
+        filesystem=filesystem,
+        **kwargs,
     )
+    closers = _closers_of([ds_out])
     # clip to extent
     ds_out = ds_out.raster.clip_geom(geom)
     name = ".".join(basename(tindex_path).split(".")[:-1])
     ds_out = ds_out.rename({ds_out.raster.vars[0]: name})
-    return ds_out  # dataset to be consitent with open_mfraster
+    # dataset to be consitent with open_mfraster
+    return _attach_closers(ds_out, closers)
 
 
-def open_geodataset(
-    loc_path,
+def _resolve_tile_uri(
+    root: str, tile: Any, filesystem: AbstractFileSystem | None
+) -> str:
+    """Resolve a tile location from a tile index against the index's own location."""
+    tile = str(tile)
+    if is_local(filesystem):
+        path = Path(tile)
+        if path.is_absolute():
+            return str(path)
+        return str(Path(abspath(join(root, tile))))
+    if not is_local_uri(tile):
+        return tile
+    return f"{root.rstrip('/')}/{tile.lstrip('/')}"
+
+
+@normalize_io_errors
+def open_zarrs(
+    uris: list[str],
+    read_kwargs: dict[str, Any] | None = None,
     *,
-    data_path=None,
-    var_name=None,
-    index_dim=None,
-    chunks=None,
-    crs=None,
-    bbox=None,
-    geom=None,
+    filesystem: AbstractFileSystem | None = None,
+) -> list[xr.Dataset]:
+    """Open multiple zarr datasets.
+
+    Parameters
+    ----------
+    uris : list[str]
+        List of URIs pointing to zarr datasets.
+    read_kwargs : dict[str, Any] | None, optional
+        Additional keyword arguments to pass to :py:func:`xarray.open_zarr`.
+    filesystem : AbstractFileSystem | None, optional
+        fsspec filesystem to read the stores from. None (default) means the
+        local filesystem, in which case the URIs are passed to zarr as-is.
+        Remote stores are opened through a mapper, which carries the
+        filesystem's credentials.
+
+    Returns
+    -------
+    list[xr.Dataset]
+        List of opened xarray datasets.
+    """
+    read_kwargs = read_kwargs or {}
+    # a mapper already carries the filesystem's credentials, and xr.open_zarr
+    # raises a TypeError when 'storage_options' is passed alongside one.
+    stores = (
+        list(uris)
+        if is_local(filesystem)
+        else [get_mapper(filesystem, uri) for uri in uris]
+    )
+    return [xr.open_zarr(store, **read_kwargs) for store in stores]
+
+
+@normalize_io_errors
+def open_mfdataset(
+    uris: list[str],
+    preprocessor: Callable[[xr.Dataset], xr.Dataset] | None = None,
+    read_kwargs: dict[str, Any] | None = None,
+    *,
+    filesystem: AbstractFileSystem | None = None,
+) -> xr.Dataset:
+    """Open a multi-file netCDF dataset.
+
+    Parameters
+    ----------
+    uris : list[str]
+        List of URIs pointing to netCDF datasets.
+    preprocessor : Callable[[xr.Dataset], xr.Dataset] | None, optional
+        Function to preprocess each dataset before concatenation.
+    read_kwargs : dict[str, Any] | None, optional
+        Additional keyword arguments to pass to :py:func:`xarray.open_mfdataset`.
+    filesystem : AbstractFileSystem | None, optional
+        fsspec filesystem to read the files from. None (default) means the local
+        filesystem, in which case the paths are passed to xarray as-is so that
+        the ``netcdf4`` engine keeps working. Remote files are read through file
+        handles, which are closed when the returned dataset is closed.
+
+    Returns
+    -------
+    xr.Dataset
+        The combined xarray dataset.
+
+    Notes
+    -----
+    File handles do not pickle, so a lazily loaded remote dataset cannot be
+    computed with a dask distributed scheduler. The threaded scheduler is fine.
+    """
+    read_kwargs = read_kwargs or {}
+    if is_local(filesystem):
+        return xr.open_mfdataset(
+            list(uris),
+            decode_coords="all",
+            preprocess=preprocessor,
+            **read_kwargs,
+            decode_timedelta=True,
+        )
+
+    handles = open_handles(filesystem, uris)
+    try:
+        ds = xr.open_mfdataset(
+            handles,
+            decode_coords="all",
+            preprocess=preprocessor,
+            **read_kwargs,
+            decode_timedelta=True,
+        )
+    except Exception:
+        for handle in handles:
+            handle.close()
+        raise
+    # the dataset stays lazily backed by the handles, so tie their lifetime to it
+    return attach_close(ds, handles)
+
+
+@normalize_io_errors
+def open_geodataset(
+    loc_path: str,
+    *,
+    data_path: str | None = None,
+    var_name: str | None = None,
+    index_dim: str | None = None,
+    chunks: dict | None = None,
+    crs: str | CRS | dict | None = None,
+    bbox: tuple[float, float, float, float] | None = None,
+    geom: gpd.GeoDataFrame | gpd.GeoSeries | None = None,
     **kwargs,
 ) -> xr.Dataset:
     """Open and combine geometry location GIS file and timeseries file in a xr.Dataset.
@@ -497,8 +761,14 @@ def open_geodataset(
     -------
     ds: xarray.Dataset
         Dataset with geospatial coordinates.
+
+    Notes
+    -----
+    This reader is local-only: it resolves ``data_path`` relative to
+    ``loc_path`` on the local filesystem.
     """
     chunks = chunks or {}
+    assert_local_uri(loc_path, reader="open_geodataset")
     if not isfile(loc_path):
         raise IOError(f"GeoDataset point location file not found: {loc_path}")
 
@@ -527,7 +797,15 @@ def open_geodataset(
     return ds.chunk(chunks)
 
 
-def open_timeseries_from_table(path, *, name=None, index_dim="index", **kwargs):
+@normalize_io_errors
+def open_timeseries_from_table(
+    path: str | Path,
+    *,
+    name: str | None = None,
+    index_dim: str = "index",
+    filesystem: AbstractFileSystem | None = None,
+    **kwargs,
+):
     """Open timeseries csv or parquet file and parse to xarray.DataArray.
 
     Accepts files with time index on one dimension and numeric location index on the
@@ -537,11 +815,14 @@ def open_timeseries_from_table(path, *, name=None, index_dim="index", **kwargs):
     Arguments
     ---------
     path: path, str
-        Path to time series file
+        Path or URI of the time series file
     name: str
         variable name, derived from basename of path if None.
     index_dim:
         the dimension to index on.
+    filesystem : AbstractFileSystem | None, optional
+        fsspec filesystem to read the file from. None (default) means the local
+        filesystem.
     **kwargs:
         key-word arguments are passed to the reader method
 
@@ -555,9 +836,9 @@ def open_timeseries_from_table(path, *, name=None, index_dim="index", **kwargs):
     if ext == ".csv":
         csv_kwargs = dict(index_col=0, parse_dates=False)
         csv_kwargs.update(**kwargs)
-        df = pd.read_csv(path, **csv_kwargs)
+        df = _read_table(path, "csv", filesystem=filesystem, **csv_kwargs)
     elif ext in {".parquet", ".pq"}:
-        df = pd.read_parquet(path, **kwargs)
+        df = _read_table(path, "parquet", filesystem=filesystem, **kwargs)
     else:
         raise ValueError(f"Unknown table file format: {ext}")
 
@@ -604,6 +885,7 @@ def open_timeseries_from_table(path, *, name=None, index_dim="index", **kwargs):
     return xr.DataArray(df, dims=("time", index_dim), name=name)
 
 
+@normalize_io_errors
 def open_vector(
     path: str | Path,
     *,
@@ -614,6 +896,7 @@ def open_vector(
     geom: gpd.GeoDataFrame | gpd.GeoSeries | None = None,
     assert_gtype: Point | LineString | Polygon | None = None,
     predicate: OPEN_VECTOR_PREDICATE = "intersects",
+    filesystem: AbstractFileSystem | None = None,
     **kwargs,
 ):
     """Open fiona-compatible geometry, csv, parquet, excel or xy file and parse it.
@@ -625,7 +908,7 @@ def open_vector(
     Parameters
     ----------
     path: str or Path-like,
-        path to geometry file
+        path or URI of the geometry file
     driver: {'csv', 'xls', 'xy', 'pyogrio', 'parquet'}, optional
         driver used to read the file: :py:meth:`geopandas.open_file` for gdal vector
         files, :py:meth:`hydromt.open_vector_from_table`
@@ -648,6 +931,10 @@ def open_vector(
         optional. If predicate is provided, the GeoDataFrame is filtered by testing
         the predicate function against each item. Requires bbox or mask.
         By default 'intersects'
+    filesystem : AbstractFileSystem | None, optional
+        fsspec filesystem to read the file from. None (default) means the local
+        filesystem, in which case the path is handed to GDAL as-is. Remote files
+        are downloaded once and handed to OGR as bytes.
     **kwargs:
         Keyword args to be passed to the driver method when opening the file
 
@@ -657,24 +944,30 @@ def open_vector(
         Parsed geometry file
     """
     driver = driver if driver is not None else str(path).split(".")[-1].lower()
+    local = is_local(filesystem)
     if driver in ["csv", "parquet", "xls", "xlsx", "xy"]:
-        gdf = open_vector_from_table(path, driver=driver, **kwargs)
-    # drivers with multiple relevant files cannot be opened directly, we should pass the uri only
-
+        gdf = open_vector_from_table(
+            path, driver=driver, filesystem=filesystem, **kwargs
+        )
+    # gpd.read_file needs a path because some drivers use multiple files (e.g. shp);
+    # OGR can take the bytes of a single remote file instead.
+    elif driver == "pyogrio" or not local:
+        if not local:
+            _assert_single_file_format(path)
+        source = str(path) if local else read_bytes(filesystem, str(path))
+        bbox_shapely = box(*bbox) if bbox else None
+        bbox_reader = gis_utils._bbox_from_file_and_filters(
+            source,
+            bbox_shapely,
+            geom,
+            crs,
+            **{k: kwargs[k] for k in _READ_INFO_KWARGS if k in kwargs},
+        )
+        gdf = read_dataframe(source, bbox=bbox_reader, **kwargs)
     else:
-        if driver == "pyogrio":
-            if bbox:
-                bbox_shapely = box(*bbox)
-            else:
-                bbox_shapely = None
-            bbox_reader = gis_utils._bbox_from_file_and_filters(
-                str(path), bbox_shapely, geom, crs
-            )
-            gdf = read_dataframe(str(path), bbox=bbox_reader, **kwargs)
-        else:
-            if isinstance(bbox, list):
-                bbox = tuple(bbox)
-            gdf = gpd.read_file(str(path), bbox=bbox, mask=geom, **kwargs)
+        if isinstance(bbox, list):
+            bbox = tuple(bbox)
+        gdf = gpd.read_file(str(path), bbox=bbox, mask=geom, **kwargs)
 
     # check geometry type
     if assert_gtype is not None:
@@ -701,6 +994,7 @@ def open_vector(
     return gdf
 
 
+@normalize_io_errors
 def open_vector_from_table(
     path,
     *,
@@ -708,6 +1002,7 @@ def open_vector_from_table(
     x_dim=None,
     y_dim=None,
     crs=None,
+    filesystem: AbstractFileSystem | None = None,
     **kwargs,
 ):
     r"""Read point geometry files from csv, parquet, xy or excel table files.
@@ -729,7 +1024,10 @@ def open_vector_from_table(
         Coordinate reference system, accepts EPSG codes (int or str), proj (str or dict)
         or wkt (str)
     path:
-        The filename to read the table from.
+        The filename or URI to read the table from.
+    filesystem : AbstractFileSystem | None, optional
+        fsspec filesystem to read the file from. None (default) means the local
+        filesystem.
     **kwargs
         Additional keyword arguments that are passed to the underlying drivers.
 
@@ -739,21 +1037,19 @@ def open_vector_from_table(
         Parsed and filtered point geometries
     """
     driver = driver.lower() if driver is not None else str(path).split(".")[-1].lower()
+    if driver not in ("csv", "parquet", "xls", "xlsx", "xy"):
+        raise IOError(f"Driver or extension {driver} unknown for vector table.")
     if "index_col" not in kwargs and driver != "parquet":
         kwargs.update(index_col=0)
-    if driver == "csv":
-        df = pd.read_csv(path, **kwargs)
-    elif driver == "parquet":
-        df = pd.read_parquet(path, **kwargs)
-    elif driver in ["xls", "xlsx"]:
-        df = pd.read_excel(path, engine="openpyxl", **kwargs)
-    elif driver == "xy":
+    if driver == "xy":
         x_dim = x_dim if x_dim is not None else "x"
         y_dim = y_dim if y_dim is not None else "y"
         kwargs.update(index_col=False, header=None, sep=r"\s+")
-        df = pd.read_csv(path, **kwargs).rename(columns={0: x_dim, 1: y_dim})
+        df = _read_table(path, "xy", filesystem=filesystem, **kwargs).rename(
+            columns={0: x_dim, 1: y_dim}
+        )
     else:
-        raise IOError(f"Driver or extension {driver} unknown for vector table.")
+        df = _read_table(path, driver, filesystem=filesystem, **kwargs)
     # infer points from table
     df.columns = [str(c).lower() for c in df.columns]
 
@@ -931,6 +1227,7 @@ def _parse_values(
     return cfdict
 
 
+@normalize_io_errors
 def open_nc(filepath: Path | str, **kwargs) -> xr.Dataset:
     """Read a netcdf file.
 
@@ -946,7 +1243,14 @@ def open_nc(filepath: Path | str, **kwargs) -> xr.Dataset:
     -------
     xr.Dataset
         Read dataset. Don't forget to close it when you're done!
+
+    Notes
+    -----
+    This reader is local-only. Use
+    :py:meth:`hydromt.readers.open_mfdataset` to read netCDF files from a
+    remote filesystem.
     """
+    assert_local_uri(filepath, reader="open_nc")
     ds = xr.open_dataset(filepath, **kwargs)
     # set geo coord if present as coordinate of dataset
     if raster.GEO_MAP_COORD in ds.data_vars:
@@ -958,6 +1262,7 @@ def open_nc(filepath: Path | str, **kwargs) -> xr.Dataset:
     return ds
 
 
+@normalize_io_errors
 def open_ncs(
     filename_template: str | Path,
     root: Path,

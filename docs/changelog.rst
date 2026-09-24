@@ -13,14 +13,24 @@ Unreleased
 
 New
 ---
+- ``readers.open_vector``, ``readers.open_vector_from_table``, ``readers.open_timeseries_from_table``, ``readers.open_mfcsv``, ``readers.open_zarrs``, ``readers.open_mfdataset`` and ``readers.open_raster_from_tindex`` now accept an fsspec ``filesystem``, so any reader can read from a remote store. ``filesystem=None`` means the local filesystem and passes paths straight through to the underlying library.
 
 Changed
 -------
+- The readers take an fsspec ``AbstractFileSystem`` plus plain string URIs; the driver resolves user-set ``storage_options`` once, via ``FSSpecFileSystem.get_fs(storage_options)``. ``FSSpecFileSystem.get_fsmap`` and ``FSSpecFileSystem.open_if_remote`` are removed: the readers now decide which form (path, handle, bytes or mapper) their library needs. For a local filesystem, paths and ``storage_options`` are passed straight through to the underlying library as before.
+- ``PyogrioDriver`` reads through ``readers.open_vector`` instead of duplicating the pyogrio logic, and now uses the catalog ``crs`` metadata for sources without a native CRS.
+- Local-only readers give a clear error for remote paths: ``readers.open_nc``, ``readers.open_geodataset`` and ``GeoDatasetVectorDriver`` now raise "does not support remote paths" instead of a "file not found".
+- Reading a multi-file vector format (e.g. ESRI Shapefile) from a remote filesystem now raises a clear error explaining that the sidecar files cannot be read, instead of an opaque GDAL "not recognized as being in a supported file format".
+- Credential errors raised by the storage backends (e.g. missing or expired AWS or Azure credentials) are normalized to ``PermissionError`` by all readers, alongside the existing 401/403 handling.
 
 Fixed
 -----
 - Fractions not more than 1 in ``raster.rasterize_geometry`` output.
 - Format flag for cli command ``check`` now correctly accepts strings instead of enum members.
+- ``readers.open_raster`` no longer returns a DataArray backed by a closed file handle when reading from a remote filesystem. The handle stays open for as long as the DataArray lives and is closed when the DataArray - or the Dataset returned by ``readers.open_mfraster`` and ``readers.open_raster_from_tindex`` - is closed. Remote rasters are still read lazily.
+- ``readers.open_mfraster`` now closes the file handles it already opened when reading a later file fails, instead of leaking them.
+- ``readers.open_raster_from_tindex`` no longer silently drops tiles whose location in the tile index is an absolute path, and reads the tile index itself through the given filesystem.
+
 
 v1.4.1 (2026-08-06)
 ===================

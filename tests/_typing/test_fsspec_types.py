@@ -60,6 +60,24 @@ def test_filesystem_storage_options(storage_options: dict[str, Any]):
         assert dump[k] == v
 
 
+def test_get_fs_without_storage_options_reuses_filesystem():
+    fs = FSSpecFileSystem(protocol="memory", storage_options={"max_paths": 50})
+
+    assert fs.get_fs() is fs.get_fs()
+    assert fs.get_fs(storage_options={}) is fs.get_fs()
+
+
+def test_get_fs_merges_driver_level_storage_options():
+    fs = FSSpecFileSystem(protocol="memory", storage_options={"max_paths": 50})
+
+    merged = fs.get_fs(storage_options={"max_paths": 100})
+
+    assert isinstance(merged, MemoryFileSystem)
+    assert merged is not fs.get_fs()
+    # the wrapper's own options are left untouched
+    assert fs.storage_options == {"max_paths": 50}
+
+
 @pytest.mark.parametrize(
     ("create_input", "expected_fs", "expected_dump", "error_msg"),
     [

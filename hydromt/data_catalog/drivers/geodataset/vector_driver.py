@@ -7,6 +7,7 @@ from typing import Any, ClassVar
 import xarray as xr
 from pydantic import Field
 
+from hydromt._fsio import assert_local
 from hydromt.data_catalog.drivers.base_driver import (
     DRIVER_OPTIONS_DESCRIPTION,
 )
@@ -91,6 +92,9 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
 
         preprocessor = self.options.get_preprocessor()
         crs: CRS | None = metadata.crs if metadata else None
+        # open_geodataset resolves the data file relative to the location file
+        # on the local filesystem, so this driver is local-only.
+        assert_local(self.filesystem.get_fs(), reader=f"Driver '{self.name}'", uri=uri)
         data = open_geodataset(
             loc_path=uri,
             geom=mask,
