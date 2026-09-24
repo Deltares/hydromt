@@ -46,7 +46,7 @@ Quick comparison
      - ``abfs://container/path/file.nc``
 
 For private S3 buckets, see :ref:`private_s3`.  For private Azure storage,
-see :doc:`azure_blob_storage`.
+see :ref:`azure_blob_storage`.
 
 
 .. _cloud_simple:
@@ -232,6 +232,6 @@ Public Azure containers and containers that authenticate through environment
 variables can be read with the generic approach above.  For everything
 Azure-specific — SAS tokens, HTTPS blob URLs, AzureML datastore URIs, the
 Azure credential chain, and signed HTTPS URLs for rasterio / GDAL — HydroMT
-provides a dedicated resolver.  See :doc:`azure_blob_storage` for details,
+provides a dedicated resolver.  See :ref:`azure_blob_storage` for details,
 including :ref:`choosing_resolver` and a step-by-step guide to
 :ref:`azure_sas_quickstart`.

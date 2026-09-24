@@ -61,4 +61,4 @@ Using a data catalog
    Supported data types <data_types>
    Data conventions <data_conventions>
    Cloud storage <data_cloud_storage>
-   Azure Blob storage <azure_blob_storage>
+   Azure Blob storage <data_azure_blob_storage>

@@ -7,7 +7,7 @@ Azure Blob Storage
 This page covers reading data from **Azure Blob Storage / ADLS Gen2** with
 HydroMT's dedicated Azure Blob Resolver.  For an overview of cloud storage
 access in HydroMT, and for simple (public or environment-variable
-authenticated) access to Azure, S3 and GCS, see :doc:`cloud_storage`.
+authenticated) access to Azure, S3 and GCS, see :ref:`cloud_storage`.
 
 
 .. _azure_blob_resolver:
@@ -262,7 +262,7 @@ GDAL/rasterio compatibility with private data.
    * - rasterio / GDAL needs signed HTTPS URLs
      - No
      - **Yes** (automatic)
-   * - S3 or GCS data (see :doc:`cloud_storage`, including :ref:`private_s3`)
+   * - S3 or GCS data (see :ref:`cloud_storage`, including :ref:`private_s3`)
      - **Yes**
      - No (Azure only)
 
