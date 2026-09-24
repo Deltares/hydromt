@@ -331,6 +331,7 @@ class TestOpenXarray:
         assert np.allclose(ds["test"].values, obsda.values)
         ds.close()
 
+    @requires_h5_netcdf_and_h5py
     def test_open_mfdataset_closes_handles_with_dataset(
         self,
         obsda: xr.DataArray,
