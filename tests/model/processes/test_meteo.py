@@ -129,7 +129,7 @@ def test_wind(era5_data, era5_dem):
         era5_dem,
         wind_u=era5_data["wind10_u"],
         wind_v=era5_data["wind10_v"],
-        freq="1H",
+        freq="1h",
     )
     assert wind_out.name == "wind"
     assert wind_out.attrs.get("unit") == "m s-1"
