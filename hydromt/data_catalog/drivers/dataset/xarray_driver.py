@@ -14,7 +14,7 @@ from hydromt.data_catalog.drivers.dataset.dataset_driver import DatasetDriver
 from hydromt.data_catalog.drivers.xarray_options import (
     XarrayDriverOptions,
     XarrayIOFormat,
-    _read_xarray,
+    read_xarray,
 )
 from hydromt.error import NoDataStrategy
 
@@ -62,14 +62,15 @@ class DatasetXarrayDriver(DatasetDriver):
         Returns
         -------
         xr.Dataset | None
-            The dataset read from the source files, or None if no data was found and the strategy allows.
+            The merged xarray Dataset, or None if no data is available and the
+            handle_nodata strategy is set to ignore.
 
         Raises
         ------
         ValueError
             If the provided files have mixed or unsupported extensions.
         """
-        return _read_xarray(
+        return read_xarray(
             uris=uris,
             options=self.options,
             filesystem=self.filesystem,

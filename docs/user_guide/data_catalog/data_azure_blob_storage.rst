@@ -249,21 +249,21 @@ GDAL/rasterio compatibility with private data.
      - Yes
    * - HTTPS blob URLs (``https://<acct>.blob.core.windows.net/…``)
      - No
-     - **Yes**
+     - Yes
    * - AzureML datastore URIs (``azureml://…``)
      - No
-     - **Yes**
+     - Yes
    * - Automatic SAS token fetching from a token API
      - No
-     - **Yes**
+     - Yes
    * - Azure credential chain (DefaultAzureCredential)
      - No
-     - **Yes**
+     - Yes
    * - rasterio / GDAL needs signed HTTPS URLs
      - No
-     - **Yes** (automatic)
+     - Yes (automatic)
    * - S3 or GCS data (see :ref:`cloud_storage`, including :ref:`private_s3`)
-     - **Yes**
+     - Yes
      - No (Azure only)
 
 

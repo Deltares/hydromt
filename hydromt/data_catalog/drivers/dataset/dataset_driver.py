@@ -38,7 +38,8 @@ class DatasetDriver(BaseDriver, ABC):
         Returns
         -------
         xr.Dataset | None
-            The loaded dataset, or None if no data was found and the strategy allows.
+            The merged xarray Dataset, or None if no data is available and the
+            handle_nodata strategy is set to ignore.
         """
         ...
 

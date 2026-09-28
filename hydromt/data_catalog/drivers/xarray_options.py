@@ -133,7 +133,7 @@ class XarrayDriverOptions(DriverOptions):
         return kwargs
 
 
-def _read_xarray(
+def read_xarray(
     uris: list[str],
     options: XarrayDriverOptions,
     filesystem: FSSpecFileSystem,
@@ -158,7 +158,8 @@ def _read_xarray(
     Returns
     -------
     xr.Dataset | None
-        The merged xarray Dataset, or None if no data was found and the strategy allows.
+        The merged xarray Dataset, or None if no data is available and the
+        handle_nodata strategy is set to ignore.
 
     Raises
     ------

@@ -75,7 +75,7 @@ _READ_INFO_KWARGS = ("layer", "encoding", "force_feature_count", "force_total_bo
 _SIDECAR_EXTENSIONS = (".shp", ".gdb", ".tab", ".mif", ".000")
 
 
-def _assert_single_file_format(path: str | Path) -> None:
+def assert_single_file_format(path: str | Path) -> None:
     """Raise a clear error for formats that need more than the one file's bytes."""
     ext = splitext(str(path))[-1].lower()
     if ext in _SIDECAR_EXTENSIONS:
@@ -87,7 +87,7 @@ def _assert_single_file_format(path: str | Path) -> None:
         )
 
 
-def _read_table(
+def read_table(
     uri: str | Path,
     fmt: str,
     *,
@@ -176,7 +176,7 @@ def open_mfcsv(
     csv_index_name = None
     dfs = []
     for id, path in paths.items():
-        df = _read_table(path, "csv", filesystem=filesystem, **csv_kwargs)
+        df = read_table(path, "csv", filesystem=filesystem, **csv_kwargs)
         if variable_axis == 0:
             df = df.T
 
@@ -381,73 +381,101 @@ def open_mfraster(
     data : DataSet
         The newly created DataSet.
     """
-    mosaic_kwargs = mosaic_kwargs or {}
     if concat and mosaic:
         raise ValueError("Only one of 'mosaic' or 'concat' can be True.")
+
     prefix, postfix = "", ""
     if isinstance(uris, str):
         if "*" in uris:
             prefix, postfix = basename(uris).split(".")[0].split("*")
-        # sort so the concat order and variable name are deterministic and do
-        # not depend on the (filesystem-dependent) glob order (see #1465)
+        # sort so the concat order and variable name are deterministic
         if filesystem is not None and not is_local(filesystem):
             matches = filesystem.glob(uris)
         else:
             matches = glob(uris)
-        uris = sorted(str(path) for path in matches if not str(path).endswith(".xml"))
+        _uris = sorted(str(path) for path in matches if not str(path).endswith(".xml"))
     else:
-        uris = [str(p) for p in uris]
-    if len(uris) == 0:
+        _uris = [str(p) for p in uris]
+
+    if len(_uris) == 0:
         raise OSError("no files to open")
 
+    ds, da_lst = _open_and_combine_rasters(
+        _uris,
+        chunks=chunks,
+        concat=concat,
+        concat_dim=concat_dim,
+        mosaic=mosaic,
+        mosaic_kwargs=mosaic_kwargs,
+        prefix=prefix,
+        postfix=postfix,
+        filesystem=filesystem,
+        **kwargs,
+    )
+
+    # merge/concat drop the per-DataArray closers, so re-attach them
+    return attach_closers(ds, closers_of(da_lst))
+
+
+def _open_and_combine_rasters(
+    uris: list[str],
+    *,
+    chunks: int | tuple[int, ...] | dict[str, int] | None = None,
+    concat: bool = False,
+    concat_dim: str = "dim0",
+    mosaic: bool = False,
+    mosaic_kwargs: dict[str, Any] | None = None,
+    prefix: str = "",
+    postfix: str = "",
+    filesystem: AbstractFileSystem | None = None,
+    **kwargs,
+) -> tuple[xr.Dataset, list[xr.DataArray]]:
+    """Open a list of rasters and combine them via merge / concat / mosaic.
+
+    Returns both the resulting Dataset and the list of opened DataArrays
+    (needed so the caller can re-attach closers).
+    """
+    mosaic_kwargs = mosaic_kwargs or {}
     da_lst: list[xr.DataArray] = []
-    index_lst, file_attrs = [], []
+    index_lst: list[int] = []
+    file_attrs: list[str] = []
+
     try:
         for i, uri in enumerate(uris):
-            # read file; take ownership of its handle straight away so that a
-            # failure further down still closes it
+            # take ownership of the handle immediately
             da = open_raster(uri, chunks=chunks, filesystem=filesystem, **kwargs)
             da_lst.append(da)
 
-            # get name, attrs and index (if concat)
             bname = basename(uri)
+
             if concat:
-                # name based on basename until postfix or _
                 vname = bname.split(".")[0].replace(postfix, "").split("_")[0]
-                # index based on postfix behind "_"
+
                 if "_" in bname and bname.split(".")[0].split("_")[1].isdigit():
                     index = int(bname.split(".")[0].split("_")[1])
-                # index based on file extension (PCRaster style)
                 elif "." in bname and bname.split(".")[1].isdigit():
                     index = int(bname.split(".")[1])
-                # index based on postfix directly after prefix
                 elif prefix != "" and bname.split(".")[0].strip(prefix).isdigit():
                     index = int(bname.split(".")[0].strip(prefix))
-                # index based on a purely numeric basename, e.g. a bare wildcard
-                # pattern "*.tif" matching "1.tif", "2.tif", ... (see #1465)
                 elif prefix == "" and postfix == "" and bname.split(".")[0].isdigit():
                     index = int(bname.split(".")[0])
-                # index based on file order
                 else:
                     index = i
                 index_lst.append(index)
             else:
-                # name based on basename minus pre- & postfix
                 vname = bname.split(".")[0].replace(prefix, "").replace(postfix, "")
                 da.attrs.update(source_file=bname)
+
             file_attrs.append(bname)
             da.name = vname
 
             if i > 0:
                 if not mosaic:
-                    # check if transform, shape and crs are close
                     if not da_lst[0].raster.identical_grid(da):
                         raise xr.MergeError("Geotransform and/or shape do not match")
-                    # copy coordinates from first raster
                     da[da.raster.x_dim] = da_lst[0][da.raster.x_dim]
                     da[da.raster.y_dim] = da_lst[0][da.raster.y_dim]
                 if concat or mosaic:
-                    # copy name from first raster
                     da.name = da_lst[0].name
 
         if concat or mosaic:
@@ -460,30 +488,25 @@ def open_mfraster(
                     da = da.sortby(concat_dim).transpose(concat_dim, ...)
                     da.attrs.update(da_lst[0].attrs)
             else:
-                da = raster_utils.merge(da_lst, **mosaic_kwargs)  # spatial merge
+                da = raster_utils.merge(da_lst, **mosaic_kwargs)
                 da.attrs.update({"source_file": "; ".join(file_attrs)})
-            ds = da.to_dataset()  # dataset for consistency
+            ds = da.to_dataset()
         else:
-            ds = xr.merge(
-                da_lst
-            )  # seems that with rioxarray drops all datarrays atrributes not just ds
+            ds = xr.merge(da_lst)
             ds.attrs = {}
 
-        # update spatial attributes
         if da_lst[0].rio.crs is not None:
             ds.rio.write_crs(da_lst[0].rio.crs, inplace=True)
         ds.rio.write_transform(inplace=True)
+
+        return ds, da_lst
+
     except Exception:
-        # the DataArrays own the (remote) file handles opened so far
-        _close_all_sources(da_lst)
+        close_all_sources(da_lst)
         raise
 
-    # merge/concat drop the per-DataArray closers, so re-attach them: the
-    # dataset can stay lazily backed by (remote) file handles.
-    return _attach_closers(ds, _closers_of(da_lst))
 
-
-def _closers_of(
+def closers_of(
     sources: Sequence[xr.DataArray | xr.Dataset],
 ) -> list[Callable[[], None]]:
     """Collect the close callbacks of the given xarray objects."""
@@ -494,17 +517,15 @@ def _closers_of(
     ]
 
 
-def _close_all_sources(sources: Sequence[xr.DataArray | xr.Dataset]) -> None:
-    for closer in _closers_of(sources):
+def close_all_sources(sources: Sequence[xr.DataArray | xr.Dataset]) -> None:
+    for closer in closers_of(sources):
         try:
             closer()
         except Exception:  # pragma: no cover - best effort cleanup
             logger.debug("Could not close data source", exc_info=True)
 
 
-def _attach_closers(
-    ds: xr.Dataset, closers: Sequence[Callable[[], None]]
-) -> xr.Dataset:
+def attach_closers(ds: xr.Dataset, closers: Sequence[Callable[[], None]]) -> xr.Dataset:
     """Run ``closers`` when ``ds`` is closed.
 
     xarray rebuilds the Dataset on ``chunk``, ``rename``, ``clip_geom`` and
@@ -589,13 +610,13 @@ def open_raster_from_tindex(
         filesystem=filesystem,
         **kwargs,
     )
-    closers = _closers_of([ds_out])
+    closers = closers_of([ds_out])
     # clip to extent
     ds_out = ds_out.raster.clip_geom(geom)
     name = ".".join(basename(tindex_path).split(".")[:-1])
     ds_out = ds_out.rename({ds_out.raster.vars[0]: name})
     # dataset to be consitent with open_mfraster
-    return _attach_closers(ds_out, closers)
+    return attach_closers(ds_out, closers)
 
 
 def _resolve_tile_uri(
@@ -836,9 +857,9 @@ def open_timeseries_from_table(
     if ext == ".csv":
         csv_kwargs = dict(index_col=0, parse_dates=False)
         csv_kwargs.update(**kwargs)
-        df = _read_table(path, "csv", filesystem=filesystem, **csv_kwargs)
+        df = read_table(path, "csv", filesystem=filesystem, **csv_kwargs)
     elif ext in {".parquet", ".pq"}:
-        df = _read_table(path, "parquet", filesystem=filesystem, **kwargs)
+        df = read_table(path, "parquet", filesystem=filesystem, **kwargs)
     else:
         raise ValueError(f"Unknown table file format: {ext}")
 
@@ -953,7 +974,7 @@ def open_vector(
     # OGR can take the bytes of a single remote file instead.
     elif driver == "pyogrio" or not local:
         if not local:
-            _assert_single_file_format(path)
+            assert_single_file_format(path)
         source = str(path) if local else read_bytes(filesystem, str(path))
         bbox_shapely = box(*bbox) if bbox else None
         bbox_reader = gis_utils._bbox_from_file_and_filters(
@@ -1037,19 +1058,22 @@ def open_vector_from_table(
         Parsed and filtered point geometries
     """
     driver = driver.lower() if driver is not None else str(path).split(".")[-1].lower()
-    if driver not in ("csv", "parquet", "xls", "xlsx", "xy"):
-        raise IOError(f"Driver or extension {driver} unknown for vector table.")
+    _ALLOWED = ("csv", "parquet", "xls", "xlsx", "xy")
+    if driver not in _ALLOWED:
+        raise IOError(
+            f"Driver or extension {driver} unknown for vector table. Choose from {_ALLOWED}."
+        )
     if "index_col" not in kwargs and driver != "parquet":
         kwargs.update(index_col=0)
     if driver == "xy":
         x_dim = x_dim if x_dim is not None else "x"
         y_dim = y_dim if y_dim is not None else "y"
         kwargs.update(index_col=False, header=None, sep=r"\s+")
-        df = _read_table(path, "xy", filesystem=filesystem, **kwargs).rename(
+        df = read_table(path, "xy", filesystem=filesystem, **kwargs).rename(
             columns={0: x_dim, 1: y_dim}
         )
     else:
-        df = _read_table(path, driver, filesystem=filesystem, **kwargs)
+        df = read_table(path, driver, filesystem=filesystem, **kwargs)
     # infer points from table
     df.columns = [str(c).lower() for c in df.columns]
 

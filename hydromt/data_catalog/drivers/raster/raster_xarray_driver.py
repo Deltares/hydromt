@@ -17,7 +17,7 @@ from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
 from hydromt.data_catalog.drivers.xarray_options import (
     XarrayDriverOptions,
     XarrayIOFormat,
-    _read_xarray,
+    read_xarray,
 )
 from hydromt.error import NoDataStrategy
 from hydromt.typing import (
@@ -88,7 +88,8 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         Returns
         -------
         xr.Dataset | None
-            The merged xarray Dataset, or None if no data was found and the strategy allows.
+            The merged xarray Dataset, or None if no data is available and the
+            handle_nodata strategy is set to ignore.
 
         Raises
         ------
@@ -114,7 +115,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         if len(uris) == 0:
             return None  # handle_nodata == ignore
 
-        return _read_xarray(
+        return read_xarray(
             uris=uris,
             options=self.options,
             filesystem=self.filesystem,

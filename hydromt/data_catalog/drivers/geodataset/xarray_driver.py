@@ -17,7 +17,7 @@ from hydromt.data_catalog.drivers.geodataset.geodataset_driver import (
 from hydromt.data_catalog.drivers.xarray_options import (
     XarrayDriverOptions,
     XarrayIOFormat,
-    _read_xarray,
+    read_xarray,
 )
 from hydromt.error import NoDataStrategy
 from hydromt.typing import (
@@ -90,7 +90,7 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
                 "metadata": metadata,
             },
         )
-        return _read_xarray(
+        return read_xarray(
             uris=uris,
             options=self.options,
             filesystem=self.filesystem,

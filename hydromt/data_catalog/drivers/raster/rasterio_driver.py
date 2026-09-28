@@ -18,7 +18,7 @@ from hydromt.data_catalog.drivers.raster import RasterDatasetDriver
 from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
 from hydromt.gis._gdal_drivers import GDAL_DRIVER_CODE_MAP
 from hydromt.gis.gis_utils import zoom_to_overview_level
-from hydromt.readers import _attach_closers, _closers_of, open_mfraster
+from hydromt.readers import attach_closers, closers_of, open_mfraster
 from hydromt.typing import (
     Geom,
     SourceMetadata,
@@ -240,7 +240,7 @@ class RasterioDriver(RasterDatasetDriver):
 
         # chunk/rename rebuild the Dataset, which drops the close callback that
         # keeps (remote) file handles alive; re-attach it afterwards.
-        closers = _closers_of([ds])
+        closers = closers_of([ds])
 
         # Mosaic's can mess up the chunking, which can error during writing
         # Or maybe setting
@@ -252,7 +252,7 @@ class RasterioDriver(RasterDatasetDriver):
         if variables is not None and len(variables) == 1 and len(ds.data_vars) == 1:
             ds = ds.rename({list(ds.data_vars.keys())[0]: list(variables)[0]})
 
-        ds = _attach_closers(ds, closers)
+        ds = attach_closers(ds, closers)
 
         for variable in ds.data_vars:
             if ds[variable].size == 0:

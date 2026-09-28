@@ -9,7 +9,7 @@ from fsspec import AbstractFileSystem
 from hydromt.data_catalog.drivers.base_driver import resolve_filesystem
 from hydromt.data_catalog.drivers.dataframe import DataFrameDriver
 from hydromt.error import NoDataStrategy, exec_nodata_strat
-from hydromt.readers import _read_table
+from hydromt.readers import read_table
 from hydromt.typing import Variables
 
 
@@ -76,20 +76,16 @@ class PandasDriver(DataFrameDriver):
             variables = self._unify_variables_and_pandas_kwargs(
                 uri, "csv", variables, options, filesystem=fs
             )
-            df = _read_table(uri, "csv", filesystem=fs, usecols=variables, **options)
+            df = read_table(uri, "csv", filesystem=fs, usecols=variables, **options)
         elif extension == "parquet":
-            df = _read_table(
-                uri, "parquet", filesystem=fs, columns=variables, **options
-            )
+            df = read_table(uri, "parquet", filesystem=fs, columns=variables, **options)
         elif extension in ["xls", "xlsx"]:
             variables = self._unify_variables_and_pandas_kwargs(
                 uri, extension, variables, options, filesystem=fs
             )
-            df = _read_table(
-                uri, extension, filesystem=fs, usecols=variables, **options
-            )
+            df = read_table(uri, extension, filesystem=fs, usecols=variables, **options)
         elif extension in ["fwf", "txt"]:
-            df = _read_table(uri, extension, filesystem=fs, **options)
+            df = read_table(uri, extension, filesystem=fs, **options)
         else:
             raise IOError(f"DataFrame: extension {extension} unknown.")
 
@@ -172,7 +168,7 @@ class PandasDriver(DataFrameDriver):
             ):
                 # if index_col is an index, get name of col
                 probe_options = {k: v for k, v in options.items() if k != "index_col"}
-                df: pd.DataFrame = _read_table(
+                df: pd.DataFrame = read_table(
                     uri, fmt, filesystem=filesystem, **{"nrows": 1, **probe_options}
                 )
                 return variables + [df.columns[0]]

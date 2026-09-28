@@ -39,13 +39,13 @@ __all__ = [
 T = TypeVar("T")
 
 
-class Closeable(Protocol):
+class CloseableXarray(Protocol):
     """An xarray object whose close callback can be replaced."""
 
     def set_close(self, close: Callable[[], None] | None) -> None: ...
 
 
-C = TypeVar("C", bound=Closeable)
+C = TypeVar("C", bound=CloseableXarray)
 
 
 def _optional_error_types(module: str, *names: str) -> tuple[type[BaseException], ...]:
@@ -108,7 +108,7 @@ def open_handles(
             with reraise_as_permission_error(uri):
                 handles.append(filesystem.open(uri, mode))
     except Exception:
-        _close_all(handles)
+        close_all(handles)
         raise
     return handles
 
@@ -158,13 +158,13 @@ def attach_close(obj: C, handles: Iterable[IO[bytes]]) -> C:
             if org_close is not None:
                 org_close()
         finally:
-            _close_all(handles)
+            close_all(handles)
 
     obj.set_close(_close)
     return obj
 
 
-def _close_all(handles: Iterable[IO[bytes]]) -> None:
+def close_all(handles: Iterable[IO[bytes]]) -> None:
     for handle in handles:
         try:
             handle.close()
