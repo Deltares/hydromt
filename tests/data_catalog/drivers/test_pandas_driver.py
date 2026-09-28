@@ -11,38 +11,44 @@ from hydromt.data_catalog.drivers.dataframe import PandasDriver
 
 
 class TestPandasDriver:
+    @staticmethod
     @pytest.fixture(scope="class")
-    def uri_csv(self, df: pd.DataFrame, managed_tmp_path: Path) -> str:
+    def uri_csv(df: pd.DataFrame, managed_tmp_path: Path) -> str:
         uri = managed_tmp_path / "test.csv"
         df.to_csv(uri, index=False)
         return str(uri)
 
+    @staticmethod
     @pytest.fixture(scope="class")
-    def uri_parquet(self, df: pd.DataFrame, managed_tmp_path: Path) -> str:
+    def uri_parquet(df: pd.DataFrame, managed_tmp_path: Path) -> str:
         uri = managed_tmp_path / "test.parquet"
         df.to_parquet(uri, index=False)
         return str(uri)
 
+    @staticmethod
     @pytest.fixture(scope="class")
-    def uri_xlsx(self, df: pd.DataFrame, managed_tmp_path: Path) -> str:
+    def uri_xlsx(df: pd.DataFrame, managed_tmp_path: Path) -> str:
         uri = managed_tmp_path / "test.xlsx"
         df.to_excel(uri, index=False)
         return str(uri)
 
+    @staticmethod
     @pytest.fixture(scope="class")
-    def uri_xls(self, df: pd.DataFrame, managed_tmp_path: Path) -> str:
+    def uri_xls(df: pd.DataFrame, managed_tmp_path: Path) -> str:
         uri = managed_tmp_path / "test.xls"
         df.to_excel(uri, engine="openpyxl", index=False)
         return str(uri)
 
+    @staticmethod
     @pytest.fixture(scope="class")
-    def uri_fwf(self, df: pd.DataFrame, managed_tmp_path: Path) -> str:
+    def uri_fwf(df: pd.DataFrame, managed_tmp_path: Path) -> str:
         uri = managed_tmp_path / "test.fwf"
         df.to_string(uri, index=False)
         return str(uri)
 
+    @staticmethod
     @pytest.fixture(scope="class")
-    def driver(self):
+    def driver() -> PandasDriver:
         return PandasDriver()
 
     # lazy-fixtures not maintained:
@@ -62,8 +68,9 @@ class TestPandasDriver:
         "uri", ["uri_csv", "uri_parquet", uri_xls_param, uri_xlsx_param]
     )
 
+    @staticmethod
     @pytest.fixture(scope="class")
-    def _raise_warnings(self):
+    def _raise_warnings():
         with warnings.catch_warnings():
             warnings.simplefilter("error")
             yield

@@ -19,16 +19,20 @@ jobs:
           pixi-version: "v0.76.0"
           run-install: false
       - name: Update lockfiles
+        id: update
         run: |
           set -o pipefail
           pixi update --json | pixi exec pixi-diff-to-markdown >> diff.md
       - name: Generate SBOM
+        id: sbom
+        if: ${{ !cancelled() }}
         run: |
           set -o pipefail
           pixi run generate-sbom
 
       - name: Generate GitHub App token
         id: app-token
+        if: ${{ !cancelled() }}
         uses: actions/create-github-app-token@v3
         with:
           client-id: ${{ vars.TOKEN_ISSUER_ACTIONS_ID }}
@@ -37,11 +41,13 @@ jobs:
       # workflows. Events created by the default GITHUB_TOKEN are intentionally
       # ignored by other workflow triggers to prevent infinite recursive runs.
       - name: Create pull request
+        id: cpr
+        if: ${{ !cancelled() }}
         uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ steps.app-token.outputs.token }}
-          commit-message: Update pixi lockfile
-          title: Update pixi lockfile
+          commit-message: Update pixi lockfile & SBOM
+          title: Update pixi lockfile & SBOM
           body-path: diff.md
           branch: update/pixi-lock
           base: main
@@ -49,3 +55,48 @@ jobs:
           add-paths: |
             pixi.lock
             hydromt-core-sbom.json
+
+      - name: Comment on PR about failures
+        if: >-
+          ${{ !cancelled()
+          && steps.cpr.outputs.pull-request-number != ''
+          && (steps.update.outcome == 'failure' || steps.sbom.outcome == 'failure') }}
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          UPDATE_OUTCOME: ${{ steps.update.outcome }}
+          SBOM_OUTCOME: ${{ steps.sbom.outcome }}
+        run: |
+          cat > comment.md <<'EOF'
+          ## ⚠️ Automated update had failures
+
+          One or more steps failed while creating this PR, so the lockfile and/or SBOM in this PR may be stale or incomplete. **Please do not merge until this is resolved.**
+
+          ### What to do
+          1. Open the workflow run linked below and check the logs of the failed step(s).
+          2. Check out this branch (`update/pixi-lock`) and reproduce the failure locally with the commands below.
+          3. Fix the underlying problem (for example a conflicting dependency), commit the fix to this branch, and make sure the lockfile and SBOM are regenerated.
+          4. Confirm CI passes before merging.
+
+          ### Commands to reproduce locally
+          ```bash
+          # update the lockfile
+          pixi update
+
+          # update the lockfile, and generate a diff report
+          pixi update --json | pixi exec pixi-diff-to-markdown >> diff.md
+
+          # regenerate the SBOM
+          pixi run generate-sbom
+          ```
+          EOF
+          {
+            echo
+            echo "### Failed steps"
+            echo "- Update lockfiles: \`${UPDATE_OUTCOME}\`"
+            echo "- Generate SBOM: \`${SBOM_OUTCOME}\`"
+            echo
+            echo "Workflow run: ${RUN_URL}"
+          } >> comment.md
+          gh pr comment "$PR_NUMBER" --body-file comment.md
