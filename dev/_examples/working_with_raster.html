@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
@@ -37,10 +37,10 @@
     <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css?v=d7afb10b" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
     <script src="../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
@@ -51,7 +51,7 @@
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_examples/working_with_raster';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.18.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.21.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/main/docs/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.5.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -367,7 +367,8 @@
   </div>
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
-        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
     <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
   </svg>
   <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
@@ -484,7 +485,7 @@
 
 <span class="n">log</span><span class="o">.</span><span class="n">initialize_logging</span><span class="p">()</span>
 
-<span class="n">data_catalog</span> <span class="o">=</span> <span class="n">hydromt</span><span class="o">.</span><span class="n">DataCatalog</span><span class="p">(</span><span class="n">data_libs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;artifact_data=v1.0.0&quot;</span><span class="p">])</span>
+<span class="n">data_catalog</span> <span class="o">=</span> <span class="n">hydromt</span><span class="o">.</span><span class="n">DataCatalog</span><span class="p">(</span><span class="n">data_libs</span><span class="o">=</span><span class="p">[</span><span class="s2">"artifact_data=v1.0.0"</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -502,9 +503,9 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-09-22 15:00:27,981 - hydromt - log - INFO - HydroMT version: 1.5.0.dev0
-2026-09-22 15:00:27,991 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data v1.0.0
-2026-09-22 15:00:27,992 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
+2026-09-28 08:31:43,059 - hydromt - log - INFO - HydroMT version: 1.5.0.dev0
+2026-09-28 08:31:43,081 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data v1.0.0
+2026-09-28 08:31:43,081 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
 </pre></div></div>
 </div>
 <p>Here, we illustrate some common GIS problems and how the functionality of the DataArray/Dataset <a class="reference internal" href="../api/gis.html#raster-methods"><span class="std std-ref">raster</span></a> accessor can be used. The data is accessed using the HydroMT <a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.html"><span class="doc">DataCatalog</span></a>. For more information see the <a class="reference internal" href="reading_raster_data.html"><span class="doc">Reading raster data</span></a> example.</p>
@@ -518,7 +519,7 @@ GDAL driver. Currently the key difference between both packages, besides the nam
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># get the GHS population raster dataset from the catalog</span>
-<span class="n">da</span> <span class="o">=</span> <span class="n">data_catalog</span><span class="o">.</span><span class="n">get_rasterdataset</span><span class="p">(</span><span class="s2">&quot;ghs_pop_2015&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;population&quot;</span><span class="p">)</span>
+<span class="n">da</span> <span class="o">=</span> <span class="n">data_catalog</span><span class="o">.</span><span class="n">get_rasterdataset</span><span class="p">(</span><span class="s2">"ghs_pop_2015"</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">"population"</span><span class="p">)</span>
 <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask_nodata</span><span class="p">()</span><span class="o">.</span><span class="n">reset_coords</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">vmax</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -528,7 +529,7 @@ GDAL driver. Currently the key difference between both packages, besides the nam
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-09-22 15:00:28,417 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading ghs_pop_2015 RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/ghs_pop_2015.tif
+2026-09-28 08:31:43,710 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading ghs_pop_2015 RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/ghs_pop_2015.tif
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -537,7 +538,7 @@ GDAL driver. Currently the key difference between both packages, besides the nam
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f0706a9f380&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f8742302ba0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -642,17 +643,17 @@ calculate the final population count. Using this approach we only make a small e
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.gis</span><span class="w"> </span><span class="kn">import</span> <span class="n">utm_crs</span>
 
 <span class="n">utm</span> <span class="o">=</span> <span class="n">utm_crs</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Destination CRS: </span><span class="si">{</span><span class="n">utm</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Destination CRS: </span><span class="si">{</span><span class="n">utm</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="n">da_pop</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask_nodata</span><span class="p">()</span>
-<span class="n">da_pop_dens</span> <span class="o">=</span> <span class="n">da_pop</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">density_grid</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;population_dens&quot;</span><span class="p">)</span>  <span class="c1"># pop.m-2</span>
+<span class="n">da_pop_dens</span> <span class="o">=</span> <span class="n">da_pop</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">density_grid</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">"population_dens"</span><span class="p">)</span>  <span class="c1"># pop.m-2</span>
 <span class="n">da_pop_dens_utm</span> <span class="o">=</span> <span class="n">da_pop_dens</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span>
-    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;bilinear&quot;</span><span class="p">,</span> <span class="n">dst_crs</span><span class="o">=</span><span class="n">utm</span><span class="p">,</span> <span class="n">dst_res</span><span class="o">=</span><span class="mi">250</span>
+    <span class="n">method</span><span class="o">=</span><span class="s2">"bilinear"</span><span class="p">,</span> <span class="n">dst_crs</span><span class="o">=</span><span class="n">utm</span><span class="p">,</span> <span class="n">dst_res</span><span class="o">=</span><span class="mi">250</span>
 <span class="p">)</span>
 <span class="n">da_pop_utm</span> <span class="o">=</span> <span class="n">da_pop_dens_utm</span> <span class="o">*</span> <span class="n">da_pop_dens_utm</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">area_grid</span><span class="p">()</span>  <span class="c1"># pop</span>
 <span class="n">bias</span> <span class="o">=</span> <span class="p">(</span><span class="n">da_pop</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">da_pop_utm</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">bias</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">bias</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">%"</span><span class="p">)</span>
 <span class="n">da_pop_utm_adj</span> <span class="o">=</span> <span class="n">da_pop_utm</span> <span class="o">*</span> <span class="n">bias</span>  <span class="c1"># bias correct</span>
-<span class="n">da_pop_utm_adj</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;population&quot;</span>
+<span class="n">da_pop_utm_adj</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"population"</span>
 <span class="n">da_pop_utm_adj</span><span class="o">.</span><span class="n">reset_coords</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">vmax</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -672,7 +673,7 @@ Error: 0.036%
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f07061e2210&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f8741b9fd90&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -693,18 +694,18 @@ Error: 0.036%
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
 
-<span class="n">gdf</span> <span class="o">=</span> <span class="n">data_catalog</span><span class="o">.</span><span class="n">get_geodataframe</span><span class="p">(</span><span class="s2">&quot;gadm_level3&quot;</span><span class="p">,</span> <span class="n">variables</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;NAME_3&quot;</span><span class="p">])</span>
+<span class="n">gdf</span> <span class="o">=</span> <span class="n">data_catalog</span><span class="o">.</span><span class="n">get_geodataframe</span><span class="p">(</span><span class="s2">"gadm_level3"</span><span class="p">,</span> <span class="n">variables</span><span class="o">=</span><span class="p">[</span><span class="s2">"NAME_3"</span><span class="p">])</span>
 <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
     <span class="p">[</span>
-        <span class="n">da_pop</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">zonal_stats</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">stats</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;sum&quot;</span><span class="p">])</span> <span class="o">/</span> <span class="mf">1e3</span><span class="p">,</span>  <span class="c1"># count [pop x1000]</span>
-        <span class="n">da_pop_dens</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">zonal_stats</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">stats</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;max&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">])</span>
+        <span class="n">da_pop</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">zonal_stats</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">stats</span><span class="o">=</span><span class="p">[</span><span class="s2">"sum"</span><span class="p">])</span> <span class="o">/</span> <span class="mf">1e3</span><span class="p">,</span>  <span class="c1"># count [pop x1000]</span>
+        <span class="n">da_pop_dens</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">zonal_stats</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">stats</span><span class="o">=</span><span class="p">[</span><span class="s2">"max"</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">])</span>
         <span class="o">*</span> <span class="mf">1e6</span><span class="p">,</span>  <span class="c1"># density [pop km-2]</span>
     <span class="p">]</span>
 <span class="p">)</span>
 <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="p">:</span>
     <span class="n">gdf</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
 
-<span class="n">gdf</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;population_sum&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="n">gdf</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">"population_sum"</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -713,7 +714,7 @@ Error: 0.036%
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-09-22 15:00:29,264 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading gadm_level3 GeoDataFrame data from /home/runner/.hydromt/artifact_data/v1.0.0/gadm_level3.gpkg
+2026-09-28 08:31:44,984 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading gadm_level3 GeoDataFrame data from /home/runner/.hydromt/artifact_data/v1.0.0/gadm_level3.gpkg
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -796,10 +797,10 @@ Error: 0.036%
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gdf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-    <span class="s2">&quot;population_sum&quot;</span><span class="p">,</span>
-    <span class="n">scheme</span><span class="o">=</span><span class="s2">&quot;NaturalBreaks&quot;</span><span class="p">,</span>
+    <span class="s2">"population_sum"</span><span class="p">,</span>
+    <span class="n">scheme</span><span class="o">=</span><span class="s2">"NaturalBreaks"</span><span class="p">,</span>
     <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">legend_kwds</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{:.0f}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;population [x1000]&quot;</span><span class="p">),</span>
+    <span class="n">legend_kwds</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s2">"</span><span class="si">{:.0f}</span><span class="s2">"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"population [x1000]"</span><span class="p">),</span>
     <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
 <span class="p">)</span>
 </pre></div>
@@ -831,7 +832,7 @@ gaps is build using voronoi triangulation. Then, values are calculated for each 
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">da_soil</span> <span class="o">=</span> <span class="n">data_catalog</span><span class="o">.</span><span class="n">get_rasterdataset</span><span class="p">(</span>
-    <span class="s2">&quot;soilgrids&quot;</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="p">[</span><span class="mf">12.7</span><span class="p">,</span> <span class="mf">45.6</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mf">45.8</span><span class="p">],</span> <span class="n">variables</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;ph_sl1&quot;</span><span class="p">]</span>
+    <span class="s2">"soilgrids"</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="p">[</span><span class="mf">12.7</span><span class="p">,</span> <span class="mf">45.6</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mf">45.8</span><span class="p">],</span> <span class="n">variables</span><span class="o">=</span><span class="p">[</span><span class="s2">"ph_sl1"</span><span class="p">]</span>
 <span class="p">)</span>
 <span class="n">da_soil</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask_nodata</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
@@ -842,7 +843,7 @@ gaps is build using voronoi triangulation. Then, values are calculated for each 
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-09-22 15:00:33,086 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading soilgrids RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/soilgrids/{variable}.tif
+2026-09-28 08:31:52,297 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading soilgrids RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/soilgrids/{variable}.tif
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -851,7 +852,7 @@ gaps is build using voronoi triangulation. Then, values are calculated for each 
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f06fb7ad090&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f8736b10e10&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -865,8 +866,8 @@ gaps is build using voronoi triangulation. Then, values are calculated for each 
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Note that data is only interpolated leaving a small nodata gap in the lower right corner. This can be extrapolated with the &#39;nearest&#39; method.</span>
-<span class="n">da_soil</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">interpolate_na</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask_nodata</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Note that data is only interpolated leaving a small nodata gap in the lower right corner. This can be extrapolated with the 'nearest' method.</span>
+<span class="n">da_soil</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">interpolate_na</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">"linear"</span><span class="p">)</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask_nodata</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -876,7 +877,7 @@ gaps is build using voronoi triangulation. Then, values are calculated for each 
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f06fb53f750&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f87369e34d0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -896,19 +897,19 @@ gaps is build using voronoi triangulation. Then, values are calculated for each 
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># step 1: read the data and mask nodata values</span>
 <span class="n">bbox</span> <span class="o">=</span> <span class="p">[</span><span class="mf">12.2</span><span class="p">,</span> <span class="mf">45.3</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mf">45.8</span><span class="p">]</span>
-<span class="n">da_dem</span> <span class="o">=</span> <span class="n">data_catalog</span><span class="o">.</span><span class="n">get_rasterdataset</span><span class="p">(</span><span class="s2">&quot;merit_hydro&quot;</span><span class="p">,</span> <span class="n">variables</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;elevtn&quot;</span><span class="p">],</span> <span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">)</span>
+<span class="n">da_dem</span> <span class="o">=</span> <span class="n">data_catalog</span><span class="o">.</span><span class="n">get_rasterdataset</span><span class="p">(</span><span class="s2">"merit_hydro"</span><span class="p">,</span> <span class="n">variables</span><span class="o">=</span><span class="p">[</span><span class="s2">"elevtn"</span><span class="p">],</span> <span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">)</span>
 <span class="n">da_dem</span> <span class="o">=</span> <span class="n">da_dem</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask_nodata</span><span class="p">()</span>
-<span class="n">da_dem</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="s2">&quot;m+EGM96&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;resolution MERIT Hydro: </span><span class="si">{</span><span class="n">da_dem</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.05f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="n">da_bath</span> <span class="o">=</span> <span class="n">data_catalog</span><span class="o">.</span><span class="n">get_rasterdataset</span><span class="p">(</span><span class="s2">&quot;gebco&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask_nodata</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;resolution GEBCO: </span><span class="si">{</span><span class="n">da_bath</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.05f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="n">da_mdt</span> <span class="o">=</span> <span class="n">data_catalog</span><span class="o">.</span><span class="n">get_rasterdataset</span><span class="p">(</span><span class="s2">&quot;mdt_cnes_cls18&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask_nodata</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;resolution MDT: </span><span class="si">{</span><span class="n">da_mdt</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.05f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">da_dem</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="s2">"m+EGM96"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"resolution MERIT Hydro: </span><span class="si">{</span><span class="n">da_dem</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.05f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="n">da_bath</span> <span class="o">=</span> <span class="n">data_catalog</span><span class="o">.</span><span class="n">get_rasterdataset</span><span class="p">(</span><span class="s2">"gebco"</span><span class="p">)</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask_nodata</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"resolution GEBCO: </span><span class="si">{</span><span class="n">da_bath</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.05f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="n">da_mdt</span> <span class="o">=</span> <span class="n">data_catalog</span><span class="o">.</span><span class="n">get_rasterdataset</span><span class="p">(</span><span class="s2">"mdt_cnes_cls18"</span><span class="p">)</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask_nodata</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"resolution MDT: </span><span class="si">{</span><span class="n">da_mdt</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.05f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 <span class="n">plot_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
     <span class="n">vmin</span><span class="o">=-</span><span class="mi">50</span><span class="p">,</span>
     <span class="n">vmax</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
-    <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;coolwarm&quot;</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="s2">"coolwarm"</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">da_dem</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
 </pre></div>
@@ -919,11 +920,11 @@ gaps is build using voronoi triangulation. Then, values are calculated for each 
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2026-09-22 15:00:33,482 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/merit_hydro/{variable}.tif
+2026-09-28 08:31:52,746 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/merit_hydro/{variable}.tif
 resolution MERIT Hydro: 0.00083
-2026-09-22 15:00:33,502 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading gebco RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/gebco.tif
+2026-09-28 08:31:52,776 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading gebco RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/gebco.tif
 resolution GEBCO: 0.00417
-2026-09-22 15:00:33,509 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading mdt_cnes_cls18 RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/mdt_cnes_cls18.tif
+2026-09-28 08:31:52,787 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading mdt_cnes_cls18 RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/mdt_cnes_cls18.tif
 resolution MDT: 0.12500
 </pre></div></div>
 </div>
@@ -933,7 +934,7 @@ resolution MDT: 0.12500
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f06fb4560d0&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f87368e5a90&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -949,8 +950,8 @@ resolution MDT: 0.12500
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># step 2: convert GEBCO to EGM96 ref and reproject to MERIT Hydro grid</span>
 <span class="n">da_bath_egm</span> <span class="o">=</span> <span class="n">da_bath</span> <span class="o">+</span> <span class="n">da_mdt</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reproject_like</span><span class="p">(</span><span class="n">da_bath</span><span class="p">)</span>
-<span class="n">da_bath_reproj</span> <span class="o">=</span> <span class="n">da_bath_egm</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reproject_like</span><span class="p">(</span><span class="n">da_dem</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;cubic&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;resolution reprojected GEBCO: </span><span class="si">{</span><span class="n">da_bath_reproj</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.05f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">da_bath_reproj</span> <span class="o">=</span> <span class="n">da_bath_egm</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reproject_like</span><span class="p">(</span><span class="n">da_dem</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"cubic"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"resolution reprojected GEBCO: </span><span class="si">{</span><span class="n">da_bath_reproj</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.05f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="n">da_dem_merged</span> <span class="o">=</span> <span class="n">da_dem</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">da_dem</span><span class="o">.</span><span class="n">notnull</span><span class="p">(),</span> <span class="n">da_bath_reproj</span><span class="p">)</span>
 <span class="n">da_dem_merged</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
 </pre></div>
@@ -970,7 +971,7 @@ resolution reprojected GEBCO: 0.00083
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f06fb47b250&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f87345aee90&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -992,7 +993,7 @@ resolution reprojected GEBCO: 0.00083
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">da_dem_merged</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">da_dem</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
 <span class="n">da_dem_merged</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_nodata</span><span class="p">(</span><span class="o">-</span><span class="mi">9999</span><span class="p">)</span>
 <span class="n">da_dem_merged</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">to_raster</span><span class="p">(</span>
-    <span class="s2">&quot;tmpdir/dem_merged.tif&quot;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;history&quot;</span><span class="p">:</span> <span class="s2">&quot;produced with HydroMT&quot;</span><span class="p">}</span>
+    <span class="s2">"tmpdir/dem_merged.tif"</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">{</span><span class="s2">"history"</span><span class="p">:</span> <span class="s2">"produced with HydroMT"</span><span class="p">}</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -1089,8 +1090,8 @@ resolution reprojected GEBCO: 0.00083
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1124,7 +1125,7 @@ resolution reprojected GEBCO: 0.00083
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
 </p></div>
       
     </div>

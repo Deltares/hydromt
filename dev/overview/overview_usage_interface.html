@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
@@ -36,10 +36,10 @@
     <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css?v=d7afb10b" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
     <script src="../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
@@ -48,7 +48,7 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'overview/overview_usage_interface';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.18.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.21.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/main/docs/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.5.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -424,7 +424,7 @@ how to use both interfaces to build a model from a configuration file.</p>
 <input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
 <label class="sd-tab-label" for="sd-tab-item-0">
 Command Line Interface (CLI)</label><div class="sd-tab-content docutils">
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>hydromt<span class="w"> </span>build<span class="w"> </span>wflow_sbm<span class="w"> </span><span class="s2">&quot;./path/to/wflow_model&quot;</span><span class="w"> </span>-d<span class="w"> </span><span class="s2">&quot;./path/to/data_catalog.yml&quot;</span><span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;./path/to/build_options.yaml&quot;</span><span class="w"> </span>-v
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>hydromt<span class="w"> </span>build<span class="w"> </span>wflow_sbm<span class="w"> </span><span class="s2">"./path/to/wflow_model"</span><span class="w"> </span>-d<span class="w"> </span><span class="s2">"./path/to/data_catalog.yml"</span><span class="w"> </span>-i<span class="w"> </span><span class="s2">"./path/to/build_options.yaml"</span><span class="w"> </span>-v
 </pre></div>
 </div>
 </div>
@@ -440,12 +440,12 @@ Python API</label><div class="sd-tab-content docutils">
 
 <span class="c1"># Instantiate model</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">WflowSbmModel</span><span class="p">(</span>
-    <span class="n">root</span><span class="o">=</span><span class="s2">&quot;./path/to/wflow_model&quot;</span><span class="p">,</span>
-    <span class="n">data_catalog</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;./path/to/data_catalog.yml&quot;</span><span class="p">],</span>
+    <span class="n">root</span><span class="o">=</span><span class="s2">"./path/to/wflow_model"</span><span class="p">,</span>
+    <span class="n">data_catalog</span><span class="o">=</span><span class="p">[</span><span class="s2">"./path/to/data_catalog.yml"</span><span class="p">],</span>
 <span class="p">)</span>
 <span class="c1"># Read build options from yaml</span>
 <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">build_options</span> <span class="o">=</span> <span class="n">read_workflow_yaml</span><span class="p">(</span>
-    <span class="s2">&quot;./path/to/build_options.yaml&quot;</span>
+    <span class="s2">"./path/to/build_options.yaml"</span>
 <span class="p">)</span>
 <span class="c1"># Build model</span>
 <span class="n">model</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="n">build_options</span><span class="p">)</span>
@@ -513,8 +513,8 @@ to read data from a catalog, perform GIS operations or write your own plugin.</p
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -548,7 +548,7 @@ to read data from a catalog, perform GIS operations or write your own plugin.</p
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
 </p></div>
       
     </div>

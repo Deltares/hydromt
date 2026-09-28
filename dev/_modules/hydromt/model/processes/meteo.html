@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
-<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+  <link href="../../../../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/autodoc_pydantic.css" />
@@ -35,17 +35,16 @@
     <link rel="stylesheet" type="text/css" href="../../../../_static/theme-deltares.css?v=d7afb10b" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../../../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../../../../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
-<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
     <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
 
 
@@ -54,173 +53,11 @@
 
 const initStyles = () => {
     const defaultStyle = document.createElement('style');
-    defaultStyle.textContent = `pre.mermaid {
-    /* Same as .mermaid-container > pre */
-    display: block;
-    width: 100%;
-}
-
-pre.mermaid > svg {
-    /* Same as .mermaid-container > pre > svg */
-    height: 500px;
-    width: 100%;
-    max-width: 100% !important;
-}`;
+    defaultStyle.textContent = "pre.mermaid {\n    /* Same as .mermaid-container > pre */\n    display: block;\n    width: 100%;\n}\n\npre.mermaid > svg {\n    /* Same as .mermaid-container > pre > svg */\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}";
     document.head.appendChild(defaultStyle);
 
     const fullscreenStyle = document.createElement('style');
-    fullscreenStyle.textContent = `.mermaid-container {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-}
-
-.mermaid-container > pre {
-    display: block;
-    width: 100%;
-}
-
-.mermaid-container > pre > svg {
-    height: 500px;
-    width: 100%;
-    max-width: 100% !important;
-}
-
-.mermaid-fullscreen-btn {
-    width: 28px;
-    height: 28px;
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(0, 0, 0, 0.3);
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    font-size: 14px;
-    line-height: 1;
-    padding: 0;
-    color: #333;
-}
-
-.mermaid-fullscreen-btn:hover {
-    opacity: 100% !important;
-    background: rgba(255, 255, 255, 1);
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
-    transform: scale(1.1);
-}
-
-.mermaid-fullscreen-btn.dark-theme {
-    background: rgba(50, 50, 50, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: #e0e0e0;
-}
-
-.mermaid-fullscreen-btn.dark-theme:hover {
-    background: rgba(60, 60, 60, 1);
-    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);
-}
-
-.mermaid-fullscreen-modal {
-    display: none;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 95vw;
-    height: 100vh;
-    background: rgba(255, 255, 255, 0.98);
-    z-index: 9999;
-    padding: 20px;
-    overflow: auto;
-}
-
-.mermaid-fullscreen-modal.dark-theme {
-    background: rgba(0, 0, 0, 0.98);
-}
-
-.mermaid-fullscreen-modal.active {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.mermaid-container-fullscreen {
-    position: relative;
-    width: 95vw;
-    height: 90vh;
-    max-width: 95vw;
-    max-height: 90vh;
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-    overflow: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.mermaid-container-fullscreen.dark-theme {
-    background: #1a1a1a;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
-}
-
-.mermaid-container-fullscreen pre.mermaid {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.mermaid-container-fullscreen .mermaid svg {
-    height: 100% !important;
-    width: 100% !important;
-    cursor: grab;
-}
-
-.mermaid-fullscreen-close {
-    position: fixed !important;
-    top: 20px !important;
-    right: 20px !important;
-    width: 40px;
-    height: 40px;
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: 50%;
-    cursor: pointer;
-    z-index: 10000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    transition: all 0.2s;
-    font-size: 24px;
-    line-height: 1;
-    color: #333;
-}
-
-.mermaid-fullscreen-close:hover {
-    background: white;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-    transform: scale(1.1);
-}
-
-.mermaid-fullscreen-close.dark-theme {
-    background: rgba(50, 50, 50, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #e0e0e0;
-}
-
-.mermaid-fullscreen-close.dark-theme:hover {
-    background: rgba(60, 60, 60, 1);
-    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
-}
-
-.mermaid-fullscreen-modal .mermaid-fullscreen-btn {
-    display: none !important;
-}`;
+    fullscreenStyle.textContent = ".mermaid-container {\n    position: relative;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n}\n\n.mermaid-container > pre {\n    display: block;\n    width: 100%;\n}\n\n.mermaid-container > pre > svg {\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}\n\n.mermaid-fullscreen-btn {\n    position: absolute;\n    width: 28px;\n    height: 28px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.3);\n    border-radius: 4px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.2s;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);\n    font-size: 14px;\n    line-height: 1;\n    padding: 0;\n    color: #333;\n}\n\n.mermaid-fullscreen-btn:hover {\n    opacity: 100% !important;\n    background: rgba(255, 255, 255, 1);\n    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-btn.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.3);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-btn.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal {\n    display: none;\n    position: fixed !important;\n    top: 0 !important;\n    left: 0 !important;\n    width: 95vw;\n    height: 100vh;\n    background: rgba(255, 255, 255, 0.98);\n    z-index: 9999;\n    padding: 20px;\n    overflow: auto;\n}\n\n.mermaid-fullscreen-modal.dark-theme {\n    background: rgba(0, 0, 0, 0.98);\n}\n\n.mermaid-fullscreen-modal.active {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen {\n    position: relative;\n    width: 95vw;\n    height: 90vh;\n    max-width: 95vw;\n    max-height: 90vh;\n    background: white;\n    border-radius: 8px;\n    padding: 20px;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n    overflow: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen.dark-theme {\n    background: #1a1a1a;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);\n}\n\n.mermaid-container-fullscreen pre.mermaid {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen .mermaid svg {\n    height: 100% !important;\n    width: 100% !important;\n    cursor: grab;\n}\n\n.mermaid-fullscreen-close {\n    position: fixed !important;\n    top: 20px !important;\n    right: 20px !important;\n    width: 40px;\n    height: 40px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.2);\n    border-radius: 50%;\n    cursor: pointer;\n    z-index: 10000;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n    transition: all 0.2s;\n    font-size: 24px;\n    line-height: 1;\n    color: #333;\n}\n\n.mermaid-fullscreen-close:hover {\n    background: white;\n    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-close.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.2);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-close.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal .mermaid-fullscreen-btn {\n    display: none !important;\n}";
     document.head.appendChild(fullscreenStyle);
 }
 
@@ -265,6 +102,32 @@ let darkTheme = isDarkTheme();
 let modal = null;
 let modalContent = null;
 let previousScrollOffset = [window.scrollX, window.scrollY];
+let _lazyObserver = null;
+let _renderQueue = Promise.resolve();
+let closeModal = () => {};
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal?.classList.contains('active')) {
+        closeModal();
+    }
+});
+
+// Apply d3 zoom to each SVG. Idempotent: an SVG already wrapped is skipped,
+// so this is safe to call both for the initial batch and for diagrams that
+// render lazily once they become visible.
+const addZoomToSvgs = (svgs) => {
+    svgs.each(function() {
+        if (this.getAttribute('data-zoom-applied') === 'true') return;
+        var svg = d3.select(this);
+        svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+        var inner = svg.select("g");
+        var zoom = d3.zoom().on("zoom", function(event) {
+            inner.attr("transform", event.transform);
+        });
+        svg.call(zoom);
+        this.setAttribute('data-zoom-applied', 'true');
+    });
+};
 
 const runMermaid = async (rerun) => {
     console.log("Running mermaid diagrams, rerun =", rerun);
@@ -272,7 +135,15 @@ const runMermaid = async (rerun) => {
     let all_mermaids = document.querySelectorAll(".mermaid");
 
     if (rerun) {
+        // Disconnect any previous lazy rendering observer
+        if (_lazyObserver) {
+            _lazyObserver.disconnect();
+            _lazyObserver = null;
+        }
+
         all_mermaids.forEach((el) => {
+            el.removeAttribute('data-mermaid-deferred');
+            el.removeAttribute('data-mermaid-render-failed');
             if(!el.hasAttribute("data-original-code")) {
                 // store original code
                 // console.log(`Storing original code for first run: `, el.innerHTML);
@@ -289,42 +160,100 @@ const runMermaid = async (rerun) => {
                 el.setAttribute('data-original-code', el.innerHTML);
             }
         });
-        await mermaid.run();
+
+        // Separate visible and hidden elements. Mermaid's layout engine measures
+        // text dimensions via the DOM, which fails for elements hidden by a parent
+        // (e.g., Reveal.js non-active slides, sphinx-design unopened tabs),
+        // producing broken SVGs. Render visible elements now, defer hidden ones.
+        const visible = [];
+        const hidden = [];
+        all_mermaids.forEach((el) => {
+            // offsetParent is null for display:none ancestors.
+            // getClientRects().length > 0 catches position:fixed elements
+            // (which also have null offsetParent but are still visible).
+            if (el.offsetParent !== null || el.getClientRects().length > 0) {
+                visible.push(el);
+            } else {
+                hidden.push(el);
+                el.setAttribute('data-mermaid-deferred', 'true');
+            }
+        });
+
+        if (visible.length > 0) {
+            try {
+                await mermaid.run({ nodes: visible });
+            } catch (e) {
+                console.error("Mermaid rendering failed:", e);
+            }
+        }
+
+        // Lazily render hidden elements when they become visible.
+        // Uses a promise chain (_renderQueue) to serialize rendering,
+        // since IntersectionObserver may report multiple entries at once
+        // and mermaid.run() is not safe to call concurrently.
+        if (hidden.length > 0) {
+            if (typeof IntersectionObserver === 'undefined') {
+                console.warn("IntersectionObserver not available; hidden mermaid diagrams will not render.");
+            } else {
+                _renderQueue = Promise.resolve();
+                _lazyObserver = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.isIntersecting && entry.target.getAttribute("data-processed") !== "true") {
+                            _lazyObserver.unobserve(entry.target);
+                            const el = entry.target;
+                            _renderQueue = _renderQueue.then(async () => {
+                                try {
+                                    await mermaid.run({ nodes: [el] });
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    // Apply zoom to the now-rendered diagram, matching
+                                    // the decoration visible diagrams receive.
+                                    if (false) {
+                                        addZoomToSvgs(d3.selectAll("").select(function() {
+                                            return this.querySelector("svg");
+                                        }));
+                                    }
+                                } catch (e) {
+                                    console.error("Mermaid deferred rendering failed:", e);
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    el.setAttribute('data-mermaid-render-failed', 'true');
+                                }
+                            });
+                        }
+                    }
+                });
+                hidden.forEach((el) => _lazyObserver.observe(el));
+            }
+        }
     }
 
     all_mermaids = document.querySelectorAll(".mermaid");
-    const mermaids_processed = document.querySelectorAll(".mermaid[data-processed='true']");
+    // Exclude deferred (hidden) and render-failed elements from completion checks
+    const mermaids_active = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])");
+    const mermaids_processed = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])[data-processed='true']");
 
-    if ("False" === "True") {
-        const mermaids_to_add_zoom = -1 === -1 ? all_mermaids.length : -1;
+    if (false) {
+        const mermaids_to_add_zoom = 0 === -1 ? mermaids_active.length : 0;
         if(mermaids_to_add_zoom > 0) {
-            var svgs = d3.selectAll("");
-            if(all_mermaids.length !== mermaids_processed.length) {
+            var svgs = d3.selectAll("").select(function() {
+                return this.querySelector("svg");
+            });
+            // Wait until every active (visible) diagram has rendered. Deferred
+            // diagrams are excluded, so a fixed d3_node_count that counts a
+            // hidden diagram no longer loops forever waiting for its SVG.
+            if(mermaids_active.length !== mermaids_processed.length) {
                 setTimeout(() => runMermaid(false), 200);
                 return;
-            } else if(svgs.size() !== mermaids_to_add_zoom) {
-                setTimeout(() => runMermaid(false), 200);
-                return;
-            } else {
-                svgs.each(function() {
-                    var svg = d3.select(this);
-                    svg.html("<g class='wrapper'>" + svg.html() + "</g>");
-                    var inner = svg.select("g");
-                    var zoom = d3.zoom().on("zoom", function(event) {
-                        inner.attr("transform", event.transform);
-                    });
-                    svg.call(zoom);
-                });
             }
+            addZoomToSvgs(svgs);
         }
-    } else if(all_mermaids.length !== mermaids_processed.length) {
+    } else if(mermaids_active.length !== mermaids_processed.length) {
         // Wait for mermaid to process all diagrams
         setTimeout(() => runMermaid(false), 200);
         return;
     }
 
     // Stop here if not adding fullscreen capability
-    if ("True" !== "True") return;
+    if (!true) return;
 
     if (modal !== null ) {
         // Destroy existing modal
@@ -347,7 +276,7 @@ const runMermaid = async (rerun) => {
     modalContent = modal.querySelector('.mermaid-container-fullscreen');
     const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
 
-    const closeModal = () => {
+    closeModal = () => {
         modal.classList.remove('active');
         modalContent.innerHTML = '';
         document.body.style.overflow = ''
@@ -358,12 +287,6 @@ const runMermaid = async (rerun) => {
     modal.addEventListener('click', (e) => {
         if (e.target === modal) closeModal();
     });
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modal.classList.contains('active')) {
-            closeModal();
-        }
-    });
-
     document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
         if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
             mermaidDiv.closest('.mermaid-fullscreen-modal')) {
@@ -383,8 +306,8 @@ const runMermaid = async (rerun) => {
         const fullscreenBtn = document.createElement('button');
         fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
         fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
-        fullscreenBtn.textContent = '⛶';
-        fullscreenBtn.style.opacity = '50%';
+        fullscreenBtn.textContent = "\u26f6";
+        fullscreenBtn.style.opacity = "50%";
 
         // Calculate dynamic position based on diagram's margin and padding
         const diagramStyle = window.getComputedStyle(mermaidDiv);
@@ -396,7 +319,7 @@ const runMermaid = async (rerun) => {
         fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
 
         fullscreenBtn.addEventListener('click', () => {
-            previousScrollOffset = [window.scroll, window.scrollY];
+            previousScrollOffset = [window.scrollX, window.scrollY];
             const clone = mermaidDiv.cloneNode(true);
             modalContent.innerHTML = '';
             modalContent.appendChild(clone);
@@ -408,9 +331,9 @@ const runMermaid = async (rerun) => {
                 svg.style.width = '100%';
                 svg.style.height = 'auto';
                 svg.style.maxWidth = '100%';
-                svg.style.sdisplay = 'block';
+                svg.style.display = 'block';
 
-                if ("False" === "True") {
+                if (false) {
                     setTimeout(() => {
                         const g = svg.querySelector('g');
                         if (g) {
@@ -433,8 +356,11 @@ const runMermaid = async (rerun) => {
     });
 };
 
+
+
 const load = async () => {
     initStyles();
+
 
     await runMermaid(true);
 
@@ -444,10 +370,8 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...JSON.parse(
-                    `{"startOnLoad": false}`
-                ),
-                ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+                {...{"startOnLoad": false},
+                ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
             await runMermaid(true);
@@ -472,10 +396,8 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...JSON.parse(
-        `{"startOnLoad": false}`
-    ),
-    ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+    {...{"startOnLoad": false},
+    ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );
 
@@ -483,7 +405,7 @@ window.addEventListener("load", load);
 window.runMermaid = runMermaid;</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/hydromt/model/processes/meteo';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.18.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.21.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/main/docs/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.5.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -854,7 +776,7 @@ window.runMermaid = runMermaid;</script>
                 <article class="bd-article">
                   
   <h1>Source code for hydromt.model.processes.meteo</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Implementaion of forcing workflows.&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""Implementaion of forcing workflows."""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
@@ -873,30 +795,30 @@ window.runMermaid = runMermaid;</script>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;precip&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;temp&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;press&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;wind&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;pet&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;press_correction&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;temp_correction&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;pet_debruin&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;pet_makkink&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;pm_fao56&quot;</span><span class="p">,</span>
+    <span class="s2">"precip"</span><span class="p">,</span>
+    <span class="s2">"temp"</span><span class="p">,</span>
+    <span class="s2">"press"</span><span class="p">,</span>
+    <span class="s2">"wind"</span><span class="p">,</span>
+    <span class="s2">"pet"</span><span class="p">,</span>
+    <span class="s2">"press_correction"</span><span class="p">,</span>
+    <span class="s2">"temp_correction"</span><span class="p">,</span>
+    <span class="s2">"pet_debruin"</span><span class="p">,</span>
+    <span class="s2">"pet_makkink"</span><span class="p">,</span>
+    <span class="s2">"pm_fao56"</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="n">PET_METHODS</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;debruin&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;makkink&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;penman-monteith_rh_simple&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;penman-monteith_tdew&quot;</span><span class="p">,</span>
+    <span class="s2">"debruin"</span><span class="p">,</span>
+    <span class="s2">"makkink"</span><span class="p">,</span>
+    <span class="s2">"penman-monteith_rh_simple"</span><span class="p">,</span>
+    <span class="s2">"penman-monteith_tdew"</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="n">PetMethods</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span>
-    <span class="s2">&quot;debruin&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;makkink&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;penman-monteith_rh_simple&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;penman-monteith_tdew&quot;</span><span class="p">,</span>
+    <span class="s2">"debruin"</span><span class="p">,</span>
+    <span class="s2">"makkink"</span><span class="p">,</span>
+    <span class="s2">"penman-monteith_rh_simple"</span><span class="p">,</span>
+    <span class="s2">"penman-monteith_tdew"</span><span class="p">,</span>
 <span class="p">]</span>
 
 
@@ -907,10 +829,10 @@ window.runMermaid = runMermaid;</script>
     <span class="n">da_like</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">],</span>
     <span class="n">clim</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">freq</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">reproj_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;nearest_index&quot;</span><span class="p">,</span>
+    <span class="n">reproj_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"nearest_index"</span><span class="p">,</span>
     <span class="n">resample_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the lazy reprojection of precipitation to model.</span>
+<span class="w">    </span><span class="sd">"""Return the lazy reprojection of precipitation to model.</span>
 
 <span class="sd">      Applies the projection to the grid and resampling of time dimension to frequency.</span>
 
@@ -926,7 +848,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    freq: str, Timedelta</span>
 <span class="sd">        output frequency of time dimension</span>
 <span class="sd">    reproj_method: str, optional</span>
-<span class="sd">        Method for spatital reprojection of precip, by default &#39;nearest_index&#39;</span>
+<span class="sd">        Method for spatital reprojection of precip, by default 'nearest_index'</span>
 <span class="sd">    resample_kwargs:</span>
 <span class="sd">        Additional key-word arguments (e.g. label, closed) for time resampling method</span>
 <span class="sd">    kwargs:</span>
@@ -936,35 +858,35 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    -------</span>
 <span class="sd">    p_out: xarray.DataArray (lazy)</span>
 <span class="sd">        processed precipitation forcing</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">resample_kwargs</span> <span class="o">=</span> <span class="n">resample_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
-    <span class="k">if</span> <span class="n">precip</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dim0</span> <span class="o">!=</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;First precip dim should be &quot;time&quot;, not </span><span class="si">{</span><span class="n">precip</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dim0</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">precip</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dim0</span> <span class="o">!=</span> <span class="s2">"time"</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'First precip dim should be "time", not </span><span class="si">{</span><span class="n">precip</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dim0</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
     <span class="c1"># downscale precip (lazy); global min of zero</span>
     <span class="n">p_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="n">precip</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reproject_like</span><span class="p">(</span><span class="n">da_like</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">reproj_method</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
     <span class="c1"># correct precip based on high-res monthly climatology</span>
     <span class="k">if</span> <span class="n">clim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># make sure first dim is month</span>
-        <span class="k">if</span> <span class="n">clim</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dim0</span> <span class="o">!=</span> <span class="s2">&quot;month&quot;</span><span class="p">:</span>
-            <span class="n">clim</span> <span class="o">=</span> <span class="n">clim</span><span class="o">.</span><span class="n">rename</span><span class="p">({</span><span class="n">clim</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dim0</span><span class="p">:</span> <span class="s2">&quot;month&quot;</span><span class="p">})</span>
-        <span class="k">if</span> <span class="n">clim</span><span class="p">[</span><span class="s2">&quot;month&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="mi">12</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Precip climatology does not contain 12 months.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">clim</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dim0</span> <span class="o">!=</span> <span class="s2">"month"</span><span class="p">:</span>
+            <span class="n">clim</span> <span class="o">=</span> <span class="n">clim</span><span class="o">.</span><span class="n">rename</span><span class="p">({</span><span class="n">clim</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dim0</span><span class="p">:</span> <span class="s2">"month"</span><span class="p">})</span>
+        <span class="k">if</span> <span class="n">clim</span><span class="p">[</span><span class="s2">"month"</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="mi">12</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Precip climatology does not contain 12 months."</span><span class="p">)</span>
         <span class="c1"># set missings to NaN</span>
         <span class="n">clim</span> <span class="o">=</span> <span class="n">clim</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask_nodata</span><span class="p">()</span>
         <span class="k">assert</span> <span class="n">clim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="c1"># calculate downscaling multiplication factor</span>
         <span class="n">clim_coarse</span> <span class="o">=</span> <span class="n">clim</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reproject_like</span><span class="p">(</span>
-            <span class="n">precip</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;average&quot;</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reproject_like</span><span class="p">(</span><span class="n">da_like</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;average&quot;</span><span class="p">)</span>
-        <span class="n">clim_fine</span> <span class="o">=</span> <span class="n">clim</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reproject_like</span><span class="p">(</span><span class="n">da_like</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;average&quot;</span><span class="p">)</span>
+            <span class="n">precip</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"average"</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reproject_like</span><span class="p">(</span><span class="n">da_like</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"average"</span><span class="p">)</span>
+        <span class="n">clim_fine</span> <span class="o">=</span> <span class="n">clim</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reproject_like</span><span class="p">(</span><span class="n">da_like</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"average"</span><span class="p">)</span>
         <span class="n">p_mult</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">clim_coarse</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">clim_fine</span> <span class="o">/</span> <span class="n">clim_coarse</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
         <span class="c1"># multiply with monthly multiplication factor</span>
-        <span class="n">p_out</span> <span class="o">=</span> <span class="n">p_out</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;time.month&quot;</span><span class="p">)</span> <span class="o">*</span> <span class="n">p_mult</span>
+        <span class="n">p_out</span> <span class="o">=</span> <span class="n">p_out</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"time.month"</span><span class="p">)</span> <span class="o">*</span> <span class="n">p_mult</span>
     <span class="c1"># resample time</span>
-    <span class="n">p_out</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;precip&quot;</span>
-    <span class="n">p_out</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s2">&quot;mm&quot;</span><span class="p">)</span>
+    <span class="n">p_out</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"precip"</span>
+    <span class="n">p_out</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s2">"mm"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">freq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">resample_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">upsampling</span><span class="o">=</span><span class="s2">&quot;bfill&quot;</span><span class="p">,</span> <span class="n">downsampling</span><span class="o">=</span><span class="s2">&quot;sum&quot;</span><span class="p">)</span>
+        <span class="n">resample_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">upsampling</span><span class="o">=</span><span class="s2">"bfill"</span><span class="p">,</span> <span class="n">downsampling</span><span class="o">=</span><span class="s2">"sum"</span><span class="p">)</span>
         <span class="n">p_out</span> <span class="o">=</span> <span class="n">resample_time</span><span class="p">(</span><span class="n">p_out</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">conserve_mass</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">resample_kwargs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">p_out</span></div>
 
@@ -979,11 +901,11 @@ window.runMermaid = runMermaid;</script>
     <span class="n">dem_forcing</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">lapse_correction</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">freq</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">reproj_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;nearest_index&quot;</span><span class="p">,</span>
+    <span class="n">reproj_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"nearest_index"</span><span class="p">,</span>
     <span class="n">lapse_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.0065</span><span class="p">,</span>
     <span class="n">resample_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return lazy reprojection of temperature to model grid.</span>
+<span class="w">    </span><span class="sd">"""Return lazy reprojection of temperature to model grid.</span>
 
 <span class="sd">    Use lapse_rate for downscaling, and resampling of time</span>
 <span class="sd">    dimension to frequency.</span>
@@ -1003,7 +925,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    freq: str, Timedelta, optional</span>
 <span class="sd">        output frequency of timedimension</span>
 <span class="sd">    reproj_method: str, optional</span>
-<span class="sd">        Method for spatital reprojection of precip, by default &#39;nearest_index&#39;</span>
+<span class="sd">        Method for spatital reprojection of precip, by default 'nearest_index'</span>
 <span class="sd">    lapse_rate: float, optional</span>
 <span class="sd">        lapse rate of temperature [C m-1] (default: -0.0065)</span>
 <span class="sd">    resample_kwargs: dict, optional</span>
@@ -1013,26 +935,26 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    -------</span>
 <span class="sd">    t_out: xarray.DataArray (lazy)</span>
 <span class="sd">        processed temperature forcing</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">resample_kwargs</span> <span class="o">=</span> <span class="n">resample_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
-    <span class="k">if</span> <span class="n">temp</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dim0</span> <span class="o">!=</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;First temp dim should be &quot;time&quot;, not </span><span class="si">{</span><span class="n">temp</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dim0</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">temp</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dim0</span> <span class="o">!=</span> <span class="s2">"time"</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'First temp dim should be "time", not </span><span class="si">{</span><span class="n">temp</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dim0</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
     <span class="c1"># apply lapse rate</span>
     <span class="k">if</span> <span class="n">lapse_correction</span><span class="p">:</span>
         <span class="c1"># if dem_forcing is not provided, reproject dem_model</span>
         <span class="n">dem_model</span> <span class="o">=</span> <span class="n">dem_model</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask_nodata</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">dem_forcing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">dem_forcing</span> <span class="o">=</span> <span class="n">dem_model</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reproject_like</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="s2">&quot;average&quot;</span><span class="p">)</span>
+            <span class="n">dem_forcing</span> <span class="o">=</span> <span class="n">dem_model</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reproject_like</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="s2">"average"</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">dem_forcing</span><span class="p">)):</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="s2">&quot;Temperature lapse rate could be computed for some (edge) cells. &quot;</span>
-                    <span class="s2">&quot;Consider providing a full coverage dem_forcing.&quot;</span>
+                    <span class="s2">"Temperature lapse rate could be computed for some (edge) cells. "</span>
+                    <span class="s2">"Consider providing a full coverage dem_forcing."</span>
                 <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># assume nans in dem_forcing occur above the ocean only -&gt; set to zero</span>
             <span class="n">dem_forcing</span> <span class="o">=</span> <span class="n">dem_forcing</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask_nodata</span><span class="p">()</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
             <span class="k">assert</span> <span class="n">dem_forcing</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="n">dem_forcing</span> <span class="o">=</span> <span class="n">dem_forcing</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reproject_like</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="s2">&quot;average&quot;</span><span class="p">)</span>
+            <span class="n">dem_forcing</span> <span class="o">=</span> <span class="n">dem_forcing</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reproject_like</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="s2">"average"</span><span class="p">)</span>
         <span class="c1"># compute temperature at quasi MSL</span>
         <span class="k">assert</span> <span class="n">dem_forcing</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="n">t_add_sea_level</span> <span class="o">=</span> <span class="n">temp_correction</span><span class="p">(</span><span class="n">dem_forcing</span><span class="p">,</span> <span class="n">lapse_rate</span><span class="o">=</span><span class="n">lapse_rate</span><span class="p">)</span>
@@ -1045,10 +967,10 @@ window.runMermaid = runMermaid;</script>
         <span class="n">t_add_elevation</span> <span class="o">=</span> <span class="n">temp_correction</span><span class="p">(</span><span class="n">dem_model</span><span class="p">,</span> <span class="n">lapse_rate</span><span class="o">=</span><span class="n">lapse_rate</span><span class="p">)</span>
         <span class="n">t_out</span> <span class="o">=</span> <span class="n">t_out</span> <span class="o">+</span> <span class="n">t_add_elevation</span>
     <span class="c1"># resample time</span>
-    <span class="n">t_out</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;temp&quot;</span>
-    <span class="n">t_out</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s2">&quot;degree C.&quot;</span><span class="p">)</span>
+    <span class="n">t_out</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"temp"</span>
+    <span class="n">t_out</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s2">"degree C."</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">freq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">resample_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">upsampling</span><span class="o">=</span><span class="s2">&quot;bfill&quot;</span><span class="p">,</span> <span class="n">downsampling</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">)</span>
+        <span class="n">resample_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">upsampling</span><span class="o">=</span><span class="s2">"bfill"</span><span class="p">,</span> <span class="n">downsampling</span><span class="o">=</span><span class="s2">"mean"</span><span class="p">)</span>
         <span class="n">t_out</span> <span class="o">=</span> <span class="n">resample_time</span><span class="p">(</span><span class="n">t_out</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">conserve_mass</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">resample_kwargs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">t_out</span></div>
 
@@ -1061,11 +983,11 @@ window.runMermaid = runMermaid;</script>
     <span class="n">dem_model</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
     <span class="n">lapse_correction</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">freq</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">reproj_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;nearest_index&quot;</span><span class="p">,</span>
+    <span class="n">reproj_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"nearest_index"</span><span class="p">,</span>
     <span class="n">lapse_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.0065</span><span class="p">,</span>
     <span class="n">resample_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return lazy reprojection of pressure to model grid.</span>
+<span class="w">    </span><span class="sd">"""Return lazy reprojection of pressure to model grid.</span>
 
 <span class="sd">    Resample time dimension to frequency.</span>
 
@@ -1077,11 +999,11 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        DataArray of the target resolution and projection, contains elevation</span>
 <span class="sd">        data</span>
 <span class="sd">    lapse_correction: str, optional</span>
-<span class="sd">       If True &#39;dem_model` is used to correct the pressure with the `lapse_rate`.</span>
+<span class="sd">       If True 'dem_model` is used to correct the pressure with the `lapse_rate`.</span>
 <span class="sd">    freq: str, Timedelta</span>
 <span class="sd">        output frequency of timedimension</span>
 <span class="sd">    reproj_method: str, optional</span>
-<span class="sd">        Method for spatital reprojection of precip, by default &#39;nearest_index&#39;</span>
+<span class="sd">        Method for spatital reprojection of precip, by default 'nearest_index'</span>
 <span class="sd">    lapse_rate: float, optional</span>
 <span class="sd">        lapse rate of temperature [C m-1] (default: -0.0065)</span>
 <span class="sd">    resample_kwargs:</span>
@@ -1091,11 +1013,11 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    -------</span>
 <span class="sd">    press_out: xarray.DataArray (lazy)</span>
 <span class="sd">        processed pressure forcing</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">resample_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">resample_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">if</span> <span class="n">press</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dim0</span> <span class="o">!=</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;First press dim should be &quot;time&quot;, not </span><span class="si">{</span><span class="n">press</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dim0</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">press</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dim0</span> <span class="o">!=</span> <span class="s2">"time"</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'First press dim should be "time", not </span><span class="si">{</span><span class="n">press</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dim0</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
     <span class="c1"># downscale pressure (lazy)</span>
     <span class="n">press_out</span> <span class="o">=</span> <span class="n">press</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reproject_like</span><span class="p">(</span><span class="n">dem_model</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">reproj_method</span><span class="p">)</span>
     <span class="c1"># correct temperature based on high-res DEM</span>
@@ -1104,10 +1026,10 @@ window.runMermaid = runMermaid;</script>
         <span class="n">press_factor</span> <span class="o">=</span> <span class="n">press_correction</span><span class="p">(</span><span class="n">dem_model</span><span class="p">,</span> <span class="n">lapse_rate</span><span class="o">=</span><span class="n">lapse_rate</span><span class="p">)</span>
         <span class="n">press_out</span> <span class="o">=</span> <span class="n">press_out</span> <span class="o">*</span> <span class="n">press_factor</span>
     <span class="c1"># resample time</span>
-    <span class="n">press_out</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;press&quot;</span>
-    <span class="n">press_out</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s2">&quot;hPa&quot;</span><span class="p">)</span>
+    <span class="n">press_out</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"press"</span>
+    <span class="n">press_out</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s2">"hPa"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">freq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">resample_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">upsampling</span><span class="o">=</span><span class="s2">&quot;bfill&quot;</span><span class="p">,</span> <span class="n">downsampling</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">)</span>
+        <span class="n">resample_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">upsampling</span><span class="o">=</span><span class="s2">"bfill"</span><span class="p">,</span> <span class="n">downsampling</span><span class="o">=</span><span class="s2">"mean"</span><span class="p">)</span>
         <span class="n">press_out</span> <span class="o">=</span> <span class="n">resample_time</span><span class="p">(</span>
             <span class="n">press_out</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">conserve_mass</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">resample_kwargs</span>
         <span class="p">)</span>
@@ -1125,10 +1047,10 @@ window.runMermaid = runMermaid;</script>
     <span class="n">altitude</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
     <span class="n">altitude_correction</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">freq</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">reproj_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;nearest_index&quot;</span><span class="p">,</span>
+    <span class="n">reproj_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"nearest_index"</span><span class="p">,</span>
     <span class="n">resample_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return lazy reprojection of wind speed to model grid.</span>
+<span class="w">    </span><span class="sd">"""Return lazy reprojection of wind speed to model grid.</span>
 
 <span class="sd">    Resample time dimension to frequency. Either provides wind speed directly</span>
 <span class="sd">    or both wind_u and wind_v components.</span>
@@ -1151,7 +1073,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    freq: str, Timedelta</span>
 <span class="sd">        output frequency of timedimension</span>
 <span class="sd">    reproj_method: str, optional</span>
-<span class="sd">        Method for spatital reprojection of precip, by default &#39;nearest_index&#39;</span>
+<span class="sd">        Method for spatital reprojection of precip, by default 'nearest_index'</span>
 <span class="sd">    resample_kwargs:</span>
 <span class="sd">        Additional key-word arguments (e.g. label, closed) for time resampling method</span>
 
@@ -1159,16 +1081,16 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    -------</span>
 <span class="sd">    wind_out: xarray.DataArray (lazy)</span>
 <span class="sd">        processed wind forcing</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">resample_kwargs</span> <span class="o">=</span> <span class="n">resample_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">wind_u</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">wind_v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">wind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">wind_u</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">wind_v</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
     <span class="k">elif</span> <span class="n">wind</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either wind or wind_u and wind_v variables must be supplied.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Either wind or wind_u and wind_v variables must be supplied."</span><span class="p">)</span>
 
     <span class="k">assert</span> <span class="n">wind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">wind</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dim0</span> <span class="o">!=</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;First wind dim should be &quot;time&quot;, not </span><span class="si">{</span><span class="n">wind</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dim0</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">wind</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dim0</span> <span class="o">!=</span> <span class="s2">"time"</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'First wind dim should be "time", not </span><span class="si">{</span><span class="n">wind</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dim0</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
     <span class="c1"># compute wind at 2 meters altitude</span>
     <span class="k">if</span> <span class="n">altitude_correction</span><span class="p">:</span>
@@ -1177,10 +1099,10 @@ window.runMermaid = runMermaid;</script>
     <span class="k">assert</span> <span class="n">wind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
     <span class="n">wind_out</span> <span class="o">=</span> <span class="n">wind</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reproject_like</span><span class="p">(</span><span class="n">da_model</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">reproj_method</span><span class="p">)</span>
     <span class="c1"># resample time</span>
-    <span class="n">wind_out</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;wind&quot;</span>
-    <span class="n">wind_out</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s2">&quot;m s-1&quot;</span><span class="p">)</span>
+    <span class="n">wind_out</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"wind"</span>
+    <span class="n">wind_out</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s2">"m s-1"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">freq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">resample_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">upsampling</span><span class="o">=</span><span class="s2">&quot;bfill&quot;</span><span class="p">,</span> <span class="n">downsampling</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">)</span>
+        <span class="n">resample_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">upsampling</span><span class="o">=</span><span class="s2">"bfill"</span><span class="p">,</span> <span class="n">downsampling</span><span class="o">=</span><span class="s2">"mean"</span><span class="p">)</span>
         <span class="n">wind_out</span> <span class="o">=</span> <span class="n">resample_time</span><span class="p">(</span><span class="n">wind_out</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">conserve_mass</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">resample_kwargs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">wind_out</span></div>
 
@@ -1192,15 +1114,15 @@ window.runMermaid = runMermaid;</script>
     <span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
     <span class="n">temp</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
     <span class="n">dem_model</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
-    <span class="n">method</span><span class="p">:</span> <span class="n">PetMethods</span> <span class="o">=</span> <span class="s2">&quot;debruin&quot;</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">:</span> <span class="n">PetMethods</span> <span class="o">=</span> <span class="s2">"debruin"</span><span class="p">,</span>
     <span class="n">press_correction</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">wind_correction</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">wind_altitude</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-    <span class="n">reproj_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;nearest_index&quot;</span><span class="p">,</span>
+    <span class="n">reproj_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"nearest_index"</span><span class="p">,</span>
     <span class="n">freq</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">resample_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine reference evapotranspiration.</span>
+<span class="w">    </span><span class="sd">"""Determine reference evapotranspiration.</span>
 
 <span class="sd">    (lazy reprojection on model grid and resampling of time dimension to frequency).</span>
 
@@ -1210,22 +1132,22 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        Dataset with climate variables: pressure [hPa], global radiation [W m-2],</span>
 <span class="sd">        TOA incident solar radiation [W m-2], wind [m s-1]</span>
 
-<span class="sd">        * Required variables: {&quot;temp&quot;, &quot;press&quot; or &quot;press_msl&quot;, &quot;kin&quot;}</span>
-<span class="sd">        * additional variables for debruin: {&quot;kout&quot;}</span>
+<span class="sd">        * Required variables: {"temp", "press" or "press_msl", "kin"}</span>
+<span class="sd">        * additional variables for debruin: {"kout"}</span>
 <span class="sd">        * additional variables for penman-monteith_rh_simple:</span>
-<span class="sd">            {&quot;temp_min&quot;, &quot;temp_max&quot;, &quot;wind&quot; or &quot;wind_u&quot;+&quot;wind_v&quot;, &quot;rh&quot;}</span>
+<span class="sd">            {"temp_min", "temp_max", "wind" or "wind_u"+"wind_v", "rh"}</span>
 <span class="sd">        * additional variables for penman-monteith_tdew:</span>
-<span class="sd">            {&quot;temp_min&quot;, &quot;temp_max&quot;, &quot;wind&quot; or &quot;wind_u&quot;+&quot;wind_v&quot;, &quot;temp_dew&quot;}</span>
+<span class="sd">            {"temp_min", "temp_max", "wind" or "wind_u"+"wind_v", "temp_dew"}</span>
 <span class="sd">    temp : xarray.DataArray</span>
 <span class="sd">        DataArray with temperature on model grid resolution [°C]</span>
 <span class="sd">    dem_model : xarray.DataArray</span>
 <span class="sd">        DataArray of the target resolution and projection, contains elevation</span>
 <span class="sd">        data</span>
-<span class="sd">    method : {&#39;debruin&#39;, &#39;makkink&#39;, &quot;penman-monteith_rh_simple&quot;, &quot;penman-monteith_tdew&quot;}</span>
+<span class="sd">    method : {'debruin', 'makkink', "penman-monteith_rh_simple", "penman-monteith_tdew"}</span>
 <span class="sd">        Potential evapotranspiration method.</span>
 <span class="sd">        if penman-monteith is used, requires the installation of the pyet package.</span>
 <span class="sd">    reproj_method: str, optional</span>
-<span class="sd">        Method for spatital reprojection of precip, by default &#39;nearest_index&#39;</span>
+<span class="sd">        Method for spatital reprojection of precip, by default 'nearest_index'</span>
 <span class="sd">    press_correction : bool, default False</span>
 <span class="sd">        If True pressure is corrected, based on elevation data of `dem_model`</span>
 <span class="sd">    wind_altitude: float, optional</span>
@@ -1242,107 +1164,107 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    -------</span>
 <span class="sd">    pet_out : xarray.DataArray (lazy)</span>
 <span class="sd">        reference evapotranspiration</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">PET_METHODS</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Unknown pet method &#39;</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">&#39;, select from </span><span class="si">{</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PET_METHODS</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"Unknown pet method '</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">', select from </span><span class="si">{</span><span class="s1">','</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PET_METHODS</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
     <span class="c1"># resample in time</span>
     <span class="n">resample_kwargs</span> <span class="o">=</span> <span class="n">resample_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
-    <span class="k">if</span> <span class="n">temp</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dim0</span> <span class="o">!=</span> <span class="s2">&quot;time&quot;</span> <span class="ow">or</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dim0</span> <span class="o">!=</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;First dimension of input variables should be &quot;time&quot;&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">temp</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dim0</span> <span class="o">!=</span> <span class="s2">"time"</span> <span class="ow">or</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dim0</span> <span class="o">!=</span> <span class="s2">"time"</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'First dimension of input variables should be "time"'</span><span class="p">)</span>
     <span class="c1"># make sure temp and ds align both temporally and spatially</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">temp</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">==</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All input variables have same time index.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">temp</span><span class="p">[</span><span class="s2">"time"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">==</span> <span class="n">ds</span><span class="p">[</span><span class="s2">"time"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"All input variables have same time index."</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">temp</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">identical_grid</span><span class="p">(</span><span class="n">dem_model</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Temp variable should be on model grid.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Temp variable should be on model grid."</span><span class="p">)</span>
 
     <span class="c1"># resample input to model grid</span>
     <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reproject_like</span><span class="p">(</span><span class="n">dem_model</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">reproj_method</span><span class="p">)</span>
 
-    <span class="c1"># Process bands like &#39;pressure&#39; and &#39;wind&#39;</span>
+    <span class="c1"># Process bands like 'pressure' and 'wind'</span>
     <span class="k">if</span> <span class="n">press_correction</span><span class="p">:</span>
-        <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;press&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">press</span><span class="p">(</span>
-            <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;press_msl&quot;</span><span class="p">],</span>
+        <span class="n">ds</span><span class="p">[</span><span class="s2">"press"</span><span class="p">]</span> <span class="o">=</span> <span class="n">press</span><span class="p">(</span>
+            <span class="n">ds</span><span class="p">[</span><span class="s2">"press_msl"</span><span class="p">],</span>
             <span class="n">dem_model</span><span class="p">,</span>
             <span class="n">lapse_correction</span><span class="o">=</span><span class="n">press_correction</span><span class="p">,</span>
             <span class="n">freq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># do not change freq of press, put pet_out later</span>
             <span class="n">reproj_method</span><span class="o">=</span><span class="n">reproj_method</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="s2">&quot;press_msl&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">:</span>
-            <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">rename</span><span class="p">({</span><span class="s2">&quot;press_msl&quot;</span><span class="p">:</span> <span class="s2">&quot;press&quot;</span><span class="p">})</span>
+        <span class="k">if</span> <span class="s2">"press_msl"</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">:</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">rename</span><span class="p">({</span><span class="s2">"press_msl"</span><span class="p">:</span> <span class="s2">"press"</span><span class="p">})</span>
         <span class="k">elif</span> <span class="n">HAS_PYET</span><span class="p">:</span>
             <span class="c1"># calculate pressure from elevation [kPa]</span>
-            <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;press&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pyet</span><span class="o">.</span><span class="n">calc_press</span><span class="p">(</span><span class="n">dem_model</span><span class="p">)</span>
+            <span class="n">ds</span><span class="p">[</span><span class="s2">"press"</span><span class="p">]</span> <span class="o">=</span> <span class="n">pyet</span><span class="o">.</span><span class="n">calc_press</span><span class="p">(</span><span class="n">dem_model</span><span class="p">)</span>
             <span class="c1"># convert to hPa to be consistent with press function calculation:</span>
-            <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;press&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;press&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">10</span>
+            <span class="n">ds</span><span class="p">[</span><span class="s2">"press"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s2">"press"</span><span class="p">]</span> <span class="o">*</span> <span class="mi">10</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ModuleNotFoundError</span><span class="p">(</span>
-                <span class="s2">&quot;If &#39;press&#39; is supplied and &#39;press_correction&#39; is not used,&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot; the pyet package must be installed.&quot;</span>
+                <span class="s2">"If 'press' is supplied and 'press_correction' is not used,"</span>
+                <span class="o">+</span> <span class="s2">" the pyet package must be installed."</span>
             <span class="p">)</span>
 
     <span class="n">timestep</span> <span class="o">=</span> <span class="n">to_timedelta</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;debruin&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">"debruin"</span><span class="p">:</span>
         <span class="n">pet_out</span> <span class="o">=</span> <span class="n">pet_debruin</span><span class="p">(</span>
             <span class="n">temp</span><span class="p">,</span>
-            <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;press&quot;</span><span class="p">],</span>
-            <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;kin&quot;</span><span class="p">],</span>
-            <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;kout&quot;</span><span class="p">],</span>
+            <span class="n">ds</span><span class="p">[</span><span class="s2">"press"</span><span class="p">],</span>
+            <span class="n">ds</span><span class="p">[</span><span class="s2">"kin"</span><span class="p">],</span>
+            <span class="n">ds</span><span class="p">[</span><span class="s2">"kout"</span><span class="p">],</span>
             <span class="n">timestep</span><span class="o">=</span><span class="n">timestep</span><span class="p">,</span>
         <span class="p">)</span>
-    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;makkink&quot;</span><span class="p">:</span>
-        <span class="n">pet_out</span> <span class="o">=</span> <span class="n">pet_makkink</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;press&quot;</span><span class="p">],</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;kin&quot;</span><span class="p">],</span> <span class="n">timestep</span><span class="o">=</span><span class="n">timestep</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="s2">&quot;penman-monteith&quot;</span> <span class="ow">in</span> <span class="n">method</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Calculating Penman-Monteith ref evaporation&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">"makkink"</span><span class="p">:</span>
+        <span class="n">pet_out</span> <span class="o">=</span> <span class="n">pet_makkink</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">ds</span><span class="p">[</span><span class="s2">"press"</span><span class="p">],</span> <span class="n">ds</span><span class="p">[</span><span class="s2">"kin"</span><span class="p">],</span> <span class="n">timestep</span><span class="o">=</span><span class="n">timestep</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="s2">"penman-monteith"</span> <span class="ow">in</span> <span class="n">method</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Calculating Penman-Monteith ref evaporation"</span><span class="p">)</span>
         <span class="c1"># Add wind</span>
         <span class="c1"># compute wind from u and v components at 10m (for era5)</span>
-        <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;wind10_u&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="s2">&quot;wind10_v&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="p">):</span>
-            <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;wind&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">wind</span><span class="p">(</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s2">"wind10_u"</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="s2">"wind10_v"</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="p">):</span>
+            <span class="n">ds</span><span class="p">[</span><span class="s2">"wind"</span><span class="p">]</span> <span class="o">=</span> <span class="n">wind</span><span class="p">(</span>
                 <span class="n">da_model</span><span class="o">=</span><span class="n">dem_model</span><span class="p">,</span>
-                <span class="n">wind_u</span><span class="o">=</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;wind10_u&quot;</span><span class="p">],</span>
-                <span class="n">wind_v</span><span class="o">=</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;wind10_v&quot;</span><span class="p">],</span>
+                <span class="n">wind_u</span><span class="o">=</span><span class="n">ds</span><span class="p">[</span><span class="s2">"wind10_u"</span><span class="p">],</span>
+                <span class="n">wind_v</span><span class="o">=</span><span class="n">ds</span><span class="p">[</span><span class="s2">"wind10_v"</span><span class="p">],</span>
                 <span class="n">altitude</span><span class="o">=</span><span class="n">wind_altitude</span><span class="p">,</span>
                 <span class="n">altitude_correction</span><span class="o">=</span><span class="n">wind_correction</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;wind&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">wind</span><span class="p">(</span>
+            <span class="n">ds</span><span class="p">[</span><span class="s2">"wind"</span><span class="p">]</span> <span class="o">=</span> <span class="n">wind</span><span class="p">(</span>
                 <span class="n">da_model</span><span class="o">=</span><span class="n">dem_model</span><span class="p">,</span>
-                <span class="n">wind</span><span class="o">=</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;wind&quot;</span><span class="p">],</span>
+                <span class="n">wind</span><span class="o">=</span><span class="n">ds</span><span class="p">[</span><span class="s2">"wind"</span><span class="p">],</span>
                 <span class="n">altitude</span><span class="o">=</span><span class="n">wind_altitude</span><span class="p">,</span>
                 <span class="n">altitude_correction</span><span class="o">=</span><span class="n">wind_correction</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;penman-monteith_rh_simple&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">"penman-monteith_rh_simple"</span><span class="p">:</span>
             <span class="n">pet_out</span> <span class="o">=</span> <span class="n">pm_fao56</span><span class="p">(</span>
-                <span class="n">temp</span><span class="p">[</span><span class="s2">&quot;temp&quot;</span><span class="p">],</span>
-                <span class="n">temp</span><span class="p">[</span><span class="s2">&quot;temp_max&quot;</span><span class="p">],</span>
-                <span class="n">temp</span><span class="p">[</span><span class="s2">&quot;temp_min&quot;</span><span class="p">],</span>
-                <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;press&quot;</span><span class="p">],</span>
-                <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;kin&quot;</span><span class="p">],</span>
-                <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;wind&quot;</span><span class="p">],</span>
-                <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;rh&quot;</span><span class="p">],</span>
+                <span class="n">temp</span><span class="p">[</span><span class="s2">"temp"</span><span class="p">],</span>
+                <span class="n">temp</span><span class="p">[</span><span class="s2">"temp_max"</span><span class="p">],</span>
+                <span class="n">temp</span><span class="p">[</span><span class="s2">"temp_min"</span><span class="p">],</span>
+                <span class="n">ds</span><span class="p">[</span><span class="s2">"press"</span><span class="p">],</span>
+                <span class="n">ds</span><span class="p">[</span><span class="s2">"kin"</span><span class="p">],</span>
+                <span class="n">ds</span><span class="p">[</span><span class="s2">"wind"</span><span class="p">],</span>
+                <span class="n">ds</span><span class="p">[</span><span class="s2">"rh"</span><span class="p">],</span>
                 <span class="n">dem_model</span><span class="p">,</span>
-                <span class="s2">&quot;rh&quot;</span><span class="p">,</span>
+                <span class="s2">"rh"</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;penman-monteith_tdew&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">"penman-monteith_tdew"</span><span class="p">:</span>
             <span class="n">pet_out</span> <span class="o">=</span> <span class="n">pm_fao56</span><span class="p">(</span>
-                <span class="n">temp</span><span class="p">[</span><span class="s2">&quot;temp&quot;</span><span class="p">],</span>
-                <span class="n">temp</span><span class="p">[</span><span class="s2">&quot;temp_max&quot;</span><span class="p">],</span>
-                <span class="n">temp</span><span class="p">[</span><span class="s2">&quot;temp_min&quot;</span><span class="p">],</span>
-                <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;press&quot;</span><span class="p">],</span>
-                <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;kin&quot;</span><span class="p">],</span>
-                <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;wind&quot;</span><span class="p">],</span>
-                <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;temp_dew&quot;</span><span class="p">],</span>
+                <span class="n">temp</span><span class="p">[</span><span class="s2">"temp"</span><span class="p">],</span>
+                <span class="n">temp</span><span class="p">[</span><span class="s2">"temp_max"</span><span class="p">],</span>
+                <span class="n">temp</span><span class="p">[</span><span class="s2">"temp_min"</span><span class="p">],</span>
+                <span class="n">ds</span><span class="p">[</span><span class="s2">"press"</span><span class="p">],</span>
+                <span class="n">ds</span><span class="p">[</span><span class="s2">"kin"</span><span class="p">],</span>
+                <span class="n">ds</span><span class="p">[</span><span class="s2">"wind"</span><span class="p">],</span>
+                <span class="n">ds</span><span class="p">[</span><span class="s2">"temp_dew"</span><span class="p">],</span>
                 <span class="n">dem_model</span><span class="p">,</span>
-                <span class="s2">&quot;temp_dew&quot;</span><span class="p">,</span>
+                <span class="s2">"temp_dew"</span><span class="p">,</span>
             <span class="p">)</span>
 
     <span class="c1"># resample in time</span>
-    <span class="n">pet_out</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;pet&quot;</span>
-    <span class="n">pet_out</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s2">&quot;mm&quot;</span><span class="p">)</span>
+    <span class="n">pet_out</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"pet"</span>
+    <span class="n">pet_out</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s2">"mm"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">freq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">resample_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">upsampling</span><span class="o">=</span><span class="s2">&quot;bfill&quot;</span><span class="p">,</span> <span class="n">downsampling</span><span class="o">=</span><span class="s2">&quot;sum&quot;</span><span class="p">)</span>
+        <span class="n">resample_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">upsampling</span><span class="o">=</span><span class="s2">"bfill"</span><span class="p">,</span> <span class="n">downsampling</span><span class="o">=</span><span class="s2">"sum"</span><span class="p">)</span>
         <span class="n">pet_out</span> <span class="o">=</span> <span class="n">resample_time</span><span class="p">(</span><span class="n">pet_out</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">conserve_mass</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">resample_kwargs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">pet_out</span></div>
 
@@ -1357,7 +1279,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">mo</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0289644</span><span class="p">,</span>
     <span class="n">lapse_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.0065</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Pressure correction based on elevation lapse_rate.</span>
+<span class="w">    </span><span class="sd">"""Pressure correction based on elevation lapse_rate.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1376,7 +1298,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    -------</span>
 <span class="sd">    press_fact : xarray.DataArray</span>
 <span class="sd">        pressure correction factor</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># constant</span>
     <span class="n">power</span> <span class="o">=</span> <span class="n">g</span> <span class="o">*</span> <span class="n">mo</span> <span class="o">/</span> <span class="p">(</span><span class="n">r_air</span> <span class="o">*</span> <span class="n">lapse_rate</span><span class="p">)</span>
     <span class="n">press_fact</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">288.15</span> <span class="o">/</span> <span class="p">(</span><span class="mf">288.15</span> <span class="o">+</span> <span class="n">lapse_rate</span> <span class="o">*</span> <span class="n">dem_model</span><span class="p">),</span> <span class="n">power</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
@@ -1387,7 +1309,7 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="temp_correction">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.processes.meteo.temp_correction.html#hydromt.model.processes.meteo.temp_correction">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">temp_correction</span><span class="p">(</span><span class="n">dem</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">lapse_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.0065</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Temperature correction based on elevation data.</span>
+<span class="w">    </span><span class="sd">"""Temperature correction based on elevation data.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1400,7 +1322,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    -------</span>
 <span class="sd">    temp_add : xarray.DataArray</span>
 <span class="sd">        temperature addition</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">temp_add</span> <span class="o">=</span> <span class="p">(</span><span class="n">dem</span> <span class="o">*</span> <span class="n">lapse_rate</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">temp_add</span></div>
@@ -1419,7 +1341,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">beta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">20.0</span><span class="p">,</span>
     <span class="n">cs</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">110.0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine De Bruin (2016) reference evapotranspiration.</span>
+<span class="w">    </span><span class="sd">"""Determine De Bruin (2016) reference evapotranspiration.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1444,7 +1366,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    -------</span>
 <span class="sd">    pet : xarray.DataArray</span>
 <span class="sd">        reference evapotranspiration</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># saturation and actual vapour pressure at given temperature [hPa °C-1]</span>
     <span class="n">esat</span> <span class="o">=</span> <span class="mf">6.112</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="mf">17.67</span> <span class="o">*</span> <span class="n">temp</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">temp</span> <span class="o">+</span> <span class="mf">243.5</span><span class="p">))</span>
 
@@ -1484,7 +1406,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">timestep</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">86400</span><span class="p">,</span>
     <span class="n">cp</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1005.0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Determnines Makkink reference evapotranspiration.</span>
+<span class="w">    </span><span class="sd">"""Determnines Makkink reference evapotranspiration.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1503,7 +1425,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    -------</span>
 <span class="sd">    pet : xarray.DataArray (lazy)</span>
 <span class="sd">        reference evapotranspiration</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># saturation and actual vapour pressure at given temperature [hPa °C-1]</span>
     <span class="n">esat</span> <span class="o">=</span> <span class="mf">6.112</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="mf">17.67</span> <span class="o">*</span> <span class="n">temp</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">temp</span> <span class="o">+</span> <span class="mf">243.5</span><span class="p">))</span>
     <span class="c1"># slope of vapour pressure curve [hPa °C-1]</span>
@@ -1531,9 +1453,9 @@ window.runMermaid = runMermaid;</script>
     <span class="n">wind</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
     <span class="n">temp_dew</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
     <span class="n">dem</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
-    <span class="n">var</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;temp_dew&quot;</span><span class="p">,</span>
+    <span class="n">var</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"temp_dew"</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Estimate daily reference evapotranspiration (ETo).</span>
+<span class="w">    </span><span class="sd">"""Estimate daily reference evapotranspiration (ETo).</span>
 
 <span class="sd">    Based on a hypothetical short grass reference surface using the</span>
 <span class="sd">    FAO-56 Penman-Monteith equation. Actual vapor pressure is derived either</span>
@@ -1562,7 +1484,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        DataArray with elevation at model resolution [m]</span>
 <span class="sd">    var : str, optional</span>
 <span class="sd">        String with variable name used to estimate actual vapor pressure</span>
-<span class="sd">        (chose from [&quot;temp_dew&quot;, &quot;rh&quot;])</span>
+<span class="sd">        (chose from ["temp_dew", "rh"])</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -1574,10 +1496,10 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    ModuleNotFoundError</span>
 <span class="sd">        In case the pyet module is not installed</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Small check for libraries</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">HAS_PYET</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ModuleNotFoundError</span><span class="p">(</span><span class="s2">&quot;Penman-Monteith FAO-56 requires the &#39;pyet&#39; library&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ModuleNotFoundError</span><span class="p">(</span><span class="s2">"Penman-Monteith FAO-56 requires the 'pyet' library"</span><span class="p">)</span>
 
     <span class="c1"># Precalculated variables:</span>
     <span class="n">lat</span> <span class="o">=</span> <span class="n">kin</span><span class="p">[</span><span class="n">kin</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span><span class="p">)</span>  <span class="c1"># latitude in radians</span>
@@ -1585,9 +1507,9 @@ window.runMermaid = runMermaid;</script>
     <span class="c1"># Vapor pressure</span>
     <span class="n">svp</span> <span class="o">=</span> <span class="n">pyet</span><span class="o">.</span><span class="n">calc_e0</span><span class="p">(</span><span class="n">tmean</span><span class="o">=</span><span class="n">temp</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">var</span> <span class="o">==</span> <span class="s2">&quot;temp_dew&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">var</span> <span class="o">==</span> <span class="s2">"temp_dew"</span><span class="p">:</span>
         <span class="n">avp</span> <span class="o">=</span> <span class="n">pyet</span><span class="o">.</span><span class="n">calc_e0</span><span class="p">(</span><span class="n">tmean</span><span class="o">=</span><span class="n">temp_dew</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">var</span> <span class="o">==</span> <span class="s2">&quot;rh&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">var</span> <span class="o">==</span> <span class="s2">"rh"</span><span class="p">:</span>
         <span class="n">avp</span> <span class="o">=</span> <span class="n">pyet</span><span class="o">.</span><span class="n">calc_ea</span><span class="p">(</span><span class="n">tmax</span><span class="o">=</span><span class="n">temp_max</span><span class="p">,</span> <span class="n">tmin</span><span class="o">=</span><span class="n">temp_min</span><span class="p">,</span> <span class="n">rh</span><span class="o">=</span><span class="n">temp_dew</span><span class="p">)</span>
 
     <span class="c1"># Net radiation</span>
@@ -1620,7 +1542,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">pet</span> <span class="o">=</span> <span class="n">num1</span> <span class="o">+</span> <span class="n">num2</span>
     <span class="n">pet</span> <span class="o">=</span> <span class="n">pyet</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">clip_zeros</span><span class="p">(</span><span class="n">pet</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">pet</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;pet&quot;</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">pet</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">"pet"</span><span class="p">)</span></div>
 
 
 
@@ -1629,14 +1551,14 @@ window.runMermaid = runMermaid;</script>
 <span class="k">def</span><span class="w"> </span><span class="nf">resample_time</span><span class="p">(</span>
     <span class="n">da</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
     <span class="n">freq</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">],</span>
-    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;right&quot;</span><span class="p">,</span>
-    <span class="n">closed</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;right&quot;</span><span class="p">,</span>
-    <span class="n">upsampling</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;bfill&quot;</span><span class="p">,</span>
-    <span class="n">downsampling</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"right"</span><span class="p">,</span>
+    <span class="n">closed</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"right"</span><span class="p">,</span>
+    <span class="n">upsampling</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"bfill"</span><span class="p">,</span>
+    <span class="n">downsampling</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"mean"</span><span class="p">,</span>
     <span class="n">conserve_mass</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">require_uniform_spacing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resample data to destination frequency.</span>
+<span class="w">    </span><span class="sd">"""Resample data to destination frequency.</span>
 
 <span class="sd">    Skip if input data already at output frequency.</span>
 
@@ -1646,10 +1568,10 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        Input data</span>
 <span class="sd">    freq: str, pd.Timedelta</span>
 <span class="sd">        Output frequency.</span>
-<span class="sd">    label: {&#39;left&#39;, &#39;right&#39;}, optional</span>
-<span class="sd">        Side of each interval to use for labeling. By default &#39;right&#39;.</span>
-<span class="sd">    closed: {&#39;left&#39;, &#39;right&#39;}, optional</span>
-<span class="sd">        Side of each interval to treat as closed. By default &#39;right&#39;.</span>
+<span class="sd">    label: {'left', 'right'}, optional</span>
+<span class="sd">        Side of each interval to use for labeling. By default 'right'.</span>
+<span class="sd">    closed: {'left', 'right'}, optional</span>
+<span class="sd">        Side of each interval to treat as closed. By default 'right'.</span>
 <span class="sd">    upsampling, downsampling: str, optional</span>
 <span class="sd">        Resampling method if output frequency is higher, lower (resp.) compared</span>
 <span class="sd">        to input frequency.</span>
@@ -1663,16 +1585,16 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    -------</span>
 <span class="sd">    pet : xarray.DataArray</span>
 <span class="sd">        Resampled data.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">da_out</span> <span class="o">=</span> <span class="n">da</span>
     <span class="n">dfreq</span> <span class="o">=</span> <span class="n">delta_freq</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">freq</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">dfreq</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">require_uniform_spacing</span><span class="p">:</span>
             <span class="n">require_uniform_spacing_time</span><span class="p">(</span><span class="n">da</span><span class="p">)</span>
         <span class="n">resample</span> <span class="o">=</span> <span class="n">upsampling</span> <span class="k">if</span> <span class="n">dfreq</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">downsampling</span>
-        <span class="n">pre</span> <span class="o">=</span> <span class="s2">&quot;up&quot;</span> <span class="k">if</span> <span class="n">dfreq</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;down&quot;</span>
+        <span class="n">pre</span> <span class="o">=</span> <span class="s2">"up"</span> <span class="k">if</span> <span class="n">dfreq</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">"down"</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pre</span><span class="si">}</span><span class="s2">sampling </span><span class="si">{</span><span class="n">da</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> using </span><span class="si">{</span><span class="n">resample</span><span class="si">}</span><span class="s2">; conserve mass: </span><span class="si">{</span><span class="n">conserve_mass</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">pre</span><span class="si">}</span><span class="s2">sampling </span><span class="si">{</span><span class="n">da</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> using </span><span class="si">{</span><span class="n">resample</span><span class="si">}</span><span class="s2">; conserve mass: </span><span class="si">{</span><span class="n">conserve_mass</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
         <span class="n">da_resampled</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span> <span class="n">skipna</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="n">closed</span><span class="p">)</span>
         <span class="n">da_out</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">da_resampled</span><span class="p">,</span> <span class="n">resample</span><span class="p">)()</span>
@@ -1689,12 +1611,12 @@ window.runMermaid = runMermaid;</script>
     <span class="n">da_or_freq</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">],</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span>
     <span class="n">da_or_freq1</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">],</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return relative difference between dataset mean timestep and destination freq.</span>
+<span class="w">    </span><span class="sd">"""Return relative difference between dataset mean timestep and destination freq.</span>
 
 <span class="sd">    &lt;1 : upsampling</span>
 <span class="sd">    1 : same</span>
 <span class="sd">    &gt;1 : downsampling.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">to_timedelta</span><span class="p">(</span><span class="n">da_or_freq1</span><span class="p">)</span> <span class="o">/</span> <span class="n">to_timedelta</span><span class="p">(</span><span class="n">da_or_freq</span><span class="p">)</span></div>
 
 
@@ -1702,7 +1624,7 @@ window.runMermaid = runMermaid;</script>
 <span class="k">def</span><span class="w"> </span><span class="nf">to_timedelta</span><span class="p">(</span>
     <span class="n">da_or_freq</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">],</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert time dimension or frequency to timedelta.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Convert time dimension or frequency to timedelta."""</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">da_or_freq</span><span class="p">,</span> <span class="p">(</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)):</span>
         <span class="n">freq</span> <span class="o">=</span> <span class="n">da_to_timedelta</span><span class="p">(</span><span class="n">da_or_freq</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -1714,22 +1636,22 @@ window.runMermaid = runMermaid;</script>
     <span class="n">da</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
     <span class="n">reducer</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert time dimension spacing in dataset to a timedelta.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Convert time dimension spacing in dataset to a timedelta."""</span>
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">reducer</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">time</span><span class="p">)))</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">freq_to_timedelta</span><span class="p">(</span><span class="n">freq</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert frequency to timedelta.&quot;&quot;&quot;</span>
-    <span class="c1"># Add &#39;1&#39; to freq that doesn&#39;t have any digit</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\d&quot;</span><span class="p">,</span> <span class="n">freq</span><span class="p">)):</span>
-        <span class="n">freq</span> <span class="o">=</span> <span class="s2">&quot;1</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">"""Convert frequency to timedelta."""</span>
+    <span class="c1"># Add '1' to freq that doesn't have any digit</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\d"</span><span class="p">,</span> <span class="n">freq</span><span class="p">)):</span>
+        <span class="n">freq</span> <span class="o">=</span> <span class="s2">"1</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span>
 
     <span class="c1"># Convert str to datetime.timedelta</span>
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">require_uniform_spacing_time</span><span class="p">(</span><span class="n">da</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if time dimension has uniform spacing.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Check if time dimension has uniform spacing."""</span>
     <span class="n">values</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique_counts</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">time</span><span class="p">))</span>
     <span class="n">data</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
         <span class="nb">zip</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
@@ -1737,16 +1659,16 @@ window.runMermaid = runMermaid;</script>
         <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">differences</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">value</span><span class="p">))</span><span class="o">.</span><span class="n">removesuffix</span><span class="p">(</span><span class="s1">&#39; 00:00:00&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> occurs &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">count</span><span class="p">)</span><span class="si">}</span><span class="s2"> time</span><span class="si">{</span><span class="s1">&#39;s&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">count</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">differences</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">value</span><span class="p">))</span><span class="o">.</span><span class="n">removesuffix</span><span class="p">(</span><span class="s1">' 00:00:00'</span><span class="p">)</span><span class="si">}</span><span class="s2"> occurs "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">count</span><span class="p">)</span><span class="si">}</span><span class="s2"> time</span><span class="si">{</span><span class="s1">'s'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">count</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">''</span><span class="si">}</span><span class="s2">"</span>
             <span class="k">for</span> <span class="n">value</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">data</span>
         <span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-            <span class="s2">&quot;Time dimension has no uniform spacing. Unique time differences: </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span>
+            <span class="s2">"Time dimension has no uniform spacing. Unique time differences: </span><span class="si">%s</span><span class="s2">."</span><span class="p">,</span>
             <span class="n">differences</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Time dimension should have uniform spacing for resampling.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Time dimension should have uniform spacing for resampling."</span><span class="p">)</span>
 </pre></div>
 
                 </article>
@@ -1802,8 +1724,8 @@ window.runMermaid = runMermaid;</script>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
-<script defer src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../../../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1837,7 +1759,7 @@ window.runMermaid = runMermaid;</script>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
 </p></div>
       
     </div>

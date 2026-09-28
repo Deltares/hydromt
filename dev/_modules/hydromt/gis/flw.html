@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/autodoc_pydantic.css" />
@@ -35,17 +35,16 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/theme-deltares.css?v=d7afb10b" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
     <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
 
 
@@ -54,173 +53,11 @@
 
 const initStyles = () => {
     const defaultStyle = document.createElement('style');
-    defaultStyle.textContent = `pre.mermaid {
-    /* Same as .mermaid-container > pre */
-    display: block;
-    width: 100%;
-}
-
-pre.mermaid > svg {
-    /* Same as .mermaid-container > pre > svg */
-    height: 500px;
-    width: 100%;
-    max-width: 100% !important;
-}`;
+    defaultStyle.textContent = "pre.mermaid {\n    /* Same as .mermaid-container > pre */\n    display: block;\n    width: 100%;\n}\n\npre.mermaid > svg {\n    /* Same as .mermaid-container > pre > svg */\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}";
     document.head.appendChild(defaultStyle);
 
     const fullscreenStyle = document.createElement('style');
-    fullscreenStyle.textContent = `.mermaid-container {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-}
-
-.mermaid-container > pre {
-    display: block;
-    width: 100%;
-}
-
-.mermaid-container > pre > svg {
-    height: 500px;
-    width: 100%;
-    max-width: 100% !important;
-}
-
-.mermaid-fullscreen-btn {
-    width: 28px;
-    height: 28px;
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(0, 0, 0, 0.3);
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    font-size: 14px;
-    line-height: 1;
-    padding: 0;
-    color: #333;
-}
-
-.mermaid-fullscreen-btn:hover {
-    opacity: 100% !important;
-    background: rgba(255, 255, 255, 1);
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
-    transform: scale(1.1);
-}
-
-.mermaid-fullscreen-btn.dark-theme {
-    background: rgba(50, 50, 50, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: #e0e0e0;
-}
-
-.mermaid-fullscreen-btn.dark-theme:hover {
-    background: rgba(60, 60, 60, 1);
-    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);
-}
-
-.mermaid-fullscreen-modal {
-    display: none;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 95vw;
-    height: 100vh;
-    background: rgba(255, 255, 255, 0.98);
-    z-index: 9999;
-    padding: 20px;
-    overflow: auto;
-}
-
-.mermaid-fullscreen-modal.dark-theme {
-    background: rgba(0, 0, 0, 0.98);
-}
-
-.mermaid-fullscreen-modal.active {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.mermaid-container-fullscreen {
-    position: relative;
-    width: 95vw;
-    height: 90vh;
-    max-width: 95vw;
-    max-height: 90vh;
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-    overflow: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.mermaid-container-fullscreen.dark-theme {
-    background: #1a1a1a;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
-}
-
-.mermaid-container-fullscreen pre.mermaid {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.mermaid-container-fullscreen .mermaid svg {
-    height: 100% !important;
-    width: 100% !important;
-    cursor: grab;
-}
-
-.mermaid-fullscreen-close {
-    position: fixed !important;
-    top: 20px !important;
-    right: 20px !important;
-    width: 40px;
-    height: 40px;
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: 50%;
-    cursor: pointer;
-    z-index: 10000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    transition: all 0.2s;
-    font-size: 24px;
-    line-height: 1;
-    color: #333;
-}
-
-.mermaid-fullscreen-close:hover {
-    background: white;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-    transform: scale(1.1);
-}
-
-.mermaid-fullscreen-close.dark-theme {
-    background: rgba(50, 50, 50, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #e0e0e0;
-}
-
-.mermaid-fullscreen-close.dark-theme:hover {
-    background: rgba(60, 60, 60, 1);
-    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
-}
-
-.mermaid-fullscreen-modal .mermaid-fullscreen-btn {
-    display: none !important;
-}`;
+    fullscreenStyle.textContent = ".mermaid-container {\n    position: relative;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n}\n\n.mermaid-container > pre {\n    display: block;\n    width: 100%;\n}\n\n.mermaid-container > pre > svg {\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}\n\n.mermaid-fullscreen-btn {\n    position: absolute;\n    width: 28px;\n    height: 28px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.3);\n    border-radius: 4px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.2s;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);\n    font-size: 14px;\n    line-height: 1;\n    padding: 0;\n    color: #333;\n}\n\n.mermaid-fullscreen-btn:hover {\n    opacity: 100% !important;\n    background: rgba(255, 255, 255, 1);\n    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-btn.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.3);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-btn.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal {\n    display: none;\n    position: fixed !important;\n    top: 0 !important;\n    left: 0 !important;\n    width: 95vw;\n    height: 100vh;\n    background: rgba(255, 255, 255, 0.98);\n    z-index: 9999;\n    padding: 20px;\n    overflow: auto;\n}\n\n.mermaid-fullscreen-modal.dark-theme {\n    background: rgba(0, 0, 0, 0.98);\n}\n\n.mermaid-fullscreen-modal.active {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen {\n    position: relative;\n    width: 95vw;\n    height: 90vh;\n    max-width: 95vw;\n    max-height: 90vh;\n    background: white;\n    border-radius: 8px;\n    padding: 20px;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n    overflow: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen.dark-theme {\n    background: #1a1a1a;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);\n}\n\n.mermaid-container-fullscreen pre.mermaid {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen .mermaid svg {\n    height: 100% !important;\n    width: 100% !important;\n    cursor: grab;\n}\n\n.mermaid-fullscreen-close {\n    position: fixed !important;\n    top: 20px !important;\n    right: 20px !important;\n    width: 40px;\n    height: 40px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.2);\n    border-radius: 50%;\n    cursor: pointer;\n    z-index: 10000;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n    transition: all 0.2s;\n    font-size: 24px;\n    line-height: 1;\n    color: #333;\n}\n\n.mermaid-fullscreen-close:hover {\n    background: white;\n    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-close.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.2);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-close.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal .mermaid-fullscreen-btn {\n    display: none !important;\n}";
     document.head.appendChild(fullscreenStyle);
 }
 
@@ -265,6 +102,32 @@ let darkTheme = isDarkTheme();
 let modal = null;
 let modalContent = null;
 let previousScrollOffset = [window.scrollX, window.scrollY];
+let _lazyObserver = null;
+let _renderQueue = Promise.resolve();
+let closeModal = () => {};
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal?.classList.contains('active')) {
+        closeModal();
+    }
+});
+
+// Apply d3 zoom to each SVG. Idempotent: an SVG already wrapped is skipped,
+// so this is safe to call both for the initial batch and for diagrams that
+// render lazily once they become visible.
+const addZoomToSvgs = (svgs) => {
+    svgs.each(function() {
+        if (this.getAttribute('data-zoom-applied') === 'true') return;
+        var svg = d3.select(this);
+        svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+        var inner = svg.select("g");
+        var zoom = d3.zoom().on("zoom", function(event) {
+            inner.attr("transform", event.transform);
+        });
+        svg.call(zoom);
+        this.setAttribute('data-zoom-applied', 'true');
+    });
+};
 
 const runMermaid = async (rerun) => {
     console.log("Running mermaid diagrams, rerun =", rerun);
@@ -272,7 +135,15 @@ const runMermaid = async (rerun) => {
     let all_mermaids = document.querySelectorAll(".mermaid");
 
     if (rerun) {
+        // Disconnect any previous lazy rendering observer
+        if (_lazyObserver) {
+            _lazyObserver.disconnect();
+            _lazyObserver = null;
+        }
+
         all_mermaids.forEach((el) => {
+            el.removeAttribute('data-mermaid-deferred');
+            el.removeAttribute('data-mermaid-render-failed');
             if(!el.hasAttribute("data-original-code")) {
                 // store original code
                 // console.log(`Storing original code for first run: `, el.innerHTML);
@@ -289,42 +160,100 @@ const runMermaid = async (rerun) => {
                 el.setAttribute('data-original-code', el.innerHTML);
             }
         });
-        await mermaid.run();
+
+        // Separate visible and hidden elements. Mermaid's layout engine measures
+        // text dimensions via the DOM, which fails for elements hidden by a parent
+        // (e.g., Reveal.js non-active slides, sphinx-design unopened tabs),
+        // producing broken SVGs. Render visible elements now, defer hidden ones.
+        const visible = [];
+        const hidden = [];
+        all_mermaids.forEach((el) => {
+            // offsetParent is null for display:none ancestors.
+            // getClientRects().length > 0 catches position:fixed elements
+            // (which also have null offsetParent but are still visible).
+            if (el.offsetParent !== null || el.getClientRects().length > 0) {
+                visible.push(el);
+            } else {
+                hidden.push(el);
+                el.setAttribute('data-mermaid-deferred', 'true');
+            }
+        });
+
+        if (visible.length > 0) {
+            try {
+                await mermaid.run({ nodes: visible });
+            } catch (e) {
+                console.error("Mermaid rendering failed:", e);
+            }
+        }
+
+        // Lazily render hidden elements when they become visible.
+        // Uses a promise chain (_renderQueue) to serialize rendering,
+        // since IntersectionObserver may report multiple entries at once
+        // and mermaid.run() is not safe to call concurrently.
+        if (hidden.length > 0) {
+            if (typeof IntersectionObserver === 'undefined') {
+                console.warn("IntersectionObserver not available; hidden mermaid diagrams will not render.");
+            } else {
+                _renderQueue = Promise.resolve();
+                _lazyObserver = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.isIntersecting && entry.target.getAttribute("data-processed") !== "true") {
+                            _lazyObserver.unobserve(entry.target);
+                            const el = entry.target;
+                            _renderQueue = _renderQueue.then(async () => {
+                                try {
+                                    await mermaid.run({ nodes: [el] });
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    // Apply zoom to the now-rendered diagram, matching
+                                    // the decoration visible diagrams receive.
+                                    if (false) {
+                                        addZoomToSvgs(d3.selectAll("").select(function() {
+                                            return this.querySelector("svg");
+                                        }));
+                                    }
+                                } catch (e) {
+                                    console.error("Mermaid deferred rendering failed:", e);
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    el.setAttribute('data-mermaid-render-failed', 'true');
+                                }
+                            });
+                        }
+                    }
+                });
+                hidden.forEach((el) => _lazyObserver.observe(el));
+            }
+        }
     }
 
     all_mermaids = document.querySelectorAll(".mermaid");
-    const mermaids_processed = document.querySelectorAll(".mermaid[data-processed='true']");
+    // Exclude deferred (hidden) and render-failed elements from completion checks
+    const mermaids_active = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])");
+    const mermaids_processed = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])[data-processed='true']");
 
-    if ("False" === "True") {
-        const mermaids_to_add_zoom = -1 === -1 ? all_mermaids.length : -1;
+    if (false) {
+        const mermaids_to_add_zoom = 0 === -1 ? mermaids_active.length : 0;
         if(mermaids_to_add_zoom > 0) {
-            var svgs = d3.selectAll("");
-            if(all_mermaids.length !== mermaids_processed.length) {
+            var svgs = d3.selectAll("").select(function() {
+                return this.querySelector("svg");
+            });
+            // Wait until every active (visible) diagram has rendered. Deferred
+            // diagrams are excluded, so a fixed d3_node_count that counts a
+            // hidden diagram no longer loops forever waiting for its SVG.
+            if(mermaids_active.length !== mermaids_processed.length) {
                 setTimeout(() => runMermaid(false), 200);
                 return;
-            } else if(svgs.size() !== mermaids_to_add_zoom) {
-                setTimeout(() => runMermaid(false), 200);
-                return;
-            } else {
-                svgs.each(function() {
-                    var svg = d3.select(this);
-                    svg.html("<g class='wrapper'>" + svg.html() + "</g>");
-                    var inner = svg.select("g");
-                    var zoom = d3.zoom().on("zoom", function(event) {
-                        inner.attr("transform", event.transform);
-                    });
-                    svg.call(zoom);
-                });
             }
+            addZoomToSvgs(svgs);
         }
-    } else if(all_mermaids.length !== mermaids_processed.length) {
+    } else if(mermaids_active.length !== mermaids_processed.length) {
         // Wait for mermaid to process all diagrams
         setTimeout(() => runMermaid(false), 200);
         return;
     }
 
     // Stop here if not adding fullscreen capability
-    if ("True" !== "True") return;
+    if (!true) return;
 
     if (modal !== null ) {
         // Destroy existing modal
@@ -347,7 +276,7 @@ const runMermaid = async (rerun) => {
     modalContent = modal.querySelector('.mermaid-container-fullscreen');
     const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
 
-    const closeModal = () => {
+    closeModal = () => {
         modal.classList.remove('active');
         modalContent.innerHTML = '';
         document.body.style.overflow = ''
@@ -358,12 +287,6 @@ const runMermaid = async (rerun) => {
     modal.addEventListener('click', (e) => {
         if (e.target === modal) closeModal();
     });
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modal.classList.contains('active')) {
-            closeModal();
-        }
-    });
-
     document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
         if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
             mermaidDiv.closest('.mermaid-fullscreen-modal')) {
@@ -383,8 +306,8 @@ const runMermaid = async (rerun) => {
         const fullscreenBtn = document.createElement('button');
         fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
         fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
-        fullscreenBtn.textContent = '⛶';
-        fullscreenBtn.style.opacity = '50%';
+        fullscreenBtn.textContent = "\u26f6";
+        fullscreenBtn.style.opacity = "50%";
 
         // Calculate dynamic position based on diagram's margin and padding
         const diagramStyle = window.getComputedStyle(mermaidDiv);
@@ -396,7 +319,7 @@ const runMermaid = async (rerun) => {
         fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
 
         fullscreenBtn.addEventListener('click', () => {
-            previousScrollOffset = [window.scroll, window.scrollY];
+            previousScrollOffset = [window.scrollX, window.scrollY];
             const clone = mermaidDiv.cloneNode(true);
             modalContent.innerHTML = '';
             modalContent.appendChild(clone);
@@ -408,9 +331,9 @@ const runMermaid = async (rerun) => {
                 svg.style.width = '100%';
                 svg.style.height = 'auto';
                 svg.style.maxWidth = '100%';
-                svg.style.sdisplay = 'block';
+                svg.style.display = 'block';
 
-                if ("False" === "True") {
+                if (false) {
                     setTimeout(() => {
                         const g = svg.querySelector('g');
                         if (g) {
@@ -433,8 +356,11 @@ const runMermaid = async (rerun) => {
     });
 };
 
+
+
 const load = async () => {
     initStyles();
+
 
     await runMermaid(true);
 
@@ -444,10 +370,8 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...JSON.parse(
-                    `{"startOnLoad": false}`
-                ),
-                ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+                {...{"startOnLoad": false},
+                ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
             await runMermaid(true);
@@ -472,10 +396,8 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...JSON.parse(
-        `{"startOnLoad": false}`
-    ),
-    ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+    {...{"startOnLoad": false},
+    ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );
 
@@ -483,7 +405,7 @@ window.addEventListener("load", load);
 window.runMermaid = runMermaid;</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/hydromt/gis/flw';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.18.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.21.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/main/docs/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.5.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -854,7 +776,7 @@ window.runMermaid = runMermaid;</script>
                 <article class="bd-article">
                   
   <h1>Source code for hydromt.gis.flw</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Hydrological flow direction methods powered by pyFlwDir.&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""Hydrological flow direction methods powered by pyFlwDir."""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
@@ -870,16 +792,16 @@ window.runMermaid = runMermaid;</script>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;flwdir_from_da&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;d8_from_dem&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;reproject_hydrography_like&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;stream_map&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;basin_map&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;outlet_map&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;gauge_map&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;clip_basins&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;upscale_flwdir&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;dem_adjust&quot;</span><span class="p">,</span>
+    <span class="s2">"flwdir_from_da"</span><span class="p">,</span>
+    <span class="s2">"d8_from_dem"</span><span class="p">,</span>
+    <span class="s2">"reproject_hydrography_like"</span><span class="p">,</span>
+    <span class="s2">"stream_map"</span><span class="p">,</span>
+    <span class="s2">"basin_map"</span><span class="p">,</span>
+    <span class="s2">"outlet_map"</span><span class="p">,</span>
+    <span class="s2">"gauge_map"</span><span class="p">,</span>
+    <span class="s2">"clip_basins"</span><span class="p">,</span>
+    <span class="s2">"upscale_flwdir"</span><span class="p">,</span>
+    <span class="s2">"dem_adjust"</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="c1">### FLWDIR METHODS ###</span>
@@ -890,11 +812,11 @@ window.runMermaid = runMermaid;</script>
 <span class="k">def</span><span class="w"> </span><span class="nf">flwdir_from_da</span><span class="p">(</span>
     <span class="n">da</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">ftype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;infer&quot;</span><span class="p">,</span>
+    <span class="n">ftype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"infer"</span><span class="p">,</span>
     <span class="n">check_ftype</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse dataarray to flow direction raster object.</span>
+<span class="w">    </span><span class="sd">"""Parse dataarray to flow direction raster object.</span>
 
 <span class="sd">    If a mask coordinate is present this will be passed</span>
 <span class="sd">    on the the pyflwdir.from_array method.</span>
@@ -903,10 +825,10 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    ----------</span>
 <span class="sd">    da : xarray.DataArray</span>
 <span class="sd">        DataArray containing flow direction raster</span>
-<span class="sd">    ftype : {&#39;d8&#39;, &#39;ldd&#39;, &#39;nextxy&#39;, &#39;nextidx&#39;, &#39;infer&#39;}, optional</span>
-<span class="sd">        name of flow direction type, infer from data if &#39;infer&#39;, by default is &#39;infer&#39;</span>
+<span class="sd">    ftype : {'d8', 'ldd', 'nextxy', 'nextidx', 'infer'}, optional</span>
+<span class="sd">        name of flow direction type, infer from data if 'infer', by default is 'infer'</span>
 <span class="sd">    check_ftype : bool, optional</span>
-<span class="sd">        check if valid flow direction raster if ftype is not &#39;infer&#39;, by default True</span>
+<span class="sd">        check if valid flow direction raster if ftype is not 'infer', by default True</span>
 <span class="sd">    mask : xr.DataArray, bool, optional</span>
 <span class="sd">        Mask for gridded flow direction data, by default None.</span>
 <span class="sd">        If True, use the mask coordinate of `da`.</span>
@@ -915,21 +837,21 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    -------</span>
 <span class="sd">    flwdir : pyflwdir.FlwdirRaster</span>
 <span class="sd">        Flow direction raster object</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;da should be an instance of xarray.DataArray&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"da should be an instance of xarray.DataArray"</span><span class="p">)</span>
     <span class="n">crs</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span>
     <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;da is missing CRS property, set using `da.raster.set_crs`&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"da is missing CRS property, set using `da.raster.set_crs`"</span><span class="p">)</span>
     <span class="n">latlon</span> <span class="o">=</span> <span class="n">crs</span><span class="o">.</span><span class="n">is_geographic</span>
-    <span class="n">_crs</span> <span class="o">=</span> <span class="s2">&quot;geographic&quot;</span> <span class="k">if</span> <span class="n">latlon</span> <span class="k">else</span> <span class="s2">&quot;projected&quot;</span>
-    <span class="n">_unit</span> <span class="o">=</span> <span class="s2">&quot;degree&quot;</span> <span class="k">if</span> <span class="n">latlon</span> <span class="k">else</span> <span class="s2">&quot;meter&quot;</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Initializing flwdir with </span><span class="si">{</span><span class="n">_crs</span><span class="si">}</span><span class="s2"> CRS with unit </span><span class="si">{</span><span class="n">_unit</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+    <span class="n">_crs</span> <span class="o">=</span> <span class="s2">"geographic"</span> <span class="k">if</span> <span class="n">latlon</span> <span class="k">else</span> <span class="s2">"projected"</span>
+    <span class="n">_unit</span> <span class="o">=</span> <span class="s2">"degree"</span> <span class="k">if</span> <span class="n">latlon</span> <span class="k">else</span> <span class="s2">"meter"</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Initializing flwdir with </span><span class="si">{</span><span class="n">_crs</span><span class="si">}</span><span class="s2"> CRS with unit </span><span class="si">{</span><span class="n">_unit</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">values</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="n">mask</span> <span class="ow">and</span> <span class="s2">&quot;mask&quot;</span> <span class="ow">in</span> <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="n">mask</span> <span class="ow">and</span> <span class="s2">"mask"</span> <span class="ow">in</span> <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
         <span class="c1"># backwards compatibility for mask = True</span>
-        <span class="n">mask</span> <span class="o">=</span> <span class="n">da</span><span class="p">[</span><span class="s2">&quot;mask&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">da</span><span class="p">[</span><span class="s2">"mask"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
     <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">flwdir</span> <span class="o">=</span> <span class="n">pyflwdir</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span>
@@ -950,14 +872,14 @@ window.runMermaid = runMermaid;</script>
     <span class="n">da_elv</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">max_depth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">outlets</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;edge&quot;</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="s2">&quot;idxs_pit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
+    <span class="n">outlets</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"edge"</span><span class="p">,</span> <span class="s2">"min"</span><span class="p">,</span> <span class="s2">"idxs_pit"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"edge"</span><span class="p">,</span>
     <span class="n">idxs_pit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">gdf_riv</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">riv_burn_method</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;fixed&quot;</span><span class="p">,</span> <span class="s2">&quot;rivdph&quot;</span><span class="p">,</span> <span class="s2">&quot;uparea&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;fixed&quot;</span><span class="p">,</span>
+    <span class="n">riv_burn_method</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"fixed"</span><span class="p">,</span> <span class="s2">"rivdph"</span><span class="p">,</span> <span class="s2">"uparea"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"fixed"</span><span class="p">,</span>
     <span class="n">riv_depth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Derive D8 flow directions grid from an elevation grid.</span>
+<span class="w">    </span><span class="sd">"""Derive D8 flow directions grid from an elevation grid.</span>
 
 <span class="sd">    Outlets occur at the edge of valid data or at user defined cells</span>
 <span class="sd">    (if `idxs_pit` is provided). A local depressions is filled based on its</span>
@@ -973,21 +895,21 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        Maximum pour point depth. Depressions with a larger pour point</span>
 <span class="sd">        depth are set as pit. A negative value (default) equals an infinitely</span>
 <span class="sd">        large pour point depth causing all depressions to be filled.</span>
-<span class="sd">    outlets: {&#39;edge&#39;, &#39;min&#39;, &#39;idxs_pit&#39;}</span>
+<span class="sd">    outlets: {'edge', 'min', 'idxs_pit'}</span>
 <span class="sd">        Position of basin outlet(s)</span>
-<span class="sd">        If &#39;edge&#39; (default) all valid elevation edge cell are considered.</span>
-<span class="sd">        If &#39;min&#39; only the global  minimum elevation edge cell is considered and all flow is directed to this cell.</span>
-<span class="sd">        If &#39;idxs_pit&#39; the linear indices of the outlet cells are provided in `idxs_pit`.</span>
+<span class="sd">        If 'edge' (default) all valid elevation edge cell are considered.</span>
+<span class="sd">        If 'min' only the global  minimum elevation edge cell is considered and all flow is directed to this cell.</span>
+<span class="sd">        If 'idxs_pit' the linear indices of the outlet cells are provided in `idxs_pit`.</span>
 <span class="sd">    idxs_pit: 1D array of int</span>
 <span class="sd">        Linear indices of outlet cells.</span>
 <span class="sd">    gdf_riv: geopandas.GeoDataArray, optional</span>
 <span class="sd">        River vector data. If provided, the river cells are burned into the dem.</span>
 <span class="sd">        Different methods can be used to burn in the river cells, see `riv_burn_method`.</span>
-<span class="sd">    riv_burn_method: {&#39;uparea&#39;, &#39;rivdph&#39;, &#39;fixed&#39;}, optional</span>
+<span class="sd">    riv_burn_method: {'uparea', 'rivdph', 'fixed'}, optional</span>
 <span class="sd">        Method to burn in river vector to aid the flow direction derivation, requires `gdf_riv`.</span>
-<span class="sd">        If &#39;fixed&#39; (default) a fixed river depth `rivdph` value is used to burn in the river cells.</span>
-<span class="sd">        If &#39;rivdph&#39; the rivdph column is used to burn in the river cells directly.</span>
-<span class="sd">        If &#39;uparea&#39; the uparea column is used to create a synthetic river depth based on `max(1, log10(uparea[m2]))`.</span>
+<span class="sd">        If 'fixed' (default) a fixed river depth `rivdph` value is used to burn in the river cells.</span>
+<span class="sd">        If 'rivdph' the rivdph column is used to burn in the river cells directly.</span>
+<span class="sd">        If 'uparea' the uparea column is used to create a synthetic river depth based on `max(1, log10(uparea[m2]))`.</span>
 <span class="sd">    riv_depth: float</span>
 <span class="sd">        fixed depth value used to burn in the dem</span>
 <span class="sd">    **kwargs:</span>
@@ -1001,38 +923,38 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    See Also</span>
 <span class="sd">    --------</span>
 <span class="sd">    pyflwdir.dem.fill_depressions</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">outlets</span> <span class="o">==</span> <span class="s2">&quot;idxs_pit&quot;</span> <span class="ow">and</span> <span class="n">idxs_pit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;idxs_pit required if outlets=&#39;idxs_pit&#39;&quot;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">idxs_pit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">outlets</span> <span class="o">!=</span> <span class="s2">&quot;idxs_pit&quot;</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;idxs_pit provided but outlets not set to &#39;idxs_pit&#39;&quot;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">outlets</span> <span class="o">==</span> <span class="s2">"idxs_pit"</span> <span class="ow">and</span> <span class="n">idxs_pit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"idxs_pit required if outlets='idxs_pit'"</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">idxs_pit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">outlets</span> <span class="o">!=</span> <span class="s2">"idxs_pit"</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"idxs_pit provided but outlets not set to 'idxs_pit'"</span><span class="p">)</span>
 
     <span class="n">nodata</span> <span class="o">=</span> <span class="n">da_elv</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">nodata</span>
     <span class="n">crs</span> <span class="o">=</span> <span class="n">da_elv</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span>
-    <span class="k">assert</span> <span class="n">da_elv</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;N-&gt;S orientation required&quot;</span>
-    <span class="k">assert</span> <span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Nodata value required&quot;</span>
+    <span class="k">assert</span> <span class="n">da_elv</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"N-&gt;S orientation required"</span>
+    <span class="k">assert</span> <span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">"Nodata value required"</span>
 
     <span class="n">nodata_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">da_elv</span><span class="p">)</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">nodata</span><span class="p">)</span> <span class="k">else</span> <span class="n">da_elv</span> <span class="o">==</span> <span class="n">nodata</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gdf_riv</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">):</span>
         <span class="c1"># checks and pre-processing gdf_riv</span>
         <span class="n">gdf_riv</span> <span class="o">=</span> <span class="n">gdf_riv</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">riv_burn_method</span> <span class="o">==</span> <span class="s2">&quot;uparea&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s2">&quot;uparea&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">gdf_riv</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;uparea column required in gdf_riv&quot;</span><span class="p">)</span>
-            <span class="n">gdf_riv</span> <span class="o">=</span> <span class="n">gdf_riv</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">&quot;uparea&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">riv_burn_method</span> <span class="o">==</span> <span class="s2">"uparea"</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">"uparea"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">gdf_riv</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"uparea column required in gdf_riv"</span><span class="p">)</span>
+            <span class="n">gdf_riv</span> <span class="o">=</span> <span class="n">gdf_riv</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">"uparea"</span><span class="p">)</span>
             <span class="c1"># log10(uparea[m2]) as river depth</span>
-            <span class="n">gdf_riv</span><span class="p">[</span><span class="s2">&quot;rivdph&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">gdf_riv</span><span class="p">[</span><span class="s2">&quot;uparea&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">*</span> <span class="mf">1e3</span><span class="p">))</span>
-        <span class="k">elif</span> <span class="n">riv_burn_method</span> <span class="o">==</span> <span class="s2">&quot;rivdph&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s2">&quot;rivdph&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">gdf_riv</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;rivdph column required in gdf_riv&quot;</span><span class="p">)</span>
-            <span class="n">gdf_riv</span> <span class="o">=</span> <span class="n">gdf_riv</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">&quot;rivdph&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">riv_burn_method</span> <span class="o">==</span> <span class="s2">&quot;fixed&quot;</span><span class="p">:</span>
+            <span class="n">gdf_riv</span><span class="p">[</span><span class="s2">"rivdph"</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">gdf_riv</span><span class="p">[</span><span class="s2">"uparea"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">*</span> <span class="mf">1e3</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">riv_burn_method</span> <span class="o">==</span> <span class="s2">"rivdph"</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">"rivdph"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">gdf_riv</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"rivdph column required in gdf_riv"</span><span class="p">)</span>
+            <span class="n">gdf_riv</span> <span class="o">=</span> <span class="n">gdf_riv</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">"rivdph"</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">riv_burn_method</span> <span class="o">==</span> <span class="s2">"fixed"</span><span class="p">:</span>
             <span class="n">gdf_riv</span> <span class="o">=</span> <span class="n">gdf_riv</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">rivdph</span><span class="o">=</span><span class="n">riv_depth</span><span class="p">)</span>  <span class="c1"># fixed depth</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown riv_burn_method: </span><span class="si">{</span><span class="n">riv_burn_method</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unknown riv_burn_method: </span><span class="si">{</span><span class="n">riv_burn_method</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="c1"># burn in river depth</span>
-        <span class="n">da_rivdph</span> <span class="o">=</span> <span class="n">da_elv</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rasterize</span><span class="p">(</span><span class="n">gdf_riv</span><span class="p">,</span> <span class="n">col_name</span><span class="o">=</span><span class="s2">&quot;rivdph&quot;</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">da_rivdph</span> <span class="o">=</span> <span class="n">da_elv</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rasterize</span><span class="p">(</span><span class="n">gdf_riv</span><span class="p">,</span> <span class="n">col_name</span><span class="o">=</span><span class="s2">"rivdph"</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">da_elv</span> <span class="o">=</span> <span class="n">da_elv</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">da_rivdph</span><span class="p">)</span>
         <span class="n">da_elv</span> <span class="o">=</span> <span class="n">da_elv</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="n">nodata_mask</span><span class="p">,</span> <span class="n">nodata</span><span class="p">)</span>
         <span class="n">da_elv</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_nodata</span><span class="p">(</span><span class="n">nodata</span><span class="p">)</span>
@@ -1053,7 +975,7 @@ window.runMermaid = runMermaid;</script>
         <span class="n">dims</span><span class="o">=</span><span class="n">da_elv</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span>
         <span class="n">coords</span><span class="o">=</span><span class="n">da_elv</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span>
         <span class="n">data</span><span class="o">=</span><span class="n">d8</span><span class="p">,</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;flwdir&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"flwdir"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">da_flw</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_nodata</span><span class="p">(</span><span class="mi">247</span><span class="p">)</span>
     <span class="n">da_flw</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
@@ -1069,12 +991,12 @@ window.runMermaid = runMermaid;</script>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">flwdir</span><span class="p">:</span> <span class="n">pyflwdir</span><span class="o">.</span><span class="n">FlwdirRaster</span><span class="p">,</span>
     <span class="n">scale_ratio</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;com2&quot;</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"com2"</span><span class="p">,</span>
     <span class="n">uparea_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">flwdir_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;flwdir&quot;</span><span class="p">,</span>
+    <span class="n">flwdir_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"flwdir"</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">pyflwdir</span><span class="o">.</span><span class="n">FlwdirRaster</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Upscale flow direction network to lower resolution.</span>
+<span class="w">    </span><span class="sd">"""Upscale flow direction network to lower resolution.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1084,12 +1006,12 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        Flow direction raster object.</span>
 <span class="sd">    scale_ratio: int</span>
 <span class="sd">        Size of upscaled (coarse) grid cells.</span>
-<span class="sd">    method : {&#39;com2&#39;, &#39;com&#39;, &#39;eam&#39;, &#39;dmm&#39;}</span>
-<span class="sd">        Upscaling method for flow direction data, by default &#39;com2&#39;.</span>
+<span class="sd">    method : {'com2', 'com', 'eam', 'dmm'}</span>
+<span class="sd">        Upscaling method for flow direction data, by default 'com2'.</span>
 <span class="sd">    uparea_name : str, optional</span>
 <span class="sd">        Name of upstream area DataArray, by default None and derived on the fly.</span>
 <span class="sd">    flwdir_name : str, optional</span>
-<span class="sd">        Name of upscaled flow direction raster DataArray, by default &quot;flwdir&quot;</span>
+<span class="sd">        Name of upscaled flow direction raster DataArray, by default "flwdir"</span>
 <span class="sd">    **kwargs:</span>
 <span class="sd">        Additional keyword arguments that are passed to the `flwdir.upscale`</span>
 <span class="sd">        function.</span>
@@ -1104,15 +1026,15 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    See Also</span>
 <span class="sd">    --------</span>
 <span class="sd">    pyflwdir.FlwdirRaster.upscale</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">flwdir</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">shape</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Flwdir and ds dimensions do not match.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Flwdir and ds dimensions do not match."</span><span class="p">)</span>
     <span class="n">uparea</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">uparea_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">uparea_name</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="p">:</span>
             <span class="n">uparea</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">uparea_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Upstream area map &quot;</span><span class="si">{</span><span class="n">uparea_name</span><span class="si">}</span><span class="s1">&quot; not in dataset.&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Upstream area map "</span><span class="si">{</span><span class="n">uparea_name</span><span class="si">}</span><span class="s1">" not in dataset.'</span><span class="p">)</span>
     <span class="n">flwdir_out</span><span class="p">,</span> <span class="n">idxs_out</span> <span class="o">=</span> <span class="n">flwdir</span><span class="o">.</span><span class="n">upscale</span><span class="p">(</span>
         <span class="n">scale_ratio</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">uparea</span><span class="o">=</span><span class="n">uparea</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span>
@@ -1130,25 +1052,25 @@ window.runMermaid = runMermaid;</script>
         <span class="n">data</span><span class="o">=</span><span class="n">flwdir_out</span><span class="o">.</span><span class="n">to_array</span><span class="p">(</span><span class="n">ftype</span><span class="p">),</span>
         <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span>
         <span class="n">dims</span><span class="o">=</span><span class="n">dims</span><span class="p">,</span>
-        <span class="n">attrs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">long_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ftype</span><span class="si">}</span><span class="s2"> flow direction&quot;</span><span class="p">,</span> <span class="n">_FillValue</span><span class="o">=</span><span class="n">flwdir</span><span class="o">.</span><span class="n">_core</span><span class="o">.</span><span class="n">_mv</span><span class="p">),</span>
+        <span class="n">attrs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">long_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ftype</span><span class="si">}</span><span class="s2"> flow direction"</span><span class="p">,</span> <span class="n">_FillValue</span><span class="o">=</span><span class="n">flwdir</span><span class="o">.</span><span class="n">_core</span><span class="o">.</span><span class="n">_mv</span><span class="p">),</span>
     <span class="p">)</span>
     <span class="c1"># translate outlet indices to global x,y coordinates</span>
     <span class="n">x_out</span><span class="p">,</span> <span class="n">y_out</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">idx_to_xy</span><span class="p">(</span><span class="n">idxs_out</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">idxs_out</span> <span class="o">!=</span> <span class="n">flwdir</span><span class="o">.</span><span class="n">_mv</span><span class="p">)</span>
-    <span class="n">da_flwdir</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s2">&quot;x_out&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span>
+    <span class="n">da_flwdir</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s2">"x_out"</span><span class="p">]</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span>
         <span class="n">dims</span><span class="o">=</span><span class="n">dims</span><span class="p">,</span>
         <span class="n">data</span><span class="o">=</span><span class="n">x_out</span><span class="p">,</span>
-        <span class="n">attrs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">long_name</span><span class="o">=</span><span class="s2">&quot;subgrid outlet x coordinate&quot;</span><span class="p">,</span> <span class="n">_FillValue</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">),</span>
+        <span class="n">attrs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">long_name</span><span class="o">=</span><span class="s2">"subgrid outlet x coordinate"</span><span class="p">,</span> <span class="n">_FillValue</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">),</span>
     <span class="p">)</span>
-    <span class="n">da_flwdir</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s2">&quot;y_out&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span>
+    <span class="n">da_flwdir</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s2">"y_out"</span><span class="p">]</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span>
         <span class="n">dims</span><span class="o">=</span><span class="n">dims</span><span class="p">,</span>
         <span class="n">data</span><span class="o">=</span><span class="n">y_out</span><span class="p">,</span>
-        <span class="n">attrs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">long_name</span><span class="o">=</span><span class="s2">&quot;subgrid outlet y coordinate&quot;</span><span class="p">,</span> <span class="n">_FillValue</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">),</span>
+        <span class="n">attrs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">long_name</span><span class="o">=</span><span class="s2">"subgrid outlet y coordinate"</span><span class="p">,</span> <span class="n">_FillValue</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">),</span>
     <span class="p">)</span>
     <span class="c1"># outlet indices</span>
-    <span class="n">da_flwdir</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s2">&quot;idx_out&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+    <span class="n">da_flwdir</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s2">"idx_out"</span><span class="p">]</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
         <span class="n">data</span><span class="o">=</span><span class="n">idxs_out</span><span class="p">,</span>
         <span class="n">dims</span><span class="o">=</span><span class="n">dims</span><span class="p">,</span>
-        <span class="n">attrs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">long_name</span><span class="o">=</span><span class="s2">&quot;subgrid outlet index&quot;</span><span class="p">,</span> <span class="n">_FillValue</span><span class="o">=</span><span class="n">flwdir</span><span class="o">.</span><span class="n">_mv</span><span class="p">),</span>
+        <span class="n">attrs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">long_name</span><span class="o">=</span><span class="s2">"subgrid outlet index"</span><span class="p">,</span> <span class="n">_FillValue</span><span class="o">=</span><span class="n">flwdir</span><span class="o">.</span><span class="n">_mv</span><span class="p">),</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">da_flwdir</span><span class="p">,</span> <span class="n">flwdir_out</span></div>
 
@@ -1162,11 +1084,11 @@ window.runMermaid = runMermaid;</script>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">river_upa</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5.0</span><span class="p">,</span>
     <span class="n">river_len</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e3</span><span class="p">,</span>
-    <span class="n">uparea_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;uparea&quot;</span><span class="p">,</span>
-    <span class="n">flwdir_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;flwdir&quot;</span><span class="p">,</span>
+    <span class="n">uparea_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"uparea"</span><span class="p">,</span>
+    <span class="n">flwdir_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"flwdir"</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reproject flow direction and upstream area data to the `da_elv` crs and grid.</span>
+<span class="w">    </span><span class="sd">"""Reproject flow direction and upstream area data to the `da_elv` crs and grid.</span>
 
 <span class="sd">    Flow directions are derived from a reprojected grid of synthetic elevation,</span>
 <span class="sd">    based on the log10 upstream area [m2]. For regions without upstream area,</span>
@@ -1195,7 +1117,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        Mimimum distance from river outlet for inflowing river location,</span>
 <span class="sd">        by default 1000 m.</span>
 <span class="sd">    uparea_name, flwdir_name : str, optional</span>
-<span class="sd">        Name of upstream area (default &quot;uparea&quot;) and flow direction (&quot;flwdir&quot;) variables</span>
+<span class="sd">        Name of upstream area (default "uparea") and flow direction ("flwdir") variables</span>
 <span class="sd">        in `ds_hydro`.</span>
 <span class="sd">    kwargs: key-word arguments</span>
 <span class="sd">        key-word arguments are passed to `d8_from_dem`</span>
@@ -1208,13 +1130,13 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    See Also</span>
 <span class="sd">    --------</span>
 <span class="sd">    d8_from_dem</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># check N-&gt;S orientation</span>
     <span class="k">assert</span> <span class="n">da_elv</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span>
     <span class="k">assert</span> <span class="n">ds_hydro</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="n">uparea_name</span><span class="p">,</span> <span class="n">flwdir_name</span><span class="p">]:</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ds_hydro</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> variable not found in ds_hydro&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> variable not found in ds_hydro"</span><span class="p">)</span>
     <span class="n">crs</span> <span class="o">=</span> <span class="n">da_elv</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span>
     <span class="n">da_upa</span> <span class="o">=</span> <span class="n">ds_hydro</span><span class="p">[</span><span class="n">uparea_name</span><span class="p">]</span>
     <span class="n">nodata</span> <span class="o">=</span> <span class="n">da_upa</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">nodata</span>
@@ -1227,9 +1149,9 @@ window.runMermaid = runMermaid;</script>
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">rivmask</span><span class="p">):</span>
         <span class="n">flwdir_src</span> <span class="o">=</span> <span class="n">flwdir_from_da</span><span class="p">(</span><span class="n">ds_hydro</span><span class="p">[</span><span class="n">flwdir_name</span><span class="p">],</span> <span class="n">mask</span><span class="o">=</span><span class="n">rivmask</span><span class="p">)</span>
         <span class="n">elvsyn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">flwdir_src</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="n">elvsyn</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">flwdir_src</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">elvsyn</span><span class="p">)</span>
-    <span class="c1"># reproject with &#39;min&#39; to preserve rivers</span>
+    <span class="c1"># reproject with 'min' to preserve rivers</span>
     <span class="n">elv_mask</span> <span class="o">=</span> <span class="n">da_elv</span> <span class="o">!=</span> <span class="n">da_elv</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">nodata</span>
-    <span class="n">elvsyn_reproj</span> <span class="o">=</span> <span class="n">elvsyn</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reproject_like</span><span class="p">(</span><span class="n">da_elv</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;min&quot;</span><span class="p">)</span>
+    <span class="n">elvsyn_reproj</span> <span class="o">=</span> <span class="n">elvsyn</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reproject_like</span><span class="p">(</span><span class="n">da_elv</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"min"</span><span class="p">)</span>
     <span class="c1"># in regions without uparea use elevation, assuming the elevation &lt; 0</span>
     <span class="c1"># (i.e. offshore bathymetry)</span>
     <span class="n">elvsyn_reproj</span> <span class="o">=</span> <span class="n">elvsyn_reproj</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
@@ -1240,9 +1162,9 @@ window.runMermaid = runMermaid;</script>
     <span class="n">elvsyn_reproj</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
     <span class="n">elvsyn_reproj</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_nodata</span><span class="p">(</span><span class="n">nodata</span><span class="p">)</span>
     <span class="c1"># get flow directions based on reprojected synthetic elevation</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Deriving flow direction from reprojected synthethic elevation.&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Deriving flow direction from reprojected synthethic elevation."</span><span class="p">)</span>
     <span class="n">da_flw1</span> <span class="o">=</span> <span class="n">d8_from_dem</span><span class="p">(</span><span class="n">elvsyn_reproj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="n">flwdir</span> <span class="o">=</span> <span class="n">flwdir_from_da</span><span class="p">(</span><span class="n">da_flw1</span><span class="p">,</span> <span class="n">ftype</span><span class="o">=</span><span class="s2">&quot;d8&quot;</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">elv_mask</span><span class="p">)</span>
+    <span class="n">flwdir</span> <span class="o">=</span> <span class="n">flwdir_from_da</span><span class="p">(</span><span class="n">da_flw1</span><span class="p">,</span> <span class="n">ftype</span><span class="o">=</span><span class="s2">"d8"</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">elv_mask</span><span class="p">)</span>
     <span class="c1"># find source river cells outside destination grid bbox</span>
     <span class="n">outside_dst</span> <span class="o">=</span> <span class="n">da_upa</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">geometry_mask</span><span class="p">(</span><span class="n">da_elv</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">box</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">area</span> <span class="o">=</span> <span class="n">flwdir</span><span class="o">.</span><span class="n">area</span> <span class="o">/</span> <span class="mf">1e6</span>  <span class="c1"># area [km2]</span>
@@ -1253,10 +1175,10 @@ window.runMermaid = runMermaid;</script>
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">rivmask</span><span class="p">,</span> <span class="n">outside_dst</span><span class="p">)):</span>
         <span class="n">feats</span> <span class="o">=</span> <span class="n">flwdir_src</span><span class="o">.</span><span class="n">streams</span><span class="p">(</span><span class="n">uparea</span><span class="o">=</span><span class="n">da_upa</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">rivmask</span><span class="p">)</span>
         <span class="n">gdf_stream</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="o">.</span><span class="n">from_features</span><span class="p">(</span><span class="n">feats</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">ds_hydro</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
-        <span class="n">gdf_stream</span> <span class="o">=</span> <span class="n">gdf_stream</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">&quot;uparea&quot;</span><span class="p">)</span>
+        <span class="n">gdf_stream</span> <span class="o">=</span> <span class="n">gdf_stream</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">"uparea"</span><span class="p">)</span>
         <span class="c1"># calculate upstream area with uparea from inflowing rivers at edge</span>
         <span class="c1"># get edge river cells indices</span>
-        <span class="n">rivupa</span> <span class="o">=</span> <span class="n">da_flw1</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rasterize</span><span class="p">(</span><span class="n">gdf_stream</span><span class="p">,</span> <span class="n">col_name</span><span class="o">=</span><span class="s2">&quot;uparea&quot;</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">rivupa</span> <span class="o">=</span> <span class="n">da_flw1</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rasterize</span><span class="p">(</span><span class="n">gdf_stream</span><span class="p">,</span> <span class="n">col_name</span><span class="o">=</span><span class="s2">"uparea"</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">rivmsk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">flwdir</span><span class="o">.</span><span class="n">distnc</span> <span class="o">&gt;</span> <span class="n">river_len</span><span class="p">,</span> <span class="n">rivupa</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
         <span class="n">_edge</span> <span class="o">=</span> <span class="n">pyflwdir</span><span class="o">.</span><span class="n">gis_utils</span><span class="o">.</span><span class="n">get_edge</span><span class="p">(</span><span class="n">elv_mask</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
         <span class="n">inflow_idxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">rivmsk</span><span class="p">,</span> <span class="n">_edge</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
@@ -1269,27 +1191,27 @@ window.runMermaid = runMermaid;</script>
                 <span class="n">geometry</span><span class="o">=</span><span class="n">gpd</span><span class="o">.</span><span class="n">points_from_xy</span><span class="p">(</span><span class="o">*</span><span class="n">flwdir</span><span class="o">.</span><span class="n">xy</span><span class="p">(</span><span class="n">inflow_idxs</span><span class="p">)),</span>
                 <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">gdf0</span><span class="p">[</span><span class="s2">&quot;distnc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flwdir</span><span class="o">.</span><span class="n">distnc</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">inflow_idxs</span><span class="p">]</span>
-            <span class="n">gdf0</span><span class="p">[</span><span class="s2">&quot;idx2&quot;</span><span class="p">],</span> <span class="n">gdf0</span><span class="p">[</span><span class="s2">&quot;dst2&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nearest</span><span class="p">(</span><span class="n">gdf0</span><span class="p">,</span> <span class="n">gdf_stream</span><span class="p">)</span>
-            <span class="n">gdf0</span> <span class="o">=</span> <span class="n">gdf0</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;distnc&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="s2">&quot;idx2&quot;</span><span class="p">)</span>
-            <span class="n">gdf0</span><span class="p">[</span><span class="s2">&quot;uparea&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf_stream</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">gdf0</span><span class="p">[</span><span class="s2">&quot;idx2&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s2">&quot;uparea&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+            <span class="n">gdf0</span><span class="p">[</span><span class="s2">"distnc"</span><span class="p">]</span> <span class="o">=</span> <span class="n">flwdir</span><span class="o">.</span><span class="n">distnc</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">inflow_idxs</span><span class="p">]</span>
+            <span class="n">gdf0</span><span class="p">[</span><span class="s2">"idx2"</span><span class="p">],</span> <span class="n">gdf0</span><span class="p">[</span><span class="s2">"dst2"</span><span class="p">]</span> <span class="o">=</span> <span class="n">nearest</span><span class="p">(</span><span class="n">gdf0</span><span class="p">,</span> <span class="n">gdf_stream</span><span class="p">)</span>
+            <span class="n">gdf0</span> <span class="o">=</span> <span class="n">gdf0</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">"distnc"</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="s2">"idx2"</span><span class="p">)</span>
+            <span class="n">gdf0</span><span class="p">[</span><span class="s2">"uparea"</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf_stream</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">gdf0</span><span class="p">[</span><span class="s2">"idx2"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s2">"uparea"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
             <span class="c1"># set stream uparea to selected inflow cells and calculate total uparea</span>
             <span class="n">nriv</span> <span class="o">=</span> <span class="n">gdf0</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">size</span>
-            <span class="n">area</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">gdf0</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf0</span><span class="p">[</span><span class="s2">&quot;uparea&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Calculating upstream area with </span><span class="si">{</span><span class="n">nriv</span><span class="si">}</span><span class="s2"> river inflows.&quot;</span><span class="p">)</span>
+            <span class="n">area</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">gdf0</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf0</span><span class="p">[</span><span class="s2">"uparea"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Calculating upstream area with </span><span class="si">{</span><span class="n">nriv</span><span class="si">}</span><span class="s2"> river inflows."</span><span class="p">)</span>
     <span class="n">da_upa1</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
         <span class="n">dims</span><span class="o">=</span><span class="n">da_flw1</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span>
         <span class="n">coords</span><span class="o">=</span><span class="n">da_flw1</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span>
         <span class="n">data</span><span class="o">=</span><span class="n">flwdir</span><span class="o">.</span><span class="n">accuflux</span><span class="p">(</span><span class="n">area</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;uparea&quot;</span><span class="p">,</span>
-        <span class="n">attrs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="s2">&quot;km2&quot;</span><span class="p">,</span> <span class="n">_FillValue</span><span class="o">=-</span><span class="mi">9999</span><span class="p">),</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"uparea"</span><span class="p">,</span>
+        <span class="n">attrs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="s2">"km2"</span><span class="p">,</span> <span class="n">_FillValue</span><span class="o">=-</span><span class="mi">9999</span><span class="p">),</span>
     <span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">da_elv</span> <span class="o">!=</span> <span class="n">nodata</span><span class="p">,</span> <span class="o">-</span><span class="mi">9999</span><span class="p">)</span>
     <span class="n">da_upa1</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">logger</span><span class="o">.</span><span class="n">getEffectiveLevel</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">:</span>
-        <span class="n">upa_reproj_max</span> <span class="o">=</span> <span class="n">da_upa</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reproject_like</span><span class="p">(</span><span class="n">da_elv</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;max&quot;</span><span class="p">)</span>
+        <span class="n">upa_reproj_max</span> <span class="o">=</span> <span class="n">da_upa</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reproject_like</span><span class="p">(</span><span class="n">da_elv</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"max"</span><span class="p">)</span>
         <span class="n">max_upa</span> <span class="o">=</span> <span class="n">upa_reproj_max</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">elv_mask</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
         <span class="n">max_upa1</span> <span class="o">=</span> <span class="n">da_upa1</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;New/org max upstream area: </span><span class="si">{</span><span class="n">max_upa1</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">max_upa</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> km2&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"New/org max upstream area: </span><span class="si">{</span><span class="n">max_upa1</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">max_upa</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> km2"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">merge</span><span class="p">([</span><span class="n">da_flw1</span><span class="p">,</span> <span class="n">da_upa1</span><span class="p">])</span></div>
 
 
@@ -1309,7 +1231,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">flwdir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pyflwdir</span><span class="o">.</span><span class="n">FlwdirRaster</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">max_dist</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10e3</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return map with unique gauge IDs.</span>
+<span class="w">    </span><span class="sd">"""Return map with unique gauge IDs.</span>
 
 <span class="sd">    Gauge locations should be provided by either x,y coordinates (`xy`) or</span>
 <span class="sd">    linear indices (`idxs`). Gauge labels (`ids`) can optionally be provided,</span>
@@ -1346,21 +1268,21 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        linear indices of gauges</span>
 <span class="sd">    ids: 1D array of int</span>
 <span class="sd">        IDs of gauges</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Snap if mask and flwdir are not None</span>
     <span class="k">if</span> <span class="n">xy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">idxs</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">xy_to_idx</span><span class="p">(</span><span class="n">xs</span><span class="o">=</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ys</span><span class="o">=</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     <span class="k">elif</span> <span class="n">idxs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either idxs or xy required&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Either idxs or xy required"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">ids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">idxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">idxs</span><span class="p">)</span>
         <span class="n">ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">idxs</span><span class="o">.</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
     <span class="c1"># Snapping</span>
     <span class="k">if</span> <span class="n">stream</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">flwdir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">idxs</span><span class="p">,</span> <span class="n">dist</span> <span class="o">=</span> <span class="n">flwdir</span><span class="o">.</span><span class="n">snap</span><span class="p">(</span><span class="n">idxs</span><span class="o">=</span><span class="n">idxs</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">stream</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;m&quot;</span><span class="p">)</span>
+        <span class="n">idxs</span><span class="p">,</span> <span class="n">dist</span> <span class="o">=</span> <span class="n">flwdir</span><span class="o">.</span><span class="n">snap</span><span class="p">(</span><span class="n">idxs</span><span class="o">=</span><span class="n">idxs</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">stream</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">"m"</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">dist</span> <span class="o">&gt;</span> <span class="n">max_dist</span><span class="p">):</span>
             <span class="n">far</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dist</span><span class="p">[</span><span class="n">dist</span> <span class="o">&gt;</span> <span class="n">max_dist</span><span class="p">])</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Snapping distance of </span><span class="si">{</span><span class="n">far</span><span class="si">}</span><span class="s2"> gauge(s) exceeds </span><span class="si">{</span><span class="n">max_dist</span><span class="si">}</span><span class="s2"> m&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Snapping distance of </span><span class="si">{</span><span class="n">far</span><span class="si">}</span><span class="s2"> gauge(s) exceeds </span><span class="si">{</span><span class="n">max_dist</span><span class="si">}</span><span class="s2"> m"</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="n">gauges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
     <span class="n">gauges</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">idxs</span><span class="p">]</span> <span class="o">=</span> <span class="n">ids</span>
@@ -1376,25 +1298,25 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="outlet_map">
 <a class="viewcode-back" href="../../../_generated/hydromt.gis.flw.outlet_map.html#hydromt.gis.flw.outlet_map">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">outlet_map</span><span class="p">(</span><span class="n">da_flw</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ftype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;infer&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a mask of basin outlets/pits from a flow direction raster.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">outlet_map</span><span class="p">(</span><span class="n">da_flw</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ftype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"infer"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return a mask of basin outlets/pits from a flow direction raster.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    da_flw: xr.DataArray</span>
 <span class="sd">        Flow direction data array</span>
-<span class="sd">    ftype : {&#39;d8&#39;, &#39;ldd&#39;, &#39;nextxy&#39;, &#39;nextidx&#39;, &#39;infer&#39;}, optional</span>
-<span class="sd">        name of flow direction type, infer from data if &#39;infer&#39;, by default is &#39;infer&#39;</span>
+<span class="sd">    ftype : {'d8', 'ldd', 'nextxy', 'nextidx', 'infer'}, optional</span>
+<span class="sd">        name of flow direction type, infer from data if 'infer', by default is 'infer'</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    da_basin : xarray.DataArray of int32</span>
 <span class="sd">        basin outlets/pits ID map</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">ftype</span> <span class="o">==</span> <span class="s2">&quot;infer&quot;</span><span class="p">:</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">ftype</span> <span class="o">==</span> <span class="s2">"infer"</span><span class="p">:</span>
         <span class="n">ftype</span> <span class="o">=</span> <span class="n">pyflwdir</span><span class="o">.</span><span class="n">pyflwdir</span><span class="o">.</span><span class="n">_infer_ftype</span><span class="p">(</span><span class="n">da_flw</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">ftype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pyflwdir</span><span class="o">.</span><span class="n">pyflwdir</span><span class="o">.</span><span class="n">FTYPES</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown pyflwdir ftype: </span><span class="si">{</span><span class="n">ftype</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unknown pyflwdir ftype: </span><span class="si">{</span><span class="n">ftype</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="n">pit_values</span> <span class="o">=</span> <span class="n">pyflwdir</span><span class="o">.</span><span class="n">pyflwdir</span><span class="o">.</span><span class="n">FTYPES</span><span class="p">[</span><span class="n">ftype</span><span class="p">]</span><span class="o">.</span><span class="n">_pv</span>
     <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">da_flw</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">pit_values</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="n">da_flw</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="n">da_flw</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span></div>
@@ -1404,7 +1326,7 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="stream_map">
 <a class="viewcode-back" href="../../../_generated/hydromt.gis.flw.stream_map.html#hydromt.gis.flw.stream_map">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">stream_map</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">stream_kwargs</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a stream mask DataArray.</span>
+<span class="w">    </span><span class="sd">"""Return a stream mask DataArray.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1421,18 +1343,18 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    -------</span>
 <span class="sd">    stream : xarray.DataArray of bool</span>
 <span class="sd">        stream mask</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">stream</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span> <span class="k">if</span> <span class="n">stream</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">stream</span>
         <span class="n">stream</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
-            <span class="n">coords</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mask&quot;</span>
+            <span class="n">coords</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"mask"</span>
         <span class="p">)</span>  <span class="c1"># all True</span>
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">stream_kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">stream</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">!=</span> <span class="n">ds</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">nodata</span><span class="p">,</span> <span class="n">ds</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">value</span><span class="p">),</span> <span class="kc">False</span>
         <span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">stream</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Stream criteria resulted in invalid mask.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Stream criteria resulted in invalid mask."</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">stream</span></div>
 
 
@@ -1450,7 +1372,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">stream</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">stream_kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a (sub)basin map, with unique non-zero IDs for each subbasin.</span>
+<span class="w">    </span><span class="sd">"""Return a (sub)basin map, with unique non-zero IDs for each subbasin.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1486,9 +1408,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    --------</span>
 <span class="sd">    stream_map</span>
 <span class="sd">    outlet_map</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">flwdir</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">shape</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Flwdir and ds dimensions do not match&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Flwdir and ds dimensions do not match"</span><span class="p">)</span>
     <span class="c1"># get stream map</span>
     <span class="n">locs</span> <span class="o">=</span> <span class="n">xy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">idxs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">locs</span> <span class="ow">and</span> <span class="p">(</span><span class="n">stream</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">stream_kwargs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
@@ -1501,8 +1423,8 @@ window.runMermaid = runMermaid;</script>
         <span class="n">idxs</span> <span class="o">=</span> <span class="n">flwdir</span><span class="o">.</span><span class="n">idxs_outlet</span>
         <span class="k">if</span> <span class="n">idxs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">idxs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;No basin outlets found in domain.&quot;</span>
-                <span class="s2">&quot;Provide &#39;xy&#39; or &#39;idxs&#39; outlet locations or set &#39;outlets=False&#39;&quot;</span>
+                <span class="s2">"No basin outlets found in domain."</span>
+                <span class="s2">"Provide 'xy' or 'idxs' outlet locations or set 'outlets=False'"</span>
             <span class="p">)</span>
     <span class="n">da_basins</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
         <span class="n">data</span><span class="o">=</span><span class="n">flwdir</span><span class="o">.</span><span class="n">basins</span><span class="p">(</span><span class="n">idxs</span><span class="o">=</span><span class="n">idxs</span><span class="p">,</span> <span class="n">xy</span><span class="o">=</span><span class="n">xy</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
@@ -1523,10 +1445,10 @@ window.runMermaid = runMermaid;</script>
     <span class="n">flwdir</span><span class="p">:</span> <span class="n">pyflwdir</span><span class="o">.</span><span class="n">FlwdirRaster</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">xy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">],</span>
-    <span class="n">flwdir_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;flwdir&quot;</span><span class="p">,</span>
+    <span class="n">flwdir_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"flwdir"</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Clip a dataset to a subbasin.</span>
+<span class="w">    </span><span class="sd">"""Clip a dataset to a subbasin.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1537,7 +1459,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    xy : tuple of array_like of float, optional</span>
 <span class="sd">        x, y coordinates of (sub)basin outlet locations</span>
 <span class="sd">    flwdir_name : str, optional</span>
-<span class="sd">        name of flow direction DataArray, by default &#39;flwdir&#39;</span>
+<span class="sd">        name of flow direction DataArray, by default 'flwdir'</span>
 <span class="sd">    kwargs : key-word arguments</span>
 <span class="sd">        Keyword arguments based to the :py:meth:`~hydromt.flw.basin_map` method.</span>
 
@@ -1550,7 +1472,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    --------</span>
 <span class="sd">    basin_map</span>
 <span class="sd">    hydromt.RasterDataArray.clip_mask</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">da_basins</span><span class="p">,</span> <span class="n">xy</span> <span class="o">=</span> <span class="n">basin_map</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">flwdir</span><span class="p">,</span> <span class="n">xy</span><span class="o">=</span><span class="n">xy</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="n">idxs_pit</span> <span class="o">=</span> <span class="n">flwdir</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="o">*</span><span class="n">xy</span><span class="p">)</span>
     <span class="c1"># set pit values in DataArray</span>
@@ -1562,7 +1484,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">attrs</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">flwdir_name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">ds</span><span class="p">[</span><span class="n">flwdir_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">dir_arr</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">)</span>
     <span class="c1"># clip data</span>
-    <span class="n">ds</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s2">&quot;mask&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">da_basins</span>
+    <span class="n">ds</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s2">"mask"</span><span class="p">]</span> <span class="o">=</span> <span class="n">da_basins</span>
     <span class="k">return</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">clip_mask</span><span class="p">(</span><span class="n">da_basins</span><span class="p">)</span></div>
 
 
@@ -1578,7 +1500,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">connectivity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
     <span class="n">river_d8</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return hydrologically conditioned elevation.</span>
+<span class="w">    </span><span class="sd">"""Return hydrologically conditioned elevation.</span>
 
 <span class="sd">    The elevation is conditioned to D4 (`connectivity=4`) or D8 (`connectivity=8`)</span>
 <span class="sd">    flow directions based on the algorithm described in Yamazaki et al. [1]_</span>
@@ -1606,7 +1528,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    xr.Dataset</span>
-<span class="sd">        Dataset with hydrologically adjusted elevation (&#39;elevtn&#39;) [m+REF]</span>
+<span class="sd">        Dataset with hydrologically adjusted elevation ('elevtn') [m+REF]</span>
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
@@ -1619,16 +1541,16 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    --------</span>
 <span class="sd">    pyflwdir.FlwdirRaster.dem_adjust</span>
 <span class="sd">    pyflwdir.FlwdirRaster.dem_dig_d4</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># get flow directions for entire domain and for rivers</span>
     <span class="k">if</span> <span class="n">flwdir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">flwdir</span> <span class="o">=</span> <span class="n">flwdir_from_da</span><span class="p">(</span><span class="n">da_flwdir</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">connectivity</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">river_d8</span> <span class="ow">and</span> <span class="n">da_rivmsk</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Provide &quot;da_rivmsk&quot; in combination with &quot;river_d8&quot;&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'Provide "da_rivmsk" in combination with "river_d8"'</span><span class="p">)</span>
     <span class="n">elevtn</span> <span class="o">=</span> <span class="n">da_elevtn</span><span class="o">.</span><span class="n">values</span>
     <span class="n">nodata</span> <span class="o">=</span> <span class="n">da_elevtn</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">nodata</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Condition elevation to D</span><span class="si">{</span><span class="n">connectivity</span><span class="si">}</span><span class="s2"> flow directions.&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Condition elevation to D</span><span class="si">{</span><span class="n">connectivity</span><span class="si">}</span><span class="s2"> flow directions."</span><span class="p">)</span>
     <span class="c1"># get D8 conditioned elevation</span>
     <span class="n">elevtn</span> <span class="o">=</span> <span class="n">flwdir</span><span class="o">.</span><span class="n">dem_adjust</span><span class="p">(</span><span class="n">elevtn</span><span class="p">)</span>
     <span class="c1"># get D4 conditioned elevation (based on D8 conditioned!)</span>
@@ -1643,7 +1565,7 @@ window.runMermaid = runMermaid;</script>
         <span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
         <span class="c1"># condition the DEM to the new D4 flow dirs</span>
         <span class="n">flwdir_d4</span> <span class="o">=</span> <span class="n">pyflwdir</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span>
-            <span class="n">d4</span><span class="p">,</span> <span class="n">ftype</span><span class="o">=</span><span class="s2">&quot;d8&quot;</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">flwdir</span><span class="o">.</span><span class="n">transform</span><span class="p">,</span> <span class="n">latlon</span><span class="o">=</span><span class="n">flwdir</span><span class="o">.</span><span class="n">latlon</span>
+            <span class="n">d4</span><span class="p">,</span> <span class="n">ftype</span><span class="o">=</span><span class="s2">"d8"</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">flwdir</span><span class="o">.</span><span class="n">transform</span><span class="p">,</span> <span class="n">latlon</span><span class="o">=</span><span class="n">flwdir</span><span class="o">.</span><span class="n">latlon</span>
         <span class="p">)</span>
         <span class="n">elevtn</span> <span class="o">=</span> <span class="n">flwdir_d4</span><span class="o">.</span><span class="n">dem_adjust</span><span class="p">(</span><span class="n">elevtn</span><span class="p">)</span>
         <span class="c1"># condition river cells to D8</span>
@@ -1716,8 +1638,8 @@ window.runMermaid = runMermaid;</script>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1751,7 +1673,7 @@ window.runMermaid = runMermaid;</script>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
 </p></div>
       
     </div>

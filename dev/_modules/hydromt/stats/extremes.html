@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/autodoc_pydantic.css" />
@@ -35,17 +35,16 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/theme-deltares.css?v=d7afb10b" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
     <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
 
 
@@ -54,173 +53,11 @@
 
 const initStyles = () => {
     const defaultStyle = document.createElement('style');
-    defaultStyle.textContent = `pre.mermaid {
-    /* Same as .mermaid-container > pre */
-    display: block;
-    width: 100%;
-}
-
-pre.mermaid > svg {
-    /* Same as .mermaid-container > pre > svg */
-    height: 500px;
-    width: 100%;
-    max-width: 100% !important;
-}`;
+    defaultStyle.textContent = "pre.mermaid {\n    /* Same as .mermaid-container > pre */\n    display: block;\n    width: 100%;\n}\n\npre.mermaid > svg {\n    /* Same as .mermaid-container > pre > svg */\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}";
     document.head.appendChild(defaultStyle);
 
     const fullscreenStyle = document.createElement('style');
-    fullscreenStyle.textContent = `.mermaid-container {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-}
-
-.mermaid-container > pre {
-    display: block;
-    width: 100%;
-}
-
-.mermaid-container > pre > svg {
-    height: 500px;
-    width: 100%;
-    max-width: 100% !important;
-}
-
-.mermaid-fullscreen-btn {
-    width: 28px;
-    height: 28px;
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(0, 0, 0, 0.3);
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    font-size: 14px;
-    line-height: 1;
-    padding: 0;
-    color: #333;
-}
-
-.mermaid-fullscreen-btn:hover {
-    opacity: 100% !important;
-    background: rgba(255, 255, 255, 1);
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
-    transform: scale(1.1);
-}
-
-.mermaid-fullscreen-btn.dark-theme {
-    background: rgba(50, 50, 50, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: #e0e0e0;
-}
-
-.mermaid-fullscreen-btn.dark-theme:hover {
-    background: rgba(60, 60, 60, 1);
-    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);
-}
-
-.mermaid-fullscreen-modal {
-    display: none;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 95vw;
-    height: 100vh;
-    background: rgba(255, 255, 255, 0.98);
-    z-index: 9999;
-    padding: 20px;
-    overflow: auto;
-}
-
-.mermaid-fullscreen-modal.dark-theme {
-    background: rgba(0, 0, 0, 0.98);
-}
-
-.mermaid-fullscreen-modal.active {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.mermaid-container-fullscreen {
-    position: relative;
-    width: 95vw;
-    height: 90vh;
-    max-width: 95vw;
-    max-height: 90vh;
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-    overflow: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.mermaid-container-fullscreen.dark-theme {
-    background: #1a1a1a;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
-}
-
-.mermaid-container-fullscreen pre.mermaid {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.mermaid-container-fullscreen .mermaid svg {
-    height: 100% !important;
-    width: 100% !important;
-    cursor: grab;
-}
-
-.mermaid-fullscreen-close {
-    position: fixed !important;
-    top: 20px !important;
-    right: 20px !important;
-    width: 40px;
-    height: 40px;
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: 50%;
-    cursor: pointer;
-    z-index: 10000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    transition: all 0.2s;
-    font-size: 24px;
-    line-height: 1;
-    color: #333;
-}
-
-.mermaid-fullscreen-close:hover {
-    background: white;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-    transform: scale(1.1);
-}
-
-.mermaid-fullscreen-close.dark-theme {
-    background: rgba(50, 50, 50, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #e0e0e0;
-}
-
-.mermaid-fullscreen-close.dark-theme:hover {
-    background: rgba(60, 60, 60, 1);
-    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
-}
-
-.mermaid-fullscreen-modal .mermaid-fullscreen-btn {
-    display: none !important;
-}`;
+    fullscreenStyle.textContent = ".mermaid-container {\n    position: relative;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n}\n\n.mermaid-container > pre {\n    display: block;\n    width: 100%;\n}\n\n.mermaid-container > pre > svg {\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}\n\n.mermaid-fullscreen-btn {\n    position: absolute;\n    width: 28px;\n    height: 28px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.3);\n    border-radius: 4px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.2s;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);\n    font-size: 14px;\n    line-height: 1;\n    padding: 0;\n    color: #333;\n}\n\n.mermaid-fullscreen-btn:hover {\n    opacity: 100% !important;\n    background: rgba(255, 255, 255, 1);\n    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-btn.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.3);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-btn.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal {\n    display: none;\n    position: fixed !important;\n    top: 0 !important;\n    left: 0 !important;\n    width: 95vw;\n    height: 100vh;\n    background: rgba(255, 255, 255, 0.98);\n    z-index: 9999;\n    padding: 20px;\n    overflow: auto;\n}\n\n.mermaid-fullscreen-modal.dark-theme {\n    background: rgba(0, 0, 0, 0.98);\n}\n\n.mermaid-fullscreen-modal.active {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen {\n    position: relative;\n    width: 95vw;\n    height: 90vh;\n    max-width: 95vw;\n    max-height: 90vh;\n    background: white;\n    border-radius: 8px;\n    padding: 20px;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n    overflow: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen.dark-theme {\n    background: #1a1a1a;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);\n}\n\n.mermaid-container-fullscreen pre.mermaid {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen .mermaid svg {\n    height: 100% !important;\n    width: 100% !important;\n    cursor: grab;\n}\n\n.mermaid-fullscreen-close {\n    position: fixed !important;\n    top: 20px !important;\n    right: 20px !important;\n    width: 40px;\n    height: 40px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.2);\n    border-radius: 50%;\n    cursor: pointer;\n    z-index: 10000;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n    transition: all 0.2s;\n    font-size: 24px;\n    line-height: 1;\n    color: #333;\n}\n\n.mermaid-fullscreen-close:hover {\n    background: white;\n    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-close.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.2);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-close.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal .mermaid-fullscreen-btn {\n    display: none !important;\n}";
     document.head.appendChild(fullscreenStyle);
 }
 
@@ -265,6 +102,32 @@ let darkTheme = isDarkTheme();
 let modal = null;
 let modalContent = null;
 let previousScrollOffset = [window.scrollX, window.scrollY];
+let _lazyObserver = null;
+let _renderQueue = Promise.resolve();
+let closeModal = () => {};
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal?.classList.contains('active')) {
+        closeModal();
+    }
+});
+
+// Apply d3 zoom to each SVG. Idempotent: an SVG already wrapped is skipped,
+// so this is safe to call both for the initial batch and for diagrams that
+// render lazily once they become visible.
+const addZoomToSvgs = (svgs) => {
+    svgs.each(function() {
+        if (this.getAttribute('data-zoom-applied') === 'true') return;
+        var svg = d3.select(this);
+        svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+        var inner = svg.select("g");
+        var zoom = d3.zoom().on("zoom", function(event) {
+            inner.attr("transform", event.transform);
+        });
+        svg.call(zoom);
+        this.setAttribute('data-zoom-applied', 'true');
+    });
+};
 
 const runMermaid = async (rerun) => {
     console.log("Running mermaid diagrams, rerun =", rerun);
@@ -272,7 +135,15 @@ const runMermaid = async (rerun) => {
     let all_mermaids = document.querySelectorAll(".mermaid");
 
     if (rerun) {
+        // Disconnect any previous lazy rendering observer
+        if (_lazyObserver) {
+            _lazyObserver.disconnect();
+            _lazyObserver = null;
+        }
+
         all_mermaids.forEach((el) => {
+            el.removeAttribute('data-mermaid-deferred');
+            el.removeAttribute('data-mermaid-render-failed');
             if(!el.hasAttribute("data-original-code")) {
                 // store original code
                 // console.log(`Storing original code for first run: `, el.innerHTML);
@@ -289,42 +160,100 @@ const runMermaid = async (rerun) => {
                 el.setAttribute('data-original-code', el.innerHTML);
             }
         });
-        await mermaid.run();
+
+        // Separate visible and hidden elements. Mermaid's layout engine measures
+        // text dimensions via the DOM, which fails for elements hidden by a parent
+        // (e.g., Reveal.js non-active slides, sphinx-design unopened tabs),
+        // producing broken SVGs. Render visible elements now, defer hidden ones.
+        const visible = [];
+        const hidden = [];
+        all_mermaids.forEach((el) => {
+            // offsetParent is null for display:none ancestors.
+            // getClientRects().length > 0 catches position:fixed elements
+            // (which also have null offsetParent but are still visible).
+            if (el.offsetParent !== null || el.getClientRects().length > 0) {
+                visible.push(el);
+            } else {
+                hidden.push(el);
+                el.setAttribute('data-mermaid-deferred', 'true');
+            }
+        });
+
+        if (visible.length > 0) {
+            try {
+                await mermaid.run({ nodes: visible });
+            } catch (e) {
+                console.error("Mermaid rendering failed:", e);
+            }
+        }
+
+        // Lazily render hidden elements when they become visible.
+        // Uses a promise chain (_renderQueue) to serialize rendering,
+        // since IntersectionObserver may report multiple entries at once
+        // and mermaid.run() is not safe to call concurrently.
+        if (hidden.length > 0) {
+            if (typeof IntersectionObserver === 'undefined') {
+                console.warn("IntersectionObserver not available; hidden mermaid diagrams will not render.");
+            } else {
+                _renderQueue = Promise.resolve();
+                _lazyObserver = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.isIntersecting && entry.target.getAttribute("data-processed") !== "true") {
+                            _lazyObserver.unobserve(entry.target);
+                            const el = entry.target;
+                            _renderQueue = _renderQueue.then(async () => {
+                                try {
+                                    await mermaid.run({ nodes: [el] });
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    // Apply zoom to the now-rendered diagram, matching
+                                    // the decoration visible diagrams receive.
+                                    if (false) {
+                                        addZoomToSvgs(d3.selectAll("").select(function() {
+                                            return this.querySelector("svg");
+                                        }));
+                                    }
+                                } catch (e) {
+                                    console.error("Mermaid deferred rendering failed:", e);
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    el.setAttribute('data-mermaid-render-failed', 'true');
+                                }
+                            });
+                        }
+                    }
+                });
+                hidden.forEach((el) => _lazyObserver.observe(el));
+            }
+        }
     }
 
     all_mermaids = document.querySelectorAll(".mermaid");
-    const mermaids_processed = document.querySelectorAll(".mermaid[data-processed='true']");
+    // Exclude deferred (hidden) and render-failed elements from completion checks
+    const mermaids_active = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])");
+    const mermaids_processed = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])[data-processed='true']");
 
-    if ("False" === "True") {
-        const mermaids_to_add_zoom = -1 === -1 ? all_mermaids.length : -1;
+    if (false) {
+        const mermaids_to_add_zoom = 0 === -1 ? mermaids_active.length : 0;
         if(mermaids_to_add_zoom > 0) {
-            var svgs = d3.selectAll("");
-            if(all_mermaids.length !== mermaids_processed.length) {
+            var svgs = d3.selectAll("").select(function() {
+                return this.querySelector("svg");
+            });
+            // Wait until every active (visible) diagram has rendered. Deferred
+            // diagrams are excluded, so a fixed d3_node_count that counts a
+            // hidden diagram no longer loops forever waiting for its SVG.
+            if(mermaids_active.length !== mermaids_processed.length) {
                 setTimeout(() => runMermaid(false), 200);
                 return;
-            } else if(svgs.size() !== mermaids_to_add_zoom) {
-                setTimeout(() => runMermaid(false), 200);
-                return;
-            } else {
-                svgs.each(function() {
-                    var svg = d3.select(this);
-                    svg.html("<g class='wrapper'>" + svg.html() + "</g>");
-                    var inner = svg.select("g");
-                    var zoom = d3.zoom().on("zoom", function(event) {
-                        inner.attr("transform", event.transform);
-                    });
-                    svg.call(zoom);
-                });
             }
+            addZoomToSvgs(svgs);
         }
-    } else if(all_mermaids.length !== mermaids_processed.length) {
+    } else if(mermaids_active.length !== mermaids_processed.length) {
         // Wait for mermaid to process all diagrams
         setTimeout(() => runMermaid(false), 200);
         return;
     }
 
     // Stop here if not adding fullscreen capability
-    if ("True" !== "True") return;
+    if (!true) return;
 
     if (modal !== null ) {
         // Destroy existing modal
@@ -347,7 +276,7 @@ const runMermaid = async (rerun) => {
     modalContent = modal.querySelector('.mermaid-container-fullscreen');
     const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
 
-    const closeModal = () => {
+    closeModal = () => {
         modal.classList.remove('active');
         modalContent.innerHTML = '';
         document.body.style.overflow = ''
@@ -358,12 +287,6 @@ const runMermaid = async (rerun) => {
     modal.addEventListener('click', (e) => {
         if (e.target === modal) closeModal();
     });
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modal.classList.contains('active')) {
-            closeModal();
-        }
-    });
-
     document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
         if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
             mermaidDiv.closest('.mermaid-fullscreen-modal')) {
@@ -383,8 +306,8 @@ const runMermaid = async (rerun) => {
         const fullscreenBtn = document.createElement('button');
         fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
         fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
-        fullscreenBtn.textContent = '⛶';
-        fullscreenBtn.style.opacity = '50%';
+        fullscreenBtn.textContent = "\u26f6";
+        fullscreenBtn.style.opacity = "50%";
 
         // Calculate dynamic position based on diagram's margin and padding
         const diagramStyle = window.getComputedStyle(mermaidDiv);
@@ -396,7 +319,7 @@ const runMermaid = async (rerun) => {
         fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
 
         fullscreenBtn.addEventListener('click', () => {
-            previousScrollOffset = [window.scroll, window.scrollY];
+            previousScrollOffset = [window.scrollX, window.scrollY];
             const clone = mermaidDiv.cloneNode(true);
             modalContent.innerHTML = '';
             modalContent.appendChild(clone);
@@ -408,9 +331,9 @@ const runMermaid = async (rerun) => {
                 svg.style.width = '100%';
                 svg.style.height = 'auto';
                 svg.style.maxWidth = '100%';
-                svg.style.sdisplay = 'block';
+                svg.style.display = 'block';
 
-                if ("False" === "True") {
+                if (false) {
                     setTimeout(() => {
                         const g = svg.querySelector('g');
                         if (g) {
@@ -433,8 +356,11 @@ const runMermaid = async (rerun) => {
     });
 };
 
+
+
 const load = async () => {
     initStyles();
+
 
     await runMermaid(true);
 
@@ -444,10 +370,8 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...JSON.parse(
-                    `{"startOnLoad": false}`
-                ),
-                ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+                {...{"startOnLoad": false},
+                ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
             await runMermaid(true);
@@ -472,10 +396,8 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...JSON.parse(
-        `{"startOnLoad": false}`
-    ),
-    ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+    {...{"startOnLoad": false},
+    ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );
 
@@ -483,7 +405,7 @@ window.addEventListener("load", load);
 window.runMermaid = runMermaid;</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/hydromt/stats/extremes';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.18.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.21.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/main/docs/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.5.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -854,7 +776,7 @@ window.runMermaid = runMermaid;</script>
                 <article class="bd-article">
                   
   <h1>Source code for hydromt.stats.extremes</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Functions for extreme value analysis.&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""Functions for extreme value analysis."""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
@@ -867,19 +789,19 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">stats</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;eva&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;get_peaks&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;get_return_value&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;fit_extremes&quot;</span><span class="p">,</span>
+    <span class="s2">"eva"</span><span class="p">,</span>
+    <span class="s2">"get_peaks"</span><span class="p">,</span>
+    <span class="s2">"get_return_value"</span><span class="p">,</span>
+    <span class="s2">"fit_extremes"</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="n">_RPS</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int_</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">500</span><span class="p">])</span>  <span class="c1"># years</span>
 <span class="n">_DISTS</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;POT&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;exp&quot;</span><span class="p">,</span> <span class="s2">&quot;gpd&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;BM&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;gumb&quot;</span><span class="p">,</span> <span class="s2">&quot;gev&quot;</span><span class="p">],</span>
+    <span class="s2">"POT"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"exp"</span><span class="p">,</span> <span class="s2">"gpd"</span><span class="p">],</span>
+    <span class="s2">"BM"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"gumb"</span><span class="p">,</span> <span class="s2">"gev"</span><span class="p">],</span>
 <span class="p">}</span>
 
-<span class="n">_DEFAULT_PERIOD_STR</span> <span class="o">=</span> <span class="s2">&quot;365.25D&quot;</span>
+<span class="n">_DEFAULT_PERIOD_STR</span> <span class="o">=</span> <span class="s2">"365.25D"</span>
 
 <span class="c1">## high level methods</span>
 
@@ -888,16 +810,16 @@ window.runMermaid = runMermaid;</script>
 <a class="viewcode-back" href="../../../_generated/hydromt.stats.extremes.eva.html#hydromt.stats.extremes.eva">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">eva</span><span class="p">(</span>
     <span class="n">da</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
-    <span class="n">ev_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;BM&quot;</span><span class="p">,</span>
+    <span class="n">ev_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"BM"</span><span class="p">,</span>
     <span class="n">min_dist</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">qthresh</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.9</span><span class="p">,</span>
     <span class="n">period</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">_DEFAULT_PERIOD_STR</span><span class="p">,</span>
     <span class="n">min_sample_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">distribution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">rps</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int_</span><span class="p">]</span> <span class="o">=</span> <span class="n">_RPS</span><span class="p">,</span>
-    <span class="n">criterium</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;AIC&quot;</span><span class="p">,</span>
+    <span class="n">criterium</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"AIC"</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return Extreme Value Analysis.</span>
+<span class="w">    </span><span class="sd">"""Return Extreme Value Analysis.</span>
 
 <span class="sd">    Extreme value analysis based on block maxima (BM) or Peaks Over Threshold (POT).</span>
 <span class="sd">    The method selects the peaks, fits a distribution and calculates return values for</span>
@@ -906,11 +828,11 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    da : xr.DataArray</span>
-<span class="sd">        Timeseries data, must have a regular spaced &#39;time&#39; dimension.</span>
-<span class="sd">    ev_type: {&quot;POT&quot;, &quot;BM&quot;}</span>
-<span class="sd">        Peaks over threshold (POT) or block maxima (BM) peaks, by default &quot;BM&quot;</span>
+<span class="sd">        Timeseries data, must have a regular spaced 'time' dimension.</span>
+<span class="sd">    ev_type: {"POT", "BM"}</span>
+<span class="sd">        Peaks over threshold (POT) or block maxima (BM) peaks, by default "BM"</span>
 <span class="sd">    period : str, optional</span>
-<span class="sd">        Period string, by default &quot;365.25D&quot;. See pandas.Timedelta for options.</span>
+<span class="sd">        Period string, by default "365.25D". See pandas.Timedelta for options.</span>
 <span class="sd">    min_dist : int, optional</span>
 <span class="sd">        Minimum distance between peaks measured in time steps, by default 0</span>
 <span class="sd">    qthresh : float, optional</span>
@@ -920,19 +842,19 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        invalid blocks are set to NaN.</span>
 <span class="sd">    distribution : str, optional</span>
 <span class="sd">        Short name of distribution. If None (default) the optimal block maxima</span>
-<span class="sd">        distribution (&quot;gumb&quot; or &quot;gev&quot; for BM and &quot;exp&quot; or &quot;gpd&quot; for POT) is selected</span>
+<span class="sd">        distribution ("gumb" or "gev" for BM and "exp" or "gpd" for POT) is selected</span>
 <span class="sd">        based on `criterium`.</span>
 <span class="sd">    rps : np.ndarray, optional</span>
 <span class="sd">        Array of return periods, by default [2, 5, 10, 25, 50, 100, 250, 500]</span>
-<span class="sd">    criterium: {&#39;AIC&#39;, &#39;AICc&#39;, &#39;BIC&#39;}</span>
-<span class="sd">        Selection criterium, by default &quot;AIC&quot;</span>
+<span class="sd">    criterium: {'AIC', 'AICc', 'BIC'}</span>
+<span class="sd">        Selection criterium, by default "AIC"</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    xr.Dataset</span>
 <span class="sd">        Dataset with peaks timeseries, distribution name and parameters</span>
 <span class="sd">        and return values.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">da_peaks</span> <span class="o">=</span> <span class="n">get_peaks</span><span class="p">(</span>
         <span class="n">da</span><span class="p">,</span>
         <span class="n">ev_type</span><span class="o">=</span><span class="n">ev_type</span><span class="p">,</span>
@@ -956,14 +878,14 @@ window.runMermaid = runMermaid;</script>
 <a class="viewcode-back" href="../../../_generated/hydromt.stats.extremes.get_peaks.html#hydromt.stats.extremes.get_peaks">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_peaks</span><span class="p">(</span>
     <span class="n">da</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
-    <span class="n">ev_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;BM&quot;</span><span class="p">,</span>
+    <span class="n">ev_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"BM"</span><span class="p">,</span>
     <span class="n">min_dist</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">qthresh</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.9</span><span class="p">,</span>
-    <span class="n">period</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span>
+    <span class="n">period</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"year"</span><span class="p">,</span>
     <span class="n">min_sample_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="n">time_dim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;time&quot;</span><span class="p">,</span>
+    <span class="n">time_dim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"time"</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return peaks from time series.</span>
+<span class="w">    </span><span class="sd">"""Return peaks from time series.</span>
 
 <span class="sd">    Return the timeseries with all but the peak values set to NaN.</span>
 
@@ -981,15 +903,15 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    da : xr.DataArray</span>
-<span class="sd">        Timeseries data, must have a regular spaced &#39;time&#39; dimension.</span>
-<span class="sd">    ev_type : {&quot;POT&quot;, &quot;BM&quot;}</span>
-<span class="sd">        Peaks over threshold (POT) or block maxima (BM) peaks, by default &quot;BM&quot;</span>
+<span class="sd">        Timeseries data, must have a regular spaced 'time' dimension.</span>
+<span class="sd">    ev_type : {"POT", "BM"}</span>
+<span class="sd">        Peaks over threshold (POT) or block maxima (BM) peaks, by default "BM"</span>
 <span class="sd">    min_dist : int, optional</span>
 <span class="sd">        Minimum distance between peaks measured in time steps, by default 0</span>
 <span class="sd">    qthresh : float, optional</span>
 <span class="sd">        Quantile threshold used with peaks over threshold method, by default 0.9</span>
-<span class="sd">    period : {&#39;year&#39;, &#39;month&#39;, &#39;quarter&#39;, pandas.Timedelta}, optional</span>
-<span class="sd">        Period string, by default &quot;year&quot;.</span>
+<span class="sd">    period : {'year', 'month', 'quarter', pandas.Timedelta}, optional</span>
+<span class="sd">        Period string, by default "year".</span>
 <span class="sd">    min_sample_size : int, optional</span>
 <span class="sd">        Minimum number of finite values in a valid block, by default 0. Peaks of</span>
 <span class="sd">        invalid bins are set to NaN.</span>
@@ -999,23 +921,23 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    xr.DataArray</span>
 <span class="sd">        Timeseries data with only peak values, all other values are set to NaN.</span>
 <span class="sd">        Average interarrival time calculated based on the average number of peaks</span>
-<span class="sd">        per year and stored as &quot;extreme_rates&quot;</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">        per year and stored as "extreme_rates"</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;</span> <span class="n">qthresh</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Quantile &#39;qthresh&#39; should be between (0,1)&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Quantile 'qthresh' should be between (0,1)"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">time_dim</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">da</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Input array should have a &#39;</span><span class="si">{</span><span class="n">time_dim</span><span class="si">}</span><span class="s2">&#39; dimension&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Input array should have a '</span><span class="si">{</span><span class="n">time_dim</span><span class="si">}</span><span class="s2">' dimension"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">ev_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_DISTS</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Unknown ev_type </span><span class="si">{</span><span class="n">ev_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">, select from </span><span class="si">{</span><span class="n">_DISTS</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="sa">f</span><span class="s2">"Unknown ev_type </span><span class="si">{</span><span class="n">ev_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">, select from </span><span class="si">{</span><span class="n">_DISTS</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">."</span>
         <span class="p">)</span>
     <span class="n">bins</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">nyears</span> <span class="o">=</span> <span class="p">(</span><span class="n">da</span><span class="p">[</span><span class="n">time_dim</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">da</span><span class="p">[</span><span class="n">time_dim</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">days</span> <span class="o">/</span> <span class="mf">365.2425</span>
-    <span class="k">if</span> <span class="n">period</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;quarter&quot;</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">ev_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;BM&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">period</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"year"</span><span class="p">,</span> <span class="s2">"quarter"</span><span class="p">,</span> <span class="s2">"month"</span><span class="p">]</span> <span class="ow">and</span> <span class="n">ev_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"BM"</span><span class="p">:</span>
         <span class="n">bins</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">da</span><span class="p">[</span><span class="n">time_dim</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="p">,</span> <span class="n">period</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
-    <span class="k">elif</span> <span class="n">ev_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;BM&quot;</span><span class="p">:</span>
-        <span class="n">tstart</span> <span class="o">=</span> <span class="n">da</span><span class="p">[</span><span class="n">time_dim</span><span class="p">]</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">period</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
-        <span class="n">bins</span> <span class="o">=</span> <span class="n">tstart</span><span class="o">.</span><span class="n">reindex_like</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;ffill&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">ev_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"BM"</span><span class="p">:</span>
+        <span class="n">tstart</span> <span class="o">=</span> <span class="n">da</span><span class="p">[</span><span class="n">time_dim</span><span class="p">]</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">period</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"left"</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+        <span class="n">bins</span> <span class="o">=</span> <span class="n">tstart</span><span class="o">.</span><span class="n">reindex_like</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"ffill"</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">min_sample_size</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># min_sample_size not used for POT</span>
 
@@ -1028,12 +950,12 @@ window.runMermaid = runMermaid;</script>
     <span class="n">lmax</span> <span class="o">=</span> <span class="n">duck</span><span class="o">.</span><span class="n">apply_along_axis</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">da</span><span class="o">.</span><span class="n">get_axis_num</span><span class="p">(</span><span class="n">time_dim</span><span class="p">),</span> <span class="n">da</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
     <span class="c1"># apply POT threshold</span>
     <span class="n">peaks</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lmax</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">ev_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;POT&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">ev_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"POT"</span><span class="p">:</span>
         <span class="n">peaks</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">peaks</span> <span class="o">&gt;</span> <span class="n">da</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">qthresh</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">time_dim</span><span class="p">))</span>
     <span class="c1"># get extreme rate per year</span>
     <span class="n">da_rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">peaks</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">time_dim</span><span class="p">)</span> <span class="o">/</span> <span class="n">nyears</span>
-    <span class="n">peaks</span> <span class="o">=</span> <span class="n">peaks</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">({</span><span class="s2">&quot;extremes_rate&quot;</span><span class="p">:</span> <span class="n">da_rate</span><span class="p">})</span>
-    <span class="n">peaks</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;peaks&quot;</span>
+    <span class="n">peaks</span> <span class="o">=</span> <span class="n">peaks</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">({</span><span class="s2">"extremes_rate"</span><span class="p">:</span> <span class="n">da_rate</span><span class="p">})</span>
+    <span class="n">peaks</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"peaks"</span>
     <span class="k">return</span> <span class="n">peaks</span></div>
 
 
@@ -1045,7 +967,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">rps</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int_</span><span class="p">]</span> <span class="o">=</span> <span class="n">_RPS</span><span class="p">,</span>
     <span class="n">extremes_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return return value based on EVA.</span>
+<span class="w">    </span><span class="sd">"""Return return value based on EVA.</span>
 
 <span class="sd">    Return return values based on a fitted extreme value distribution using the</span>
 <span class="sd">    :py:meth:`fit_extremes` method based on the scipy inverse survival function (isf).</span>
@@ -1066,49 +988,49 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    -------</span>
 <span class="sd">    xr.DataArray</span>
 <span class="sd">        Return values</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_return_values_1d</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">rps</span><span class="o">=</span><span class="n">rps</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">rps</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">d</span> <span class="o">==</span> <span class="s2">&quot;gumb&quot;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">d</span> <span class="o">==</span> <span class="s2">"gumb"</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
             <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
         <span class="k">return</span> <span class="n">_get_return_values</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">rps</span><span class="o">=</span><span class="n">rps</span><span class="p">,</span> <span class="n">extremes_rate</span><span class="o">=</span><span class="n">r</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rps</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">rps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">rps</span><span class="p">)</span>
     <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rps</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;rps should be a list or numpy array&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="s2">&quot;dparams&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">da_params</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;da_params should have a &#39;dparams&#39; dimension&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="s2">&quot;distribution&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">da_params</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;da_params should have a &#39;distribution&#39; coordinate&quot;</span><span class="p">)</span>
-    <span class="n">distributions</span> <span class="o">=</span> <span class="n">da_params</span><span class="p">[</span><span class="s2">&quot;distribution&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
-    <span class="k">if</span> <span class="s2">&quot;extremes_rate&quot;</span> <span class="ow">in</span> <span class="n">da_params</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
-        <span class="n">extremes_rate</span> <span class="o">=</span> <span class="n">da_params</span><span class="p">[</span><span class="s2">&quot;extremes_rate&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"rps should be a list or numpy array"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">"dparams"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">da_params</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"da_params should have a 'dparams' dimension"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">"distribution"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">da_params</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"da_params should have a 'distribution' coordinate"</span><span class="p">)</span>
+    <span class="n">distributions</span> <span class="o">=</span> <span class="n">da_params</span><span class="p">[</span><span class="s2">"distribution"</span><span class="p">]</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+    <span class="k">if</span> <span class="s2">"extremes_rate"</span> <span class="ow">in</span> <span class="n">da_params</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+        <span class="n">extremes_rate</span> <span class="o">=</span> <span class="n">da_params</span><span class="p">[</span><span class="s2">"extremes_rate"</span><span class="p">]</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">extremes_rate</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
         <span class="n">extremes_rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">distributions</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">extremes_rate</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">extremes_rate</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">distributions</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;extremes_rate should be a scalar or have the same shape as distribution&quot;</span>
+            <span class="s2">"extremes_rate should be a scalar or have the same shape as distribution"</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">da_params</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># fix case of single dim</span>
-        <span class="n">da_params</span> <span class="o">=</span> <span class="n">da_params</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
+        <span class="n">da_params</span> <span class="o">=</span> <span class="n">da_params</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="s2">"index"</span><span class="p">)</span>
     <span class="n">da_rvs</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">apply_ufunc</span><span class="p">(</span>
         <span class="n">_return_values_1d</span><span class="p">,</span>
         <span class="n">da_params</span><span class="p">,</span>
         <span class="n">extremes_rate</span><span class="p">,</span>
         <span class="n">distributions</span><span class="p">,</span>
-        <span class="n">input_core_dims</span><span class="o">=</span><span class="p">([</span><span class="s2">&quot;dparams&quot;</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[]),</span>
-        <span class="n">output_core_dims</span><span class="o">=</span><span class="p">[[</span><span class="s2">&quot;rps&quot;</span><span class="p">]],</span>
+        <span class="n">input_core_dims</span><span class="o">=</span><span class="p">([</span><span class="s2">"dparams"</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[]),</span>
+        <span class="n">output_core_dims</span><span class="o">=</span><span class="p">[[</span><span class="s2">"rps"</span><span class="p">]],</span>
         <span class="n">vectorize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">dask</span><span class="o">=</span><span class="s2">&quot;parallelized&quot;</span><span class="p">,</span>
-        <span class="n">dask_gufunc_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">output_sizes</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;rps&quot;</span><span class="p">:</span> <span class="n">rps</span><span class="o">.</span><span class="n">size</span><span class="p">}),</span>
+        <span class="n">dask</span><span class="o">=</span><span class="s2">"parallelized"</span><span class="p">,</span>
+        <span class="n">dask_gufunc_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">output_sizes</span><span class="o">=</span><span class="p">{</span><span class="s2">"rps"</span><span class="p">:</span> <span class="n">rps</span><span class="o">.</span><span class="n">size</span><span class="p">}),</span>
         <span class="n">output_dtypes</span><span class="o">=</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
     <span class="p">)</span>
-    <span class="n">da_rvs</span><span class="p">[</span><span class="s2">&quot;rps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">IndexVariable</span><span class="p">(</span><span class="s2">&quot;rps&quot;</span><span class="p">,</span> <span class="n">rps</span><span class="p">)</span>
-    <span class="n">da_rvs</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;return_values&quot;</span>
+    <span class="n">da_rvs</span><span class="p">[</span><span class="s2">"rps"</span><span class="p">]</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">IndexVariable</span><span class="p">(</span><span class="s2">"rps"</span><span class="p">,</span> <span class="n">rps</span><span class="p">)</span>
+    <span class="n">da_rvs</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"return_values"</span>
     <span class="k">return</span> <span class="n">da_rvs</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span></div>
 
 
@@ -1118,20 +1040,20 @@ window.runMermaid = runMermaid;</script>
 <span class="k">def</span><span class="w"> </span><span class="nf">fit_extremes</span><span class="p">(</span>
     <span class="n">da_peaks</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
     <span class="n">distribution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">ev_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;BM&quot;</span><span class="p">,</span>
-    <span class="n">criterium</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;AIC&quot;</span><span class="p">,</span>
-    <span class="n">time_dim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;time&quot;</span><span class="p">,</span>
+    <span class="n">ev_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"BM"</span><span class="p">,</span>
+    <span class="n">criterium</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"AIC"</span><span class="p">,</span>
+    <span class="n">time_dim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"time"</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return distribution fit from extremes.</span>
+<span class="w">    </span><span class="sd">"""Return distribution fit from extremes.</span>
 
 <span class="sd">    Return the fitted parameters of the extreme value `distribution` based on</span>
 <span class="sd">    the lmoments method. If no distribution name is provided `distribution=None`,</span>
 <span class="sd">    the optimal distribution is selected based on `criterium` from a list</span>
 <span class="sd">    of distributions associated with `ev_type`.</span>
 
-<span class="sd">    Block maximum distributions: gumbel (&quot;gumb&quot;) and general extreme value (&quot;gev&quot;).</span>
-<span class="sd">    Peak over threshold distributions: exponential (&quot;exp&quot;) and general pareto</span>
-<span class="sd">    distribution (&quot;gdp&quot;).</span>
+<span class="sd">    Block maximum distributions: gumbel ("gumb") and general extreme value ("gev").</span>
+<span class="sd">    Peak over threshold distributions: exponential ("exp") and general pareto</span>
+<span class="sd">    distribution ("gdp").</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1139,30 +1061,30 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        Timeseries data with only peak values, any other values are set to NaN.</span>
 <span class="sd">        The DataArray should contain as coordinate `extreme_rates` indicating</span>
 <span class="sd">        the yearly rate of extreme events. If not provided, this value is set to 1.0</span>
-<span class="sd">    distribution: {&#39;gev&#39;, &#39;gpd&#39;, &#39;gumb&#39;, &#39;exp&#39;}, optional</span>
+<span class="sd">    distribution: {'gev', 'gpd', 'gumb', 'exp'}, optional</span>
 <span class="sd">        Short distribution name. If None (default) the optimal distribution</span>
 <span class="sd">        is calculated based on `criterium`</span>
-<span class="sd">    ev_type : {&quot;POT&quot;, &quot;BM&quot;}</span>
-<span class="sd">        Peaks over threshold (POT) or block maxima (BM) peaks, by default &quot;BM&quot;</span>
-<span class="sd">    criterium: {&#39;AIC&#39;, &#39;AICc&#39;, &#39;BIC&#39;}</span>
-<span class="sd">        Selection criterium, by default &quot;AIC&quot;</span>
+<span class="sd">    ev_type : {"POT", "BM"}</span>
+<span class="sd">        Peaks over threshold (POT) or block maxima (BM) peaks, by default "BM"</span>
+<span class="sd">    criterium: {'AIC', 'AICc', 'BIC'}</span>
+<span class="sd">        Selection criterium, by default "AIC"</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    xr.DataArray</span>
 <span class="sd">        Parameters and short name of optimal extreme value distribution.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">distributions</span> <span class="o">=</span> <span class="n">_DISTS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ev_type</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">distribution</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">distribution</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">distributions</span> <span class="o">=</span> <span class="p">[</span><span class="n">distribution</span><span class="p">]</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">distribution</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;distribution should be a string or list, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">distribution</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"distribution should be a string or list, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">distribution</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
     <span class="k">elif</span> <span class="n">ev_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_DISTS</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Unknown ev_type </span><span class="si">{</span><span class="n">ev_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">, select from </span><span class="si">{</span><span class="n">_DISTS</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="sa">f</span><span class="s2">"Unknown ev_type </span><span class="si">{</span><span class="n">ev_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">, select from </span><span class="si">{</span><span class="n">_DISTS</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">."</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_fitopt_1d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">distributions</span><span class="o">=</span><span class="n">distributions</span><span class="p">,</span> <span class="n">criterium</span><span class="o">=</span><span class="n">criterium</span><span class="p">):</span>
@@ -1176,31 +1098,31 @@ window.runMermaid = runMermaid;</script>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">params</span><span class="p">,</span> <span class="p">[</span><span class="n">idist</span><span class="p">]])</span>
 
     <span class="k">if</span> <span class="n">da_peaks</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># fix case of single dim</span>
-        <span class="n">da_peaks</span> <span class="o">=</span> <span class="n">da_peaks</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
+        <span class="n">da_peaks</span> <span class="o">=</span> <span class="n">da_peaks</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="s2">"index"</span><span class="p">)</span>
     <span class="n">da_params</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">apply_ufunc</span><span class="p">(</span>
         <span class="n">_fitopt_1d</span><span class="p">,</span>
         <span class="n">da_peaks</span><span class="p">,</span>
         <span class="n">input_core_dims</span><span class="o">=</span><span class="p">[[</span><span class="n">time_dim</span><span class="p">]],</span>
-        <span class="n">output_core_dims</span><span class="o">=</span><span class="p">[[</span><span class="s2">&quot;dparams&quot;</span><span class="p">]],</span>
-        <span class="n">dask_gufunc_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">output_sizes</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;dparams&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">}),</span>
+        <span class="n">output_core_dims</span><span class="o">=</span><span class="p">[[</span><span class="s2">"dparams"</span><span class="p">]],</span>
+        <span class="n">dask_gufunc_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">output_sizes</span><span class="o">=</span><span class="p">{</span><span class="s2">"dparams"</span><span class="p">:</span> <span class="mi">4</span><span class="p">}),</span>
         <span class="n">vectorize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">dask</span><span class="o">=</span><span class="s2">&quot;parallelized&quot;</span><span class="p">,</span>
+        <span class="n">dask</span><span class="o">=</span><span class="s2">"parallelized"</span><span class="p">,</span>
         <span class="n">output_dtypes</span><span class="o">=</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
     <span class="p">)</span>
     <span class="c1"># split output</span>
     <span class="n">idist</span> <span class="o">=</span> <span class="n">da_params</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">dparams</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-    <span class="n">distributions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">distributions</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;NA&quot;</span><span class="p">])[</span><span class="n">idist</span><span class="p">])</span>
+    <span class="n">distributions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">distributions</span> <span class="o">+</span> <span class="p">[</span><span class="s2">"NA"</span><span class="p">])[</span><span class="n">idist</span><span class="p">])</span>
     <span class="n">da_params</span> <span class="o">=</span> <span class="n">da_params</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">dparams</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
-    <span class="n">da_params</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;parameters&quot;</span>
+    <span class="n">da_params</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"parameters"</span>
     <span class="c1"># add coordinates</span>
-    <span class="n">dist_dims</span> <span class="o">=</span> <span class="nb">list</span><span class="p">([</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">da_params</span><span class="o">.</span><span class="n">dims</span> <span class="k">if</span> <span class="n">d</span> <span class="o">!=</span> <span class="s2">&quot;dparams&quot;</span><span class="p">])</span>
+    <span class="n">dist_dims</span> <span class="o">=</span> <span class="nb">list</span><span class="p">([</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">da_params</span><span class="o">.</span><span class="n">dims</span> <span class="k">if</span> <span class="n">d</span> <span class="o">!=</span> <span class="s2">"dparams"</span><span class="p">])</span>
     <span class="n">coords</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-        <span class="n">dparams</span><span class="o">=</span><span class="n">xr</span><span class="o">.</span><span class="n">IndexVariable</span><span class="p">(</span><span class="s2">&quot;dparams&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;shape&quot;</span><span class="p">,</span> <span class="s2">&quot;loc&quot;</span><span class="p">,</span> <span class="s2">&quot;scale&quot;</span><span class="p">]),</span>
+        <span class="n">dparams</span><span class="o">=</span><span class="n">xr</span><span class="o">.</span><span class="n">IndexVariable</span><span class="p">(</span><span class="s2">"dparams"</span><span class="p">,</span> <span class="p">[</span><span class="s2">"shape"</span><span class="p">,</span> <span class="s2">"loc"</span><span class="p">,</span> <span class="s2">"scale"</span><span class="p">]),</span>
         <span class="n">distribution</span><span class="o">=</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="n">dist_dims</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">distributions</span><span class="p">),</span>
     <span class="p">)</span>
     <span class="c1"># forward extremes_rate if provided</span>
-    <span class="k">if</span> <span class="s2">&quot;extremes_rate&quot;</span> <span class="ow">in</span> <span class="n">da_peaks</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
-        <span class="n">coords</span><span class="p">[</span><span class="s2">&quot;extremes_rate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">da_peaks</span><span class="p">[</span><span class="s2">&quot;extremes_rate&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s2">"extremes_rate"</span> <span class="ow">in</span> <span class="n">da_peaks</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+        <span class="n">coords</span><span class="p">[</span><span class="s2">"extremes_rate"</span><span class="p">]</span> <span class="o">=</span> <span class="n">da_peaks</span><span class="p">[</span><span class="s2">"extremes_rate"</span><span class="p">]</span>
     <span class="n">da_params</span> <span class="o">=</span> <span class="n">da_params</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">da_params</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span></div>
 
@@ -1214,7 +1136,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">min_dist</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">min_sample_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return boolean index of local maxima in `arr` which are `min_dist` apart.</span>
+<span class="w">    </span><span class="sd">"""Return boolean index of local maxima in `arr` which are `min_dist` apart.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1232,7 +1154,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    -------</span>
 <span class="sd">    np.ndarray</span>
 <span class="sd">        boolean index of local maxima</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">a0</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">amax</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>  <span class="c1"># peak value</span>
     <span class="n">imax</span> <span class="o">=</span> <span class="o">-</span><span class="n">min_dist</span>  <span class="c1"># peak index</span>
@@ -1272,25 +1194,25 @@ window.runMermaid = runMermaid;</script>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">get_dist</span><span class="p">(</span><span class="n">distribution</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">stats</span><span class="o">.</span><span class="n">rv_continuous</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return scipy.stats distribution.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return scipy.stats distribution."""</span>
     <span class="n">_DISTS</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;gev&quot;</span><span class="p">:</span> <span class="s2">&quot;genextreme&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;gpd&quot;</span><span class="p">:</span> <span class="s2">&quot;genpareto&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;gumb&quot;</span><span class="p">:</span> <span class="s2">&quot;gumbel_r&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;exp&quot;</span><span class="p">:</span> <span class="s2">&quot;genpareto&quot;</span><span class="p">,</span>
+        <span class="s2">"gev"</span><span class="p">:</span> <span class="s2">"genextreme"</span><span class="p">,</span>
+        <span class="s2">"gpd"</span><span class="p">:</span> <span class="s2">"genpareto"</span><span class="p">,</span>
+        <span class="s2">"gumb"</span><span class="p">:</span> <span class="s2">"gumbel_r"</span><span class="p">,</span>
+        <span class="s2">"exp"</span><span class="p">:</span> <span class="s2">"genpareto"</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="n">_scipy_dist_name</span> <span class="o">=</span> <span class="n">_DISTS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">distribution</span><span class="p">,</span> <span class="n">distribution</span><span class="p">)</span>
     <span class="n">dist</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">stats</span><span class="p">,</span> <span class="n">_scipy_dist_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">dist</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Distribution &quot;</span><span class="si">{</span><span class="n">_scipy_dist_name</span><span class="si">}</span><span class="s1">&quot; not found in scipy.stats.&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Distribution "</span><span class="si">{</span><span class="n">_scipy_dist_name</span><span class="si">}</span><span class="s1">" not found in scipy.stats.'</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">dist</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">get_frozen_dist</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">distribution</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return frozen distribution.</span>
+<span class="w">    </span><span class="sd">"""Return frozen distribution.</span>
 
 <span class="sd">    Returns scipy.stats frozen distribution, i.e.: with set parameters.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">get_dist</span><span class="p">(</span><span class="n">distribution</span><span class="p">)(</span><span class="o">*</span><span class="n">params</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">scale</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
 
@@ -1298,7 +1220,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_aic</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">distribution</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return Akaike Information Criterion for a frozen distribution.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return Akaike Information Criterion for a frozen distribution."""</span>
     <span class="n">k</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
     <span class="n">nll</span> <span class="o">=</span> <span class="n">get_frozen_dist</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">distribution</span><span class="p">)</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
     <span class="n">aic</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">k</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">nll</span>
@@ -1306,11 +1228,11 @@ window.runMermaid = runMermaid;</script>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_aicc</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">distribution</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return AICC.</span>
+<span class="w">    </span><span class="sd">"""Return AICC.</span>
 
 <span class="sd">    Return Akaike Information Criterion with correction for small sample size</span>
 <span class="sd">    for a frozen distribution.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">k</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
     <span class="n">aic</span> <span class="o">=</span> <span class="n">_aic</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">distribution</span><span class="p">)</span>
     <span class="n">aicc</span> <span class="o">=</span> <span class="n">aic</span> <span class="o">+</span> <span class="p">((</span><span class="mi">2</span> <span class="o">*</span> <span class="n">k</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">k</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
@@ -1318,7 +1240,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_bic</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">distribution</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return Bayesian Information Criterion for a frozen distribution.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return Bayesian Information Criterion for a frozen distribution."""</span>
     <span class="n">k</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
     <span class="n">nll</span> <span class="o">=</span> <span class="n">get_frozen_dist</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">distribution</span><span class="p">)</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
     <span class="n">bic</span> <span class="o">=</span> <span class="n">k</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">nll</span>
@@ -1338,7 +1260,7 @@ window.runMermaid = runMermaid;</script>
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_return_periods</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">extremes_rate</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
     <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
     <span class="n">b</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">a</span>
-    <span class="n">ranks</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">stats</span><span class="o">.</span><span class="n">rankdata</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;average&quot;</span><span class="p">)</span>
+    <span class="n">ranks</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">stats</span><span class="o">.</span><span class="n">rankdata</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"average"</span><span class="p">)</span>
     <span class="n">freq</span> <span class="o">=</span> <span class="p">((</span><span class="n">ranks</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span><span class="p">))</span> <span class="o">*</span> <span class="n">extremes_rate</span>
     <span class="n">rps</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">freq</span>
     <span class="k">return</span> <span class="n">rps</span>
@@ -1369,16 +1291,16 @@ window.runMermaid = runMermaid;</script>
     <span class="n">x</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
     <span class="n">params</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
     <span class="n">distribution</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">x_scale</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;gumbel&quot;</span><span class="p">,</span>
+    <span class="n">x_scale</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"gumbel"</span><span class="p">,</span>
     <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">color</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;k&quot;</span><span class="p">,</span>
+    <span class="n">color</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"k"</span><span class="p">,</span>
     <span class="n">a</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">alpha</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.9</span><span class="p">,</span>
     <span class="n">nsample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
     <span class="n">rps</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int_</span><span class="p">]</span> <span class="o">=</span> <span class="n">_RPS</span><span class="p">,</span>
     <span class="n">extremes_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return figure of EVA fit and empirical data.</span>
+<span class="w">    </span><span class="sd">"""Return figure of EVA fit and empirical data.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1395,7 +1317,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    ax :</span>
 
 <span class="sd">    color : str, optional</span>
-<span class="sd">        Color of the line. By default colord is black &#39;k&#39;.</span>
+<span class="sd">        Color of the line. By default colord is black 'k'.</span>
 <span class="sd">    a : float, optional</span>
 <span class="sd">        Float for the Gringorten position. By default a = 0</span>
 <span class="sd">    alpha : float, optional</span>
@@ -1414,12 +1336,12 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    -------</span>
 <span class="sd">    ax.figure</span>
 <span class="sd">        Figure of EVA fit and empirical data</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
     <span class="n">rvs_obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">x</span><span class="p">)])</span>
-    <span class="k">if</span> <span class="n">distribution</span> <span class="o">!=</span> <span class="s2">&quot;empirical&quot;</span><span class="p">:</span>
-        <span class="n">params</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span> <span class="k">if</span> <span class="n">distribution</span> <span class="o">==</span> <span class="s2">&quot;gumb&quot;</span> <span class="k">else</span> <span class="n">params</span>
+    <span class="k">if</span> <span class="n">distribution</span> <span class="o">!=</span> <span class="s2">"empirical"</span><span class="p">:</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span> <span class="k">if</span> <span class="n">distribution</span> <span class="o">==</span> <span class="s2">"gumb"</span> <span class="k">else</span> <span class="n">params</span>
         <span class="n">rvs_sim</span> <span class="o">=</span> <span class="n">_get_return_values</span><span class="p">(</span>
             <span class="n">params</span><span class="p">,</span> <span class="n">distribution</span><span class="p">,</span> <span class="n">rps</span><span class="o">=</span><span class="n">rps</span><span class="p">,</span> <span class="n">extremes_rate</span><span class="o">=</span><span class="n">extremes_rate</span>
         <span class="p">)</span>
@@ -1427,7 +1349,7 @@ window.runMermaid = runMermaid;</script>
         <span class="n">rvs_sim</span> <span class="o">=</span> <span class="n">rvs_obs</span>
     <span class="n">rps_obs</span> <span class="o">=</span> <span class="n">_get_return_periods</span><span class="p">(</span><span class="n">rvs_obs</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span> <span class="n">extremes_rate</span><span class="o">=</span><span class="n">extremes_rate</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">x_scale</span> <span class="o">==</span> <span class="s2">&quot;gumbel&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">x_scale</span> <span class="o">==</span> <span class="s2">"gumbel"</span><span class="p">:</span>
         <span class="n">xsim</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">rps</span><span class="p">))</span>
         <span class="n">xobs</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">rps_obs</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
@@ -1436,14 +1358,14 @@ window.runMermaid = runMermaid;</script>
 
     <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">rvs_obs</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;plot position&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">rvs_obs</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">"o"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"plot position"</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">distribution</span> <span class="o">!=</span> <span class="s2">&quot;empirical&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">distribution</span> <span class="o">!=</span> <span class="s2">"empirical"</span><span class="p">:</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-            <span class="n">xsim</span><span class="p">,</span> <span class="n">rvs_sim</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">distribution</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> fit&quot;</span>
+            <span class="n">xsim</span><span class="p">,</span> <span class="n">rvs_sim</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">"--"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">distribution</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> fit"</span>
         <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">alpha</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">nsample</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">distribution</span> <span class="o">!=</span> <span class="s2">&quot;empirical&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">alpha</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">nsample</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">distribution</span> <span class="o">!=</span> <span class="s2">"empirical"</span><span class="p">:</span>
         <span class="n">urvs</span> <span class="o">=</span> <span class="n">lmoment_ci</span><span class="p">(</span>
             <span class="n">x</span><span class="p">,</span>
             <span class="n">distribution</span><span class="p">,</span>
@@ -1456,28 +1378,28 @@ window.runMermaid = runMermaid;</script>
             <span class="n">xsim</span><span class="p">,</span>
             <span class="n">urvs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span>
             <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
-            <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">,</span>
-            <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;conf. interval (alpha = </span><span class="si">{</span><span class="n">alpha</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+            <span class="n">ls</span><span class="o">=</span><span class="s2">":"</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">"conf. interval (alpha = </span><span class="si">{</span><span class="n">alpha</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
             <span class="n">xsim</span><span class="p">,</span>
             <span class="n">urvs</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span>
             <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
-            <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">,</span>
+            <span class="n">ls</span><span class="o">=</span><span class="s2">":"</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper left&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">"upper left"</span><span class="p">)</span>
 
     <span class="n">ymin</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">ymax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">rvs_obs</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">rvs_sim</span><span class="p">),</span> <span class="mi">0</span><span class="p">])</span>
     <span class="n">ymax</span> <span class="o">=</span> <span class="n">ymax</span> <span class="o">*</span> <span class="mf">1.1</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">)</span>
 
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Return value&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">x_scale</span> <span class="o">==</span> <span class="s2">&quot;gumbel&quot;</span><span class="p">:</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Return value"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">x_scale</span> <span class="o">==</span> <span class="s2">"gumbel"</span><span class="p">:</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">xsim</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">rps</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Return period&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Return period"</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">ax</span>
@@ -1487,8 +1409,8 @@ window.runMermaid = runMermaid;</script>
 <span class="c1"># credits Ferdinand Diermanse</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">lmoment_fitopt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">distributions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">criterium</span><span class="o">=</span><span class="s2">&quot;AIC&quot;</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return parameters based on lmoments fit.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">lmoment_fitopt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">distributions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">criterium</span><span class="o">=</span><span class="s2">"AIC"</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Return parameters based on lmoments fit.</span>
 
 <span class="sd">    Lmomentfit routine derive parameters of a distribution function</span>
 <span class="sd">    based on lmoments. The distribution selection is based on the</span>
@@ -1500,9 +1422,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    ----------</span>
 <span class="sd">    X: 1D array of float</span>
 <span class="sd">        data series</span>
-<span class="sd">    distributions: iterable of {&#39;gev&#39;, &#39;gpd&#39;, &#39;gumb&#39;, &#39;exp&#39;}</span>
+<span class="sd">    distributions: iterable of {'gev', 'gpd', 'gumb', 'exp'}</span>
 <span class="sd">        iterable of distribution names</span>
-<span class="sd">    criterium: {&#39;AIC&#39;, &#39;AICc&#39;, &#39;BIC&#39;}</span>
+<span class="sd">    criterium: {'AIC', 'AICc', 'BIC'}</span>
 <span class="sd">        distrition selection criterium</span>
 
 <span class="sd">    Returns</span>
@@ -1511,8 +1433,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        array of distribution parameters</span>
 <span class="sd">    distribution: str</span>
 <span class="sd">        selected distribution</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">fgof</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;AIC&quot;</span><span class="p">:</span> <span class="n">_aic</span><span class="p">,</span> <span class="s2">&quot;AICC&quot;</span><span class="p">:</span> <span class="n">_aicc</span><span class="p">,</span> <span class="s2">&quot;BIC&quot;</span><span class="p">:</span> <span class="n">_bic</span><span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">criterium</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+<span class="sd">    """</span>
+    <span class="n">fgof</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"AIC"</span><span class="p">:</span> <span class="n">_aic</span><span class="p">,</span> <span class="s2">"AICC"</span><span class="p">:</span> <span class="n">_aicc</span><span class="p">,</span> <span class="s2">"BIC"</span><span class="p">:</span> <span class="n">_bic</span><span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">criterium</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
     <span class="c1"># make sure the timeseries does not contain NaNs</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x</span><span class="p">)]</span>
 
@@ -1530,7 +1452,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">lmoment_fit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">distribution</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return parameters based on lmoments.</span>
+<span class="w">    </span><span class="sd">"""Return parameters based on lmoments.</span>
 
 <span class="sd">    Lmomentfit routine derive parameters of a distribution function</span>
 <span class="sd">    based on lmoments.</span>
@@ -1541,7 +1463,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    ----------</span>
 <span class="sd">    X: 1D array of float</span>
 <span class="sd">        data series</span>
-<span class="sd">    distribution: {&#39;gev&#39;, &#39;gpd&#39;, &#39;gumb&#39;, &#39;exp&#39;}</span>
+<span class="sd">    distribution: {'gev', 'gpd', 'gumb', 'exp'}</span>
 <span class="sd">        Short name of distribution function to be fitted.</span>
 
 <span class="sd">    Returns</span>
@@ -1550,7 +1472,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        array of distribution parameters</span>
 <span class="sd">    lambda: 1D array of float</span>
 <span class="sd">        vector of (nmom) L-moments</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># make sure the timesiries does not contain NaNs</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x</span><span class="p">)]</span>
 
@@ -1564,7 +1486,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_lmomentfit</span><span class="p">(</span><span class="n">lmom</span><span class="p">,</span> <span class="n">distribution</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return parameters based on lmoments.</span>
+<span class="w">    </span><span class="sd">"""Return parameters based on lmoments.</span>
 
 <span class="sd">    Lmomentfit routine to derive parameters of a distribution function</span>
 <span class="sd">    based on given lmoments.</span>
@@ -1575,46 +1497,46 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    ----------</span>
 <span class="sd">    lmom: 1D array of float</span>
 <span class="sd">        l-moments, derived from data</span>
-<span class="sd">    distribution: {&#39;gev&#39;, &#39;gpd&#39;, &#39;gumb&#39;, &#39;exp&#39;}</span>
+<span class="sd">    distribution: {'gev', 'gpd', 'gumb', 'exp'}</span>
 <span class="sd">        Short name of distribution function to be fitted.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    params: ndarray of float</span>
 <span class="sd">        array of distribution parameters</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># l-moment ratios from l-moments</span>
     <span class="n">tau3</span> <span class="o">=</span> <span class="n">lmom</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">lmom</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># tau3 is in L-SK</span>
 
     <span class="c1"># derive parameters for selected distribution</span>
-    <span class="k">if</span> <span class="n">distribution</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;gev&quot;</span><span class="p">,</span> <span class="s2">&quot;genextreme&quot;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">distribution</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"gev"</span><span class="p">,</span> <span class="s2">"genextreme"</span><span class="p">]:</span>
         <span class="n">c1</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">3.0</span> <span class="o">+</span> <span class="n">tau3</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span>
         <span class="n">k1</span> <span class="o">=</span> <span class="mf">7.859</span> <span class="o">*</span> <span class="n">c1</span> <span class="o">+</span> <span class="mf">2.9554</span> <span class="o">*</span> <span class="p">(</span><span class="n">c1</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)</span>
         <span class="n">s1</span> <span class="o">=</span> <span class="p">(</span><span class="n">lmom</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">k1</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="mf">1.0</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="n">k1</span><span class="p">))</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">gamma</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">k1</span><span class="p">))</span>
         <span class="n">m1</span> <span class="o">=</span> <span class="n">lmom</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">s1</span> <span class="o">/</span> <span class="n">k1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">gamma</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">k1</span><span class="p">))</span>
         <span class="n">params</span> <span class="o">=</span> <span class="p">(</span><span class="n">k1</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span> <span class="n">s1</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">distribution</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;gumb&quot;</span><span class="p">,</span> <span class="s2">&quot;gumbel_r&quot;</span><span class="p">]:</span>
+    <span class="k">elif</span> <span class="n">distribution</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"gumb"</span><span class="p">,</span> <span class="s2">"gumbel_r"</span><span class="p">]:</span>
         <span class="n">s1</span> <span class="o">=</span> <span class="n">lmom</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span>
         <span class="n">m1</span> <span class="o">=</span> <span class="n">lmom</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.5772</span> <span class="o">*</span> <span class="n">s1</span>
         <span class="n">params</span> <span class="o">=</span> <span class="p">(</span><span class="n">m1</span><span class="p">,</span> <span class="n">s1</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">distribution</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;gpd&quot;</span><span class="p">,</span> <span class="s2">&quot;genpareto&quot;</span><span class="p">]:</span>
+    <span class="k">elif</span> <span class="n">distribution</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"gpd"</span><span class="p">,</span> <span class="s2">"genpareto"</span><span class="p">]:</span>
         <span class="n">k1</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">tau3</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">tau3</span><span class="p">)</span>
         <span class="n">s1</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">k1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="n">k1</span><span class="p">)</span> <span class="o">*</span> <span class="n">lmom</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">m1</span> <span class="o">=</span> <span class="n">lmom</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="n">k1</span><span class="p">)</span> <span class="o">*</span> <span class="n">lmom</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">params</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">k1</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span> <span class="n">s1</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">distribution</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;exp&quot;</span><span class="p">,</span> <span class="s2">&quot;genexpon&quot;</span><span class="p">]:</span>
+    <span class="k">elif</span> <span class="n">distribution</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"exp"</span><span class="p">,</span> <span class="s2">"genexpon"</span><span class="p">]:</span>
         <span class="n">k1</span> <span class="o">=</span> <span class="mf">1e-8</span>
         <span class="n">s1</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">k1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="n">k1</span><span class="p">)</span> <span class="o">*</span> <span class="n">lmom</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">m1</span> <span class="o">=</span> <span class="n">lmom</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="n">k1</span><span class="p">)</span> <span class="o">*</span> <span class="n">lmom</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">params</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span> <span class="n">s1</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown distribution&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Unknown distribution"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">params</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">legendre_shift_poly</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Shifted Legendre polynomial.</span>
+<span class="w">    </span><span class="sd">"""Shifted Legendre polynomial.</span>
 
 <span class="sd">    Based on recurrence relation</span>
 <span class="sd">        (n + 1)Pn+1 (x) - (1 + 2 n)(2 x - 1)Pn (x) + n Pn-1 (x) = 0</span>
@@ -1622,7 +1544,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    Given nonnegative integer n, compute the shifted Legendre polynomial P_n.</span>
 <span class="sd">    Return the result as a vector whose mth element is the coefficient of x^(n+1-m).</span>
 <span class="sd">    polyval(legendre_shift_poly(n),x) evaluates P_n(x).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">pk</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -1655,7 +1577,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">get_lmom</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">nmom</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute L-moments for a data series.</span>
+<span class="w">    </span><span class="sd">"""Compute L-moments for a data series.</span>
 
 <span class="sd">    Based on calculation of probability weighted moments and the coefficient</span>
 <span class="sd">    of the shifted Legendre polynomial.</span>
@@ -1673,7 +1595,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    -------</span>
 <span class="sd">    lmom: 1D array of float</span>
 <span class="sd">        vector of (nmom) L-moments</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">bb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nmom</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
@@ -1753,8 +1675,8 @@ window.runMermaid = runMermaid;</script>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1788,7 +1710,7 @@ window.runMermaid = runMermaid;</script>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
 </p></div>
       
     </div>
