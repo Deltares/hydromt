@@ -13,32 +13,37 @@ from hydromt.typing import Bbox
 
 
 class TestPyogrioDriver:
+    @staticmethod
     @pytest.fixture(scope="class")
-    def uri_gjson(self, geodf: gpd.GeoDataFrame, managed_tmp_path: Path) -> str:
+    def uri_gjson(geodf: gpd.GeoDataFrame, managed_tmp_path: Path) -> str:
         uri = managed_tmp_path / "test.geojson"
         geodf.to_file(uri, driver="GeoJSON")
         return str(uri)
 
+    @staticmethod
     @pytest.fixture(scope="class")
-    def uri_shp(self, geodf: gpd.GeoDataFrame, managed_tmp_path: Path) -> str:
+    def uri_shp(geodf: gpd.GeoDataFrame, managed_tmp_path: Path) -> str:
         uri = managed_tmp_path / "test.shp"
         geodf.to_file(uri, "ESRI Shapefile")
         return str(uri)
 
+    @staticmethod
     @pytest.fixture(scope="class")
-    def uri_gpkg(self, geodf: gpd.GeoDataFrame, managed_tmp_path: Path) -> str:
+    def uri_gpkg(geodf: gpd.GeoDataFrame, managed_tmp_path: Path) -> str:
         uri = managed_tmp_path / "test.gpkg"
         geodf.to_file(uri, driver="GPKG")
         return str(uri)
 
+    @staticmethod
     @pytest.fixture(scope="class")
-    def uri_fgb(self, geodf: gpd.GeoDataFrame, managed_tmp_path: Path) -> str:
+    def uri_fgb(geodf: gpd.GeoDataFrame, managed_tmp_path: Path) -> str:
         uri = managed_tmp_path / "test.fgb"
         geodf.to_file(uri, driver="FlatGeobuf")
         return str(uri)
 
+    @staticmethod
     @pytest.fixture(scope="class")
-    def driver(self):
+    def driver():
         return PyogrioDriver()
 
     # lazy-fixtures not maintained:
@@ -48,8 +53,9 @@ class TestPyogrioDriver:
         ["uri_gjson", "uri_shp", "uri_fgb", "uri_gpkg"],
     )
 
+    @staticmethod
     @pytest.fixture(scope="class")
-    def _raise_gdal_warnings(self):
+    def _raise_gdal_warnings():
         with warnings.catch_warnings():
             warnings.simplefilter("error")
             yield
