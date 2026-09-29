@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 
@@ -26,8 +25,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/autodoc_pydantic.css" />
@@ -35,10 +34,10 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/theme-deltares.css?v=d7afb10b" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=64cc4de3f052d77215f0"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0" />
 
     <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
@@ -405,7 +404,7 @@ window.addEventListener("load", load);
 window.runMermaid = runMermaid;</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/hydromt/typing/fsspec_types';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.21.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.22.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/main/docs/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.5.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -465,7 +464,7 @@ window.runMermaid = runMermaid;</script>
   
     <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
   </button>
   
@@ -557,7 +556,7 @@ window.runMermaid = runMermaid;</script>
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -598,7 +597,7 @@ window.runMermaid = runMermaid;</script>
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -607,7 +606,7 @@ window.runMermaid = runMermaid;</script>
   
 
   
-    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
       <span class="fa-solid fa-outdent"></span>
     </button>
   
@@ -778,6 +777,7 @@ window.runMermaid = runMermaid;</script>
   <h1>Source code for hydromt.typing.fsspec_types</h1><div class="highlight"><pre>
 <span></span><span class="sd">"""Pydantic compatible fsspec AbstractFileSystem type."""</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">fsspec</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractFileSystem</span><span class="p">,</span> <span class="n">filesystem</span>
@@ -787,6 +787,8 @@ window.runMermaid = runMermaid;</script>
     <span class="n">PrivateAttr</span><span class="p">,</span>
     <span class="n">model_serializer</span><span class="p">,</span>
 <span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._fsio</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_local</span>
 
 
 <div class="viewcode-block" id="FSSpecFileSystem">
@@ -810,19 +812,52 @@ window.runMermaid = runMermaid;</script>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span> <span class="n">storage_options</span><span class="o">=</span><span class="n">storage_options</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fs</span> <span class="o">=</span> <span class="n">filesystem</span><span class="p">(</span><span class="n">protocol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">storage_options</span><span class="p">)</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_local</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Check if the filesystem is local."""</span>
+        <span class="k">return</span> <span class="n">is_local</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fs</span><span class="p">)</span>
+
 <div class="viewcode-block" id="FSSpecFileSystem.get_fs">
 <a class="viewcode-back" href="../../../_generated/hydromt.typing.FSSpecFileSystem.html#hydromt.typing.FSSpecFileSystem.get_fs">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_fs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AbstractFileSystem</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Get the underlying fsspec filesystem."""</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_fs</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">storage_options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AbstractFileSystem</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Get the underlying fsspec filesystem.</span>
+
+<span class="sd">        This is the single place where driver-level overrides are merged into</span>
+<span class="sd">        the filesystem. Readers take the resulting</span>
+<span class="sd">        :class:`~fsspec.AbstractFileSystem` and never see ``storage_options``.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        storage_options : dict[str, Any] | None, optional</span>
+<span class="sd">            Additional storage options to merge with this filesystem's own</span>
+<span class="sd">            storage options. Useful for driver-level options (e.g. set under a</span>
+<span class="sd">            driver's ``options`` rather than its ``filesystem``) that weren't</span>
+<span class="sd">            available at filesystem construction time. Default is None, which</span>
+<span class="sd">            reuses the filesystem built at construction time.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">storage_options</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">filesystem</span><span class="p">(</span>
+                <span class="n">protocol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span> <span class="o">**</span><span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">storage_options</span><span class="p">,</span> <span class="o">**</span><span class="n">storage_options</span><span class="p">}</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fs</span></div>
 
 
 <div class="viewcode-block" id="FSSpecFileSystem.serialize">
 <a class="viewcode-back" href="../../../_generated/hydromt.typing.FSSpecFileSystem.html#hydromt.typing.FSSpecFileSystem.serialize">[docs]</a>
     <span class="nd">@model_serializer</span><span class="p">()</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">"""Serialize the filesystem to a dict."""</span>
-        <span class="n">fs_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_fs</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">include_password</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include_credentials</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Serialize the filesystem to a dict.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        include_credentials:</span>
+<span class="sd">            Whether to include passwords/secrets in the serialized dict.</span>
+<span class="sd">        """</span>
+        <span class="n">fs_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_fs</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span>
+            <span class="n">include_password</span><span class="o">=</span><span class="n">include_credentials</span>
+        <span class="p">)</span>
         <span class="n">fs_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"cls"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># cls is not required</span>
         <span class="k">if</span> <span class="s2">"args"</span> <span class="ow">in</span> <span class="n">fs_dict</span> <span class="ow">and</span> <span class="n">fs_dict</span><span class="p">[</span><span class="s2">"args"</span><span class="p">]</span> <span class="o">==</span> <span class="p">[]:</span>
             <span class="n">fs_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"args"</span><span class="p">)</span>  <span class="c1"># args is optional</span>
@@ -843,8 +878,9 @@ window.runMermaid = runMermaid;</script>
             <span class="c1"># input is dict with build args for fsspec filesystem.</span>
             <span class="k">if</span> <span class="s2">"protocol"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">input</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Filesystem dict </span><span class="si">{</span><span class="nb">input</span><span class="si">}</span><span class="s2"> requires 'protocol'."</span><span class="p">)</span>
-            <span class="n">protocol</span> <span class="o">=</span> <span class="nb">input</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"protocol"</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">FSSpecFileSystem</span><span class="p">(</span><span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span> <span class="n">storage_options</span><span class="o">=</span><span class="nb">input</span><span class="p">)</span>
+            <span class="n">storage_options</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
+            <span class="n">protocol</span> <span class="o">=</span> <span class="n">storage_options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"protocol"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">FSSpecFileSystem</span><span class="p">(</span><span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span> <span class="n">storage_options</span><span class="o">=</span><span class="n">storage_options</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">AbstractFileSystem</span><span class="p">):</span>
             <span class="n">protocol</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="nb">input</span><span class="o">.</span><span class="n">protocol</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -913,8 +949,8 @@ window.runMermaid = runMermaid;</script>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -935,7 +971,6 @@ window.runMermaid = runMermaid;</script>
 
   <p class="sphinx-version">
     Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
-    <br/>
   </p>
 </div>
       
@@ -948,7 +983,7 @@ window.runMermaid = runMermaid;</script>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.22.0.
 </p></div>
       
     </div>

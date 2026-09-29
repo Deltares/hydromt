@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 
@@ -26,8 +25,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
@@ -35,10 +34,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/theme-deltares.css?v=d7afb10b" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=64cc4de3f052d77215f0"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0" />
 
     <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
@@ -405,7 +404,7 @@ window.addEventListener("load", load);
 window.runMermaid = runMermaid;</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/hydromt/readers';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.21.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.22.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/main/docs/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.5.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -465,7 +464,7 @@ window.runMermaid = runMermaid;</script>
   
     <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
   </button>
   
@@ -557,7 +556,7 @@ window.runMermaid = runMermaid;</script>
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -598,7 +597,7 @@ window.runMermaid = runMermaid;</script>
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -607,7 +606,7 @@ window.runMermaid = runMermaid;</script>
   
 
   
-    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
       <span class="fa-solid fa-outdent"></span>
     </button>
   
@@ -781,27 +780,37 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ast</span><span class="w"> </span><span class="kn">import</span> <span class="n">literal_eval</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">glob</span><span class="w"> </span><span class="kn">import</span> <span class="n">glob</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">io</span><span class="w"> </span><span class="kn">import</span> <span class="n">IOBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">abspath</span><span class="p">,</span> <span class="n">basename</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">isfile</span><span class="p">,</span> <span class="n">join</span><span class="p">,</span> <span class="n">splitext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Sequence</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">dask</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pyproj</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">rasterio</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">rioxarray</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">tomli</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fsspec</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractFileSystem</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyogrio</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_dataframe</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Point</span><span class="p">,</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">box</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">GEOMETRY_TYPES</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._fsio</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">assert_local_uri</span><span class="p">,</span>
+    <span class="n">attach_close</span><span class="p">,</span>
+    <span class="n">get_mapper</span><span class="p">,</span>
+    <span class="n">is_local</span><span class="p">,</span>
+    <span class="n">is_local_uri</span><span class="p">,</span>
+    <span class="n">normalize_io_errors</span><span class="p">,</span>
+    <span class="n">open_handle</span><span class="p">,</span>
+    <span class="n">open_handles</span><span class="p">,</span>
+    <span class="n">read_bytes</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.naming_convention</span><span class="w"> </span><span class="kn">import</span> <span class="n">_expand_uri_placeholders</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">_make_config_paths_absolute</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.uris</span><span class="w"> </span><span class="kn">import</span> <span class="n">_is_valid_url</span>
@@ -817,6 +826,8 @@ window.runMermaid = runMermaid;</script>
     <span class="s2">"open_mfcsv"</span><span class="p">,</span>
     <span class="s2">"open_raster"</span><span class="p">,</span>
     <span class="s2">"open_mfraster"</span><span class="p">,</span>
+    <span class="s2">"open_zarrs"</span><span class="p">,</span>
+    <span class="s2">"open_mfdataset"</span><span class="p">,</span>
     <span class="s2">"open_ncs"</span><span class="p">,</span>
     <span class="s2">"open_nc"</span><span class="p">,</span>
     <span class="s2">"open_raster_from_tindex"</span><span class="p">,</span>
@@ -834,13 +845,63 @@ window.runMermaid = runMermaid;</script>
 <span class="p">]</span>
 <span class="n">OPEN_VECTOR_DRIVER</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"csv"</span><span class="p">,</span> <span class="s2">"xls"</span><span class="p">,</span> <span class="s2">"xy"</span><span class="p">,</span> <span class="s2">"pyogrio"</span><span class="p">,</span> <span class="s2">"parquet"</span><span class="p">,</span> <span class="s2">"xlsx"</span><span class="p">]</span>
 
+<span class="c1"># kwargs of pyogrio.read_dataframe that pyogrio.read_info also understands</span>
+<span class="n">_READ_INFO_KWARGS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"layer"</span><span class="p">,</span> <span class="s2">"encoding"</span><span class="p">,</span> <span class="s2">"force_feature_count"</span><span class="p">,</span> <span class="s2">"force_total_bounds"</span><span class="p">)</span>
+
+<span class="c1"># OGR formats that need sidecar files, so they cannot be read from bytes</span>
+<span class="n">_SIDECAR_EXTENSIONS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">".shp"</span><span class="p">,</span> <span class="s2">".gdb"</span><span class="p">,</span> <span class="s2">".tab"</span><span class="p">,</span> <span class="s2">".mif"</span><span class="p">,</span> <span class="s2">".000"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">assert_single_file_format</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Raise a clear error for formats that need more than the one file's bytes."""</span>
+    <span class="n">ext</span> <span class="o">=</span> <span class="n">splitext</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">ext</span> <span class="ow">in</span> <span class="n">_SIDECAR_EXTENSIONS</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"Reading '</span><span class="si">{</span><span class="n">ext</span><span class="si">}</span><span class="s2">' from a remote filesystem is not supported: the format "</span>
+            <span class="s2">"needs sidecar files, which cannot be read from the bytes of a single "</span>
+            <span class="s2">"file. Download the dataset first, or convert it to a single-file "</span>
+            <span class="s2">"format such as GeoPackage or FlatGeobuf."</span>
+        <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">read_table</span><span class="p">(</span>
+    <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">fmt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">filesystem</span><span class="p">:</span> <span class="n">AbstractFileSystem</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Read a tabular file with pandas, through ``filesystem`` when it is remote.</span>
+
+<span class="sd">    Local paths are handed to pandas untouched so that its own path handling</span>
+<span class="sd">    (compression inference, globbing of storage backends) keeps working.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">fmt</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"csv"</span><span class="p">,</span> <span class="s2">"xy"</span><span class="p">):</span>
+        <span class="n">reader</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span>
+    <span class="k">elif</span> <span class="n">fmt</span> <span class="o">==</span> <span class="s2">"parquet"</span><span class="p">:</span>
+        <span class="n">reader</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span>
+    <span class="k">elif</span> <span class="n">fmt</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"xls"</span><span class="p">,</span> <span class="s2">"xlsx"</span><span class="p">):</span>
+        <span class="n">reader</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"engine"</span><span class="p">,</span> <span class="s2">"openpyxl"</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">fmt</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"fwf"</span><span class="p">,</span> <span class="s2">"txt"</span><span class="p">):</span>
+        <span class="n">reader</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_fwf</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unknown table file format: </span><span class="si">{</span><span class="n">fmt</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">is_local</span><span class="p">(</span><span class="n">filesystem</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">reader</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">open_handle</span><span class="p">(</span><span class="n">filesystem</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">uri</span><span class="p">))</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">reader</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
 
 <div class="viewcode-block" id="open_mfcsv">
 <a class="viewcode-back" href="../../_generated/hydromt.readers.open_mfcsv.html#hydromt.readers.open_mfcsv">[docs]</a>
+<span class="nd">@normalize_io_errors</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">open_mfcsv</span><span class="p">(</span>
     <span class="n">paths</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">],</span>
     <span class="n">concat_dim</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
+    <span class="n">filesystem</span><span class="p">:</span> <span class="n">AbstractFileSystem</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">driver_kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">variable_axis</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="n">segmented_by</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"var"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"id"</span><span class="p">,</span>
@@ -859,6 +920,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    concat_dim : str,</span>
 <span class="sd">        name of the dimension that will be created by concatinating</span>
 <span class="sd">        all of the supplied csv files.</span>
+<span class="sd">    filesystem : AbstractFileSystem | None, optional</span>
+<span class="sd">        fsspec filesystem to read the files from. None (default) means the</span>
+<span class="sd">        local filesystem, in which case the paths are passed to pandas as-is.</span>
 <span class="sd">    driver_kwargs : dict[str, Any],</span>
 <span class="sd">        Any additional arguments to be passed to pandas' `read_csv` function.</span>
 <span class="sd">    variable_axis : Literal[0, 1] = 1,</span>
@@ -891,7 +955,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">csv_index_name</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="nb">id</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">csv_kwargs</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">read_table</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">"csv"</span><span class="p">,</span> <span class="n">filesystem</span><span class="o">=</span><span class="n">filesystem</span><span class="p">,</span> <span class="o">**</span><span class="n">csv_kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">variable_axis</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">T</span>
 
@@ -955,12 +1019,14 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="open_raster">
 <a class="viewcode-back" href="../../_generated/hydromt.readers.open_raster.html#hydromt.readers.open_raster">[docs]</a>
+<span class="nd">@normalize_io_errors</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">open_raster</span><span class="p">(</span>
-    <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="n">IOBase</span> <span class="o">|</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">DatasetReader</span> <span class="o">|</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">vrt</span><span class="o">.</span><span class="n">WarpedVRT</span><span class="p">,</span>
+    <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">mask_nodata</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">chunks</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">nodata</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">filesystem</span><span class="p">:</span> <span class="n">AbstractFileSystem</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Open a gdal-readable file with rasterio based on.</span>
@@ -969,8 +1035,8 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">    Arguments</span>
 <span class="sd">    ---------</span>
-<span class="sd">    filename : str, path, file-like, rasterio.DatasetReader, or rasterio.WarpedVRT</span>
-<span class="sd">        Path to the file to open. Or already open rasterio dataset.</span>
+<span class="sd">    uri : str, Path</span>
+<span class="sd">        Path or URI of the file to open. ``Path`` is only valid for local files.</span>
 <span class="sd">    mask_nodata : bool, optional</span>
 <span class="sd">        set nodata values to np.nan (xarray default nodata value)</span>
 <span class="sd">    nodata: int, float, optional</span>
@@ -979,6 +1045,10 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        Chunk sizes along each dimension, e.g., ``5``, ``(5, 5)`` or</span>
 <span class="sd">        ``{'x': 5, 'y': 5}``. If chunks is provided, it used to load the new</span>
 <span class="sd">        DataArray into a dask array.</span>
+<span class="sd">    filesystem : AbstractFileSystem | None, optional</span>
+<span class="sd">        fsspec filesystem to read the file from. None (default) means the local</span>
+<span class="sd">        filesystem, in which case the path is handed to GDAL as-is so that its</span>
+<span class="sd">        own drivers and fast paths keep working.</span>
 <span class="sd">    **kwargs:</span>
 <span class="sd">        key-word arguments are passed to :py:meth:`xarray.open_dataset` with</span>
 <span class="sd">        "rasterio" engine.</span>
@@ -987,16 +1057,33 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    -------</span>
 <span class="sd">    data : DataArray</span>
 <span class="sd">        DataArray</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Remote files are read lazily through a file handle. The handle is closed</span>
+<span class="sd">    when the returned DataArray is closed, so the data stays readable for as</span>
+<span class="sd">    long as the DataArray lives.</span>
 <span class="sd">    """</span>
     <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">masked</span><span class="o">=</span><span class="n">mask_nodata</span><span class="p">,</span> <span class="n">default_name</span><span class="o">=</span><span class="s2">"data"</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">mask_nodata</span><span class="p">:</span>  <span class="c1"># if mask_and_scale by default True in xarray ?</span>
         <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mask_and_scale</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">IOBase</span><span class="p">):</span>  <span class="c1"># file-like does not handle chunks</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"Removing chunks to read and load remote data."</span><span class="p">)</span>
-        <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"chunks"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
-    <span class="c1"># keep only 2D DataArray</span>
-    <span class="n">da</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_local</span><span class="p">(</span><span class="n">filesystem</span><span class="p">):</span>
+        <span class="c1"># keep only 2D DataArray</span>
+        <span class="n">da</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># The DataArray stays lazy, so it must not outlive the handle: tie the</span>
+        <span class="c1"># handle's lifetime to the DataArray instead of closing it here.</span>
+        <span class="p">(</span><span class="n">handle</span><span class="p">,)</span> <span class="o">=</span> <span class="n">open_handles</span><span class="p">(</span><span class="n">filesystem</span><span class="p">,</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">uri</span><span class="p">)])</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">da</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">=</span> <span class="n">rioxarray</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span>
+                <span class="n">drop</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">handle</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">raise</span>
+        <span class="n">da</span> <span class="o">=</span> <span class="n">attach_close</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="p">[</span><span class="n">handle</span><span class="p">])</span>
+
     <span class="c1"># set missing _FillValue</span>
     <span class="k">if</span> <span class="n">mask_nodata</span><span class="p">:</span>
         <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_nodata</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
@@ -1018,6 +1105,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="open_mfraster">
 <a class="viewcode-back" href="../../_generated/hydromt.readers.open_mfraster.html#hydromt.readers.open_mfraster">[docs]</a>
+<span class="nd">@normalize_io_errors</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">open_mfraster</span><span class="p">(</span>
     <span class="n">uris</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
@@ -1026,6 +1114,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">concat_dim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"dim0"</span><span class="p">,</span>
     <span class="n">mosaic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">mosaic_kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">filesystem</span><span class="p">:</span> <span class="n">AbstractFileSystem</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Open multiple gdal-readable files as single Dataset with geospatial attributes.</span>
@@ -1040,8 +1129,8 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">    Arguments</span>
 <span class="sd">    ---------</span>
-<span class="sd">    uris: str, list of str/Path/file-like</span>
-<span class="sd">        Paths to the rasterio/gdal files.</span>
+<span class="sd">    uris: str, list of str/Path</span>
+<span class="sd">        Paths or URIs of the rasterio/gdal files.</span>
 <span class="sd">        Paths can be provided as list of paths or a path pattern string which is</span>
 <span class="sd">        interpreted according to the rules used by the Unix shell. The variable name</span>
 <span class="sd">        is derived from the basename minus extension in case a list of paths:</span>
@@ -1066,6 +1155,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    mosaic_kwargs: dict, optional</span>
 <span class="sd">        Mosaic key_word arguments to unify raster crs and/or resolution. See</span>
 <span class="sd">        :py:meth:`hydromt.merge.merge` for options.</span>
+<span class="sd">    filesystem : AbstractFileSystem | None, optional</span>
+<span class="sd">        fsspec filesystem to read the files from. None (default) means the local</span>
+<span class="sd">        filesystem.</span>
 <span class="sd">    **kwargs:</span>
 <span class="sd">        key-word arguments are passed to :py:meth:`hydromt.raster.open_raster`</span>
 
@@ -1074,106 +1166,179 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    data : DataSet</span>
 <span class="sd">        The newly created DataSet.</span>
 <span class="sd">    """</span>
-    <span class="n">mosaic_kwargs</span> <span class="o">=</span> <span class="n">mosaic_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">concat</span> <span class="ow">and</span> <span class="n">mosaic</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Only one of 'mosaic' or 'concat' can be True."</span><span class="p">)</span>
+
     <span class="n">prefix</span><span class="p">,</span> <span class="n">postfix</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">""</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">uris</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">if</span> <span class="s2">"*"</span> <span class="ow">in</span> <span class="n">uris</span><span class="p">:</span>
             <span class="n">prefix</span><span class="p">,</span> <span class="n">postfix</span> <span class="o">=</span> <span class="n">basename</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"*"</span><span class="p">)</span>
-        <span class="c1"># sort so the concat order and variable name are deterministic and do</span>
-        <span class="c1"># not depend on the (filesystem-dependent) glob order (see #1465)</span>
-        <span class="n">uris</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">path</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">glob</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">".xml"</span><span class="p">))</span>
+        <span class="c1"># sort so the concat order and variable name are deterministic</span>
+        <span class="k">if</span> <span class="n">filesystem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_local</span><span class="p">(</span><span class="n">filesystem</span><span class="p">):</span>
+            <span class="n">matches</span> <span class="o">=</span> <span class="n">filesystem</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">matches</span> <span class="o">=</span> <span class="n">glob</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span>
+        <span class="n">_uris</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">matches</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">".xml"</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">uris</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">Path</span><span class="p">)</span> <span class="k">else</span> <span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">uris</span><span class="p">]</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">_uris</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">uris</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_uris</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">OSError</span><span class="p">(</span><span class="s2">"no files to open"</span><span class="p">)</span>
 
+    <span class="n">ds</span><span class="p">,</span> <span class="n">da_lst</span> <span class="o">=</span> <span class="n">_open_and_combine_rasters</span><span class="p">(</span>
+        <span class="n">_uris</span><span class="p">,</span>
+        <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span>
+        <span class="n">concat</span><span class="o">=</span><span class="n">concat</span><span class="p">,</span>
+        <span class="n">concat_dim</span><span class="o">=</span><span class="n">concat_dim</span><span class="p">,</span>
+        <span class="n">mosaic</span><span class="o">=</span><span class="n">mosaic</span><span class="p">,</span>
+        <span class="n">mosaic_kwargs</span><span class="o">=</span><span class="n">mosaic_kwargs</span><span class="p">,</span>
+        <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
+        <span class="n">postfix</span><span class="o">=</span><span class="n">postfix</span><span class="p">,</span>
+        <span class="n">filesystem</span><span class="o">=</span><span class="n">filesystem</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># merge/concat drop the per-DataArray closers, so re-attach them</span>
+    <span class="k">return</span> <span class="n">attach_closers</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">closers_of</span><span class="p">(</span><span class="n">da_lst</span><span class="p">))</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_open_and_combine_rasters</span><span class="p">(</span>
+    <span class="n">uris</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">chunks</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">concat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">concat_dim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"dim0"</span><span class="p">,</span>
+    <span class="n">mosaic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">mosaic_kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+    <span class="n">postfix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+    <span class="n">filesystem</span><span class="p">:</span> <span class="n">AbstractFileSystem</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Open a list of rasters and combine them via merge / concat / mosaic.</span>
+
+<span class="sd">    Returns both the resulting Dataset and the list of opened DataArrays</span>
+<span class="sd">    (needed so the caller can re-attach closers).</span>
+<span class="sd">    """</span>
+    <span class="n">mosaic_kwargs</span> <span class="o">=</span> <span class="n">mosaic_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="n">da_lst</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">index_lst</span><span class="p">,</span> <span class="n">file_attrs</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">uri</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">uris</span><span class="p">):</span>
-        <span class="c1"># read file</span>
-        <span class="n">da</span> <span class="o">=</span> <span class="n">open_raster</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">index_lst</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">file_attrs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="c1"># get name, attrs and index (if concat)</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="s2">"path"</span><span class="p">):</span>  <span class="c1"># file-like</span>
-            <span class="n">bname</span> <span class="o">=</span> <span class="n">basename</span><span class="p">(</span><span class="n">uri</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">uri</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">uris</span><span class="p">):</span>
+            <span class="c1"># take ownership of the handle immediately</span>
+            <span class="n">da</span> <span class="o">=</span> <span class="n">open_raster</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span> <span class="n">filesystem</span><span class="o">=</span><span class="n">filesystem</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">da_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">da</span><span class="p">)</span>
+
             <span class="n">bname</span> <span class="o">=</span> <span class="n">basename</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">concat</span><span class="p">:</span>
-            <span class="c1"># name based on basename until postfix or _</span>
-            <span class="n">vname</span> <span class="o">=</span> <span class="n">bname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">postfix</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"_"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="c1"># index based on postfix behind "_"</span>
-            <span class="k">if</span> <span class="s2">"_"</span> <span class="ow">in</span> <span class="n">bname</span> <span class="ow">and</span> <span class="n">bname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"_"</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
-                <span class="n">index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">bname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"_"</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="c1"># index based on file extension (PCRaster style)</span>
-            <span class="k">elif</span> <span class="s2">"."</span> <span class="ow">in</span> <span class="n">bname</span> <span class="ow">and</span> <span class="n">bname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
-                <span class="n">index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">bname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="c1"># index based on postfix directly after prefix</span>
-            <span class="k">elif</span> <span class="n">prefix</span> <span class="o">!=</span> <span class="s2">""</span> <span class="ow">and</span> <span class="n">bname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
-                <span class="n">index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">bname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="n">prefix</span><span class="p">))</span>
-            <span class="c1"># index based on a purely numeric basename, e.g. a bare wildcard</span>
-            <span class="c1"># pattern "*.tif" matching "1.tif", "2.tif", ... (see #1465)</span>
-            <span class="k">elif</span> <span class="n">prefix</span> <span class="o">==</span> <span class="s2">""</span> <span class="ow">and</span> <span class="n">postfix</span> <span class="o">==</span> <span class="s2">""</span> <span class="ow">and</span> <span class="n">bname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
-                <span class="n">index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">bname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="c1"># index based on file order</span>
+
+            <span class="k">if</span> <span class="n">concat</span><span class="p">:</span>
+                <span class="n">vname</span> <span class="o">=</span> <span class="n">bname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">postfix</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"_"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="s2">"_"</span> <span class="ow">in</span> <span class="n">bname</span> <span class="ow">and</span> <span class="n">bname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"_"</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                    <span class="n">index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">bname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"_"</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="s2">"."</span> <span class="ow">in</span> <span class="n">bname</span> <span class="ow">and</span> <span class="n">bname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                    <span class="n">index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">bname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">prefix</span> <span class="o">!=</span> <span class="s2">""</span> <span class="ow">and</span> <span class="n">bname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                    <span class="n">index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">bname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="n">prefix</span><span class="p">))</span>
+                <span class="k">elif</span> <span class="n">prefix</span> <span class="o">==</span> <span class="s2">""</span> <span class="ow">and</span> <span class="n">postfix</span> <span class="o">==</span> <span class="s2">""</span> <span class="ow">and</span> <span class="n">bname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                    <span class="n">index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">bname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">index</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="n">index_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">index</span> <span class="o">=</span> <span class="n">i</span>
-            <span class="n">index_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+                <span class="n">vname</span> <span class="o">=</span> <span class="n">bname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">postfix</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+                <span class="n">da</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">source_file</span><span class="o">=</span><span class="n">bname</span><span class="p">)</span>
+
+            <span class="n">file_attrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bname</span><span class="p">)</span>
+            <span class="n">da</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">vname</span>
+
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">mosaic</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">da_lst</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">identical_grid</span><span class="p">(</span><span class="n">da</span><span class="p">):</span>
+                        <span class="k">raise</span> <span class="n">xr</span><span class="o">.</span><span class="n">MergeError</span><span class="p">(</span><span class="s2">"Geotransform and/or shape do not match"</span><span class="p">)</span>
+                    <span class="n">da</span><span class="p">[</span><span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">x_dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">da_lst</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">x_dim</span><span class="p">]</span>
+                    <span class="n">da</span><span class="p">[</span><span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">da_lst</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">concat</span> <span class="ow">or</span> <span class="n">mosaic</span><span class="p">:</span>
+                    <span class="n">da</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">da_lst</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="k">if</span> <span class="n">concat</span> <span class="ow">or</span> <span class="n">mosaic</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">concat</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">dask</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"array.slicing.split_large_chunks"</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+                <span class="p">):</span>
+                    <span class="n">da</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">da_lst</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">concat_dim</span><span class="p">)</span>
+                    <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">concat_dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">IndexVariable</span><span class="p">(</span><span class="n">concat_dim</span><span class="p">,</span> <span class="n">index_lst</span><span class="p">)</span>
+                    <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">sortby</span><span class="p">(</span><span class="n">concat_dim</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">concat_dim</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+                    <span class="n">da</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">da_lst</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">da</span> <span class="o">=</span> <span class="n">raster_utils</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">da_lst</span><span class="p">,</span> <span class="o">**</span><span class="n">mosaic_kwargs</span><span class="p">)</span>
+                <span class="n">da</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">"source_file"</span><span class="p">:</span> <span class="s2">"; "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_attrs</span><span class="p">)})</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">to_dataset</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># name based on basename minus pre- &amp; postfix</span>
-            <span class="n">vname</span> <span class="o">=</span> <span class="n">bname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">postfix</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
-            <span class="n">da</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">source_file</span><span class="o">=</span><span class="n">bname</span><span class="p">)</span>
-        <span class="n">file_attrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bname</span><span class="p">)</span>
-        <span class="n">da</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">vname</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">da_lst</span><span class="p">)</span>
+            <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">mosaic</span><span class="p">:</span>
-                <span class="c1"># check if transform, shape and crs are close</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">da_lst</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">identical_grid</span><span class="p">(</span><span class="n">da</span><span class="p">):</span>
-                    <span class="k">raise</span> <span class="n">xr</span><span class="o">.</span><span class="n">MergeError</span><span class="p">(</span><span class="s2">"Geotransform and/or shape do not match"</span><span class="p">)</span>
-                <span class="c1"># copy coordinates from first raster</span>
-                <span class="n">da</span><span class="p">[</span><span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">x_dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">da_lst</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">x_dim</span><span class="p">]</span>
-                <span class="n">da</span><span class="p">[</span><span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">da_lst</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">y_dim</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">concat</span> <span class="ow">or</span> <span class="n">mosaic</span><span class="p">:</span>
-                <span class="c1"># copy name from first raster</span>
-                <span class="n">da</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">da_lst</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
-        <span class="n">da_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">da</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">da_lst</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="n">da_lst</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">concat</span> <span class="ow">or</span> <span class="n">mosaic</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">concat</span><span class="p">:</span>
-            <span class="k">with</span> <span class="n">dask</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"array.slicing.split_large_chunks"</span><span class="p">:</span> <span class="kc">False</span><span class="p">}):</span>
-                <span class="n">da</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">da_lst</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">concat_dim</span><span class="p">)</span>
-                <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">concat_dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">IndexVariable</span><span class="p">(</span><span class="n">concat_dim</span><span class="p">,</span> <span class="n">index_lst</span><span class="p">)</span>
-                <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">sortby</span><span class="p">(</span><span class="n">concat_dim</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">concat_dim</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
-                <span class="n">da</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">da_lst</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">da</span> <span class="o">=</span> <span class="n">raster_utils</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">da_lst</span><span class="p">,</span> <span class="o">**</span><span class="n">mosaic_kwargs</span><span class="p">)</span>  <span class="c1"># spatial merge</span>
-            <span class="n">da</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">"source_file"</span><span class="p">:</span> <span class="s2">"; "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_attrs</span><span class="p">)})</span>
-        <span class="n">ds</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">to_dataset</span><span class="p">()</span>  <span class="c1"># dataset for consistency</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
-            <span class="n">da_lst</span>
-        <span class="p">)</span>  <span class="c1"># seems that with rioxarray drops all datarrays atrributes not just ds</span>
-        <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">return</span> <span class="n">ds</span><span class="p">,</span> <span class="n">da_lst</span>
 
-    <span class="c1"># update spatial attributes</span>
-    <span class="k">if</span> <span class="n">da_lst</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="n">da_lst</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">ds</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_transform</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">ds</span></div>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="n">close_all_sources</span><span class="p">(</span><span class="n">da_lst</span><span class="p">)</span>
+        <span class="k">raise</span>
 
+
+<span class="k">def</span><span class="w"> </span><span class="nf">closers_of</span><span class="p">(</span>
+    <span class="n">sources</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[],</span> <span class="kc">None</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Collect the close callbacks of the given xarray objects."""</span>
+    <span class="k">return</span> <span class="p">[</span>
+        <span class="n">closer</span>
+        <span class="k">for</span> <span class="n">closer</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">"_close"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">sources</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">closer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">close_all_sources</span><span class="p">(</span><span class="n">sources</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">closer</span> <span class="ow">in</span> <span class="n">closers_of</span><span class="p">(</span><span class="n">sources</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">closer</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># pragma: no cover - best effort cleanup</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"Could not close data source"</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">attach_closers</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">closers</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[],</span> <span class="kc">None</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Run ``closers`` when ``ds`` is closed.</span>
+
+<span class="sd">    xarray rebuilds the Dataset on ``chunk``, ``rename``, ``clip_geom`` and</span>
+<span class="sd">    friends, which drops ``_close``, so re-attach it after such steps.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">closers</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ds</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_close</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">closer</span> <span class="ow">in</span> <span class="n">closers</span><span class="p">:</span>
+            <span class="n">closer</span><span class="p">()</span>
+
+    <span class="n">ds</span><span class="o">.</span><span class="n">set_close</span><span class="p">(</span><span class="n">_close</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ds</span>
 
 
 <div class="viewcode-block" id="open_raster_from_tindex">
 <a class="viewcode-back" href="../../_generated/hydromt.readers.open_raster_from_tindex.html#hydromt.readers.open_raster_from_tindex">[docs]</a>
+<span class="nd">@normalize_io_errors</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">open_raster_from_tindex</span><span class="p">(</span>
-    <span class="n">tindex_path</span><span class="p">,</span>
+    <span class="n">tindex_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">bbox</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">geom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">tileindex</span><span class="o">=</span><span class="s2">"location"</span><span class="p">,</span>
-    <span class="n">mosaic_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">bbox</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">geom</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span> <span class="o">|</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">tileindex</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"location"</span><span class="p">,</span>
+    <span class="n">mosaic_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">filesystem</span><span class="p">:</span> <span class="n">AbstractFileSystem</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Read and merge raster tiles.</span>
@@ -1185,7 +1350,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    Arguments</span>
 <span class="sd">    ---------</span>
 <span class="sd">    tindex_path: path, str</span>
-<span class="sd">        Path to tile index file.</span>
+<span class="sd">        Path or URI of the tile index file.</span>
 <span class="sd">    bbox : tuple of floats, optional</span>
 <span class="sd">        (xmin, ymin, xmax, ymax) bounding box in EPGS:4326, by default None.</span>
 <span class="sd">    geom : geopandas.GeoDataFrame/Series, optional</span>
@@ -1196,13 +1361,15 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    mosaic_kwargs: dict, optional</span>
 <span class="sd">        Mosaic key_word arguments to unify raster crs and/or resolution. See</span>
 <span class="sd">        :py:meth:`~hydromt.merge.merge()` for options.</span>
+<span class="sd">    filesystem : AbstractFileSystem | None, optional</span>
+<span class="sd">        fsspec filesystem to read the tile index and the tiles from. None</span>
+<span class="sd">        (default) means the local filesystem.</span>
 <span class="sd">    **kwargs:</span>
 <span class="sd">        key-word arguments are passed to :py:meth:`hydromt.readers.open_mfraster()`</span>
 
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    data : Dataset</span>
+<span class="sd">    data : xr.Dataset</span>
 <span class="sd">        A single-variable Dataset of merged raster tiles.</span>
 <span class="sd">    """</span>
     <span class="n">mosaic_kwargs</span> <span class="o">=</span> <span class="n">mosaic_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
@@ -1210,46 +1377,163 @@ window.runMermaid = runMermaid;</script>
         <span class="n">geom</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="p">[</span><span class="n">box</span><span class="p">(</span><span class="o">*</span><span class="n">bbox</span><span class="p">)],</span> <span class="n">crs</span><span class="o">=</span><span class="mi">4326</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">geom</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"bbox or geom required in combination with tile_index"</span><span class="p">)</span>
-    <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">tindex_path</span><span class="p">)</span>
+    <span class="n">gdf</span> <span class="o">=</span> <span class="n">open_vector</span><span class="p">(</span><span class="n">tindex_path</span><span class="p">,</span> <span class="n">filesystem</span><span class="o">=</span><span class="n">filesystem</span><span class="p">)</span>
     <span class="n">gdf</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">gdf</span><span class="o">.</span><span class="n">sindex</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">geom</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span><span class="o">.</span><span class="n">union_all</span><span class="p">())]</span>
     <span class="k">if</span> <span class="n">gdf</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">"No intersecting tiles found."</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">tileindex</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">gdf</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Tile index "</span><span class="si">{</span><span class="n">tileindex</span><span class="si">}</span><span class="s1">" column missing in tile index file.'</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">root</span> <span class="o">=</span> <span class="n">dirname</span><span class="p">(</span><span class="n">tindex_path</span><span class="p">)</span>
-        <span class="n">paths</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">gdf</span><span class="p">[</span><span class="n">tileindex</span><span class="p">]:</span>
-            <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">is_absolute</span><span class="p">():</span>
-                <span class="n">paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">abspath</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">path</span><span class="p">))))</span>
+
+    <span class="n">root</span> <span class="o">=</span> <span class="n">dirname</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tindex_path</span><span class="p">))</span>
+    <span class="n">uris</span> <span class="o">=</span> <span class="p">[</span><span class="n">_resolve_tile_uri</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">tile</span><span class="p">,</span> <span class="n">filesystem</span><span class="p">)</span> <span class="k">for</span> <span class="n">tile</span> <span class="ow">in</span> <span class="n">gdf</span><span class="p">[</span><span class="n">tileindex</span><span class="p">]]</span>
+
     <span class="c1"># read &amp; merge data</span>
     <span class="k">if</span> <span class="s2">"dst_bounds"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mosaic_kwargs</span><span class="p">:</span>
         <span class="n">mosaic_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mask</span><span class="o">=</span><span class="n">geom</span><span class="p">)</span>  <span class="c1"># limit output domain to bbox/geom</span>
 
     <span class="n">ds_out</span> <span class="o">=</span> <span class="n">open_mfraster</span><span class="p">(</span>
-        <span class="n">paths</span><span class="p">,</span> <span class="n">mosaic</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mosaic_kwargs</span><span class="o">=</span><span class="n">mosaic_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="n">uris</span><span class="p">,</span>
+        <span class="n">mosaic</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">mosaic_kwargs</span><span class="o">=</span><span class="n">mosaic_kwargs</span><span class="p">,</span>
+        <span class="n">filesystem</span><span class="o">=</span><span class="n">filesystem</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span>
+    <span class="n">closers</span> <span class="o">=</span> <span class="n">closers_of</span><span class="p">([</span><span class="n">ds_out</span><span class="p">])</span>
     <span class="c1"># clip to extent</span>
     <span class="n">ds_out</span> <span class="o">=</span> <span class="n">ds_out</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">clip_geom</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
     <span class="n">name</span> <span class="o">=</span> <span class="s2">"."</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">basename</span><span class="p">(</span><span class="n">tindex_path</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
     <span class="n">ds_out</span> <span class="o">=</span> <span class="n">ds_out</span><span class="o">.</span><span class="n">rename</span><span class="p">({</span><span class="n">ds_out</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">vars</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">name</span><span class="p">})</span>
-    <span class="k">return</span> <span class="n">ds_out</span>  <span class="c1"># dataset to be consitent with open_mfraster</span></div>
+    <span class="c1"># dataset to be consitent with open_mfraster</span>
+    <span class="k">return</span> <span class="n">attach_closers</span><span class="p">(</span><span class="n">ds_out</span><span class="p">,</span> <span class="n">closers</span><span class="p">)</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_resolve_tile_uri</span><span class="p">(</span>
+    <span class="n">root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tile</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">filesystem</span><span class="p">:</span> <span class="n">AbstractFileSystem</span> <span class="o">|</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Resolve a tile location from a tile index against the index's own location."""</span>
+    <span class="n">tile</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tile</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_local</span><span class="p">(</span><span class="n">filesystem</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tile</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_absolute</span><span class="p">():</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">abspath</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">tile</span><span class="p">))))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_local_uri</span><span class="p">(</span><span class="n">tile</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">tile</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">'/'</span><span class="p">)</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">tile</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">'/'</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+
+
+<span class="nd">@normalize_io_errors</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">open_zarrs</span><span class="p">(</span>
+    <span class="n">uris</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">read_kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">filesystem</span><span class="p">:</span> <span class="n">AbstractFileSystem</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Open multiple zarr datasets.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    uris : list[str]</span>
+<span class="sd">        List of URIs pointing to zarr datasets.</span>
+<span class="sd">    read_kwargs : dict[str, Any] | None, optional</span>
+<span class="sd">        Additional keyword arguments to pass to :py:func:`xarray.open_zarr`.</span>
+<span class="sd">    filesystem : AbstractFileSystem | None, optional</span>
+<span class="sd">        fsspec filesystem to read the stores from. None (default) means the</span>
+<span class="sd">        local filesystem, in which case the URIs are passed to zarr as-is.</span>
+<span class="sd">        Remote stores are opened through a mapper, which carries the</span>
+<span class="sd">        filesystem's credentials.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list[xr.Dataset]</span>
+<span class="sd">        List of opened xarray datasets.</span>
+<span class="sd">    """</span>
+    <span class="n">read_kwargs</span> <span class="o">=</span> <span class="n">read_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="c1"># a mapper already carries the filesystem's credentials, and xr.open_zarr</span>
+    <span class="c1"># raises a TypeError when 'storage_options' is passed alongside one.</span>
+    <span class="n">stores</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="nb">list</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_local</span><span class="p">(</span><span class="n">filesystem</span><span class="p">)</span>
+        <span class="k">else</span> <span class="p">[</span><span class="n">get_mapper</span><span class="p">(</span><span class="n">filesystem</span><span class="p">,</span> <span class="n">uri</span><span class="p">)</span> <span class="k">for</span> <span class="n">uri</span> <span class="ow">in</span> <span class="n">uris</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">open_zarr</span><span class="p">(</span><span class="n">store</span><span class="p">,</span> <span class="o">**</span><span class="n">read_kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">store</span> <span class="ow">in</span> <span class="n">stores</span><span class="p">]</span>
+
+
+<span class="nd">@normalize_io_errors</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">open_mfdataset</span><span class="p">(</span>
+    <span class="n">uris</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">preprocessor</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">],</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">read_kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">filesystem</span><span class="p">:</span> <span class="n">AbstractFileSystem</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Open a multi-file netCDF dataset.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    uris : list[str]</span>
+<span class="sd">        List of URIs pointing to netCDF datasets.</span>
+<span class="sd">    preprocessor : Callable[[xr.Dataset], xr.Dataset] | None, optional</span>
+<span class="sd">        Function to preprocess each dataset before concatenation.</span>
+<span class="sd">    read_kwargs : dict[str, Any] | None, optional</span>
+<span class="sd">        Additional keyword arguments to pass to :py:func:`xarray.open_mfdataset`.</span>
+<span class="sd">    filesystem : AbstractFileSystem | None, optional</span>
+<span class="sd">        fsspec filesystem to read the files from. None (default) means the local</span>
+<span class="sd">        filesystem, in which case the paths are passed to xarray as-is so that</span>
+<span class="sd">        the ``netcdf4`` engine keeps working. Remote files are read through file</span>
+<span class="sd">        handles, which are closed when the returned dataset is closed.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    xr.Dataset</span>
+<span class="sd">        The combined xarray dataset.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    File handles do not pickle, so a lazily loaded remote dataset cannot be</span>
+<span class="sd">    computed with a dask distributed scheduler. The threaded scheduler is fine.</span>
+<span class="sd">    """</span>
+    <span class="n">read_kwargs</span> <span class="o">=</span> <span class="n">read_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">is_local</span><span class="p">(</span><span class="n">filesystem</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_mfdataset</span><span class="p">(</span>
+            <span class="nb">list</span><span class="p">(</span><span class="n">uris</span><span class="p">),</span>
+            <span class="n">decode_coords</span><span class="o">=</span><span class="s2">"all"</span><span class="p">,</span>
+            <span class="n">preprocess</span><span class="o">=</span><span class="n">preprocessor</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">read_kwargs</span><span class="p">,</span>
+            <span class="n">decode_timedelta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">handles</span> <span class="o">=</span> <span class="n">open_handles</span><span class="p">(</span><span class="n">filesystem</span><span class="p">,</span> <span class="n">uris</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_mfdataset</span><span class="p">(</span>
+            <span class="n">handles</span><span class="p">,</span>
+            <span class="n">decode_coords</span><span class="o">=</span><span class="s2">"all"</span><span class="p">,</span>
+            <span class="n">preprocess</span><span class="o">=</span><span class="n">preprocessor</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">read_kwargs</span><span class="p">,</span>
+            <span class="n">decode_timedelta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">handle</span> <span class="ow">in</span> <span class="n">handles</span><span class="p">:</span>
+            <span class="n">handle</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">raise</span>
+    <span class="c1"># the dataset stays lazily backed by the handles, so tie their lifetime to it</span>
+    <span class="k">return</span> <span class="n">attach_close</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">handles</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="open_geodataset">
 <a class="viewcode-back" href="../../_generated/hydromt.readers.open_geodataset.html#hydromt.readers.open_geodataset">[docs]</a>
+<span class="nd">@normalize_io_errors</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">open_geodataset</span><span class="p">(</span>
-    <span class="n">loc_path</span><span class="p">,</span>
+    <span class="n">loc_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">data_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">var_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">index_dim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">chunks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">bbox</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">geom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">data_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">var_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">index_dim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">chunks</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">crs</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">CRS</span> <span class="o">|</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">bbox</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">geom</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span> <span class="o">|</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Open and combine geometry location GIS file and timeseries file in a xr.Dataset.</span>
@@ -1289,8 +1573,14 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    -------</span>
 <span class="sd">    ds: xarray.Dataset</span>
 <span class="sd">        Dataset with geospatial coordinates.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This reader is local-only: it resolves ``data_path`` relative to</span>
+<span class="sd">    ``loc_path`` on the local filesystem.</span>
 <span class="sd">    """</span>
     <span class="n">chunks</span> <span class="o">=</span> <span class="n">chunks</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">assert_local_uri</span><span class="p">(</span><span class="n">loc_path</span><span class="p">,</span> <span class="n">reader</span><span class="o">=</span><span class="s2">"open_geodataset"</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">isfile</span><span class="p">(</span><span class="n">loc_path</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"GeoDataset point location file not found: </span><span class="si">{</span><span class="n">loc_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
@@ -1322,7 +1612,15 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="open_timeseries_from_table">
 <a class="viewcode-back" href="../../_generated/hydromt.readers.open_timeseries_from_table.html#hydromt.readers.open_timeseries_from_table">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">open_timeseries_from_table</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">index_dim</span><span class="o">=</span><span class="s2">"index"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="nd">@normalize_io_errors</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">open_timeseries_from_table</span><span class="p">(</span>
+    <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">index_dim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"index"</span><span class="p">,</span>
+    <span class="n">filesystem</span><span class="p">:</span> <span class="n">AbstractFileSystem</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Open timeseries csv or parquet file and parse to xarray.DataArray.</span>
 
 <span class="sd">    Accepts files with time index on one dimension and numeric location index on the</span>
@@ -1332,11 +1630,14 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    Arguments</span>
 <span class="sd">    ---------</span>
 <span class="sd">    path: path, str</span>
-<span class="sd">        Path to time series file</span>
+<span class="sd">        Path or URI of the time series file</span>
 <span class="sd">    name: str</span>
 <span class="sd">        variable name, derived from basename of path if None.</span>
 <span class="sd">    index_dim:</span>
 <span class="sd">        the dimension to index on.</span>
+<span class="sd">    filesystem : AbstractFileSystem | None, optional</span>
+<span class="sd">        fsspec filesystem to read the file from. None (default) means the local</span>
+<span class="sd">        filesystem.</span>
 <span class="sd">    **kwargs:</span>
 <span class="sd">        key-word arguments are passed to the reader method</span>
 
@@ -1350,9 +1651,9 @@ window.runMermaid = runMermaid;</script>
     <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s2">".csv"</span><span class="p">:</span>
         <span class="n">csv_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">csv_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">csv_kwargs</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">read_table</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">"csv"</span><span class="p">,</span> <span class="n">filesystem</span><span class="o">=</span><span class="n">filesystem</span><span class="p">,</span> <span class="o">**</span><span class="n">csv_kwargs</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">".parquet"</span><span class="p">,</span> <span class="s2">".pq"</span><span class="p">}:</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">read_table</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">"parquet"</span><span class="p">,</span> <span class="n">filesystem</span><span class="o">=</span><span class="n">filesystem</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unknown table file format: </span><span class="si">{</span><span class="n">ext</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
@@ -1402,6 +1703,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="open_vector">
 <a class="viewcode-back" href="../../_generated/hydromt.readers.open_vector.html#hydromt.readers.open_vector">[docs]</a>
+<span class="nd">@normalize_io_errors</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">open_vector</span><span class="p">(</span>
     <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
@@ -1412,6 +1714,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">geom</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span> <span class="o">|</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">assert_gtype</span><span class="p">:</span> <span class="n">Point</span> <span class="o">|</span> <span class="n">LineString</span> <span class="o">|</span> <span class="n">Polygon</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">predicate</span><span class="p">:</span> <span class="n">OPEN_VECTOR_PREDICATE</span> <span class="o">=</span> <span class="s2">"intersects"</span><span class="p">,</span>
+    <span class="n">filesystem</span><span class="p">:</span> <span class="n">AbstractFileSystem</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Open fiona-compatible geometry, csv, parquet, excel or xy file and parse it.</span>
@@ -1423,7 +1726,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    path: str or Path-like,</span>
-<span class="sd">        path to geometry file</span>
+<span class="sd">        path or URI of the geometry file</span>
 <span class="sd">    driver: {'csv', 'xls', 'xy', 'pyogrio', 'parquet'}, optional</span>
 <span class="sd">        driver used to read the file: :py:meth:`geopandas.open_file` for gdal vector</span>
 <span class="sd">        files, :py:meth:`hydromt.open_vector_from_table`</span>
@@ -1446,6 +1749,10 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        optional. If predicate is provided, the GeoDataFrame is filtered by testing</span>
 <span class="sd">        the predicate function against each item. Requires bbox or mask.</span>
 <span class="sd">        By default 'intersects'</span>
+<span class="sd">    filesystem : AbstractFileSystem | None, optional</span>
+<span class="sd">        fsspec filesystem to read the file from. None (default) means the local</span>
+<span class="sd">        filesystem, in which case the path is handed to GDAL as-is. Remote files</span>
+<span class="sd">        are downloaded once and handed to OGR as bytes.</span>
 <span class="sd">    **kwargs:</span>
 <span class="sd">        Keyword args to be passed to the driver method when opening the file</span>
 
@@ -1455,24 +1762,30 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        Parsed geometry file</span>
 <span class="sd">    """</span>
     <span class="n">driver</span> <span class="o">=</span> <span class="n">driver</span> <span class="k">if</span> <span class="n">driver</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">local</span> <span class="o">=</span> <span class="n">is_local</span><span class="p">(</span><span class="n">filesystem</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">driver</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"csv"</span><span class="p">,</span> <span class="s2">"parquet"</span><span class="p">,</span> <span class="s2">"xls"</span><span class="p">,</span> <span class="s2">"xlsx"</span><span class="p">,</span> <span class="s2">"xy"</span><span class="p">]:</span>
-        <span class="n">gdf</span> <span class="o">=</span> <span class="n">open_vector_from_table</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="n">driver</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="c1"># drivers with multiple relevant files cannot be opened directly, we should pass the uri only</span>
-
+        <span class="n">gdf</span> <span class="o">=</span> <span class="n">open_vector_from_table</span><span class="p">(</span>
+            <span class="n">path</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="n">driver</span><span class="p">,</span> <span class="n">filesystem</span><span class="o">=</span><span class="n">filesystem</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+    <span class="c1"># gpd.read_file needs a path because some drivers use multiple files (e.g. shp);</span>
+    <span class="c1"># OGR can take the bytes of a single remote file instead.</span>
+    <span class="k">elif</span> <span class="n">driver</span> <span class="o">==</span> <span class="s2">"pyogrio"</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">local</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">local</span><span class="p">:</span>
+            <span class="n">assert_single_file_format</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">if</span> <span class="n">local</span> <span class="k">else</span> <span class="n">read_bytes</span><span class="p">(</span><span class="n">filesystem</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+        <span class="n">bbox_shapely</span> <span class="o">=</span> <span class="n">box</span><span class="p">(</span><span class="o">*</span><span class="n">bbox</span><span class="p">)</span> <span class="k">if</span> <span class="n">bbox</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">bbox_reader</span> <span class="o">=</span> <span class="n">gis_utils</span><span class="o">.</span><span class="n">_bbox_from_file_and_filters</span><span class="p">(</span>
+            <span class="n">source</span><span class="p">,</span>
+            <span class="n">bbox_shapely</span><span class="p">,</span>
+            <span class="n">geom</span><span class="p">,</span>
+            <span class="n">crs</span><span class="p">,</span>
+            <span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">_READ_INFO_KWARGS</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">},</span>
+        <span class="p">)</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="n">read_dataframe</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="n">bbox_reader</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">driver</span> <span class="o">==</span> <span class="s2">"pyogrio"</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">bbox</span><span class="p">:</span>
-                <span class="n">bbox_shapely</span> <span class="o">=</span> <span class="n">box</span><span class="p">(</span><span class="o">*</span><span class="n">bbox</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">bbox_shapely</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">bbox_reader</span> <span class="o">=</span> <span class="n">gis_utils</span><span class="o">.</span><span class="n">_bbox_from_file_and_filters</span><span class="p">(</span>
-                <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">bbox_shapely</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">crs</span>
-            <span class="p">)</span>
-            <span class="n">gdf</span> <span class="o">=</span> <span class="n">read_dataframe</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">bbox</span><span class="o">=</span><span class="n">bbox_reader</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bbox</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                <span class="n">bbox</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">bbox</span><span class="p">)</span>
-            <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">geom</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bbox</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">bbox</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">bbox</span><span class="p">)</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">geom</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="c1"># check geometry type</span>
     <span class="k">if</span> <span class="n">assert_gtype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1502,6 +1815,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="open_vector_from_table">
 <a class="viewcode-back" href="../../_generated/hydromt.readers.open_vector_from_table.html#hydromt.readers.open_vector_from_table">[docs]</a>
+<span class="nd">@normalize_io_errors</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">open_vector_from_table</span><span class="p">(</span>
     <span class="n">path</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
@@ -1509,6 +1823,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">x_dim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">y_dim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">filesystem</span><span class="p">:</span> <span class="n">AbstractFileSystem</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Read point geometry files from csv, parquet, xy or excel table files.</span>
@@ -1530,7 +1845,10 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        Coordinate reference system, accepts EPSG codes (int or str), proj (str or dict)</span>
 <span class="sd">        or wkt (str)</span>
 <span class="sd">    path:</span>
-<span class="sd">        The filename to read the table from.</span>
+<span class="sd">        The filename or URI to read the table from.</span>
+<span class="sd">    filesystem : AbstractFileSystem | None, optional</span>
+<span class="sd">        fsspec filesystem to read the file from. None (default) means the local</span>
+<span class="sd">        filesystem.</span>
 <span class="sd">    **kwargs</span>
 <span class="sd">        Additional keyword arguments that are passed to the underlying drivers.</span>
 
@@ -1540,21 +1858,22 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        Parsed and filtered point geometries</span>
 <span class="sd">    """</span>
     <span class="n">driver</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">if</span> <span class="n">driver</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">_ALLOWED</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"csv"</span><span class="p">,</span> <span class="s2">"parquet"</span><span class="p">,</span> <span class="s2">"xls"</span><span class="p">,</span> <span class="s2">"xlsx"</span><span class="p">,</span> <span class="s2">"xy"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">driver</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_ALLOWED</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"Driver or extension </span><span class="si">{</span><span class="n">driver</span><span class="si">}</span><span class="s2"> unknown for vector table. Choose from </span><span class="si">{</span><span class="n">_ALLOWED</span><span class="si">}</span><span class="s2">."</span>
+        <span class="p">)</span>
     <span class="k">if</span> <span class="s2">"index_col"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="n">driver</span> <span class="o">!=</span> <span class="s2">"parquet"</span><span class="p">:</span>
         <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">driver</span> <span class="o">==</span> <span class="s2">"csv"</span><span class="p">:</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">driver</span> <span class="o">==</span> <span class="s2">"parquet"</span><span class="p">:</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">driver</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"xls"</span><span class="p">,</span> <span class="s2">"xlsx"</span><span class="p">]:</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">"openpyxl"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">driver</span> <span class="o">==</span> <span class="s2">"xy"</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">driver</span> <span class="o">==</span> <span class="s2">"xy"</span><span class="p">:</span>
         <span class="n">x_dim</span> <span class="o">=</span> <span class="n">x_dim</span> <span class="k">if</span> <span class="n">x_dim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">"x"</span>
         <span class="n">y_dim</span> <span class="o">=</span> <span class="n">y_dim</span> <span class="k">if</span> <span class="n">y_dim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">"y"</span>
         <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">index_col</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="sa">r</span><span class="s2">"\s+"</span><span class="p">)</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="n">x_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="n">y_dim</span><span class="p">})</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">read_table</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">"xy"</span><span class="p">,</span> <span class="n">filesystem</span><span class="o">=</span><span class="n">filesystem</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+            <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="n">x_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="n">y_dim</span><span class="p">}</span>
+        <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Driver or extension </span><span class="si">{</span><span class="n">driver</span><span class="si">}</span><span class="s2"> unknown for vector table."</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">read_table</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">driver</span><span class="p">,</span> <span class="n">filesystem</span><span class="o">=</span><span class="n">filesystem</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="c1"># infer points from table</span>
     <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
 
@@ -1738,6 +2057,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="open_nc">
 <a class="viewcode-back" href="../../_generated/hydromt.readers.open_nc.html#hydromt.readers.open_nc">[docs]</a>
+<span class="nd">@normalize_io_errors</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">open_nc</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Read a netcdf file.</span>
 
@@ -1753,7 +2073,14 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    -------</span>
 <span class="sd">    xr.Dataset</span>
 <span class="sd">        Read dataset. Don't forget to close it when you're done!</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This reader is local-only. Use</span>
+<span class="sd">    :py:meth:`hydromt.readers.open_mfdataset` to read netCDF files from a</span>
+<span class="sd">    remote filesystem.</span>
 <span class="sd">    """</span>
+    <span class="n">assert_local_uri</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">reader</span><span class="o">=</span><span class="s2">"open_nc"</span><span class="p">)</span>
     <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="c1"># set geo coord if present as coordinate of dataset</span>
     <span class="k">if</span> <span class="n">raster</span><span class="o">.</span><span class="n">GEO_MAP_COORD</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="p">:</span>
@@ -1768,6 +2095,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="open_ncs">
 <a class="viewcode-back" href="../../_generated/hydromt.readers.open_ncs.html#hydromt.readers.open_ncs">[docs]</a>
+<span class="nd">@normalize_io_errors</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">open_ncs</span><span class="p">(</span>
     <span class="n">filename_template</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
     <span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
@@ -1951,8 +2279,8 @@ window.runMermaid = runMermaid;</script>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1973,7 +2301,6 @@ window.runMermaid = runMermaid;</script>
 
   <p class="sphinx-version">
     Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
-    <br/>
   </p>
 </div>
       
@@ -1986,7 +2313,7 @@ window.runMermaid = runMermaid;</script>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.22.0.
 </p></div>
       
     </div>

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 
@@ -26,8 +25,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../../../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
-<link href="../../../../../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+  <link href="../../../../../_static/styles/theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
+<link href="../../../../../_static/styles/pydata-sphinx-theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/autodoc_pydantic.css" />
@@ -35,10 +34,10 @@
     <link rel="stylesheet" type="text/css" href="../../../../../_static/theme-deltares.css?v=d7afb10b" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../../../../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
+  <script defer src="../../../../../_static/scripts/fontawesome.js?digest=64cc4de3f052d77215f0"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
-<link rel="preload" as="script" href="../../../../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
+  <link rel="preload" as="script" href="../../../../../_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0" />
+<link rel="preload" as="script" href="../../../../../_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0" />
 
     <script src="../../../../../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
@@ -405,7 +404,7 @@ window.addEventListener("load", load);
 window.runMermaid = runMermaid;</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/hydromt/data_catalog/drivers/geodataset/xarray_driver';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.21.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.22.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/main/docs/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.5.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -465,7 +464,7 @@ window.runMermaid = runMermaid;</script>
   
     <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
   </button>
   
@@ -557,7 +556,7 @@ window.runMermaid = runMermaid;</script>
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -598,7 +597,7 @@ window.runMermaid = runMermaid;</script>
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -607,7 +606,7 @@ window.runMermaid = runMermaid;</script>
   
 
   
-    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
       <span class="fa-solid fa-outdent"></span>
     </button>
   
@@ -795,8 +794,9 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.drivers.xarray_options</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">XarrayDriverOptions</span><span class="p">,</span>
     <span class="n">XarrayIOFormat</span><span class="p">,</span>
+    <span class="n">read_xarray</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="n">exec_nodata_strat</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDataStrategy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Geom</span><span class="p">,</span>
     <span class="n">Predicate</span><span class="p">,</span>
@@ -836,7 +836,7 @@ window.runMermaid = runMermaid;</script>
         <span class="n">mask</span><span class="p">:</span> <span class="n">Geom</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">predicate</span><span class="p">:</span> <span class="n">Predicate</span> <span class="o">=</span> <span class="s2">"intersects"</span><span class="p">,</span>
         <span class="n">metadata</span><span class="p">:</span> <span class="n">SourceMetadata</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Read in data to an xarray Dataset.</span>
 
@@ -871,37 +871,13 @@ window.runMermaid = runMermaid;</script>
                 <span class="s2">"metadata"</span><span class="p">:</span> <span class="n">metadata</span><span class="p">,</span>
             <span class="p">},</span>
         <span class="p">)</span>
-        <span class="n">preprocessor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get_preprocessor</span><span class="p">()</span>
-        <span class="n">filtered_uris</span><span class="p">,</span> <span class="n">io_format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">filter_uris_by_format</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span>
-
-        <span class="c1"># Read and merge</span>
-        <span class="k">if</span> <span class="n">io_format</span> <span class="o">==</span> <span class="n">XarrayIOFormat</span><span class="o">.</span><span class="n">ZARR</span><span class="p">:</span>
-            <span class="n">datasets</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">preprocessor</span><span class="p">(</span><span class="n">xr</span><span class="o">.</span><span class="n">open_zarr</span><span class="p">(</span><span class="n">_uri</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get_kwargs</span><span class="p">()))</span>
-                <span class="k">for</span> <span class="n">_uri</span> <span class="ow">in</span> <span class="n">filtered_uris</span>
-            <span class="p">]</span>
-            <span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">datasets</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">io_format</span> <span class="o">==</span> <span class="n">XarrayIOFormat</span><span class="o">.</span><span class="n">NETCDF4</span><span class="p">:</span>
-            <span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_mfdataset</span><span class="p">(</span>
-                <span class="n">filtered_uris</span><span class="p">,</span>
-                <span class="n">decode_coords</span><span class="o">=</span><span class="s2">"all"</span><span class="p">,</span>
-                <span class="n">preprocess</span><span class="o">=</span><span class="n">preprocessor</span><span class="p">,</span>
-                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get_kwargs</span><span class="p">(),</span>
-                <span class="n">decode_timedelta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">"Unknown extension for GeoDatasetXarrayDriver: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get_reading_ext</span><span class="p">(</span><span class="n">uris</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s2"> "</span>
-            <span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">ds</span><span class="p">[</span><span class="n">variable</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">exec_nodata_strat</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">"No data from driver: '</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">' for variable: '</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s2">'"</span><span class="p">,</span>
-                    <span class="n">strategy</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># handle_nodata == ignore</span>
-        <span class="k">return</span> <span class="n">ds</span></div>
+        <span class="k">return</span> <span class="n">read_xarray</span><span class="p">(</span>
+            <span class="n">uris</span><span class="o">=</span><span class="n">uris</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">,</span>
+            <span class="n">filesystem</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">filesystem</span><span class="p">,</span>
+            <span class="n">driver_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">handle_nodata</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="GeoDatasetXarrayDriver.write">
@@ -1007,8 +983,8 @@ window.runMermaid = runMermaid;</script>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
-<script defer src="../../../../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
+  <script defer src="../../../../../_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0"></script>
+<script defer src="../../../../../_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1029,7 +1005,6 @@ window.runMermaid = runMermaid;</script>
 
   <p class="sphinx-version">
     Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
-    <br/>
   </p>
 </div>
       
@@ -1042,7 +1017,7 @@ window.runMermaid = runMermaid;</script>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.22.0.
 </p></div>
       
     </div>
