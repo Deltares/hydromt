@@ -175,18 +175,28 @@ hosted on AWS; omit it for buckets on AWS S3.
 Verify the configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-Check that the AWS CLI picks up your configuration.  If you use pixi, run the
-CLI through your pixi environment:
+Check that AWS picks up your configuration using python.
+The ``io`` optional dependency group of hydromt is required for this.
+
+.. code-block:: python
+
+  import s3fs
+
+  fs = s3fs.S3FileSystem(profile="<profile-name>")
+  print(fs.ls("<bucket-name>")[:5])
+
+To check that the AWS CLI picks up your configuration, you first need to install aws.
+Which can be done by adding `awscli <https://pypi.org/project/awscli/>`_ to your python environment or by doing a `system installation <https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html>`_.
 
 .. code-block:: powershell
 
-   pixi run aws configure list
+   aws configure list
 
 Then verify that you can list the bucket with the matching profile:
 
 .. code-block:: powershell
 
-   pixi run aws s3 ls s3://<bucket-name> --profile <profile-name>
+   aws s3 ls s3://<bucket-name> --profile <profile-name>
 
 
 Use the profile in a data catalog
