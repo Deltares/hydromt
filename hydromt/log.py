@@ -179,7 +179,7 @@ def to_file(
         yield
     except Exception:
         # This also logs the stack trace + exception
-        logger.exception("Unhandled exception occured.")
+        logger.exception("Unhandled exception occurred.")
         raise
     finally:
         handler.flush()

@@ -318,7 +318,7 @@ def grid_from_constant(
     dtype: type, optional
         Data type of grid. By default np.float32.
     nodata: int, float, optional
-        Nodata value. By default infered from dtype.
+        Nodata value. By default inferred from dtype.
     mask_name: str, optional
         Name of mask in self.grid to use for masking raster_data. By default 'mask'.
         Use None to disable masking.
