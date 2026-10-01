@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 from abc import ABC, abstractmethod
 from copy import deepcopy
@@ -22,11 +23,12 @@ from pyproj import CRS
 from pystac import Catalog as StacCatalog
 
 from hydromt._utils.uris import _is_valid_url
+from hydromt._utils.warnings import deprecation_warning
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.data_catalog.drivers import BaseDriver
 from hydromt.data_catalog.uri_resolvers import ConventionResolver, URIResolver
 from hydromt.error import NoDataStrategy
-from hydromt.typing import DataType, SourceMetadata
+from hydromt.typing import DataType, FSSpecFileSystem, SourceMetadata
 from hydromt.typing.type_def import TimeRange, TotalBounds
 
 logger = logging.getLogger(__name__)
@@ -56,6 +58,7 @@ class DataSource(BaseModel, ABC):
     data_adapter: DataAdapterBase
     driver: BaseDriver
     uri_resolver: URIResolver = Field(default_factory=ConventionResolver)
+    filesystem: FSSpecFileSystem = Field(default_factory=FSSpecFileSystem)
     data_type: ClassVar[DataType]
     root: Optional[str] = Field(
         default=None, exclude=True
@@ -97,6 +100,93 @@ class DataSource(BaseModel, ABC):
                 copy_data["driver"] = cls._infer_default_driver(copy_data.get("uri"))
         return copy_data
 
+    @model_validator(mode="before")
+    @classmethod
+    def _migrate_legacy_filesystem(cls, data: Any) -> DataSource:
+        if not isinstance(data, dict):
+            return data
+        data = dict(data)  # don't mutate caller's dict
+
+        legacy: dict[str, dict] = {}
+        for key in ("driver", "uri_resolver"):
+            section = data.get(key)
+            if isinstance(section, dict) and "filesystem" in section:
+                section = dict(section)
+                legacy[key] = section.pop("filesystem")
+                data[key] = section
+
+        if not legacy:
+            return data
+
+        if "filesystem" in data:
+            raise ValueError(
+                "Specify `filesystem` only at the DataSource root; "
+                "found it also under driver/uri_resolver."
+            )
+
+        distinct = {json.dumps(v, sort_keys=True) for v in legacy.values()}
+        if len(distinct) > 1:
+            raise ValueError(
+                "driver and uri_resolver define different filesystems; "
+                "a DataSource can only have one. Move it to the root level."
+            )
+        deprecation_warning(
+            message=(
+                "`filesystem` under `driver`/`uri_resolver` is deprecated; "
+                "define it at the DataSource root instead."
+            ),
+            removed_in_release="v1.6.0",
+            alternative=(
+                "Define `filesystem` at the DataSource root instead. "
+                "Update your data catalog automatically by running the cli command: "
+                "`hydromt check -d <catalog_path> --upgrade`."
+            ),
+        )
+        data["filesystem"] = next(iter(legacy.values()))
+        return data
+
+    @model_validator(mode="after")
+    def _inject_filesystem(self) -> DataSource:
+        components = (self.driver, self.uri_resolver)
+
+        if "filesystem" not in self.model_fields_set:
+            defined_on_component = [
+                c.filesystem for c in components if "filesystem" in c.model_fields_set
+            ]
+            if len({_fs_key(fs) for fs in defined_on_component}) > 1:
+                raise ValueError(
+                    "driver and uri_resolver have different filesystems; "
+                    "set a single `filesystem` on the DataSource."
+                )
+            if defined_on_component:
+                deprecation_warning(
+                    message=(
+                        f"Defining `filesystem` under `driver`/`uri_resolver` for source '{self.name}' is deprecated"
+                    ),
+                    removed_in_release="v1.6.0",
+                    alternative=(
+                        "Define `filesystem` at the DataSource root instead. "
+                        "Update your data catalog automatically by running the cli command: "
+                        "`hydromt check -d <catalog_path> --upgrade`."
+                    ),
+                )
+                # bypass validate_assignment
+                object.__setattr__(self, "filesystem", defined_on_component[0])
+        else:
+            for c in components:
+                if "filesystem" in c.model_fields_set and _fs_key(
+                    c.filesystem
+                ) != _fs_key(self.filesystem):
+                    raise ValueError(
+                        f"`filesystem` set on {type(c).__name__} conflicts with the "
+                        "DataSource-level filesystem."
+                    )
+
+        for c in components:
+            # bypass validate_assignment
+            object.__setattr__(c, "filesystem", self.filesystem)
+        return self
+
     @classmethod
     def _infer_default_driver(
         cls, uri: str | None = None, driver: type[BaseDriver] | None = None
@@ -121,23 +211,6 @@ class DataSource(BaseModel, ABC):
         if isinstance(driver, BaseDriver):
             data["driver"] = driver.model_dump()
         return handler(data)
-
-    @model_validator(mode="after")
-    def _validate_fs_equal_if_not_set(self) -> DataSource:
-        """
-        Validate and change the filesystems.
-
-        They have to be equal between driver and uri resolver if they are not set.
-        They can be different, but only if set explicitly.
-        """
-        driver_fs_set = "filesystem" in self.driver.model_fields_set
-        uri_res_fs_set = "filesystem" in self.uri_resolver.model_fields_set
-        if driver_fs_set ^ uri_res_fs_set:
-            if driver_fs_set:
-                self.uri_resolver.filesystem = self.driver.filesystem
-            else:
-                self.driver.filesystem = self.uri_resolver.filesystem
-        return self
 
     @property
     def full_uri(self) -> str:
@@ -348,3 +421,7 @@ def _abs_path(root: Union[Path, str], rel_path: Union[Path, str]) -> str:
             rel_path = join(root, rel_path)
         path = Path(abspath(rel_path))
     return str(path)
+
+
+def _fs_key(fs: FSSpecFileSystem) -> str:
+    return json.dumps(fs.model_dump(), sort_keys=True, default=str)
