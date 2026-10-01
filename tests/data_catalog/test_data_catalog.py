@@ -1733,6 +1733,34 @@ def test_get_dataset_variables(timeseries_df: pd.DataFrame, data_catalog: DataCa
 
 
 class TestGetDataFrame:
+    @pytest.mark.parametrize("index_col", [0, "time"])
+    def test_csv_time_and_variable_slice(self, tmp_path: Path, index_col: int | str):
+        path = tmp_path / "wind.csv"
+        path.write_text(
+            "time,windx,windy\n"
+            "2020-01-01,2.0,4.0\n"
+            "2020-01-02,3.0,5.0\n"
+            "2020-01-03,4.0,6.0\n"
+        )
+
+        result = DataCatalog().get_dataframe(
+            str(path),
+            variables=["windx"],
+            time_range=("2020-01-02", "2020-01-03"),
+            source_kwargs={
+                "driver": {
+                    "name": "pandas",
+                    "options": {"index_col": index_col, "parse_dates": ["time"]},
+                }
+            },
+        )
+
+        expected = pd.DataFrame(
+            {"windx": [3.0, 4.0]},
+            index=pd.DatetimeIndex(["2020-01-02", "2020-01-03"], name="time"),
+        )
+        pd.testing.assert_frame_equal(result, expected)
+
     @pytest.fixture
     def uri_csv(self, df: pd.DataFrame, managed_tmp_path: Path) -> str:
         uri: str = managed_tmp_path / "test.csv"
