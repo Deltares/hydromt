@@ -163,6 +163,9 @@ class PandasDriver(DataFrameDriver):
         """Prevent clashes between arguments and hydromt query parameters."""
         # include index_col in variables
         if variables:
+            index_col = options.get("index_col")
+            if isinstance(index_col, str):
+                return variables if index_col in variables else variables + [index_col]
             if hasattr(self.options, "index_col") and not isinstance(
                 self.options.index_col, str
             ):
