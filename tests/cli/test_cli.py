@@ -4,16 +4,65 @@ import logging
 import shutil
 from datetime import date
 from pathlib import Path
+from textwrap import dedent
 from typing import Generator
 
 import pytest
+import yaml
 from click.testing import CliRunner
 
 from hydromt import __version__
+from hydromt.cli.main import DataCatalogV1Validator
 from hydromt.cli.main import main as hydromt_cli
 from hydromt.error import NoDataException
 from hydromt.model.components.grid import GridComponent
 from hydromt.readers import read_toml
+
+LEGACY_V1_CATALOG = dedent("""\
+    cmip6_historical:
+      data_type: RasterDataset
+      uri: gs://cmip6/CMIP6/CMIP/MPI-ESM1-2-HR/historical/r1i1p1f1/day/tas/*/*
+      driver:
+        name: raster_xarray
+        filesystem:
+          protocol: gcs
+    """)
+
+CURRENT_V1_CATALOG = dedent("""\
+    cmip6_historical:
+      data_type: RasterDataset
+      uri: gs://cmip6/CMIP6/CMIP/MPI-ESM1-2-HR/historical/r1i1p1f1/day/tas/*/*
+      driver:
+        name: raster_xarray
+      filesystem:
+        protocol: gcs
+    """)
+
+CONFLICTING_V1_CATALOG = dedent("""\
+    cmip6_historical:
+      data_type: RasterDataset
+      uri: gs://cmip6/data/*
+      driver:
+        name: raster_xarray
+        filesystem: {protocol: gcs}
+      uri_resolver:
+        name: convention
+        filesystem: {protocol: s3}
+    """)
+
+
+def _check(*args: str):
+    return CliRunner().invoke(hydromt_cli, ["check", *args], catch_exceptions=False)
+
+
+def _write(tmp_path: Path, text: str) -> Path:
+    path = tmp_path / "catalog.yml"
+    path.write_text(text)
+    return path
+
+
+def _upgraded(path: Path) -> Path:
+    return path.with_stem(f"{path.stem}_upgraded")
 
 
 @pytest.fixture(scope="session")
@@ -413,21 +462,13 @@ def test_export_cli_config_file(tmp_path: Path):
 
 @pytest.mark.usefixtures("_reset_log_level")
 def test_v0_catalog_is_not_valid_v1_catalog(caplog):
-    r = CliRunner().invoke(
-        hydromt_cli,
-        [
-            "check",
-            "-d",
-            "data/catalogs/artifact_data/v0.0.9/data_catalog.yml",
-            "--format",
-            "v1",
-        ],
-        catch_exceptions=False,
+    r = _check(
+        "-d", "data/catalogs/artifact_data/v0.0.9/data_catalog.yml", "--format", "v1"
     )
 
     assert r.exit_code == 1
-    assert "No hydromt version was specified for the data catalog" in caplog.text
-    assert "has the following error(s): " in caplog.text
+    assert "outdated layout" in caplog.text
+    assert "--upgrade" in caplog.text
 
 
 @pytest.mark.usefixtures("_reset_log_level")
@@ -480,21 +521,91 @@ def test_cli_check_v0x_workflow(caplog, test_data_dir: Path):
 
 
 @pytest.mark.usefixtures("_reset_log_level")
-def test_cli_upgrade_datacatalog(test_data_dir: Path, tmp_path: Path):
+@pytest.mark.parametrize(
+    "extra", [["--format", "v0"], []], ids=["format-v0", "default-format"]
+)
+def test_cli_upgrade_datacatalog(test_data_dir: Path, tmp_path: Path, extra):
     target = tmp_path / "test_v0_data_catalog.yml"
     shutil.copy(test_data_dir / "test_v0_data_catalog.yml", target)
-    r = CliRunner().invoke(
-        hydromt_cli,
-        [
-            "check",
-            "-d",
-            str(target),
-            "--format",
-            "v0",
-            "--upgrade",
-        ],
-        catch_exceptions=False,
-    )
+
+    r = _check("-d", str(target), *extra, "--upgrade")
+
     assert r.exit_code == 0, r.output
-    out_path = target.with_stem(f"{target.stem}_v1")
+    out_path = _upgraded(target)  # was f"{stem}_v1" before
     assert out_path.exists()
+    expected = DataCatalogV1Validator.from_yml(
+        test_data_dir / "test_v0_data_catalog_upgraded.yml"
+    )
+    assert DataCatalogV1Validator.from_yml(out_path) == expected
+
+
+@pytest.mark.usefixtures("_reset_log_level")
+def test_invalid_v1_catalog_still_reports_validation_errors(tmp_path, caplog):
+    path = _write(tmp_path, "src:\n  data_type: RaserDataset\n  uri: x.tif\n")
+
+    r = _check("-d", str(path))
+
+    assert r.exit_code == 1
+    assert "has the following error(s)" in caplog.text
+
+
+@pytest.mark.usefixtures("_reset_log_level")
+def test_legacy_v1_layout_passes_with_warning_and_writes_nothing(tmp_path, caplog):
+    path = _write(tmp_path, LEGACY_V1_CATALOG)
+
+    r = _check("-d", str(path))
+
+    assert r.exit_code == 0, r.output
+    assert "moved to the source root" in caplog.text
+    assert list(tmp_path.iterdir()) == [path]
+
+
+@pytest.mark.usefixtures("_reset_log_level")
+def test_cli_upgrade_v1_datacatalog(tmp_path):
+    path = _write(tmp_path, LEGACY_V1_CATALOG)
+
+    r = _check("-d", str(path), "--upgrade")
+
+    assert r.exit_code == 0, r.output
+    assert path.read_text() == LEGACY_V1_CATALOG  # original untouched
+    out = _upgraded(path)
+    upgraded = yaml.safe_load(out.read_text())
+    source = upgraded["cmip6_historical"]
+    assert source["filesystem"] == {"protocol": "gcs"}
+    assert source["driver"] == {"name": "raster_xarray"}
+    assert upgraded["meta"]["hydromt_version"].startswith(">=1.5")
+    DataCatalogV1Validator.from_yml(out)  # and it is valid
+
+
+@pytest.mark.usefixtures("_reset_log_level")
+def test_upgraded_catalog_has_no_pending_migrations(tmp_path, caplog):
+    path = _write(tmp_path, LEGACY_V1_CATALOG)
+    _check("-d", str(path), "--upgrade")
+    caplog.clear()
+
+    r = _check("-d", str(_upgraded(path)))
+
+    assert r.exit_code == 0, r.output
+    assert "moved to the source root" not in caplog.text
+
+
+@pytest.mark.usefixtures("_reset_log_level")
+def test_cli_upgrade_is_noop_for_current_catalog(tmp_path):
+    path = _write(tmp_path, CURRENT_V1_CATALOG)
+
+    r = _check("-d", str(path), "--upgrade")
+
+    assert r.exit_code == 0, r.output
+    assert list(tmp_path.iterdir()) == [path]  # nothing written
+
+
+@pytest.mark.usefixtures("_reset_log_level")
+def test_cli_fails_on_unmigratable_catalog(tmp_path, caplog):
+    path = _write(tmp_path, CONFLICTING_V1_CATALOG)
+
+    r = _check("-d", str(path), "--upgrade")
+
+    assert r.exit_code == 1
+    assert "can't be upgraded automatically" in caplog.text
+    assert "cmip6_historical" in caplog.text  # names the offending source
+    assert not _upgraded(path).exists()

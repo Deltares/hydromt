@@ -142,7 +142,7 @@ class DataSource(BaseModel, ABC):
                 "`hydromt check -d <catalog_path> --upgrade`."
             ),
         )
-        data["filesystem"] = next(iter(legacy.values()))
+        data["filesystem"] = FSSpecFileSystem.create(next(iter(legacy.values())))
         return data
 
     @model_validator(mode="after")
