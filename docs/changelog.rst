@@ -25,7 +25,7 @@ Changed
 
 Fixed
 -----
-- Named ``index_col`` values are now preserved when selecting variables from CSV and Excel files with the pandas driver, allowing date parsing and time slicing to work (`#1502 <https://github.com/Deltares/hydromt/issues/1502>`_).
+- Named ``index_col`` values are now preserved when selecting variables from CSV and Excel files with the pandas driver, allowing date parsing and time slicing to work (`PR #1548 <https://github.com/Deltares/hydromt/pull/1548>`_).
 - Fractions not more than 1 in ``raster.rasterize_geometry`` output.
 - Format flag for cli command ``check`` now correctly accepts strings instead of enum members.
 - ``readers.open_raster`` no longer returns a DataArray backed by a closed file handle when reading from a remote filesystem. The handle stays open for as long as the DataArray lives and is closed when the DataArray - or the Dataset returned by ``readers.open_mfraster`` and ``readers.open_raster_from_tindex`` - is closed. Remote rasters are still read lazily.
