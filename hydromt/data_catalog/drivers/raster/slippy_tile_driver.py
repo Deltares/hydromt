@@ -309,12 +309,15 @@ def has_credentials() -> bool:
     session = botocore.session.get_session()
     try:
         creds = session.get_credentials()
+        # NOTE: accessing creds.access_key is what actually triggers the
+        # lazy credential refresh (e.g. an SSO token renewal) and can
+        # raise (TokenRetrievalError etc.) — it MUST stay inside this try.
+        return creds is not None and creds.access_key is not None
     except Exception as e:
         logger.debug(
             f"Could not resolve AWS credentials ({e}); using anonymous access."
         )
         return False
-    return creds is not None and creds.access_key is not None
 
 
 def _download_tile(fs: Any, bucket: str, key: str, filename: str) -> bool:
