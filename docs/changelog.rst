@@ -23,7 +23,7 @@ Changed
 - Local-only readers give a clear error for remote paths: ``readers.open_nc``, ``readers.open_geodataset`` and ``GeoDatasetVectorDriver`` now raise "does not support remote paths" instead of a "file not found".
 - Reading a multi-file vector format (e.g. ESRI Shapefile) from a remote filesystem now raises a clear error explaining that the sidecar files cannot be read, instead of an opaque GDAL "not recognized as being in a supported file format".
 - Credential errors raised by the storage backends (e.g. missing or expired AWS or Azure credentials) are normalized to ``PermissionError`` by all readers, alongside the existing 401/403 handling.
-- Any `filesystem` keys that were defined under either ``driver`` or ``uri_resolver``, are now at the root for each data source. This is a breaking structural change that prevents older hydromt versions from reading these catalogs, so they are now v2.0.0. 
+- Any `filesystem` keys that were defined under either ``driver`` or ``uri_resolver``, are now at the root for each data source. This is a breaking structural change that prevents older hydromt versions from reading these catalogs, so they are now v2.0.0.
 - (Predefined) data catalogs now read the key `meta.hydromt_version` from the data catalogs to determine compatibility. The `version` key is purely semantic versioning for each data catalog separately. The `hydromt_version` key is what determines behaviour.
 
 Fixed
