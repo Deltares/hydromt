@@ -10,7 +10,7 @@ authors = [
 	{ name = "Sam Vente", email = "sam.vente@deltares.nl" },
 ]
 dependencies = [
-	"affine>=2.4,<3.0",        # Spatial rasterers affine transformations (bbox pixel coalision)
+	"affine>=2.4,<4.0",        # Spatial rasterers affine transformations (bbox pixel coalision)
 	"bottleneck>=1.6",         # Spearmen rank computation
 	"click>=8.2",              # CLI configuration
 	"dask[distributed]>=2024", # lazy computing
