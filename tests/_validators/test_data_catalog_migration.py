@@ -15,8 +15,6 @@ from hydromt._validators.upgrade_data_catalog import (
 )
 from hydromt.readers import _yml_from_uri_or_path
 
-# ---------------------------------------------------------------- fixtures
-
 LEGACY_DRIVER_FS = {
     "data_type": "RasterDataset",
     "uri": "gs://cmip6/data/*",
@@ -70,9 +68,6 @@ def _v0(*, drop: tuple[str, ...] = (), **overrides) -> dict:
 def _migrate(source: dict, name: str = "src") -> dict:
     migrated, _ = migrate_catalog({name: source})
     return migrated[name]
-
-
-# ------------------------------------------------- filesystem-to-root (1.5)
 
 
 def test_filesystem_moves_from_driver_to_root():
