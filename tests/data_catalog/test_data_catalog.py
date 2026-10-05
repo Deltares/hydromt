@@ -526,7 +526,7 @@ def test_from_predefined_catalogs(data_catalog):
     assert len(data_catalog.predefined_catalogs) > 0
     for name in data_catalog.predefined_catalogs:
         data_catalog._sources = {}  # reset
-        data_catalog.from_predefined_catalogs(f"{name}=latest")
+        data_catalog.from_predefined_catalogs(name)
         assert len(data_catalog._sources) > 0
 
 
@@ -1202,20 +1202,17 @@ class TestGetRasterDataset:
         da = data_catalog.get_rasterdataset(
             data,
             source_kwargs={
-                "driver": {
-                    "name": "rasterio",
-                    "filesystem": {"protocol": "s3", "anon": "true"},
-                },
+                "driver": "rasterio",
+                "filesystem": {"protocol": "s3", "anon": "true"},
             },
         )
 
         assert isinstance(da, xr.DataArray)
 
     @pytest.mark.skipif(not HAS_S3FS, reason="S3FS not installed.")
-    def test_aws_worldcover(self, test_settings: Settings, catalog_dir: Path):
-        catalog_fn = catalog_dir / "aws_data" / "v1.0.0" / "data_catalog.yml"
+    def test_aws_worldcover(self, test_settings: Settings):
         data_catalog = DataCatalog(
-            data_libs=[catalog_fn],
+            data_libs="aws_data",
             cache=True,
             cache_dir=test_settings.cache_root.as_posix(),
         )
@@ -2099,9 +2096,10 @@ def require_earthdatahub_credentials():
                 "No netrc file found (.netrc/_netrc) for Earth Data Hub mirror authentication."
             )
 
-    if "api.earthdatahub.destine.eu" not in credentials.hosts:
+    # the datasets are served from the data host, so netrc must contain that host
+    if "data.earthdatahub.destine.eu" not in credentials.hosts:
         pytest.skip(
-            "No Earth Data Hub credentials found in netrc file (.netrc/_netrc) for host api.earthdatahub.destine.eu."
+            "No Earth Data Hub credentials found in netrc file (.netrc/_netrc) for host data.earthdatahub.destine.eu."
         )
 
 

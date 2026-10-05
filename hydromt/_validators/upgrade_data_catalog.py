@@ -99,10 +99,16 @@ def migrate_catalog(raw: dict | None) -> tuple[dict, MigrationReport]:
     if required is not None:
         meta = dict(catalog.get("meta") or {})
         spec = meta.get("hydromt_version")
-        if spec is None or required not in SpecifierSet(str(spec), prereleases=True):
-            meta["hydromt_version"] = f">={required}"
+        spec_set = SpecifierSet(str(spec or ""), prereleases=True)
+        lower = _lower_bound(spec_set)
+        # compare without pre-release part so '>=1.0a' counts as admitting 1.0
+        if lower is None or Version(lower.base_version) < Version(
+            required.base_version
+        ):
+            new_spec = _with_min_version(spec_set, required)
+            meta["hydromt_version"] = new_spec
             report.notes.append(
-                f"meta.hydromt_version set to '>={required}' (was {spec!r})."
+                f"meta.hydromt_version set to '{new_spec}' (was {spec!r})."
             )
             catalog = {
                 "meta": meta,
@@ -122,6 +128,27 @@ def _clone(obj: Any) -> Any:
 
 def _variants(source: SourceDict) -> list[SourceDict]:
     return [v for v in source.get("variants") or [] if isinstance(v, dict)]
+
+
+_LOWER_OPS = {">=", ">"}
+
+
+def _lower_bound(spec: SpecifierSet) -> Version | None:
+    """Return the lower bound version from a SpecifierSet, if any."""
+    return max(
+        (Version(s.version) for s in spec if s.operator in _LOWER_OPS),
+        default=None,
+    )
+
+
+def _with_min_version(spec: SpecifierSet, required: Version) -> str:
+    """Replace the lower bound of `spec` by `>=required`, keep other specifiers that admit it."""
+    kept: list[str] = [
+        str(s)
+        for s in spec
+        if s.operator not in _LOWER_OPS and s.contains(required, prereleases=True)
+    ]
+    return ",".join([f">={required.base_version}", *kept])
 
 
 ### Migrations ###
@@ -158,7 +185,6 @@ _V0_SOURCE_KEYS = {
     "unit_mult",
     "kwargs",
     "driver_kwargs",
-    "placeholders",
 }
 _V0_VARIANT_KEYS = {"path"}
 
@@ -243,9 +269,6 @@ def _convert_v0_source(source: SourceDict) -> None:
     if adapter:
         source["data_adapter"] = adapter
 
-    if "placeholders" in source:
-        source["placeholder"] = source.pop("placeholders")
-
 
 def _convert_v0_variant(variant: SourceDict) -> None:
     filesystem = _v0_filesystem(variant)
@@ -257,9 +280,9 @@ def _convert_v0_variant(variant: SourceDict) -> None:
 
 @migration(
     "filesystem-to-root",
-    introduced_in="1.5.0.dev0",
+    introduced_in="1.5.0",
     description="`filesystem` under `driver`/`uri_resolver` moved to the source root",
-    removed_in="1.6",
+    removed_in="1.6.0",
 )
 def _filesystem_to_root(source: SourceDict) -> bool:
     changed = _upgrade_filesystem_inplace(source)

@@ -1,3 +1,6 @@
+meta:
+  hydromt_version: '>=1.0'
+
 chelsa:
   data_type: RasterDataset
   metadata:

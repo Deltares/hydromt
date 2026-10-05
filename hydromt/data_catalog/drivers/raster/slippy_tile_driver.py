@@ -372,7 +372,7 @@ def _download_missing_tiles(
         f"Downloading {len(to_download)} missing tiles from s3://{s3_bucket}/{s3_key}/ ..."
     )
 
-    fs = s3fs.S3FileSystem(anon=not has_credentials())
+    fs = s3fs.S3FileSystem(anon=True)
 
     downloaded = 0
     with ThreadPoolExecutor() as pool:

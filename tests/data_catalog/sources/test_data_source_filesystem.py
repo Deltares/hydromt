@@ -2,10 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from hydromt._utils.warnings import HydroMTDeprecationWarning
-from hydromt.data_catalog.drivers import RasterioDriver
-from hydromt.data_catalog.sources import RasterDatasetSource
-from hydromt.data_catalog.uri_resolvers import ConventionResolver
-from hydromt.typing import FSSpecFileSystem
+from hydromt.data_catalog.sources import DataSource, RasterDatasetSource
 
 
 def _source(**kw):
@@ -35,15 +32,13 @@ def test_root_filesystem_is_shared_by_reference_without_warning(recwarn):
 
 
 def test_conflicting_component_filesystems_raise():
+    dct = {
+        "name": "x",
+        "driver": {"name": "raster_xarray", "filesystem": {"protocol": "s3"}},
+        "uri_resolver": {"filesystem": {"protocol": "gcs"}},
+    }
     with pytest.raises(ValidationError, match="different filesystems"):
-        RasterDatasetSource(
-            name="x",
-            uri="gs://b/x",
-            driver=RasterioDriver(filesystem=FSSpecFileSystem(protocol="s3")),
-            uri_resolver=ConventionResolver(
-                filesystem=FSSpecFileSystem(protocol="gcs")
-            ),
-        )
+        DataSource.model_validate(dct)
 
 
 def test_component_dump_has_no_filesystem():

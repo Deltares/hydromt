@@ -260,8 +260,7 @@ def test_v0_adapter_fields_and_placeholders():
         "unit_add": {"b": 1},
         "unit_mult": {"b": 2},
     }
-    assert out["placeholder"] == {"year": ["2020", "2021"]}
-    assert "placeholders" not in out
+    assert out["placeholders"] == {"year": ["2020", "2021"]}
 
 
 def test_v0_provider_and_version_are_kept():
@@ -370,3 +369,33 @@ def test_deltares_v0_catalog_migrates_to_valid_v1(dd_v0_catalog):
 def test_latest_deltares_v1_catalog_has_no_pending_migrations(latest_dd_version_uri):
     _, report = migrate_catalog(_yml_from_uri_or_path(latest_dd_version_uri))
     assert not report.applied, [(n, m.id) for n, m in report.applied]
+
+
+def test_filesystem_migration_replaces_min_version():
+    raw = {
+        "meta": {"hydromt_version": ">1.0a,<2"},
+        "src": {
+            "uri": "x",
+            "driver": {"name": "rasterio", "filesystem": {"protocol": "gcs"}},
+        },
+    }
+    migrated, _ = migrate_catalog(raw)
+    assert migrated["meta"]["hydromt_version"] == ">=1.5.0,<2"
+
+
+def test_no_filesystem_keeps_version():
+    raw = {"meta": {"hydromt_version": ">1.0a,<2"}, "src": {"uri": "x"}}
+    migrated, _ = migrate_catalog(raw)
+    assert migrated["meta"]["hydromt_version"] == ">1.0a,<2"
+
+
+def test_higher_existing_min_version_untouched():
+    raw = {
+        "meta": {"hydromt_version": ">=1.6,<2"},
+        "src": {
+            "uri": "x",
+            "driver": {"name": "rasterio", "filesystem": {"protocol": "gcs"}},
+        },
+    }
+    migrated, _ = migrate_catalog(raw)
+    assert migrated["meta"]["hydromt_version"] == ">=1.6,<2"

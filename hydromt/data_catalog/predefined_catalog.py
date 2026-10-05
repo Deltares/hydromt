@@ -8,6 +8,7 @@ from typing import Callable, ClassVar, Optional
 
 import packaging.version
 import pooch
+from packaging.specifiers import SpecifierSet
 
 from hydromt._utils.caching import copy_to_local
 from hydromt._utils.uris import _is_valid_url
@@ -186,7 +187,7 @@ class PredefinedCatalog(object):
             The path to the cachd catalog file.
         """
         if version is None or version == "latest":  # get latest version
-            version = self.versions[-1]
+            version = self._latest_compatible_version()
         if version not in self.versions:
             raise ValueError(f"Version {version} not found in {self.name} catalog")
         # get the catalog file
@@ -201,14 +202,54 @@ class PredefinedCatalog(object):
             return _copy_file
         return None
 
+    def _is_compatible(self, version: str) -> bool:
+        """Check if the running hydromt satisfies meta.hydromt_version of a version."""
+        from hydromt import __version__
+        from hydromt.readers import read_yaml
+
+        path = self.pooch.fetch(
+            f"{version}/data_catalog.yml", downloader=self._downloader
+        )
+        spec: Optional[str] = (read_yaml(path).get("meta") or {}).get("hydromt_version")
+        if spec is None:
+            return True
+        specifier = SpecifierSet(str(spec), prereleases=True)
+        version = packaging.version.Version(__version__)
+        # a dev build of X.Y.Z counts as X.Y.Z, like in DataCatalog.from_dict
+        return (
+            version in specifier
+            or packaging.version.Version(version.base_version) in specifier
+        )
+
+    def _latest_compatible_version(self) -> str:
+        """Newest version whose hydromt_version spec accepts the running hydromt."""
+        from hydromt import __version__
+
+        for version in reversed(self.versions):
+            if self._is_compatible(version):
+                return version
+        raise RuntimeError(
+            f"No {self.name} catalog version is compatible with hydromt {__version__}."
+        )
+
 
 def _valid_key(v: str, format_version: Optional[str] = None) -> bool:
-    """Check if the key is a valid version."""
+    """Check if the key is a valid version, optionally for a catalog format.
+
+    The format is no longer a prefix of the version. Format ``v0`` only accepts
+    0.x catalogs; format ``v1`` accepts any catalog version >= 1. Which of those
+    a given hydromt can use is decided by ``meta.hydromt_version``.
+    """
     try:
-        packaging.version.parse(v.split("/")[0])
-        return v.startswith(format_version) if format_version else True
+        version = packaging.version.parse(v.split("/")[0])
+        if format_version is None:
+            return True
+        fmt = packaging.version.parse(format_version)
     except (packaging.version.InvalidVersion, AttributeError):
         return False
+    if fmt.major == 0:
+        return version.major == 0
+    return version.major >= fmt.major
 
 
 def _copy_file(

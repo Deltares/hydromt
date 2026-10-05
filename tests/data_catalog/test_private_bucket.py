@@ -22,18 +22,17 @@ if HAS_BOTO3 and HAS_S3FS:
 
 CATALOG_YAML = """
 meta:
-  version: v1
-  hydromt_version: ">1.0a,<2"
+  hydromt_version: ">1.5.0,<2"
 
 merit_hydro:
   data_type: RasterDataset
   uri: s3://hydromt-data/merit_hydro/merit_hydro.zarr
-  driver:
-    name: raster_xarray
-    filesystem:
+  filesystem:
       protocol: s3
       anon: false
       profile: hydromt-data
+  driver:
+    name: raster_xarray
     options:
       zarr_format: 3
   metadata:

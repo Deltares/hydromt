@@ -2,6 +2,23 @@
 Change log predefined datasets
 ==============================
 
+Pre-defined catalog refactor (2026.10)
+======================================
+
+Changed
+-------
+Any `filesystem` keys that were defined under either driver or uri_resolver, are now at the root for each data source.
+This is a breaking structural change that prevents older hydromt versions from reading these catalogs, so they are now v2.0.0.
+(Predefined) data catalogs now read the key `meta.hydromt_version` from the data catalogs to determine compatibility.
+The `version` key is purely semantic versioning for each data catalog separately. The `hydromt_version` key is what determines behaviour.
+
+Added
+-----
+- `aws_data` v2.0.0
+- `earthdatahub_data` v2.0.0
+- `gcsc_mip6_data` v2.0.0
+
+
 Pre-defined catalog refactor (2024.05)
 ======================================
 

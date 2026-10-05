@@ -146,7 +146,7 @@ class DataCatalogV1MetaData(BaseModel):
         requested = SpecifierSet(self.hydromt_version, prereleases=True)
         version = Version(HYDROMT_VERSION)
 
-        if version in requested:
+        if version in requested or Version(version.base_version) in requested:
             return self
         else:
             raise ValueError(
@@ -256,8 +256,9 @@ class DataCatalogV1Item(BaseModel):
     metadata: DataCatalogV1ItemMetadata | None = None
     variants: List[SourceVariant] | None = None
     version: str | Number | None = None
-    placeholder: dict[str, list[str]] | None = None
+    placeholders: dict[str, list[str]] | None = None
     data_adapter: DataCatalogV1DataAdapter | None = None
+    filesystem: dict[str, Any] | None = None
 
     model_config = ConfigDict(
         str_strip_whitespace=True,

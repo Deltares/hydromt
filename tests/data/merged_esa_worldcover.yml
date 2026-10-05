@@ -25,7 +25,6 @@ esa_worldcover:
     provider: aws
     uri: s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt
     version: 2020
-    driver:
-      filesystem:
-        protocol: s3
-        anon: true
+    filesystem:
+      protocol: s3
+      anon: true
