@@ -17,15 +17,15 @@ def test_legacy_driver_filesystem_loads_with_warning():
         match="`filesystem` under `driver`/`uri_resolver` is deprecated",
     ):
         source = _source(
-            driver={"name": "raster_xarray", "filesystem": {"protocol": "gcs"}}
+            driver={"name": "raster_xarray", "filesystem": {"protocol": "file"}}
         )
-    assert source.filesystem.protocol == "gcs"
+    assert source.filesystem.protocol == "file"
     assert source.driver.filesystem is source.filesystem
     assert source.uri_resolver.filesystem is source.filesystem
 
 
 def test_root_filesystem_is_shared_by_reference_without_warning(recwarn):
-    source = _source(driver={"name": "raster_xarray"}, filesystem={"protocol": "gcs"})
+    source = _source(driver={"name": "raster_xarray"}, filesystem={"protocol": "file"})
     assert source.driver.filesystem is source.filesystem
     assert source.uri_resolver.filesystem is source.filesystem
     assert not [w for w in recwarn if issubclass(w.category, HydroMTDeprecationWarning)]
@@ -42,7 +42,7 @@ def test_conflicting_component_filesystems_raise():
 
 
 def test_component_dump_has_no_filesystem():
-    source = _source(driver={"name": "raster_xarray"}, filesystem={"protocol": "gcs"})
+    source = _source(driver={"name": "raster_xarray"}, filesystem={"protocol": "file"})
     assert "filesystem" not in source.driver.model_dump()
     assert "filesystem" not in source.uri_resolver.model_dump()
 
