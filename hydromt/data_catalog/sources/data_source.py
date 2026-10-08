@@ -209,7 +209,7 @@ class DataSource(BaseModel, ABC):
     def _wrap_driver_validation(cls, data, handler):
         driver = data.get("driver")
         if isinstance(driver, BaseDriver):
-            data["driver"] = driver.model_dump()
+            data["driver"] = driver.model_copy(deep=True)
         return handler(data)
 
     @property

@@ -2,6 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from hydromt._utils.warnings import HydroMTDeprecationWarning
+from hydromt.data_catalog.drivers import RasterioDriver
 from hydromt.data_catalog.sources import DataSource, RasterDatasetSource
 
 
@@ -52,3 +53,20 @@ def test_v0_layout_is_still_rejected_at_runtime():
         RasterDatasetSource.model_validate(
             {"name": "x", "path": "x.tif", "driver": "raster"}
         )
+
+
+@pytest.mark.filterwarnings("ignore::hydromt._utils.warnings.HydroMTDeprecationWarning")
+def test_driver_instance_filesystem_is_kept_by_datasource() -> None:
+    driver: RasterioDriver = RasterioDriver(
+        filesystem={"protocol": "memory", "auto_mkdir": True}
+    )
+    assert "filesystem" in driver.model_fields_set
+    assert driver.filesystem.protocol == "memory"
+
+    source: RasterDatasetSource = RasterDatasetSource(
+        name="test", uri="test.tif", driver=driver
+    )
+
+    assert source.filesystem.protocol == "memory"
+    assert source.filesystem.storage_options == {"auto_mkdir": True}
+    assert source.driver.filesystem.protocol == "memory"

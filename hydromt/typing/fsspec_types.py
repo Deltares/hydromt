@@ -85,14 +85,17 @@ class FSSpecFileSystem(BaseModel):
         if isinstance(input, str):
             # input is protocol
             return FSSpecFileSystem(protocol=input)
+        elif isinstance(input, FSSpecFileSystem):
+            return input
         elif isinstance(input, dict):
             if not input:
                 return FSSpecFileSystem()
             # input is dict with build args for fsspec filesystem.
             if "protocol" not in input:
                 raise ValueError(f"Filesystem dict {input} requires 'protocol'.")
-            storage_options = deepcopy(input)
-            protocol = storage_options.pop("protocol")
+            _options = deepcopy(input)
+            protocol = _options.pop("protocol")
+            storage_options = _options.pop("storage_options", _options)
             return FSSpecFileSystem(protocol=protocol, storage_options=storage_options)
         elif isinstance(input, AbstractFileSystem):
             protocol = (

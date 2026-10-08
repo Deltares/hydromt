@@ -726,18 +726,13 @@ class DataCatalog(object):
         )
         return self
 
-    def _is_compatible(
-        self, hydromt_version: str, requested_range: str, allow_prerelease=True
-    ) -> bool:
+    def _is_compatible(self, hydromt_version: str, requested_range: str) -> bool:
         if requested_range is None:
             return True
         requested = SpecifierSet(requested_range)
         version = Version(hydromt_version)
 
-        if allow_prerelease:
-            return version in requested or Version(version.base_version) in requested
-        else:
-            return version in requested
+        return Version(version.base_version) in requested
 
     def _determine_catalog_root(self, meta: Dict[str, Any]) -> Path:
         """Determine which of the roots provided in meta exists and should be used."""

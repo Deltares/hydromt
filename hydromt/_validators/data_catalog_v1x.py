@@ -146,12 +146,11 @@ class DataCatalogV1MetaData(BaseModel):
         requested = SpecifierSet(self.hydromt_version, prereleases=True)
         version = Version(HYDROMT_VERSION)
 
-        if version in requested or Version(version.base_version) in requested:
-            return self
-        else:
+        if Version(version.base_version) not in requested:
             raise ValueError(
                 f"Current hydromt version {HYDROMT_VERSION} is not compatible with version specified in catalog {self.hydromt_version}"
             )
+        return self
 
     @staticmethod
     def from_dict(input_dict: Dict[str, Any]) -> "DataCatalogV1MetaData":
