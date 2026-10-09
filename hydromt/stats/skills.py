@@ -498,8 +498,14 @@ def _spearman_correlation(x, y):
 
 # numpy functions
 def _fdc_alpha(sim, obs, axis=-1):
-    fdc_s = np.sort(sim, axis=axis) / (np.nanmean(sim, axis=axis) * len(sim))
-    fdc_o = np.sort(obs, axis=axis) / (np.nanmean(obs, axis=axis) * len(obs))
+    n_sim = sim.shape[axis]
+    n_obs = obs.shape[axis]
+    fdc_s = np.sort(sim, axis=axis) / (
+        np.nanmean(sim, axis=axis, keepdims=True) * n_sim
+    )
+    fdc_o = np.sort(obs, axis=axis) / (
+        np.nanmean(obs, axis=axis, keepdims=True) * n_obs
+    )
     return 1 - 0.5 * np.nansum(np.abs(fdc_s - fdc_o), axis=axis)
 
 
@@ -531,7 +537,7 @@ def _rsr(sim, obs, axis=-1):
     """RMSE-observations standard deviation."""
     rmse = np.sqrt(_mse(sim, obs, axis=axis))
     stdev = np.sqrt(
-        np.nansum((obs - np.nanmean(obs, axis=axis)) ** 2, axis=axis)
+        np.nansum((obs - np.nanmean(obs, axis=axis, keepdims=True)) ** 2, axis=axis)
         / np.nansum(np.isfinite(obs), axis=axis)
     )
     return rmse / stdev
