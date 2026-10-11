@@ -185,7 +185,7 @@ cache_opt = click.option(
     default=False,
     is_flag=True,
     is_eager=True,
-    help="Print available component plugins and exit.",
+    help="Print available plugins and exit.",
     callback=print_available_plugins,
 )
 @click.pass_context
