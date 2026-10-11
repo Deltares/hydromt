@@ -126,10 +126,6 @@ data_opt = click.option(
     help="Path to local yaml data catalog file OR name of predefined data catalog.",
 )
 
-format_option = click.option(
-    "--format",
-)
-
 deltares_data_opt = click.option(
     "--dd",
     "--deltares-data",

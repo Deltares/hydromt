@@ -1525,7 +1525,6 @@ class XRasterBase(XGeoBase):
         dst_height=None,
         align=False,
     ):
-        # NOTE dst_tranform may get overwritten here?!
         if dst_transform is None or dst_width is None or dst_height is None:
             (
                 dst_transform,
@@ -1659,7 +1658,6 @@ class XRasterBase(XGeoBase):
         )
         index.raster.set_crs(dst_crs)
         index.raster.set_nodata(-1)
-        index.raster._tranform = dst_transform
         return index
 
 

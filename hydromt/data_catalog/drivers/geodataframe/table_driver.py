@@ -22,10 +22,6 @@ from hydromt.typing.metadata import SourceMetadata
 
 logger = logging.getLogger(__name__)
 
-# possible labels for the x and y dimensions
-X_DIM_LABELS = ("x", "longitude", "lon", "long")
-Y_DIM_LABELS = ("y", "latitude", "lat")
-
 
 class GeoDataFrameTableOptions(DriverOptions):
     """Options for the GeoDataFrameTableDriver."""
