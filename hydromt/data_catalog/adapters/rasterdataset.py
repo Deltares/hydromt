@@ -283,7 +283,7 @@ class RasterDatasetAdapter(DataAdapterBase):
     def _set_nodata(self, ds, metadata: SourceMetadata):
         """Parse and apply nodata values from the data catalog."""
         # set nodata value
-        if nodata := metadata.nodata is not None:
+        if (nodata := metadata.nodata) is not None:
             if not isinstance(nodata, dict):
                 no_data_values: Dict[str, Any] = {
                     k: metadata.nodata for k in ds.data_vars.keys()
