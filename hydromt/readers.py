@@ -247,9 +247,7 @@ def open_raster(
     filesystem: AbstractFileSystem | None = None,
     **kwargs,
 ) -> xr.DataArray:
-    """Open a gdal-readable file with rasterio based on.
-
-    :py:meth:`rioxarray.open_rasterio`, but return squeezed DataArray.
+    """Open a gdal-readable file with rasterio based on :py:meth:`rioxarray.open_rasterio`, but return squeezed DataArray.
 
     Arguments
     ---------
@@ -261,15 +259,14 @@ def open_raster(
         Set nodata value if missing
     chunks : int, tuple or dict, optional
         Chunk sizes along each dimension, e.g., ``5``, ``(5, 5)`` or
-        ``{'x': 5, 'y': 5}``. If chunks is provided, it used to load the new
+        ``{'x': 5, 'y': 5}``. If chunks is provided, it is used to load the new
         DataArray into a dask array.
     filesystem : AbstractFileSystem | None, optional
         fsspec filesystem to read the file from. None (default) means the local
         filesystem, in which case the path is handed to GDAL as-is so that its
         own drivers and fast paths keep working.
     **kwargs:
-        key-word arguments are passed to :py:meth:`xarray.open_dataset` with
-        "rasterio" engine.
+        key-word arguments are passed to :py:meth:`rioxarray.open_rasterio`.
 
     Returns
     -------
@@ -340,7 +337,7 @@ def open_mfraster(
     If ``concat`` the DataArrays are concatenated along ``concat_dim`` returning a
     Dataset with a single 3D DataArray.
     If ``mosaic`` the DataArrays are concatenated along the the spatial dimensions
-    using :py:meth:`~hydromt.raster.merge`.
+    using :py:meth:`~hydromt.gis.raster_utils.merge`.
 
     Arguments
     ---------
@@ -353,9 +350,9 @@ def open_mfraster(
         extension in a path pattern: ``<prefix><*name><postfix>.<extension>``
     chunks: int, tuple or dict, optional
         Chunk sizes along each dimension, e.g., 5, (5, 5) or {'x': 5, 'y': 5}.
-        If chunks is provided, it used to load the new DataArray into a dask array.
+        If chunks is provided, it is used to load the new DataArray into a dask array.
     concat: bool, optional
-        If True, concatenate raster along ``concat_dim``. We destinguish the following
+        If True, concatenate raster along ``concat_dim``. We distinguish the following
         filenames from which the numerical index and variable name are inferred, where
         the variable name is based on the first raster.
         ``<name>_<index>.<extension>``
@@ -363,23 +360,23 @@ def open_mfraster(
         ``<name><index>.<extension>``
         ``<name>.<extension>`` (index based on order)
     concat_dim: str, optional
-        Dimension name of concatenate index, by default 'dim0'
+        Dimension name of the concatenation index, by default 'dim0'
     mosaic: bool, optional
         If True create mosaic of several rasters. The variable is named based on
-        variable name infered from the first raster.
+        variable name inferred from the first raster.
     mosaic_kwargs: dict, optional
         Mosaic key_word arguments to unify raster crs and/or resolution. See
-        :py:meth:`hydromt.merge.merge` for options.
+        :py:meth:`hydromt.gis.raster_utils.merge` for options.
     filesystem : AbstractFileSystem | None, optional
         fsspec filesystem to read the files from. None (default) means the local
         filesystem.
     **kwargs:
-        key-word arguments are passed to :py:meth:`hydromt.raster.open_raster`
+        key-word arguments are passed to :py:meth:`hydromt.readers.open_raster`
 
     Returns
     -------
-    data : DataSet
-        The newly created DataSet.
+    data : Dataset
+        The newly created Dataset.
     """
     if concat and mosaic:
         raise ValueError("Only one of 'mosaic' or 'concat' can be True.")
@@ -572,7 +569,7 @@ def open_raster_from_tindex(
         Field name to hold the file path/location to the indexed rasters
     mosaic_kwargs: dict, optional
         Mosaic key_word arguments to unify raster crs and/or resolution. See
-        :py:meth:`~hydromt.merge.merge()` for options.
+        :py:meth:`~hydromt.gis.raster_utils.merge()` for options.
     filesystem : AbstractFileSystem | None, optional
         fsspec filesystem to read the tile index and the tiles from. None
         (default) means the local filesystem.

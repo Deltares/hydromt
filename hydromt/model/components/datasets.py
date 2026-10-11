@@ -155,7 +155,7 @@ class DatasetsComponent(ModelComponent):
         """Write dictionary of xarray.Dataset and/or xarray.DataArray to netcdf files.
 
         Possibility to update the xarray objects attributes to get GDAL compliant NetCDF
-        files, using :py:meth:`~hydromt.raster.gdal_compliant`.
+        files, using :py:meth:`~hydromt.gis.raster.XRasterBase.gdal_compliant`.
         The function will first try to directly write to file.
         In case of PermissionError, it will first write a temporary file then move the file over.
 
@@ -171,7 +171,7 @@ class DatasetsComponent(ModelComponent):
             Each name in the data dictionary will be used to replace the {name} placeholder or the * character in the filename.
         gdal_compliant: bool, optional
             If True, convert xarray.Dataset and/or xarray.DataArray to gdal compliant
-            format using :py:meth:`~hydromt.raster.gdal_compliant`
+            format using :py:meth:`~hydromt.gis.raster.XRasterBase.gdal_compliant`
         rename_dims: bool, optional
             If True, rename x_dim and y_dim to standard names depending on the CRS
             (x/y for projected and lat/lon for geographic). Only used if
