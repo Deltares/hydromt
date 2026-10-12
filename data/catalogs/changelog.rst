@@ -18,6 +18,8 @@ Added
 - `aws_data` v2.0.0
 - `earthdatahub_data` v2.0.0
 - `gcsc_mip6_data` v2.0.0
+- `deltares_data` v2.0.0
+- `artifact_data` v2.0.0
 
 
 Pre-defined catalog refactor (2024.05)

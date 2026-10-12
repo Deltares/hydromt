@@ -375,9 +375,7 @@ def _validate_catalog(cat_path: Path, fmt: Format, upgrade: bool, sort: bool) ->
             logger.warning(f"{name}: {m.description}")
 
     if upgrade and report.applied:
-        out_path = cat_path.with_stem(
-            f"{cat_path.stem}_upgraded"
-        )  # `_v1` if docs/tests rely on it
+        out_path = cat_path.with_stem(f"{cat_path.stem}_upgraded")
         write_yaml(out_path, migrated, sort_keys=sort, Dumper=CatalogDumper)
         logger.info(f"Upgraded catalog written to {out_path}")
         for note in report.notes:

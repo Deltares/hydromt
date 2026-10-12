@@ -14,7 +14,7 @@ Unreleased
 New
 ---
 - ``readers.open_vector``, ``readers.open_vector_from_table``, ``readers.open_timeseries_from_table``, ``readers.open_mfcsv``, ``readers.open_zarrs``, ``readers.open_mfdataset`` and ``readers.open_raster_from_tindex`` now accept an fsspec ``filesystem``, so any reader can read from a remote store. ``filesystem=None`` means the local filesystem and passes paths straight through to the underlying library.
-- Predefined Data catalogs v2.0.0: `aws_data`, `earthdatahub_data`, `gcsc_mip6_data`.
+- Predefined Data catalogs v2.0.0: `aws_data`, `earthdatahub_data`, `gcsc_mip6_data`, `artifact_data` and `deltares_data`.
 
 Changed
 -------
