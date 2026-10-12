@@ -528,8 +528,7 @@ class Model(object, metaclass=ABCMeta):
                 cat._to_dataframe().reset_index().to_csv(
                     csv_path, sep=",", index=False, header=True
                 )
-
-            cat.to_yml(path, root=root)
+            cat.to_yml(path, root=str(root or self.root.path))
 
     def test_equal(self, other: "Model") -> tuple[bool, Dict[str, str]]:
         """Test if two models are equal, based on their components.

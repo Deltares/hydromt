@@ -1,6 +1,12 @@
 """Utility functions for hydromt that have no other home."""
 
 from hydromt._utils.caching import cache_vrt_tiles, copy_to_local
+from hydromt._utils.catalog_format import (
+    LATEST_CATALOG_FORMAT,
+    Format,
+    catalog_format,
+    check_catalog_format,
+)
 from hydromt._utils.dataset import (
     _rename_vars,
     _set_metadata,
@@ -44,6 +50,10 @@ __all__ = [
     "_make_config_paths_absolute",
     "_make_config_paths_relative",
     "temp_env",
+    "Format",
+    "LATEST_CATALOG_FORMAT",
+    "catalog_format",
+    "check_catalog_format",
 ]
 
 

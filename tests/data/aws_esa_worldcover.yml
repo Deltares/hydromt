@@ -1,13 +1,16 @@
+meta:
+  format_version: 2
+
 esa_worldcover:
   name: esa_worldcover
   uri: s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt
   data_adapter:
     rename:
       ESA_WorldCover_10m_2020_v100_Map_AWS: landuse
+  filesystem:
+    protocol: s3
+    anon: True
   driver:
-    filesystem:
-      protocol: s3
-      anon: True
     name: rasterio
   version: 2021
   provider: aws

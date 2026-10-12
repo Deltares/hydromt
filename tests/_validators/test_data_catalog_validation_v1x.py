@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from hydromt._validators.data_catalog_v0x import DataCatalogV0Validator
+from hydromt._utils.catalog_migrations import migrate_catalog
 from hydromt._validators.data_catalog_v1x import (
     DataCatalogV1Item,
     DataCatalogV1MetaData,
@@ -226,13 +226,10 @@ def test_data_invalid_crs_v1():
 
 
 def test_upgrade_v0_data_catalog(test_data_dir: Path):
-    expected_upgraded_data_catalog = DataCatalogV1Validator.from_yml(
+    expected = DataCatalogV1Validator.from_yml(
         test_data_dir / "test_v0_data_catalog_upgraded.yml"
     )
-    v0_catalog = DataCatalogV0Validator.from_yml(
-        test_data_dir / "test_v0_data_catalog.yml"
+    migrated, _ = migrate_catalog(
+        _yml_from_uri_or_path(test_data_dir / "test_v0_data_catalog.yml")
     )
-
-    upgraded_catalog = DataCatalogV1Validator.from_v0(v0_catalog)
-
-    assert upgraded_catalog == expected_upgraded_data_catalog
+    assert DataCatalogV1Validator.from_dict(migrated) == expected
