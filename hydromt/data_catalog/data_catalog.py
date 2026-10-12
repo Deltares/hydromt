@@ -808,8 +808,7 @@ class DataCatalog(object):
         # check version required hydromt version
         requested_version = meta.get("hydromt_version", None)
         if requested_version is not None:
-            allow_dev = meta.get("allow_dev_version", True)
-            if not self._is_compatible(__version__, requested_version, allow_dev):
+            if not self._is_compatible(__version__, requested_version):
                 raise RuntimeError(
                     f"Data catalog requires Hydromt Version {requested_version} which "
                     f"is incompattible with current hydromt version {__version__}."
