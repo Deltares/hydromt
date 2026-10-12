@@ -22,7 +22,7 @@ if HAS_BOTO3 and HAS_S3FS:
 
 CATALOG_YAML = """
 meta:
-  hydromt_version: ">1.5.0,<2"
+  format_version: 2
 
 merit_hydro:
   data_type: RasterDataset

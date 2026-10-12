@@ -6,17 +6,12 @@ import copy
 import inspect
 import itertools
 import logging
-import os
 from datetime import datetime
-from os.path import abspath, basename, dirname, exists, isfile, join, splitext
 from pathlib import Path
 from typing import (
     Any,
-    Dict,
     Iterator,
-    List,
     Optional,
-    Tuple,
     Union,
     cast,
 )
@@ -27,17 +22,16 @@ import pandas as pd
 import pooch
 import xarray as xr
 import yaml
-from packaging.specifiers import SpecifierSet
-from packaging.version import Version
 from pystac import Catalog as StacCatalog
 from pystac import CatalogType, MediaType
 
-from hydromt import __version__
 from hydromt._utils import (
+    LATEST_CATALOG_FORMAT,
     CatalogDumper,
     _deep_merge,
     _partition_dictionaries,
     _single_var_as_array,
+    check_catalog_format,
 )
 from hydromt.config import SETTINGS
 from hydromt.data_catalog.adapters import (
@@ -82,7 +76,7 @@ class DataCatalog(object):
 
     def __init__(
         self,
-        data_libs: Optional[Union[List, str]] = None,
+        data_libs: Optional[Union[list, str]] = None,
         cache: Optional[bool] = False,
         cache_dir: Optional[str] = None,
     ) -> None:
@@ -93,7 +87,7 @@ class DataCatalog(object):
 
         Arguments
         ---------
-        data_libs: List[str], str, Path, optional
+        data_libs: list[str], str, Path, optional
             One or more paths to data catalog configuration files or names of predefined
             data catalogs. By default the data catalog is initiated without data
             entries. See :py:func:`~hydromt.data_catalog.DataCatalog.from_yml` for
@@ -112,8 +106,8 @@ class DataCatalog(object):
 
         data_libs = cast(list, data_libs)
 
-        self._sources: Dict[str, DataSource] = {}
-        self._catalogs: Dict[str, PredefinedCatalog] = {}
+        self._sources: dict[str, DataSource] = {}
+        self._catalogs: dict[str, PredefinedCatalog] = {}
         self.root: str | Path | None = None
         # caching
         self.cache = bool(cache)
@@ -127,19 +121,19 @@ class DataCatalog(object):
                 self.from_predefined_catalogs(name_or_path)
 
     @property
-    def sources(self) -> Dict[str, DataSource]:
+    def sources(self) -> dict[str, DataSource]:
         """Returns dictionary of DataSources."""
         return self._sources
 
-    def get_source_names(self) -> List[str]:
+    def get_source_names(self) -> list[str]:
         """Return a list of all available data source names."""
         return list(self._sources.keys())
 
     def to_stac_catalog(
         self,
         root: Union[str, Path],
-        source_names: Optional[List[str]] = None,
-        meta: Optional[Dict[str, Any]] = None,
+        source_names: Optional[list[str]] = None,
+        meta: Optional[dict[str, Any]] = None,
         catalog_name: str = "hydromt-stac-catalog",
         description: str = "The stac catalog of hydromt",
         used_only: bool = False,
@@ -157,7 +151,7 @@ class DataCatalog(object):
             If "auto" (default) the data source paths are relative to the yaml
             output ``path``.
         source_names: list, optional
-            List of source names to export, by default None in which case all sources
+            list of source names to export, by default None in which case all sources
             are exported. This argument is ignored if `used_only=True`.
         used_only: bool, optional
             If True, export only data entries kept in used_data list, by default False.
@@ -182,7 +176,7 @@ class DataCatalog(object):
 
     def from_stac_catalog(
         self,
-        stac_like: Union[str, Path, StacCatalog, Dict[Any, Any]],
+        stac_like: Union[str, Path, StacCatalog, dict[Any, Any]],
     ):
         """Write data catalog to STAC format.
 
@@ -244,7 +238,7 @@ class DataCatalog(object):
         return self
 
     @property
-    def predefined_catalogs(self) -> Dict:
+    def predefined_catalogs(self) -> dict:
         """Return all predefined catalogs."""
         if not self._catalogs:
             self._set_predefined_catalogs()
@@ -257,7 +251,7 @@ class DataCatalog(object):
         version: Optional[str] = None,
         detect: bool = True,
         strict: bool = False,
-    ) -> Optional[Tuple[Bbox, int]]:
+    ) -> Optional[tuple[Bbox, int]]:
         """Retrieve the bounding box and crs of the source.
 
         Parameters
@@ -278,7 +272,7 @@ class DataCatalog(object):
 
         Returns
         -------
-        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
+        bbox: tuple[np.float64,np.float64,np.float64,np.float64]
             the bounding box coordinates of the data. coordinates are returned as
             [xmin,ymin,xmax,ymax]
         crs: int
@@ -295,7 +289,7 @@ class DataCatalog(object):
         version: Optional[str] = None,
         detect: bool = True,
         strict: bool = False,
-    ) -> Optional[Tuple[datetime, datetime]]:
+    ) -> Optional[tuple[datetime, datetime]]:
         """Detect the temporal range of the dataset.
 
         Parameters
@@ -316,7 +310,7 @@ class DataCatalog(object):
 
         Returns
         -------
-        range: Tuple[np.datetime64, np.datetime64]
+        range: tuple[np.datetime64, np.datetime64]
             A tuple containing the start and end of the time dimension. Range is
             inclusive on both sides.
         """
@@ -452,7 +446,7 @@ class DataCatalog(object):
 
         self._sources[name][provider] = versions
 
-    def list_sources(self, used_only=False) -> List[Tuple[str, DataSource]]:
+    def list_sources(self, used_only=False) -> list[tuple[str, DataSource]]:
         """Return a flat list of all available data sources.
 
         Parameters
@@ -470,7 +464,7 @@ class DataCatalog(object):
 
         return sources
 
-    def __iter__(self) -> Iterator[Tuple[str, DataSource]]:
+    def __iter__(self) -> Iterator[tuple[str, DataSource]]:
         """Iterate over sources."""
         return iter(self.list_sources())
 
@@ -559,7 +553,7 @@ class DataCatalog(object):
         """Add data sources to library or update them."""
         self.update(**kwargs)
 
-    def _set_predefined_catalogs(self) -> Dict:
+    def _set_predefined_catalogs(self) -> dict:
         """Set initialized predefined catalogs to _catalogs attribute."""
         for k, cat in PLUGINS.catalog_plugins.items():
             self._catalogs[k] = cat(
@@ -642,17 +636,24 @@ class DataCatalog(object):
         root: str | Path | None = None,
         catalog_name: Optional[str] = None,
         catalog_version: Optional[str] = None,
+        format_version: str | int | None = None,
         mark_used: bool = False,
     ) -> DataCatalog:
         """Add data sources based on yaml file.
 
         Parameters
         ----------
-        urlpath: str, Path
+        urlpath : str, Path
             Path or url to data source yaml files.
-        root: str, Path, optional
+        root : str, Path, optional
             Global root for all relative paths in yaml file(s).
-        mark_used: bool
+        catalog_name : str, optional
+            Name of the data catalog.
+        catalog_version : str, optional
+            Version of the data catalog.
+        format_version : str, int, optional
+            Format version of the data catalog.
+        mark_used : bool
             If True, append to used_data list.
 
         Examples
@@ -695,74 +696,26 @@ class DataCatalog(object):
         """
         logger.info(f"Parsing data catalog from {urlpath}")
         yml = _yml_from_uri_or_path(urlpath)
-        # read meta data
-        meta = yml.pop("meta", {})
-        if catalog_name is None:
-            catalog_name = cast(
-                str, meta.get("name", "".join(basename(urlpath).split(".")[:-1]))
-            )
-
-        if catalog_version is not None:
-            version = catalog_version
-        else:
-            version = meta.pop("version", "latest")
-
-        if root is not None:
-            self.root = root
-        elif "root" in meta:
-            root = meta.pop("root")
-        elif "roots" in meta:
-            root = self._determine_catalog_root(meta)
-        else:
-            root = dirname(Path(urlpath))
-
-        self.from_dict(
+        meta = yml.get("meta") or {}
+        return self.from_dict(
             yml,
-            catalog_name=catalog_name,
-            catalog_version=version,
-            root=root,
-            category=meta.get("category", None),
+            catalog_name=catalog_name or meta.get("name") or Path(urlpath).stem,
+            catalog_version=catalog_version,
+            format_version=format_version,
+            root=_determine_catalog_root(
+                meta=meta, root=root, default=Path(urlpath).parent
+            ),
             mark_used=mark_used,
         )
-        return self
-
-    def _is_compatible(self, hydromt_version: str, requested_range: str) -> bool:
-        if requested_range is None:
-            return True
-        requested = SpecifierSet(requested_range)
-        version = Version(hydromt_version)
-
-        return Version(version.base_version) in requested
-
-    def _determine_catalog_root(self, meta: Dict[str, Any]) -> Path:
-        """Determine which of the roots provided in meta exists and should be used."""
-        root = None
-        to_check = meta.get("roots", [])
-        if "root" in meta:
-            to_check.append(meta["root"])
-        for r in to_check:
-            if exists(r):
-                root = r
-                break
-
-        if root is None:
-            if to_check:
-                logger.warning(
-                    "None of the specified roots were found, "
-                    f"using first root: {to_check[0]}"
-                )
-                root = to_check[0]
-            else:
-                raise ValueError("No roots specified in catalog metadata")
-        return Path(root)
 
     def from_dict(
         self,
-        data_dict: Dict[str, Any],
-        catalog_name: str = "",
-        catalog_version: Optional[str] = None,
+        data_dict: dict[str, Any],
+        catalog_name: str | None = None,
+        catalog_version: str | None = None,
+        format_version: str | int | None = None,
         root: str | Path | None = None,
-        category: Optional[str] = None,
+        category: str | None = None,
         mark_used: bool = False,
     ) -> DataCatalog:
         """Add data sources based on dictionary.
@@ -770,10 +723,14 @@ class DataCatalog(object):
         Parameters
         ----------
         data_dict: dict
-            Dictionary of data_sources.
+            Dictionary of data sources to add to the catalog.
         catalog_name: str, optional
-            Name of data catalog
-        root: str, Path, optional
+            Name of the data catalog.
+        catalog_version: str, optional
+            Version of the data catalog.
+        format_version: str or int, optional
+            Format version of the data catalog.
+        root: str or Path, optional
             Global root for all relative paths in `data_dict`.
         category: str, optional
             Global category for all sources in `data_dict`.
@@ -804,65 +761,50 @@ class DataCatalog(object):
             }
 
         """
-        meta = data_dict.pop("meta", {})
-        # check version required hydromt version
-        requested_version = meta.get("hydromt_version", None)
-        if requested_version is not None:
-            if not self._is_compatible(__version__, requested_version):
-                raise RuntimeError(
-                    f"Data catalog requires Hydromt Version {requested_version} which "
-                    f"is incompattible with current hydromt version {__version__}."
-                )
+        meta = data_dict.get("meta") or {}
+        sources = {k: v for k, v in data_dict.items() if k != "meta"}
+        _catalog_name = catalog_name or meta.get("name") or "Unnamed"
+        content_version = catalog_version or meta.get("version")
+        _format_version = format_version or meta.get("format_version")
+        check_catalog_format(_format_version, f"Data catalog '{_catalog_name}'")
 
-        if "category" in meta and category is None:
-            category = meta.pop("category")
-
-        if catalog_version is not None:
-            version = catalog_version
-        else:
-            version = meta.get("version", None)
-
-        if root is not None:
-            self.root = root
-        elif "root" in meta:
-            self.root = meta.pop("root")
-        elif "roots" in meta:
-            self.root = self._determine_catalog_root(meta)
-        else:
-            self.root = dirname(Path("."))
-
-        if self.root is not None and splitext(self.root)[-1] in [".gz", ".zip"]:
+        self.root = _determine_catalog_root(meta=meta, root=root)
+        if self.root is not None and Path(self.root).suffix in [".gz", ".zip"]:
             # if root is an archive, unpack it at the cache dir
             self.root = self._cache_archive(
-                self.root, name=catalog_name, version=version
+                self.root, name=_catalog_name, version=str(content_version or "latest")
             )
 
             # save catalog to cache
-            with open(join(self.root, f"{catalog_name}.yml"), "w") as f:
-                d = {"meta": {k: v for k, v in meta.items() if k != "roots"}}
-                d.update(data_dict)
-                yaml.dump(d, f, default_flow_style=False, sort_keys=False)
+            cached_meta = {k: v for k, v in meta.items() if k != "roots"}
+            with (self.root / f"{_catalog_name}.yml").open("w") as f:
+                yaml.dump(
+                    {"meta": cached_meta, **sources},
+                    f,
+                    default_flow_style=False,
+                    sort_keys=False,
+                )
 
-        for name, source_dict in _denormalise_data_dict(data_dict):
+        for source_name, source_dict in _denormalise_data_dict(sources):
             source = _parse_data_source_dict(
-                name,
+                source_name,
                 source_dict,
                 root=self.root,
-                category=category,
+                category=category or meta.get("category"),
             )
             if mark_used:
                 source._mark_as_used()
-            self.add_source(name, source)
+            self.add_source(source_name, source)
 
         return self
 
     def to_yml(
         self,
-        path: Union[str, Path],
-        root: str = "auto",
-        source_names: Optional[List[str]] = None,
+        path: str | Path,
+        root: str | None = None,
+        source_names: list[str] | None = None,
         used_only: bool = False,
-        meta: Optional[Dict[str, Any]] = None,
+        meta: dict[str, Any] | None = None,
     ) -> None:
         """Write data catalog to yaml format.
 
@@ -872,10 +814,10 @@ class DataCatalog(object):
             yaml output path.
         root: str, Path, optional
             Global root for all relative paths in yaml file.
-            If "auto" (default) the data source paths are relative to the yaml
+            If None (default) the data source paths are relative to the yaml
             output ``path``.
         source_names: list, optional
-            List of source names to export, by default None in which case all sources
+            list of source names to export, by default None in which case all sources
             are exported. This argument is ignored if `used_only=True`.
         used_only: bool, optional
             If True, export only data entries kept in used_data list, by default False.
@@ -883,40 +825,36 @@ class DataCatalog(object):
             key-value pairs to add to the data catalog meta section, such as 'version',
             by default empty.
         """
-        meta = meta or {}
-        yml_dir = os.path.dirname(abspath(path))
-        if root == "auto":
-            root = yml_dir
+        yml_dir = Path(path).parent
+        _root = yml_dir if root is None else Path(root)
         data_dict = self.to_dict(
-            root=root, source_names=source_names, meta=meta, used_only=used_only
+            root=_root, source_names=source_names, meta=meta, used_only=used_only
         )
-        if str(root) == yml_dir:
-            data_dict.pop("root", None)  # remove root if it equals the yml_dir
-        if data_dict:
-            with open(path, "w") as f:
-                yaml.dump(
-                    data_dict,
-                    f,
-                    default_flow_style=False,
-                    sort_keys=False,
-                    Dumper=CatalogDumper,
-                )
-        else:
-            logger.info("The data catalog is empty, no yml file is written.")
+        if _root == yml_dir:
+            data_dict["meta"].pop("root", None)
+
+        with Path(path).open("w") as f:
+            yaml.dump(
+                data_dict,
+                f,
+                default_flow_style=False,
+                sort_keys=False,
+                Dumper=CatalogDumper,
+            )
 
     def to_dict(
         self,
-        source_names: Optional[List[str]] = None,
+        source_names: list[str] | None = None,
         root: str | Path | None = None,
-        meta: Optional[Dict[str, Any]] = None,
+        meta: dict[str, Any] | None = None,
         used_only: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Export the data catalog to a dictionary.
 
         Parameters
         ----------
         source_names : list, optional
-            List of source names to export, by default None in which case all sources
+            list of source names to export, by default None in which case all sources
             are exported.
         root : str, Path, optional
             Global root for all relative paths in the file.
@@ -931,11 +869,12 @@ class DataCatalog(object):
         dict
             data catalog dictionary
         """
+        _root = root or self.root
         meta = meta or {}
-        sources_out: Dict[str, Any] = dict()
-        if root is None:
-            root = str(self.root)
-        meta.update(**{"root": root})
+        meta.update(format_version=LATEST_CATALOG_FORMAT)
+        if _root is not None:
+            meta.update(root=str(_root))
+        sources_out: dict[str, Any] = dict()
         sources = self.list_sources(used_only=used_only)
         sorted_sources = sorted(sources, key=lambda x: x[0])
         for name, source in sorted_sources:  # alphabetical order
@@ -949,39 +888,15 @@ class DataCatalog(object):
 
             # remove non serializable entries to prevent errors
             source_dict = _process_dict(source_dict)
-            source_dict["root"] = root
-            if name in sources_out:
-                existing = sources_out.pop(name)
-                if existing == source_dict:
-                    sources_out.update({name: source_dict})
-                    continue
-                if "variants" in existing:
-                    variants = existing.pop("variants")
-                    _, variant, _ = _partition_dictionaries(source_dict, existing)
-                    variants.append(variant)
-                    existing["variants"] = variants
-                else:
-                    base, diff_existing, diff_new = _partition_dictionaries(
-                        source_dict, existing
-                    )
-                    # provider and version should always be in variants list
-                    provider = base.pop("provider", None)
-                    if provider is not None:
-                        diff_existing["provider"] = provider
-                        diff_new["provider"] = provider
-                    version = base.pop("version", None)
-                    if version is not None:
-                        diff_existing["version"] = version
-                        diff_new["version"] = version
-                    base["variants"] = [diff_new, diff_existing]
-                sources_out[name] = base
-            else:
-                sources_out.update({name: source_dict})
-        if meta:
-            sources_out = {"meta": meta, **sources_out}
-        return sources_out
+            if _root is not None:
+                source_dict["root"] = str(_root)
+            existing = sources_out.get(name)
+            if existing is not None and existing != source_dict:
+                source_dict = _merge_variants(existing, source_dict)
+            sources_out[name] = source_dict
+        return {"meta": meta, **sources_out}
 
-    def _to_dataframe(self, source_names: Optional[List] = None) -> pd.DataFrame:
+    def _to_dataframe(self, source_names: list[str] | None = None) -> pd.DataFrame:
         """Return data catalog summary as DataFrame."""
         source_names = source_names or []
         d = []
@@ -1003,12 +918,12 @@ class DataCatalog(object):
 
     def export_data(
         self,
-        new_root: Union[Path, str],
-        bbox: Optional[Bbox] = None,
+        new_root: str | Path,
+        bbox: Bbox | None = None,
         time_range: TimeRange | tuple | dict | None = None,
-        source_names: Optional[List[str]] = None,
+        source_names: list[str] | None = None,
         unit_conversion: bool = True,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
         force_overwrite: bool = False,
         append: bool = False,
         handle_nodata: NoDataStrategy = NoDataStrategy.WARN,
@@ -1017,7 +932,7 @@ class DataCatalog(object):
 
         Parameters
         ----------
-        new_root : str, Path
+        new_root : Path
             Path to output folder
         bbox : array-like of floats
             (xmin, ymin, xmax, ymax) bounding box of area of interest.
@@ -1026,18 +941,18 @@ class DataCatalog(object):
             of the dataset is returned. If not None, must be parsable by TimeRange.create,
             by default None
         source_names: list, optional
-            List of source names to export, by default None in which case all sources
+            list of source names to export, by default None in which case all sources
             are exported. Specific variables can be selected by appending them to the
             source name in square brackets. For example, to export all variables of
             'source_name1' and only 'var1' and 'var2' of 'source_name'
             use source_names=['source_name1', 'source_name2[var1,var2]']
         unit_conversion: boolean, optional
             If False skip unit conversion when parsing data from file, by default True.
-        meta: dict, optional
+        metadata: dict, optional
             key-value pairs to add to the data catalog meta section, such as 'version',
-            by default empty.
-        forced_overwrite: bool
-            override any existing files if True. False by default.
+            by default None.
+        force_overwrite: bool
+            Override any existing files if True. False by default.
         append: bool, optional
             If True, append to existing data catalog, by default False.
         handle_nodata: NoDataStrategy, optional
@@ -1084,8 +999,8 @@ class DataCatalog(object):
             )
 
         # read existing data catalog if it exists
-        path = join(new_root, "data_catalog.yml")
-        if isfile(path) and append:
+        path = new_root / "data_catalog.yml"
+        if path.is_file() and append:
             logger.info(f"Appending existing data catalog {path}")
             sources_out = DataCatalog(path).sources
         else:
@@ -1115,14 +1030,14 @@ class DataCatalog(object):
                     if adapter is not None:
                         data_catalog_out.add_source(key, adapter)
 
-        data_catalog_out.to_yml(path, root="auto", meta=metadata)
+        data_catalog_out.to_yml(path, meta=metadata)
 
     def _export_source(
         self,
         source: DataSource,
         unit_conversion: bool,
         new_root: Path,
-        bbox: Optional[Bbox],
+        bbox: Bbox | None,
         time_range: TimeRange | tuple | dict | None,
         source_vars: dict[str, list[str]],
         registry: dict[str, dict[str, dict[str, DataSource]]],
@@ -1334,12 +1249,12 @@ class DataCatalog(object):
         buffer: int = 0,
         chunks: Optional[dict] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        variables: Optional[Union[List, str]] = None,
+        variables: Optional[Union[list, str]] = None,
         time_range: TimeRange | tuple | dict | None = None,
         single_var_as_array: Optional[bool] = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
-        source_kwargs: Dict[str, Any] | None = None,
+        source_kwargs: dict[str, Any] | None = None,
     ) -> Optional[Union[xr.Dataset, xr.DataArray]]:
         """Return a clipped, sliced and unified RasterDataset.
 
@@ -1362,7 +1277,7 @@ class DataCatalog(object):
             {'name', 'provider', 'version'}.
             If a path to a file is provided it will be added
             to the catalog with its based on the file basename.
-        bbox : Optional[List], optional
+        bbox : Optional[list], optional
             (xmin, ymin, xmax, ymax) bounding box of area of interest
             (in WGS84 coordinates), by default None
         geom : Optional[gpd.GeoDataFrame], optional
@@ -1378,7 +1293,7 @@ class DataCatalog(object):
             by default 0
         handle_nodata : NoDataStrategy, optional
             How to react when no data is found, by default NoDataStrategy.RAISE
-        variables : Optional[List], optional
+        variables : Optional[list], optional
             Names of RasterDataset variables to return, or all if None, by default None
         time_range : TimeRange | tuple | dict | None, optional
             Start and end date of period of interest. By default the entire time period
@@ -1428,7 +1343,7 @@ class DataCatalog(object):
                 driver: str = source_kwargs.pop(
                     "driver", RasterDatasetSource._fallback_driver_read
                 )
-                name = basename(data_like)
+                name = Path(data_like).name
                 source = RasterDatasetSource(
                     name=name,
                     uri=str(data_like),
@@ -1484,11 +1399,11 @@ class DataCatalog(object):
         data_like: Union[
             str, SourceSpecDict, Path, xr.Dataset, xr.DataArray, GeoDataFrameSource
         ],
-        bbox: Optional[List] = None,
+        bbox: Optional[list] = None,
         geom: Optional[gpd.GeoDataFrame] = None,
         buffer: Union[float, int] = 0,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        variables: Optional[Union[List, str]] = None,
+        variables: Optional[Union[list, str]] = None,
         predicate: str = "intersects",
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1510,7 +1425,7 @@ class DataCatalog(object):
             {'name', 'provider', 'version'}.
             If a path to a vector file is provided it will be added
             to the catalog with its based on the file basename.
-        bbox : Optional[List], optional
+        bbox : Optional[list], optional
             (xmin, ymin, xmax, ymax) bounding box of area of interest
             (in WGS84 coordinates), by default None
         geom : Optional[gpd.GeoDataFrame], optional
@@ -1519,7 +1434,7 @@ class DataCatalog(object):
             Buffer around the `bbox` or `geom` area of interest in meters, by default 0
         handle_nodata : NoDataStrategy, optional
             How to react when no data is found, by default NoDataStrategy.RAISE
-        variables : Optional[List], optional
+        variables : Optional[list], optional
             Names of GeoDataFrame variables to return, or all if None, by default None
         predicate : str, optional
             If predicate is provided, the GeoDataSet is filtered by testing
@@ -1561,7 +1476,7 @@ class DataCatalog(object):
             else:
                 source_kwargs = source_kwargs or {}
                 source_kwargs.setdefault("provider", "user")
-                name = basename(data_like)
+                name = Path(data_like).name
                 source = GeoDataFrameSource(
                     name=name, uri=str(data_like), **source_kwargs
                 )
@@ -1596,7 +1511,7 @@ class DataCatalog(object):
         buffer: Union[float, int] = 0,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         predicate: str = "intersects",
-        variables: Optional[List[str]] = None,
+        variables: Optional[list[str]] = None,
         time_range: TimeRange | tuple | dict | None = None,
         single_var_as_array: bool = True,
         provider: Optional[str] = None,
@@ -1623,7 +1538,7 @@ class DataCatalog(object):
             {'name', 'provider', 'version'}.
             If a path to a file is provided it will be added
             to the catalog with its based on the file basename.
-        bbox : Optional[List], optional
+        bbox : Optional[list], optional
             (xmin, ymin, xmax, ymax) bounding box of area of interest
             (in WGS84 coordinates), by default None
         geom : Optional[gpd.GeoDataFrame], optional
@@ -1638,7 +1553,7 @@ class DataCatalog(object):
             options are:
             {'intersects', 'within', 'contains', 'overlaps', 'crosses', 'touches'},
             by default 'intersects'
-        variables : Optional[List], optional
+        variables : Optional[list], optional
             Names of GeoDataset variables to return, or all if None, by default None
         time_range : TimeRange | tuple | dict | None, optional
             Start and end date of period of interest. By default the entire time period
@@ -1689,7 +1604,7 @@ class DataCatalog(object):
                 driver: str = source_kwargs.pop(
                     "driver", GeoDatasetSource._fallback_driver_read
                 )
-                name = basename(data_like)
+                name = Path(data_like).name
                 source = GeoDatasetSource(
                     name=name,
                     uri=str(data_like),
@@ -1728,7 +1643,7 @@ class DataCatalog(object):
         data_like: Union[
             str, SourceSpecDict, Path, xr.Dataset, xr.DataArray, DatasetSource
         ],
-        variables: Optional[List] = None,
+        variables: Optional[list] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         time_range: TimeRange | tuple | dict | None = None,
         single_var_as_array: bool = True,
@@ -1754,7 +1669,7 @@ class DataCatalog(object):
             {'name', 'provider', 'version'}.
             If a path to a file is provided it will be added
             to the catalog with its based on the file basename.
-        variables : Optional[List], optional
+        variables : Optional[list], optional
             Names of Dataset variables to return, or all if None, by default None
         handle_nodata : NoDataStrategy, optional
             How to react when no data is found, by default NoDataStrategy.RAISE
@@ -1799,7 +1714,7 @@ class DataCatalog(object):
             else:
                 source_kwargs = source_kwargs or {}
                 source_kwargs.setdefault("provider", "user")
-                name = basename(data_like)
+                name = Path(data_like).name
                 source = DatasetSource(uri=str(data_like), name=name, **source_kwargs)
                 self.add_source(name, source)
 
@@ -1826,7 +1741,7 @@ class DataCatalog(object):
     def get_dataframe(
         self,
         data_like: Union[str, SourceSpecDict, Path, pd.DataFrame, DataFrameSource],
-        variables: Optional[List] = None,
+        variables: Optional[list] = None,
         time_range: TimeRange | tuple | dict | None = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         provider: Optional[str] = None,
@@ -1844,7 +1759,7 @@ class DataCatalog(object):
             {'name', 'provider', 'version'}.
             If a path to a tabular data file is provided it will be added
             to the catalog with its based on the file basename.
-        variables : Optional[List], optional
+        variables : Optional[list], optional
             Names of DataFrame variables to return, or all if None, by default None
         time_range : TimeRange | tuple | dict | None, optional
             Start and end date of period of interest. By default the entire time period
@@ -1893,7 +1808,7 @@ class DataCatalog(object):
                 driver: str = source_kwargs.pop(
                     "driver", DataFrameSource._fallback_driver_read
                 )
-                name = basename(data_like)
+                name = Path(data_like).name
                 source = DataFrameSource(
                     uri=str(data_like), name=name, driver=driver, **source_kwargs
                 )
@@ -1932,7 +1847,7 @@ def _parse_data_like_dict(
 
 def _parse_data_source_dict(
     name: str,
-    data_source_dict: Dict,
+    data_source_dict: dict,
     root: Optional[Union[Path, str]] = None,
     category: Optional[str] = None,
 ) -> DataSource:
@@ -1947,7 +1862,7 @@ def _parse_data_source_dict(
         source.update({"root": str(root)})
 
     # source meta data
-    meta: Dict[str, str] = source.get("metadata", {})
+    meta: dict[str, str] = source.get("metadata", {})
     if "category" not in meta and category is not None:
         meta.update(category=category)
 
@@ -1956,7 +1871,25 @@ def _parse_data_source_dict(
     return create_source(source)
 
 
-def _process_dict(d: Dict) -> Dict:
+def _merge_variants(existing: dict, new: dict) -> dict:
+    """Merge two source dicts with the same name into one with a variants list."""
+    if "variants" in existing:
+        variants = existing.pop("variants")
+        _, variant, _ = _partition_dictionaries(new, existing)
+        existing["variants"] = [*variants, variant]
+        return existing
+    base, diff_existing, diff_new = _partition_dictionaries(new, existing)
+    # provider and version should always be in variants list
+    for key in ("provider", "version"):
+        value = base.pop(key, None)
+        if value is not None:
+            diff_existing[key] = value
+            diff_new[key] = value
+    base["variants"] = [diff_new, diff_existing]
+    return base
+
+
+def _process_dict(d: dict) -> dict:
     """Recursively change dict values to keep only python literal structures."""
     for k, v in d.items():
         _check_key = isinstance(k, str)
@@ -1967,7 +1900,7 @@ def _process_dict(d: Dict) -> Dict:
     return d
 
 
-def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
+def _denormalise_data_dict(data_dict) -> list[tuple[str, dict]]:
     """Return a flat list of with data name, dictionary of input data_dict.
 
     Expand possible versions and variants in data_dict.
@@ -2010,3 +1943,27 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
             data_list.extend(_denormalise_data_dict(item))
 
     return data_list
+
+
+def _determine_catalog_root(
+    meta: dict[str, Any],
+    root: str | Path | None = None,
+    default: str | Path | None = None,
+) -> str | Path | None:
+    """Determine the catalog root: the given root, else from meta, else default."""
+    if root is not None:
+        return root
+    if "roots" in meta:
+        to_check = [*meta["roots"], *([meta["root"]] if "root" in meta else [])]
+        if not to_check:
+            raise ValueError("No roots specified in catalog metadata")
+        for r in to_check:
+            if Path(r).exists():
+                return Path(r)
+        logger.warning(
+            f"None of the specified roots were found, using first root: {to_check[0]}"
+        )
+        return Path(to_check[0])
+    if "root" in meta:
+        return meta["root"]
+    return default

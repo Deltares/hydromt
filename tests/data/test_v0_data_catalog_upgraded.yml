@@ -1,5 +1,5 @@
 meta:
-  hydromt_version: '>=1.0'
+  format_version: 2
 
 chelsa:
   data_type: RasterDataset

@@ -115,6 +115,7 @@ class DataCatalogV1MetaData(BaseModel):
 
     roots: List[Path] | None = None
     version: str | Number | None = None
+    format_version: int | str | None = None
     hydromt_version: str | None = None
     name: str | None = None
     category: str | None = None

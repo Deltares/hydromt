@@ -287,22 +287,28 @@ def test_v0_unmappable_constructs_raise(src, match):
 
 
 @pytest.mark.parametrize(
-    ("meta", "expected", "rewritten"),
+    ("meta", "expected"),
     [
-        ({"hydromt_version": ">=0.9,<1"}, ">=1.0", True),  # contradicts
-        ({"roots": [""]}, ">=1.0", True),  # absent
-        (None, ">=1.0", True),  # no meta at all
-        ({"hydromt_version": ">=1.0a,<2"}, ">=1.0a,<2", False),  # already admits
+        ({"format_version": 0}, 2),
+        ({"format_version": 1}, 2),
+        ({"roots": [""]}, 2),  # absent
+        (None, 2),  # no meta at all
     ],
-    ids=["contradicting", "absent", "no-meta", "admitting"],
+    ids=["v0", "v1", "absent", "no-meta"],
 )
-def test_v0_migration_fixes_meta_hydromt_version(meta, expected, rewritten):
+def test_migration_sets_latest_format_version(meta, expected):
     raw = {"src": copy.deepcopy(V0_GEODATAFRAME)}
     if meta is not None:
         raw = {"meta": meta, **raw}
     migrated, report = migrate_catalog(raw)
-    assert migrated["meta"]["hydromt_version"] == expected
-    assert bool(report.notes) is rewritten
+    assert migrated["meta"]["format_version"] == expected
+    assert report.notes
+
+
+def test_migration_rejects_invalid_format_version():
+    raw = {"meta": {"format_version": "draft"}, "src": copy.deepcopy(V0_GEODATAFRAME)}
+    with pytest.raises(MigrationError, match="Invalid catalog format_version"):
+        migrate_catalog(raw)
 
 
 @pytest.mark.parametrize(
@@ -366,7 +372,26 @@ def test_latest_deltares_v1_catalog_has_no_pending_migrations(latest_dd_version_
     assert not report.applied, [(n, m.id) for n, m in report.applied]
 
 
-def test_filesystem_migration_replaces_min_version():
+def test_filesystem_migration_sets_latest_format_version():
+    raw = {
+        "meta": {"version": "2024.1"},
+        "src": {
+            "uri": "x",
+            "driver": {"name": "rasterio", "filesystem": {"protocol": "gcs"}},
+        },
+    }
+    migrated, _ = migrate_catalog(raw)
+    assert migrated["meta"]["format_version"] == 2
+    assert migrated["meta"]["version"] == "2024.1"  # content version untouched
+
+
+def test_no_migration_keeps_meta():
+    raw = {"meta": {"version": "v1.0.0"}, "src": {"uri": "x"}}
+    migrated, _ = migrate_catalog(raw)
+    assert migrated["meta"] == {"version": "v1.0.0"}
+
+
+def test_migration_leaves_hydromt_version_untouched():
     raw = {
         "meta": {"hydromt_version": ">1.0a,<2"},
         "src": {
@@ -375,22 +400,17 @@ def test_filesystem_migration_replaces_min_version():
         },
     }
     migrated, _ = migrate_catalog(raw)
-    assert migrated["meta"]["hydromt_version"] == ">=1.5.0,<2"
-
-
-def test_no_filesystem_keeps_version():
-    raw = {"meta": {"hydromt_version": ">1.0a,<2"}, "src": {"uri": "x"}}
-    migrated, _ = migrate_catalog(raw)
     assert migrated["meta"]["hydromt_version"] == ">1.0a,<2"
 
 
-def test_higher_existing_min_version_untouched():
+def test_current_format_version_untouched():
     raw = {
-        "meta": {"hydromt_version": ">=1.6,<2"},
+        "meta": {"format_version": 2},
         "src": {
             "uri": "x",
             "driver": {"name": "rasterio", "filesystem": {"protocol": "gcs"}},
         },
     }
-    migrated, _ = migrate_catalog(raw)
-    assert migrated["meta"]["hydromt_version"] == ">=1.6,<2"
+    migrated, report = migrate_catalog(raw)
+    assert migrated["meta"]["format_version"] == 2
+    assert not report.notes

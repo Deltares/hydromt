@@ -9,8 +9,9 @@ Changed
 -------
 Any `filesystem` keys that were defined under either driver or uri_resolver, are now at the root for each data source.
 This is a breaking structural change that prevents older hydromt versions from reading these catalogs, so they are now v2.0.0.
-(Predefined) data catalogs now read the key `meta.hydromt_version` from the data catalogs to determine compatibility.
-The `version` key is purely semantic versioning for each data catalog separately. The `hydromt_version` key is what determines behaviour.
+The new `meta.format_version` key of a data catalog determines its format (2 since the move of `filesystem`); catalogs without it use format 1.
+The `meta.version` key is purely the semantic version of the catalog content.
+The key `meta.hydromt_version` is deprecated and ignored, and `latest` now resolves to the newest version of a catalog that the running hydromt can read.
 
 Added
 -----

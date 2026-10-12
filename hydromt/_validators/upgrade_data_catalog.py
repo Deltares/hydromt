@@ -2,14 +2,15 @@ from __future__ import annotations
 
 import copy
 import json
+import logging
 from dataclasses import dataclass, field
 from typing import Any, Callable
 from urllib.parse import urlsplit
 
-from packaging.specifiers import SpecifierSet
-from packaging.version import Version
-
+from hydromt._utils.catalog_format import LATEST_CATALOG_FORMAT, catalog_format
 from hydromt._validators.data_catalog_v1x import DRIVER_RENAME_MAPPING
+
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "MigrationError",
@@ -70,11 +71,6 @@ class MigrationReport:
     applied: list[tuple[str, Migration]] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
 
-    @property
-    def required_version(self) -> Version | None:
-        versions = [Version(m.introduced_in) for _, m in self.applied]
-        return max(versions, default=None)
-
 
 def migrate_source(
     source: SourceDict, *, runtime_only: bool = False
@@ -95,20 +91,20 @@ def migrate_catalog(raw: dict | None) -> tuple[dict, MigrationReport]:
         except MigrationError as e:
             raise MigrationError(f"{name}: {e}") from e
 
-    required = report.required_version
-    if required is not None:
+    if report.applied:
         meta = dict(catalog.get("meta") or {})
-        spec = meta.get("hydromt_version")
-        spec_set = SpecifierSet(str(spec or ""), prereleases=True)
-        lower = _lower_bound(spec_set)
-        # compare without pre-release part so '>=1.0a' counts as admitting 1.0
-        if lower is None or Version(lower.base_version) < Version(
-            required.base_version
-        ):
-            new_spec = _with_min_version(spec_set, required)
-            meta["hydromt_version"] = new_spec
+        old = meta.get("format_version")
+        if old is None:
+            old = "v1"
+            logger.warning("No format_version found in catalog meta, assuming 'v1'.")
+        try:
+            current = catalog_format(old)
+        except ValueError as e:
+            raise MigrationError(str(e)) from e
+        if current is None or current < LATEST_CATALOG_FORMAT:
+            meta["format_version"] = LATEST_CATALOG_FORMAT
             report.notes.append(
-                f"meta.hydromt_version set to '{new_spec}' (was {spec!r})."
+                f"meta.format_version set to {LATEST_CATALOG_FORMAT} (was {old!r})."
             )
             catalog = {
                 "meta": meta,
@@ -128,27 +124,6 @@ def _clone(obj: Any) -> Any:
 
 def _variants(source: SourceDict) -> list[SourceDict]:
     return [v for v in source.get("variants") or [] if isinstance(v, dict)]
-
-
-_LOWER_OPS = {">=", ">"}
-
-
-def _lower_bound(spec: SpecifierSet) -> Version | None:
-    """Return the lower bound version from a SpecifierSet, if any."""
-    return max(
-        (Version(s.version) for s in spec if s.operator in _LOWER_OPS),
-        default=None,
-    )
-
-
-def _with_min_version(spec: SpecifierSet, required: Version) -> str:
-    """Replace the lower bound of `spec` by `>=required`, keep other specifiers that admit it."""
-    kept: list[str] = [
-        str(s)
-        for s in spec
-        if s.operator not in _LOWER_OPS and s.contains(required, prereleases=True)
-    ]
-    return ",".join([f">={required.base_version}", *kept])
 
 
 ### Migrations ###

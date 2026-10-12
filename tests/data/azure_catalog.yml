@@ -1,6 +1,5 @@
 meta:
-  hydromt_version: ">=1.5.0,<2.0"
-  version: v2.0.0
+  format_version: 2
 
 # Anonymous access to Azure Blob Storage using the default ConventionResolver.
 # This mirrors the AWS S3 pattern (filesystem protocol + anon: true) and

@@ -14,8 +14,7 @@ import numpy as np
 from pydantic import ValidationError
 
 from hydromt import __version__, log
-from hydromt._utils import CatalogDumper
-from hydromt._validators import Format
+from hydromt._utils import CatalogDumper, Format
 from hydromt._validators.data_catalog_v0x import DataCatalogV0Validator
 from hydromt._validators.data_catalog_v1x import DataCatalogV1Validator
 from hydromt._validators.model_config import HydromtModelSetup

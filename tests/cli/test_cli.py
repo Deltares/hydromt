@@ -573,7 +573,7 @@ def test_cli_upgrade_v1_datacatalog(tmp_path):
     source = upgraded["cmip6_historical"]
     assert source["filesystem"] == {"protocol": "gcs"}
     assert source["driver"] == {"name": "raster_xarray"}
-    assert upgraded["meta"]["hydromt_version"].startswith(">=1.5")
+    assert upgraded["meta"]["format_version"] == 2
     DataCatalogV1Validator.from_yml(out)  # and it is valid
 
 

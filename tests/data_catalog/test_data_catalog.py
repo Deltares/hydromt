@@ -58,7 +58,7 @@ def test_falls_back_to_first_root_when_none_found(
     roots = [tmp_path / p for p in ["a", "b", "c", "d", "4", "⽀"]]
     d = {
         "meta": {
-            "hydromt_version": ">=1.0a,<2",
+            "version": "v2.0.0",
             "roots": roots,
         },
     }
@@ -73,7 +73,7 @@ def test_finds_later_roots(tmp_path: Path):
     Path(tmp_path, "asasdfasdf").mkdir()
     d = {
         "meta": {
-            "hydromt_version": ">=1.0a,<2",
+            "version": "v2.0.0",
             "roots": [tmp_path / p for p in ["a", "b", "c", "d", "4", "asasdfasdf"]],
         },
     }
@@ -87,7 +87,7 @@ def test_finds_roots_in_correct_order(tmp_path: Path):
         p.mkdir()
 
     d = {
-        "meta": {"hydromt_version": ">=1.0a,<2", "roots": paths},
+        "meta": {"version": "v2.0.0", "roots": paths},
     }
     cat = DataCatalog().from_dict(d)
     assert cat.root == Path(tmp_path, "a")
@@ -95,7 +95,7 @@ def test_finds_roots_in_correct_order(tmp_path: Path):
 
 def test_from_yml_no_root(tmp_path: Path):
     d = {
-        "meta": {"hydromt_version": ">=1.0a,<2"},
+        "meta": {"version": "v2.0.0"},
     }
 
     cat_file = tmp_path / "cat.yml"
@@ -484,10 +484,28 @@ def test_data_catalog_from_deltares_data():
     assert len(data_catalog._sources) > 0
 
 
-def test_data_catalog_hydromt_version(tmp_path: Path):
+def test_data_catalog_ignores_hydromt_version(tmp_path: Path):
     yml_path = tmp_path / "test.yml"
-    data_catalog = DataCatalog()
-    data_catalog.to_yml(yml_path, meta={"hydromt_version": "0.7.0"})
+    yml_path.write_text("meta:\n  hydromt_version: '<0.1'\n")
+    DataCatalog().from_yml(yml_path)
+
+
+@pytest.mark.parametrize(
+    ("fmt", "match"),
+    [(3, "not supported by hydromt"), (0, "--upgrade")],
+)
+def test_data_catalog_unsupported_format_raises(tmp_path: Path, fmt, match):
+    yml_path = tmp_path / "test.yml"
+    yml_path.write_text(f"meta:\n  format_version: {fmt}\n")
+    with pytest.raises(RuntimeError, match=match):
+        DataCatalog().from_yml(yml_path)
+
+
+@pytest.mark.parametrize("version", ["2023", "2023.05.14", "v3.0.0"])
+def test_data_catalog_version_does_not_determine_format(tmp_path: Path, version):
+    yml_path = tmp_path / "test.yml"
+    yml_path.write_text(f"meta:\n  version: '{version}'\n")
+    DataCatalog().from_yml(yml_path)
 
 
 @pytest.mark.skipif(not HAS_S3FS, reason="s3fs is not installed")
@@ -576,7 +594,7 @@ def test_export_global_datasets(tmp_path: Path, export_test_slice_objects):
         yml_list = f.readlines()
     assert yml_list[0].strip() == "meta:"
     assert yml_list[1].strip() == "version: 1"
-    assert yml_list[2].strip().startswith("root:")
+    assert yml_list[2].strip() == "format_version: 2"
 
 
 def test_export_global_datasets_overwrite(tmp_path: Path, export_test_slice_objects):
@@ -611,7 +629,7 @@ def test_export_global_datasets_overwrite(tmp_path: Path, export_test_slice_obje
         yml_list = f.readlines()
     assert yml_list[0].strip() == "meta:"
     assert yml_list[1].strip() == "version: 2"
-    assert yml_list[2].strip().startswith("root:")
+    assert yml_list[2].strip() == "format_version: 2"
 
 
 @pytest.mark.integration
