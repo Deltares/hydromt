@@ -20,6 +20,7 @@ from pyproj import CRS
 from pyproj.exceptions import CRSError
 
 from hydromt import __version__ as HYDROMT_VERSION
+from hydromt._utils.catalog_migrations import DRIVER_RENAME_MAPPING
 from hydromt._validators.data_catalog_v0x import (
     DataCatalogV0Item,
     DataCatalogV0ItemMetadata,
@@ -29,39 +30,6 @@ from hydromt._validators.data_catalog_v0x import (
 from hydromt.data_catalog.drivers.base_driver import DriverOptions
 from hydromt.readers import _yml_from_uri_or_path
 from hydromt.typing import Bbox, Number, TimeRange
-
-DRIVER_RENAME_MAPPING: Dict[str, Dict[str, str]] = {
-    "RasterDataset": {
-        "raster": "rasterio",
-        "zarr": "raster_xarray",
-        "netcdf": "raster_xarray",
-        "raster_tindex": "rasterio",
-    },
-    "GeoDataset": {
-        "vector": "geodataset_vector",
-        "zarr": "geodataset_xarray",
-        "netcdf": "geodataset_xarray",
-    },
-    "GeoDataFrame": {
-        "csv": "geodataframe_table",
-        "parquet": "geodataframe_table",
-        "xls": "geodataframe_table",
-        "xlsx": "geodataframe_table",
-        "xy": "geodataframe_table",
-        "vector": "pyogrio",
-    },
-    "DataFrame": {
-        "csv": "pandas",
-        "parquet": "pandas",
-        "xls": "pandas",
-        "xlsx": "pandas",
-        "fwf": "pandas",
-    },
-    "DataSet": {
-        "zarr": "dataset_xarray",
-        "netcdf": "dataset_xarray",
-    },
-}
 
 
 class SourceSpec(BaseModel):

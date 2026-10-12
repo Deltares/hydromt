@@ -15,10 +15,10 @@ from pydantic import ValidationError
 
 from hydromt import __version__, log
 from hydromt._utils import CatalogDumper, Format
+from hydromt._utils.catalog_migrations import MigrationError, migrate_catalog
 from hydromt._validators.data_catalog_v0x import DataCatalogV0Validator
 from hydromt._validators.data_catalog_v1x import DataCatalogV1Validator
 from hydromt._validators.model_config import HydromtModelSetup
-from hydromt._validators.upgrade_data_catalog import MigrationError, migrate_catalog
 from hydromt.cli import _utils
 from hydromt.data_catalog import DataCatalog
 from hydromt.error import NoDataStrategy

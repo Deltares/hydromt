@@ -870,10 +870,9 @@ class DataCatalog(object):
             data catalog dictionary
         """
         _root = root or self.root
-        meta = meta or {}
-        meta.update(format_version=LATEST_CATALOG_FORMAT)
+        _meta = {**(meta or {}), "format_version": LATEST_CATALOG_FORMAT}
         if _root is not None:
-            meta.update(root=str(_root))
+            _meta["root"] = str(_root)
         sources_out: dict[str, Any] = dict()
         sources = self.list_sources(used_only=used_only)
         sorted_sources = sorted(sources, key=lambda x: x[0])
@@ -889,12 +888,12 @@ class DataCatalog(object):
             # remove non serializable entries to prevent errors
             source_dict = _process_dict(source_dict)
             if _root is not None:
-                source_dict["root"] = str(_root)
+                source_dict.pop("root", None)  # given by meta.root
             existing = sources_out.get(name)
             if existing is not None and existing != source_dict:
                 source_dict = _merge_variants(existing, source_dict)
             sources_out[name] = source_dict
-        return {"meta": meta, **sources_out}
+        return {"meta": _meta, **sources_out}
 
     def _to_dataframe(self, source_names: list[str] | None = None) -> pd.DataFrame:
         """Return data catalog summary as DataFrame."""

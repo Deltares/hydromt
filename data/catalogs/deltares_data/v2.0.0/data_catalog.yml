@@ -4,6 +4,7 @@ meta:
     - /mnt/p/wflow_global/hydromt
     - /p/wflow_global/hydromt
   version: v2.0.0
+  format_version: 2
   name: deltares_data
 
 hydro_basin_atlas_level12:

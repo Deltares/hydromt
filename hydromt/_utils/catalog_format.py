@@ -57,7 +57,7 @@ def check_catalog_format(
     ----------
     format_version: str | int | None
         The catalog format version, either as an integer (e.g., 2) or a string (e.g., "v2").
-        If None, a warning is issued and the latest format is assumed.
+        If None, a warning is issued and the v1 format is assumed.
     source: str, optional
         The name of the source for logging purposes. Default is "data catalog".
 

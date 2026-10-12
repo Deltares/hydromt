@@ -15,7 +15,7 @@ def _source(**kw):
 def test_legacy_driver_filesystem_loads_with_warning():
     with pytest.warns(
         HydroMTDeprecationWarning,
-        match="`filesystem` under `driver`/`uri_resolver` is deprecated",
+        match="`filesystem` under `driver`/`uri_resolver` moved to the source root",
     ):
         source = _source(
             driver={"name": "raster_xarray", "filesystem": {"protocol": "file"}}

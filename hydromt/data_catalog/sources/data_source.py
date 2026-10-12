@@ -22,6 +22,7 @@ from pydantic import (
 from pyproj import CRS
 from pystac import Catalog as StacCatalog
 
+from hydromt._utils.catalog_migrations import Migration, get_migration, migrate_source
 from hydromt._utils.uris import _is_valid_url
 from hydromt._utils.warnings import deprecation_warning
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
@@ -32,6 +33,9 @@ from hydromt.typing import DataType, FSSpecFileSystem, SourceMetadata
 from hydromt.typing.type_def import TimeRange, TotalBounds
 
 logger = logging.getLogger(__name__)
+
+# Put here to run at import time, so we know the migration function is always available.
+_FILESYSTEM_MIGRATION = get_migration("filesystem-to-root")
 
 T = TypeVar("T")
 
@@ -91,58 +95,22 @@ class DataSource(BaseModel, ABC):
     @classmethod
     def _validate_data_type(cls, data: Any) -> Any:
         """Pydantic does not check class variables, so it is checked here."""
-        copy_data: dict = deepcopy(data)
-        if isinstance(copy_data, dict):
-            if data_type := copy_data.pop("data_type", None):
+        if isinstance(data, dict):
+            if data_type := data.pop("data_type", None):
                 if data_type != cls.data_type:
                     raise ValueError(f"'data_type' must be '{cls.data_type}'.")
-            if not copy_data.get("driver"):
-                copy_data["driver"] = cls._infer_default_driver(copy_data.get("uri"))
-        return copy_data
+            if not data.get("driver"):
+                data["driver"] = cls._infer_default_driver(data.get("uri"))
+        return data
 
     @model_validator(mode="before")
     @classmethod
-    def _migrate_legacy_filesystem(cls, data: Any) -> DataSource:
+    def _migrate_legacy_layout(cls, data: Any) -> Any:
         if not isinstance(data, dict):
             return data
-        data = dict(data)  # don't mutate caller's dict
-
-        legacy: dict[str, dict] = {}
-        for key in ("driver", "uri_resolver"):
-            section = data.get(key)
-            if isinstance(section, dict) and "filesystem" in section:
-                section = dict(section)
-                legacy[key] = section.pop("filesystem")
-                data[key] = section
-
-        if not legacy:
-            return data
-
-        if "filesystem" in data:
-            raise ValueError(
-                "Specify `filesystem` only at the DataSource root; "
-                "found it also under driver/uri_resolver."
-            )
-
-        distinct = {json.dumps(v, sort_keys=True) for v in legacy.values()}
-        if len(distinct) > 1:
-            raise ValueError(
-                "driver and uri_resolver define different filesystems; "
-                "a DataSource can only have one. Move it to the root level."
-            )
-        deprecation_warning(
-            message=(
-                "`filesystem` under `driver`/`uri_resolver` is deprecated; "
-                "define it at the DataSource root instead."
-            ),
-            removed_in_release="v1.6.0",
-            alternative=(
-                "Define `filesystem` at the DataSource root instead. "
-                "Update your data catalog automatically by running the cli command: "
-                "`hydromt check -d <catalog_path> --upgrade`."
-            ),
-        )
-        data["filesystem"] = FSSpecFileSystem.create(next(iter(legacy.values())))
+        applied = migrate_source(data, runtime_only=True)
+        for m in applied:
+            _warn_migration(m, data.get("name"))
         return data
 
     @model_validator(mode="after")
@@ -159,17 +127,7 @@ class DataSource(BaseModel, ABC):
                     "set a single `filesystem` on the DataSource."
                 )
             if defined_on_component:
-                deprecation_warning(
-                    message=(
-                        f"Defining `filesystem` under `driver`/`uri_resolver` for source '{self.name}' is deprecated"
-                    ),
-                    removed_in_release="v1.6.0",
-                    alternative=(
-                        "Define `filesystem` at the DataSource root instead. "
-                        "Update your data catalog automatically by running the cli command: "
-                        "`hydromt check -d <catalog_path> --upgrade`."
-                    ),
-                )
+                _warn_migration(_FILESYSTEM_MIGRATION, self.name)
                 # bypass validate_assignment
                 object.__setattr__(self, "filesystem", defined_on_component[0])
         else:
@@ -206,11 +164,12 @@ class DataSource(BaseModel, ABC):
 
     @model_validator(mode="wrap")
     @classmethod
-    def _wrap_driver_validation(cls, data, handler):
-        driver = data.get("driver")
-        if isinstance(driver, BaseDriver):
-            data["driver"] = driver.model_copy(deep=True)
-        return handler(data)
+    def _copy_input(cls, data, handler):
+        """Validate a copy, so the before validators can mutate their input.
+
+        Defined after the before validators: the last defined runs first.
+        """
+        return handler(deepcopy(data) if isinstance(data, dict) else data)
 
     @property
     def full_uri(self) -> str:
@@ -425,3 +384,14 @@ def _abs_path(root: Union[Path, str], rel_path: Union[Path, str]) -> str:
 
 def _fs_key(fs: FSSpecFileSystem) -> str:
     return json.dumps(fs.model_dump(), sort_keys=True, default=str)
+
+
+def _warn_migration(m: Migration, name: str | None) -> None:
+    deprecation_warning(
+        message=f"Data source '{name}': {m.description}",
+        removed_in_release=m.removed_in,
+        alternative=(
+            "Update your data catalog automatically by running the cli command: "
+            "`hydromt check -d <catalog_path> --upgrade`"
+        ),
+    )

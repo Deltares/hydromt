@@ -6,13 +6,13 @@ import yaml
 from packaging.version import Version
 
 from hydromt import __version__ as HYDROMT_VERSION
-from hydromt._validators.data_catalog_v1x import DataCatalogV1Validator
-from hydromt._validators.upgrade_data_catalog import (
+from hydromt._utils.catalog_migrations import (
     _MIGRATIONS,
     MigrationError,
     migrate_catalog,
     migrate_source,
 )
+from hydromt._validators.data_catalog_v1x import DataCatalogV1Validator
 from hydromt.readers import _yml_from_uri_or_path
 
 LEGACY_DRIVER_FS = {

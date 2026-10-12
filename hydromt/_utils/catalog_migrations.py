@@ -8,22 +8,56 @@ from typing import Any, Callable
 from urllib.parse import urlsplit
 
 from hydromt._utils.catalog_format import LATEST_CATALOG_FORMAT, catalog_format
-from hydromt._validators.data_catalog_v1x import DRIVER_RENAME_MAPPING
 
 logger = logging.getLogger(__name__)
 
 __all__ = [
+    "DRIVER_RENAME_MAPPING",
     "MigrationError",
     "Migration",
     "MigrationReport",
     "migrate_source",
     "migrate_catalog",
+    "get_migration",
 ]
 
 SourceDict = dict[str, Any]
 
+DRIVER_RENAME_MAPPING: dict[str, dict[str, str]] = {
+    "RasterDataset": {
+        "raster": "rasterio",
+        "zarr": "raster_xarray",
+        "netcdf": "raster_xarray",
+        "raster_tindex": "rasterio",
+    },
+    "GeoDataset": {
+        "vector": "geodataset_vector",
+        "zarr": "geodataset_xarray",
+        "netcdf": "geodataset_xarray",
+    },
+    "GeoDataFrame": {
+        "csv": "geodataframe_table",
+        "parquet": "geodataframe_table",
+        "xls": "geodataframe_table",
+        "xlsx": "geodataframe_table",
+        "xy": "geodataframe_table",
+        "vector": "pyogrio",
+    },
+    "DataFrame": {
+        "csv": "pandas",
+        "parquet": "pandas",
+        "xls": "pandas",
+        "xlsx": "pandas",
+        "fwf": "pandas",
+    },
+    "DataSet": {
+        "zarr": "dataset_xarray",
+        "netcdf": "dataset_xarray",
+    },
+}
 
-class MigrationError(Exception):
+
+class MigrationError(ValueError):
     """Custom exception for migration errors."""
 
 
@@ -75,12 +109,46 @@ class MigrationReport:
 def migrate_source(
     source: SourceDict, *, runtime_only: bool = False
 ) -> list[Migration]:
+    """Apply all applicable migrations to the given source in-place.
+
+    Parameters
+    ----------
+    source : SourceDict
+        The source dictionary to migrate.
+    runtime_only : bool, optional
+        If True, only apply runtime migrations. Defaults to False.
+
+    Returns
+    -------
+    list[Migration]
+        List of migrations that were applied.
+    """
     return [
         m for m in _MIGRATIONS if (m.runtime or not runtime_only) and m.apply(source)
     ]
 
 
+def get_migration(id: str) -> Migration:
+    """Retrieve a migration by its unique identifier, raising a KeyError if not found."""
+    _migration = next((m for m in _MIGRATIONS if m.id == id), None)
+    if _migration is None:
+        raise KeyError(f"Unknown migration id '{id}'.")
+    return _migration
+
+
 def migrate_catalog(raw: dict | None) -> tuple[dict, MigrationReport]:
+    """Apply all applicable migrations to the given catalog and return a copy.
+
+    Parameters
+    ----------
+    raw : dict | None
+        The raw catalog dictionary to migrate.
+
+    Returns
+    -------
+    tuple[dict, MigrationReport]
+        The migrated catalog and a report of the applied migrations.
+    """
     catalog = _clone(raw or {})
     report = MigrationReport()
     for name, source in catalog.items():
@@ -257,7 +325,6 @@ def _convert_v0_variant(variant: SourceDict) -> None:
     "filesystem-to-root",
     introduced_in="1.5.0",
     description="`filesystem` under `driver`/`uri_resolver` moved to the source root",
-    removed_in="1.6.0",
 )
 def _filesystem_to_root(source: SourceDict) -> bool:
     changed = _upgrade_filesystem_inplace(source)
