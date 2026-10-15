@@ -1,6 +1,6 @@
 """Pydantic models for validation of various hydromt internal components."""
 
-from enum import Enum
+from enum import StrEnum
 
 from hydromt._validators.data_catalog_v0x import (
     DataCatalogV0Item,
@@ -41,17 +41,6 @@ __all__ = [
 ]
 
 
-class Format(Enum):
-    v0 = 0
-    v1 = 1
-
-    # just a convenience function
-    # with some nicer error messages
-    @classmethod
-    def from_str(cls, s: str) -> "Format":
-        try:
-            return cls[s.strip().lower()]
-        except KeyError as e:
-            raise ValueError(
-                f"{e} is not a known valid Format, options are {list(cls.__members__.keys())}"
-            )
+class Format(StrEnum):
+    v0 = "v0"
+    v1 = "v1"

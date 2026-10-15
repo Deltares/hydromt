@@ -414,9 +414,9 @@ def _validate_config(config: Path, model: Optional[str], fmt: Format) -> bool:
 @verbose_opt
 @click.option(
     "--format",
-    type=click.Choice(list(Format)),
-    default=Format.v1,
-    help="The HydroMT major version",
+    type=click.Choice([f.value for f in Format]),
+    default=Format.v1.value,
+    help="The format of the data catalog (v0 or v1).",
 )
 @click.option(
     "--upgrade",
@@ -436,7 +436,7 @@ def check(
     data,
     quiet: int,
     verbose: int,
-    format: Format,
+    format: str,
     upgrade: bool,
     sort: bool,
 ):
@@ -464,10 +464,10 @@ def check(
         results = []
         for cat_path in data:
             results.append(
-                _validate_catalog(Path(cat_path), format, upgrade, sort),
+                _validate_catalog(Path(cat_path), Format(format), upgrade, sort),
             )
         if config:
-            results.append(_validate_config(Path(config), model, format))
+            results.append(_validate_config(Path(config), model, Format(format)))
 
     if not all(results):
         raise click.ClickException(

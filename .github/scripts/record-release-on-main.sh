@@ -5,7 +5,13 @@
 #
 # Version is set to max(main's current, X.(Y+1).0.dev0).
 #
-# Usage: record-release-on-main.sh <RELEASE_BRANCH> <NEW_VERSION>
+# Usage: record-release-on-main.sh <RELEASE_BRANCH> <NEW_VERSION> <MARK_AS_LATEST>
+#
+# MARK_AS_LATEST ("true"/"false") controls whether this version is marked
+# `preferred` in switcher.json — i.e. the stable release the docs switcher
+# defaults to. Should be passed the same value used for
+# `gh release create --latest=...` and the `stable` symlink update, so all
+# three always agree. When false, existing preferred flags are left alone.
 #
 # Prerequisites:
 #  - origin/main and release branch fetched (full history)
@@ -21,9 +27,10 @@ set -euo pipefail
 
 RELEASE_BRANCH="${1:-}"
 NEW_VERSION="${2:-}"
+MARK_AS_LATEST="${3:-false}"
 
 if [[ -z "$RELEASE_BRANCH" || -z "$NEW_VERSION" ]]; then
-  echo "Usage: record-release-on-main.sh <RELEASE_BRANCH> <NEW_VERSION>" >&2
+  echo "Usage: record-release-on-main.sh <RELEASE_BRANCH> <NEW_VERSION> <MARK_AS_LATEST>" >&2
   exit 1
 fi
 
@@ -99,95 +106,11 @@ if [[ "$TARGET_VERSION" != "$MAIN_VERSION" ]]; then
 fi
 bash .github/scripts/set-version.sh "$TARGET_VERSION"
 
-# Rebuild changelog from main's copy.
-git show origin/main:docs/changelog.rst > /tmp/main-changelog.rst
+# Update changelog
+bash .github/scripts/update-changelog.sh "$NEW_VERSION" "$RELEASE_BRANCH" "$VERSION_BUMPED"
 
-# If version was bumped, replace the Unreleased section with a fresh one.
-if [[ "$VERSION_BUMPED" == "true" ]]; then
-  awk '
-    BEGIN { skip = 0; printed_header = 0 }
-    /^Unreleased$/ { skip = 1; next }
-    skip && /^=+$/ { next }
-    skip && /^v[0-9]+\.[0-9]+\.[0-9]+/ { skip = 0 }
-    skip { next }
-    !printed_header {
-      print "Unreleased"
-      print "=========="
-      print ""
-      print "New"
-      print "---"
-      print ""
-      print "Changed"
-      print "-------"
-      print ""
-      print "Fixed"
-      print "-----"
-      print ""
-      print "Deprecated"
-      print "----------"
-      print ""
-      print "Removed"
-      print "-------"
-      print ""
-      printed_header = 1
-    }
-    { print }
-  ' /tmp/main-changelog.rst > /tmp/main-changelog-fresh.rst
-  mv /tmp/main-changelog-fresh.rst /tmp/main-changelog.rst
-fi
-
-# Extract the v<NEW_VERSION> section from the release branch changelog.
-git show "origin/$RELEASE_BRANCH:docs/changelog.rst" > /tmp/release-changelog.rst
-awk -v ver="v$NEW_VERSION" '
-  $0 ~ "^"ver"( |$)" { capture = 1 }
-  capture && /^v[0-9]+\.[0-9]+\.[0-9]+/ && $0 !~ "^"ver"( |$)" { exit }
-  capture { print }
-' /tmp/release-changelog.rst > /tmp/section.rst
-
-if [ ! -s /tmp/section.rst ]; then
-  echo "Could not extract v$NEW_VERSION section from release branch changelog." >&2
-  exit 1
-fi
-
-# Insert the section above the matching X.Y.0 heading in main's changelog.
-FAMILY_BASE="v${MAJOR}.${MINOR}.0"
-
-awk -v family_base="$FAMILY_BASE" -v section_file="/tmp/section.rst" '
-  BEGIN {
-    while ((getline line < section_file) > 0) section = section line "\n"
-    close(section_file)
-    inserted = 0
-  }
-  !inserted && $0 ~ "^"family_base"( |$)" {
-    printf "%s\n", section
-    inserted = 1
-  }
-  !inserted && /^v[0-9]+\.[0-9]+\.[0-9]+/ {
-    # family_base not in changelog; insert before the first version heading.
-    printf "%s\n", section
-    inserted = 1
-  }
-  { print }
-  END {
-    if (!inserted) {
-      # No version headings at all; append.
-      printf "\n%s", section
-    }
-  }
-' /tmp/main-changelog.rst > /tmp/changelog-merged.rst
-cp /tmp/changelog-merged.rst docs/changelog.rst
-
-# Rebuild switcher.json: union of both sides.
-git show origin/main:docs/_static/switcher.json > /tmp/main-switcher.json
-git show "origin/$RELEASE_BRANCH:docs/_static/switcher.json" > /tmp/release-switcher.json
-jq -s '
-  (.[0] + .[1])
-  | map(select(.version != "latest"))
-  | unique_by(.version)
-  | sort_by(.version | split(".") | map(tonumber? // 0))
-  + [{"name":"latest","version":"latest","url":"https://deltares.github.io/hydromt/latest/"}]
-' /tmp/main-switcher.json /tmp/release-switcher.json > /tmp/switcher-merged.json
-cp /tmp/switcher-merged.json docs/_static/switcher.json
+# Update switcher.json
+bash .github/scripts/update-switcher.sh "$NEW_VERSION" "$RELEASE_BRANCH" "$MARK_AS_LATEST"
 
 # Commit and push.
 git add hydromt/__init__.py docs/changelog.rst docs/_static/switcher.json
