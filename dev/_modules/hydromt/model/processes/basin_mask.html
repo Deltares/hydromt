@@ -828,13 +828,13 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    ds : xr.Dataset</span>
 <span class="sd">        Dataset containing basin and flow direction variables</span>
 <span class="sd">    basin_index: gpd.GeoDataFrame</span>
-<span class="sd">        Dataframe with basin geomtries or bounding boxes with "basid" column</span>
+<span class="sd">        Dataframe with basin geometries or bounding boxes with "basid" column</span>
 <span class="sd">        corresponding to the ``ds[&lt;basins_name&gt;]`` map.</span>
 <span class="sd">    kind : str</span>
 <span class="sd">        Kind of basin description, choose from "basin", "subbasin" or "interbasin"</span>
 <span class="sd">    bounds : list[float] | tuple[float], optional</span>
 <span class="sd">        [xmin, ymin, xmax, ymax] coordinates of total bounding box, i.e. the data is</span>
-<span class="sd">        clipped to this domain before futher processing. By default None</span>
+<span class="sd">        clipped to this domain before further processing. By default None</span>
 <span class="sd">    bbox : list[float] | tuple[float], optional</span>
 <span class="sd">        [xmin, ymin, xmax, ymax] coordinates to infer (sub)(inter)basin(s),</span>
 <span class="sd">        by default None</span>
@@ -1030,7 +1030,7 @@ window.runMermaid = runMermaid;</script>
                 <span class="n">outmap</span> <span class="o">=</span> <span class="n">outmap</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">stream_kwargs</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
             <span class="n">idxs_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">outmap</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">ravel</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">outmap</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"No outlets found with with given criteria."</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"No outlets found with the given criteria."</span><span class="p">)</span>
             <span class="n">xy</span> <span class="o">=</span> <span class="n">outmap</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">idx_to_xy</span><span class="p">(</span><span class="n">idxs_out</span><span class="p">)</span>
         <span class="c1"># get subbasin map</span>
         <span class="n">bas_mask</span><span class="p">,</span> <span class="n">xy_out</span> <span class="o">=</span> <span class="n">basin_map</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">flwdir</span><span class="p">,</span> <span class="n">xy</span><span class="o">=</span><span class="n">xy</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>

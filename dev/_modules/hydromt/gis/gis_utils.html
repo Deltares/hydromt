@@ -915,7 +915,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        Buffer around the `bbox` or `geom` area of interest in meters. By default 0.</span>
 <span class="sd">    crs: pyproj.CRS, optional</span>
 <span class="sd">        projection of the bbox or geometry. If the geometry already has a crs, this</span>
-<span class="sd">        argument is ignored. Defaults to EPSG:4236.</span>
+<span class="sd">        argument is ignored. Defaults to EPSG:4326.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -925,7 +925,7 @@ window.runMermaid = runMermaid;</script>
     <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="p">(</span><span class="s2">"EPSG:4326"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">geom</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="c1"># convert bbox to geom with crs EPGS:4326 to apply buffer later</span>
+        <span class="c1"># convert bbox to geom with crs EPSG:4326 to apply buffer later</span>
         <span class="n">geom</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="p">[</span><span class="n">box</span><span class="p">(</span><span class="o">*</span><span class="n">bbox</span><span class="p">)],</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">geom</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"No geom or bbox provided."</span><span class="p">)</span>
