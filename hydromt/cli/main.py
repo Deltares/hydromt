@@ -493,7 +493,7 @@ def check(
 @click.option(
     "-b",
     "--bbox",
-    help="a bbox in EPSG:4236 designating the region of which to export the data",
+    help="a bbox in EPSG:4326 designating the region of which to export the data",
 )
 @region_opt
 @export_dest_path
