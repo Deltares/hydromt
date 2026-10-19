@@ -40,6 +40,9 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}-${{ matrix.os }}-${{ matrix.dependencies }}-${{ matrix.python-version }}-${{ github.ref }}
       cancel-in-progress: true
+    env:
+      ALLOW_MINIO_SKIP: ${{ secrets.MINIO_ACCESS_KEY_READONLY_HYDROMT_DATA == '' && 'true' || 'false' }}
+
     steps:
       - uses: actions/checkout@v7
       - uses: prefix-dev/setup-pixi@v0.11.2
@@ -47,6 +50,7 @@ jobs:
           pixi-version: "v0.76.0"
           environments: ${{ matrix.dependencies }}-py${{ matrix.python-version }}
       - name: Create aws profile for minio access
+        if: env.ALLOW_MINIO_SKIP != 'true'
         env:
           ACCESS_KEY: ${{ secrets.MINIO_ACCESS_KEY_READONLY_HYDROMT_DATA }}
           SECRET_KEY: ${{ secrets.MINIO_SECRET_KEY_READONLY_HYDROMT_DATA }}
@@ -59,6 +63,6 @@ jobs:
       - name: Test
         env:
           PYTEST_ADDOPTS: ${{ matrix.dependencies == 'low' && '-p no:warnings' || '' }}
+          NUMBA_DISABLE_JIT: 1
         run: |
-          export NUMBA_DISABLE_JIT=1
           pixi run --locked -e ${{ matrix.dependencies }}-py${{ matrix.python-version }} test
