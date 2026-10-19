@@ -185,10 +185,11 @@ def _to_geographic_bbox(
 
 
 def _bbox_from_file_and_filters(
-    path: str,
+    source: str | bytes,
     bbox: Optional[GpdShapeGeom] = None,
     mask: Optional[GpdShapeGeom] = None,
     crs: Optional[CRS] = None,
+    **read_info_kwargs,
 ) -> Optional[Bbox]:
     """Create a bbox from the file metadata and filter options.
 
@@ -200,8 +201,8 @@ def _bbox_from_file_and_filters(
 
     Parameters
     ----------
-    path: IOBase,
-        path to the opened file.
+    source: str | bytes,
+        path of the file to read the metadata from, or its contents as bytes.
     bbox: GeoDataFrame | GeoSeries | BaseGeometry
         bounding box to filter the data while reading.
     mask: GeoDataFrame | GeoSeries | BaseGeometry
@@ -209,6 +210,9 @@ def _bbox_from_file_and_filters(
     crs: pyproj.CRS
         coordinate reference system of the bounding box or geometry. If already set,
         this argument is ignored.
+    **read_info_kwargs:
+        Additional keyword arguments passed to :py:meth:`pyogrio.read_info`,
+        e.g. ``layer``.
     """
     if bbox is not None and mask is not None:
         raise ValueError(
@@ -216,12 +220,16 @@ def _bbox_from_file_and_filters(
         )
     if bbox is None and mask is None:
         return None
-    if source_crs_str := read_info(path).get("crs"):
+    if source_crs_str := read_info(source, **read_info_kwargs).get("crs"):
         source_crs = CRS(source_crs_str)
     elif crs:
         source_crs = crs
     else:  # assume WGS84
         source_crs = CRS("EPSG:4326")
+        logger.warning(
+            "Reading without CRS definition. Filtering assumes EPSG:4326, "
+            "cannot compare crs."
+        )
 
     if mask is not None:
         bbox = mask

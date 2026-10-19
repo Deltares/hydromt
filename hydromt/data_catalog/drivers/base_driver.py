@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, ClassVar
 
+from fsspec import AbstractFileSystem
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from hydromt._abstract_base import AbstractBaseModel
@@ -15,6 +16,34 @@ from hydromt.typing.fsspec_types import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def resolve_filesystem(
+    filesystem: FSSpecFileSystem, options: dict[str, Any]
+) -> AbstractFileSystem:
+    """Turn a driver's filesystem and options into the filesystem for its reader.
+
+    This is the single place where ``storage_options`` are handled, so the
+    readers only ever see an :class:`~fsspec.AbstractFileSystem`. User-set
+    ``storage_options`` are popped from ``options`` and merged into the
+    filesystem.
+
+    For a local filesystem they are left in ``options`` instead: the readers
+    pass local paths straight through to the underlying library, which resolves
+    the URI - and any ``storage_options`` that come with it - itself.
+
+    Parameters
+    ----------
+    filesystem : FSSpecFileSystem
+        The driver's configured filesystem.
+    options : dict[str, Any]
+        The driver's open options. Modified in place when the filesystem is not
+        local.
+    """
+    if filesystem.is_local:
+        return filesystem.get_fs()
+    return filesystem.get_fs(storage_options=options.pop("storage_options", None))
+
 
 DRIVER_OPTIONS_DESCRIPTION = """
 Driver options that can be used to configure the behavior of the driver.

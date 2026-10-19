@@ -134,36 +134,37 @@ def test_spread():
 
 
 class TestBBoxFromFileAndFilters:
+    @staticmethod
     @pytest.fixture(scope="class")
-    def vector_data_with_crs(
-        self, geodf: gpd.GeoDataFrame, managed_tmp_path: Path
-    ) -> Path:
+    def vector_data_with_crs(geodf: gpd.GeoDataFrame, managed_tmp_path: Path) -> Path:
         example_data = geodf.set_crs(crs=CRS.from_user_input(4326))
         example_data.to_crs(crs=CRS.from_user_input(3857), inplace=True)
         path = managed_tmp_path / "test.fgb"
         example_data.to_file(path, engine="pyogrio")
         return path
 
+    @staticmethod
     @pytest.fixture(scope="class")
     def vector_data_without_crs(
-        self, geodf: gpd.GeoDataFrame, managed_tmp_path: Path
+        geodf: gpd.GeoDataFrame, managed_tmp_path: Path
     ) -> Path:
         path = managed_tmp_path / "test.geojson"
         geodf.to_file(path, engine="pyogrio")
         return path
 
+    @staticmethod
     @pytest.fixture(scope="class")
-    def gdf_mask_without_crs(self, world: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    def gdf_mask_without_crs(world: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         return world[world["name"] == "Chile"]
 
+    @staticmethod
     @pytest.fixture(scope="class")
-    def gdf_bbox_with_crs(
-        self, gdf_mask_without_crs: gpd.GeoDataFrame
-    ) -> gpd.GeoDataFrame:
+    def gdf_bbox_with_crs(gdf_mask_without_crs: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         return gdf_mask_without_crs.set_crs(CRS.from_user_input(4326))
 
+    @staticmethod
     @pytest.fixture(scope="class")
-    def shapely_bbox(self, gdf_mask_without_crs: gpd.GeoDataFrame) -> Polygon:
+    def shapely_bbox(gdf_mask_without_crs: gpd.GeoDataFrame) -> Polygon:
         return box(*list(gdf_mask_without_crs.total_bounds))
 
     def test_gdf_bbox_crs_source_crs(
