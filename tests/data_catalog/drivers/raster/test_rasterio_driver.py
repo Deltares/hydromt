@@ -3,6 +3,7 @@ import shutil
 from os.path import join
 from pathlib import Path
 from typing import Tuple
+from unittest import mock
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -82,7 +83,10 @@ class TestRasterioDriver:
         options = RasterioOptions(**options_dict)
         RasterioDriver(options=options).read(uris=uris)
         fake_open_mfraster.assert_called_once_with(
-            uris, mosaic=False, mosaic_kwargs=mosaic_kwargs
+            uris,
+            mosaic=False,
+            mosaic_kwargs=mosaic_kwargs,
+            filesystem=mock.ANY,
         )
 
     def test_write(self, rioda: xr.DataArray, tmp_path: Path):

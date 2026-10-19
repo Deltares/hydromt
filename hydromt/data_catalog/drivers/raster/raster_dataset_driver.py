@@ -35,7 +35,7 @@ class RasterDatasetDriver(BaseDriver, ABC):
         zoom: Zoom | None = None,
         chunks: dict[str, Any] | None = None,
         metadata: SourceMetadata | None = None,
-    ) -> xr.Dataset:
+    ) -> xr.Dataset | None:
         """
         Read raster data from one or more URIs into an xarray Dataset.
 
@@ -61,8 +61,9 @@ class RasterDatasetDriver(BaseDriver, ABC):
 
         Returns
         -------
-        xr.Dataset
-            The loaded raster dataset.
+        xr.Dataset | None
+            The merged xarray Dataset, or None if no data is available and the
+            handle_nodata strategy is set to ignore.
 
         """
         ...

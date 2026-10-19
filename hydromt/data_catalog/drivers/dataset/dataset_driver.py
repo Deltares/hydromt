@@ -21,7 +21,7 @@ class DatasetDriver(BaseDriver, ABC):
     @abstractmethod
     def read(
         self, uris: list[str], *, handle_nodata: NoDataStrategy = NoDataStrategy.RAISE
-    ) -> xr.Dataset:
+    ) -> xr.Dataset | None:
         """
         Read data from one or more URIs into an xarray Dataset.
 
@@ -37,8 +37,9 @@ class DatasetDriver(BaseDriver, ABC):
 
         Returns
         -------
-        xr.Dataset
-            The loaded dataset.
+        xr.Dataset | None
+            The merged xarray Dataset, or None if no data is available and the
+            handle_nodata strategy is set to ignore.
         """
         ...
 
