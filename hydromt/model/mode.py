@@ -1,4 +1,4 @@
-"""Handeling for the mode a HydroMT Model can be in."""
+"""Handling for the mode a HydroMT Model can be in."""
 
 from enum import Enum
 from typing import Union

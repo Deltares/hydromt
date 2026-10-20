@@ -885,7 +885,7 @@ class GeoDataset(GeoBase):
     # Will probably be deleted in the future but now needed for compatibility
     @property
     def vars(self) -> list[str]:
-        """list: Returns non-coordinate varibles."""
+        """list: Returns non-coordinate variables."""
         return list(self._obj.data_vars.keys())
 
     # Internal conversion and selection methods
