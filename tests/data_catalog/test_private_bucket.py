@@ -46,7 +46,10 @@ def _fail_or_skip_missing_profile(profile_name: str) -> None:
     try:
         Session(profile_name=profile_name)
     except ProfileNotFound:
-        if os.environ.get("CI") == "true":
+        in_ci = os.environ.get("CI") == "true"
+        allow_skip = os.environ.get("ALLOW_MINIO_SKIP") == "true"
+
+        if in_ci and not allow_skip:
             # https://docs.github.com/en/actions/reference/workflows-and-actions/variables
             pytest.fail(
                 f"AWS profile '{profile_name}' not configured in CI -- "
