@@ -126,10 +126,6 @@ data_opt = click.option(
     help="Path to local yaml data catalog file OR name of predefined data catalog.",
 )
 
-format_option = click.option(
-    "--format",
-)
-
 deltares_data_opt = click.option(
     "--dd",
     "--deltares-data",
@@ -185,7 +181,7 @@ cache_opt = click.option(
     default=False,
     is_flag=True,
     is_eager=True,
-    help="Print available component plugins and exit.",
+    help="Print available plugins and exit.",
     callback=print_available_plugins,
 )
 @click.pass_context

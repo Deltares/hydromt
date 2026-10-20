@@ -492,11 +492,11 @@ def press_correction(
         DataArray with high res lat/lon axis and elevation data
     g : float, default 9.80665
         gravitational constant [m s-2]
-    R_air : float, default 8.3144621
-        specific gas constant for dry air [J mol-1 K-1]
-    Mo : float, default 0.0289644
-        molecular weight of gas [kg / mol]
-    lapse_rate : float, deafult -0.0065
+    r_air : float, default 8.3144621
+        universal gas constant [J mol-1 K-1]
+    mo : float, default 0.0289644
+        molar mass of dry air [kg / mol]
+    lapse_rate : float, default -0.0065
         lapse rate of temperature [C m-1]
 
     Returns

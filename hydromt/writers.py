@@ -74,7 +74,7 @@ def write_nc(
     """Write xarray.Dataset and/or xarray.DataArray to netcdf file.
 
     Possibility to update the xarray objects attributes to get GDAL compliant NetCDF
-    files, using :py:meth:`~hydromt.raster.gdal_compliant`.
+    files, using :py:meth:`~hydromt.gis.raster.XRasterBase.gdal_compliant`.
     The function will first try to directly write to file. In case of
     PermissionError, it will first write a temporary file and move the file over.
 
@@ -90,7 +90,7 @@ def write_nc(
         Whether or not to compress the data, by default False
     gdal_compliant : bool, optional
         If True, convert xarray.Dataset and/or xarray.DataArray to gdal compliant
-        format using :py:meth:`~hydromt.raster.gdal_compliant`, by default False
+        format using :py:meth:`~hydromt.gis.raster.XRasterBase.gdal_compliant`, by default False
     rename_dims : bool, optional
         If True, rename x_dim and y_dim to standard names depending on the CRS
         (x/y for projected and lat/lon for geographic). Only used if
