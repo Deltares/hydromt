@@ -108,3 +108,18 @@ def test_create_fs(
         assert fs.serialize() == expected_dump, (
             f"Failed to serialize filesystem, expected {expected_dump}, got {fs.serialize()}"
         )
+
+
+def test_create_filesystem_nested_storage_options() -> None:
+    fs: FSSpecFileSystem = FSSpecFileSystem.create(
+        {"protocol": "memory", "storage_options": {"auto_mkdir": True}}
+    )
+    assert fs.protocol == "memory"
+    assert fs.storage_options == {"auto_mkdir": True}
+
+
+def test_create_filesystem_roundtrips_model_dump() -> None:
+    fs: FSSpecFileSystem = FSSpecFileSystem(
+        protocol="memory", storage_options={"auto_mkdir": True}
+    )
+    assert FSSpecFileSystem.create(fs.model_dump()) == fs

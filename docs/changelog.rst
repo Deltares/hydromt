@@ -14,6 +14,7 @@ Unreleased
 New
 ---
 - ``readers.open_vector``, ``readers.open_vector_from_table``, ``readers.open_timeseries_from_table``, ``readers.open_mfcsv``, ``readers.open_zarrs``, ``readers.open_mfdataset`` and ``readers.open_raster_from_tindex`` now accept an fsspec ``filesystem``, so any reader can read from a remote store. ``filesystem=None`` means the local filesystem and passes paths straight through to the underlying library.
+- Predefined Data catalogs v2.0.0: `aws_data`, `earthdatahub_data`, `gcsc_mip6_data`, `artifact_data` and `deltares_data`.
 
 Changed
 -------
@@ -22,6 +23,8 @@ Changed
 - Local-only readers give a clear error for remote paths: ``readers.open_nc``, ``readers.open_geodataset`` and ``GeoDatasetVectorDriver`` now raise "does not support remote paths" instead of a "file not found".
 - Reading a multi-file vector format (e.g. ESRI Shapefile) from a remote filesystem now raises a clear error explaining that the sidecar files cannot be read, instead of an opaque GDAL "not recognized as being in a supported file format".
 - Credential errors raised by the storage backends (e.g. missing or expired AWS or Azure credentials) are normalized to ``PermissionError`` by all readers, alongside the existing 401/403 handling.
+- Any `filesystem` keys that were defined under either ``driver`` or ``uri_resolver``, are now at the root for each data source. This is a breaking structural change that prevents older hydromt versions from reading these catalogs, so they are now v2.0.0.
+- (Predefined) data catalogs: the new ``meta.format_version`` key determines the data catalog format and thereby compatibility. Hydromt errors on catalogs with a newer format than it supports, upgrades supported older layouts in memory (with a deprecation warning) and points to ``hydromt check --upgrade`` for the rest. ``meta.version`` is purely the (semantic) version of the catalog content. ``meta.hydromt_version`` is ignored and deprecated; ``hydromt check --upgrade`` now sets ``meta.format_version`` instead of rewriting ``meta.hydromt_version``.
 
 Fixed
 -----

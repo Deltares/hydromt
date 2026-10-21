@@ -51,10 +51,11 @@ The catalog file can start with an *optional* global **metadata** data section:
   cross machine compatibility only, as can be seen above. Note that in the end only one
   of the roots will be used, so all data should still be located in the same folder
   tree.
-- **version** (recommended): data catalog version
-- **hydromt_version** (recommended): range of hydromt version that can read this
-  catalog. Format should be acording to `PEP 440
-  <https://peps.python.org/pep-0440/#version-specifiers>`_.
+- **version** (recommended): data catalog content version to note additions & changes, purely semantic, ignored by hydromt.
+- **format_version** (recommended): data catalog format, currently ``2``, see
+  :ref:`catalog format v2 <data_catalog_format_v2>`. HydroMT reads this first: catalogs
+  with a newer format than supported raise an error. Catalogs without it are format 1.
+- **hydromt_version** (deprecated): ignored, ``format_version`` determines compatibility.
 - **category** (optional): used if all data source in catalog belong to the same
   category. Usual categories within HydroMT are *geography*, *topography*,
   *hydrography*, *meteo*, *landuse*, *ocean*, *socio-economic*, *observed data* but the
