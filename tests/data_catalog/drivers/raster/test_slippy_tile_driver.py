@@ -345,6 +345,27 @@ def test_has_credentials_handles_provider_error():
         assert has_credentials() is False
 
 
+@pytest.mark.skipif(not HAS_S3FS, reason="s3fs/botocore required for credential test")
+def test_has_credentials_handles_lazy_refresh_error():
+    """A lazy credential refresh error must not prevent anonymous access."""
+    from botocore.exceptions import CredentialRetrievalError
+
+    class FakeCredentials:
+        @property
+        def access_key(self):
+            raise CredentialRetrievalError(
+                provider="sso", error_msg="Token has expired and refresh failed"
+            )
+
+    fake_session = MagicMock()
+    fake_session.get_credentials.return_value = FakeCredentials()
+    with patch(
+        "hydromt.data_catalog.drivers.raster.slippy_tile_driver.botocore.session.get_session",
+        return_value=fake_session,
+    ):
+        assert has_credentials() is False
+
+
 def test_has_credentials_returns_false_when_s3fs_missing():
     """Without s3fs/botocore the function must return False, not NameError."""
     with patch(
