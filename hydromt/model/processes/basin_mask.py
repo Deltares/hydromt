@@ -49,13 +49,13 @@ def get_basin_geometry(
     ds : xr.Dataset
         Dataset containing basin and flow direction variables
     basin_index: gpd.GeoDataFrame
-        Dataframe with basin geomtries or bounding boxes with "basid" column
+        Dataframe with basin geometries or bounding boxes with "basid" column
         corresponding to the ``ds[<basins_name>]`` map.
     kind : str
         Kind of basin description, choose from "basin", "subbasin" or "interbasin"
     bounds : list[float] | tuple[float], optional
         [xmin, ymin, xmax, ymax] coordinates of total bounding box, i.e. the data is
-        clipped to this domain before futher processing. By default None
+        clipped to this domain before further processing. By default None
     bbox : list[float] | tuple[float], optional
         [xmin, ymin, xmax, ymax] coordinates to infer (sub)(inter)basin(s),
         by default None
@@ -251,7 +251,7 @@ def get_basin_geometry(
                 outmap = outmap.where(stream_kwargs, False)
             idxs_out = np.nonzero(outmap.values.ravel())[0]
             if not np.any(outmap):
-                raise ValueError("No outlets found with with given criteria.")
+                raise ValueError("No outlets found with the given criteria.")
             xy = outmap.raster.idx_to_xy(idxs_out)
         # get subbasin map
         bas_mask, xy_out = basin_map(ds, flwdir, xy=xy, **kwargs)
