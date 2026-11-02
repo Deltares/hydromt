@@ -5,7 +5,10 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from hydromt._validators.data_catalog_v0x import DataCatalogV0Validator
+from hydromt._validators.data_catalog_v0x import (
+    DataCatalogV0Item,
+    DataCatalogV0Validator,
+)
 from hydromt._validators.data_catalog_v1x import (
     DataCatalogV1Item,
     DataCatalogV1MetaData,
@@ -236,3 +239,40 @@ def test_upgrade_v0_data_catalog(test_data_dir: Path):
     upgraded_catalog = DataCatalogV1Validator.from_v0(v0_catalog)
 
     assert upgraded_catalog == expected_upgraded_data_catalog
+
+
+def test_upgrade_v0_geodataset_vector_fn_data():
+    # open_geodataset's data file argument was renamed fn_data -> data_path in v1
+    v0_item = DataCatalogV0Item(
+        name="tss_moselle",
+        data_type="GeoDataset",
+        driver="vector",
+        path=Path("tss_locations.csv"),
+        crs=4326,
+        driver_kwargs={"fn_data": "tss_timeseries.csv"},
+    )
+
+    v1_item = DataCatalogV1Item.from_v0(v0_item)
+
+    assert v1_item.driver.name == "geodataset_vector"
+    assert v1_item.driver.options.model_dump(exclude_none=True) == {
+        "data_path": "tss_timeseries.csv"
+    }
+
+
+def test_upgrade_v0_geodataset_vector_prefers_new_option_name():
+    v0_item = DataCatalogV0Item(
+        name="tss_moselle",
+        data_type="GeoDataset",
+        driver="vector",
+        path=Path("tss_locations.csv"),
+        driver_kwargs={"fn_data": "old.csv", "data_path": "new.csv"},
+    )
+
+    v1_item = DataCatalogV1Item.from_v0(v0_item)
+
+    assert v1_item.driver.options.model_dump(exclude_none=True) == {
+        "data_path": "new.csv"
+    }
+    # the v0 model is only read, never rewritten
+    assert v0_item.driver_kwargs == {"fn_data": "old.csv", "data_path": "new.csv"}
