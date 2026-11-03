@@ -143,9 +143,6 @@ core = "hydromt.data_catalog.predefined_catalog"
 [project.entry-points."hydromt.uri_resolvers"]
 core = "hydromt.data_catalog.uri_resolvers"
 
-[tool.setuptools.dynamic]
-description = { file = "hydromt/__init__.py" }
-
 [tool.ruff]
 line-length = 88
 target-version = "py311"                        # keep as the lowest for backwards compatible changes.
