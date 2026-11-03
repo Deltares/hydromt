@@ -11,7 +11,7 @@ a digital elevation model (DEM).
 
 Processes are only available through the Python API and are usually the backbone of the model
 and components ``setup_`` or ``add_data_`` methods. HydroMT proposes a collection of methods
-that can be re-used in your python scripts or when developing your own plugins.
+that can be reused in your python scripts or when developing your own plugins.
 
 Grid
 ----

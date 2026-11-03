@@ -138,7 +138,7 @@ class ConfigComponent(ModelComponent):
         else:
             logger.warning(
                 f"No default model config was found at {read_path}. "
-                "It wil be initialized as empty dictionary"
+                "It will be initialized as empty dictionary"
             )
             return
 

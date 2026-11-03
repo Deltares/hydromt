@@ -625,7 +625,7 @@ class DataCatalog(object):
             kwargs.update(processor=pooch.Unzip(extract_dir=root))
         elif Path(archive_uri).suffix == ".gz":
             kwargs.update(processor=pooch.Untar(extract_dir=root))
-        if Path(archive_uri).exists():  # check if arhive is a local file
+        if Path(archive_uri).exists():  # check if archive is a local file
             kwargs.update(donwloader=_copy_file)
         pooch.retrieve(
             archive_uri,
@@ -1391,7 +1391,7 @@ class DataCatalog(object):
             of the dataset is returned. If not None, must be parsable by TimeRange.create,
             by default None
         single_var_as_array : bool, optional
-            Wether to return a xr.DataArray if the dataset consists of a single variable,
+            Whether to return a xr.DataArray if the dataset consists of a single variable,
             by default True
         provider : Optional[str], optional
             Specifies a data provider, by default None
@@ -1468,7 +1468,7 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown raster data type "{type(data_like).__name__}"')
 
-        # This isnt briliant but works the best at this stage
+        # This isn't brilliant but works the best at this stage
         if isinstance(source.driver, RasterioDriver):
             source.driver.options.cache = self.cache
             source.driver.options.cache_root = self._cache_dir.as_posix()
@@ -1651,7 +1651,7 @@ class DataCatalog(object):
             of the dataset is returned. If not None, must be parsable by TimeRange.create,
             by default None
         single_var_as_array : bool, optional
-            Wether to return a xr.DataArray if the dataset consists of a single variable,
+            Whether to return a xr.DataArray if the dataset consists of a single variable,
             by default True
         provider : Optional[str], optional
             Specifies a data provider, by default None
@@ -1769,7 +1769,7 @@ class DataCatalog(object):
             of the dataset is returned. If not None, must be parsable by TimeRange.create,
             by default None
         single_var_as_array : bool, optional
-            Wether to return a xr.DataArray if the dataset consists of a single variable,
+            Whether to return a xr.DataArray if the dataset consists of a single variable,
             by default True
         provider : Optional[str], optional
             Specifies a data provider, by default None
@@ -2005,7 +2005,7 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
                 if isinstance(v, (int, float)):
                     # numbers are pretty much always a version here,
                     # and we need strings, so just cast to string when
-                    # we encoutner a number. not the pretties,
+                    # we encounter a number. not the pretties,
                     # but it will have to do for now.
                     source[k] = str(v)
             data_list.append((name, source))

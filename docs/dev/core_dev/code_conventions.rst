@@ -34,7 +34,7 @@ Docstrings
 
 Code format
 ^^^^^^^^^^^
-- We use the `black code style <https://black.readthedocs.io/en/stable/the_black_code_style.html>`_ and `pre-commit <https://pre-commit.com>`_ to keep everything formatted. We use the formatter included with `ruff <https://docs.astral.sh/ruff/formatter/>`_ which is black compatible, but much faster. Please make sure all hooks pass before commiting. Pre-commit will do this for you if it's installed correctly.
+- We use the `black code style <https://black.readthedocs.io/en/stable/the_black_code_style.html>`_ and `pre-commit <https://pre-commit.com>`_ to keep everything formatted. We use the formatter included with `ruff <https://docs.astral.sh/ruff/formatter/>`_ which is black compatible, but much faster. Please make sure all hooks pass before committing. Pre-commit will do this for you if it's installed correctly.
 
 You can install pre-commit by running:
 

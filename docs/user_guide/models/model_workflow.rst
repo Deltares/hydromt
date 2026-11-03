@@ -116,7 +116,7 @@ Here is an example of a Wflow SBM workflow:
         - geoms.write:
 
 As mentioned in :ref:`building <model_build>` and :ref:`updating <model_update>` a model
-pages, if you are using hydromt in Python, you can also use the worfklow file and the ``build``
+pages, if you are using hydromt in Python, you can also use the workflow file and the ``build``
 and ``update`` methods, or just prepare your model step by step by calling the methods directly.
 
 For example:

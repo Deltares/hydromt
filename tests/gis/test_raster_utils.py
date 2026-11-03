@@ -144,7 +144,7 @@ def test_full_from_transform_errors():
     ):
         _ = full_from_transform(
             transform=Affine(1.0, 0.0, 0.5, 0.0, -1.0, 8.5),
-            shape=(1, 2, 3, 4),  # Cant do 4D data
+            shape=(1, 2, 3, 4),  # Can't do 4D data
         )
 
     # Call the function with to few dimensions
@@ -154,7 +154,7 @@ def test_full_from_transform_errors():
     ):
         _ = full_from_transform(
             transform=Affine(1.0, 0.0, 0.5, 0.0, -1.0, 8.5),
-            shape=(1,),  # Cant do 1D data
+            shape=(1,),  # Can't do 1D data
         )
 
 

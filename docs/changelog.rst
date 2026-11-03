@@ -160,7 +160,7 @@ Fixed
 - Relative path in the workflow yaml were not correctly resolved. (#1304)
 - Fix pydantic for V1 catalog for nodata and fix the catalog upgrade to convert nodata and extra metadata arguments. (#1304)
 - Fix pydantic for V1 catalog for attrs and fix the catalog upgrade to convert attrs arguments.
-- Do not pass metadata "extent" from catalog in xarray objects to avoid issues when writting to netcdf. (#1304)
+- Do not pass metadata "extent" from catalog in xarray objects to avoid issues when writing to netcdf. (#1304)
 - Build and update functions call `ModelComponent.cleanup` and `ModelComponent.finish_write`. Stabilizing the write functionality and making sure that netCDF files can be overwritten when the source and destination are the same. (#778)
 - `hydromt check` has been updated to validate v1 data catalogs (#1265)
 - All handling of log files is now done with the context manager `hydromt._utils.log.to_file`. This means that they are always closed by the the function that opened them. (#1272)
@@ -279,7 +279,7 @@ Removed
 - support for dictionary like features on the DataCatalog have been removed. (#790)
 - Support for using `.ini` and `.toml` files for configuration has been removed. (#791)
 - `staticmaps` and `staticgeoms` attributes on the `Model` object have been removed. (#845)
-- Code refering to the unimplemented Network Model type has been removed (#871)
+- Code referring to the unimplemented Network Model type has been removed (#871)
 - Removed `_API`, `.api` property, `test_api` and other `Model` level conventions as they are now handled by the components. (#894)
 - support for using aliases in the DataCatalog has been removed. (#987)
 - support for `storage_options` in the DataCatalog and adapters has been removed. (#987)
@@ -349,7 +349,7 @@ Deprecated
 
 v0.9.4 (2024-02-26)
 ===================
-This release fixes a performance regression when reading geometry masks, relaxed warnings for empty raster datasets and updated the documention of the new hydromt commands.
+This release fixes a performance regression when reading geometry masks, relaxed warnings for empty raster datasets and updated the documentation of the new hydromt commands.
 
 Fixed
 -----
@@ -382,7 +382,7 @@ Fixed
 
 v0.9.2 (2024-01-09)
 ===================
-This release adds additional bug fixes for the meridian offset functinality, and improvements to the new CLI commands.
+This release adds additional bug fixes for the meridian offset functionality, and improvements to the new CLI commands.
 
 Added
 -----
@@ -493,7 +493,7 @@ Vector
 
 Fixed
 -----
-- when a model component (eg maps, forcing, grid) is updated using the set\_ methods, it will first be read to avoid loosing data. (PR #460)
+- when a model component (eg maps, forcing, grid) is updated using the set\_ methods, it will first be read to avoid losing data. (PR #460)
 - open_geodataset with driver vector also works for other geometry type than points. (PR #509)
 - overwrite model in update mode. (PR #534)
 - fix stats.extremes methods for (dask) 3D arrays. (PR #505)
@@ -506,7 +506,7 @@ Deprecated
 
 v0.8.0 (2023-07-18)
 ===================
-This release contains several new features, including extreme value analysis, new generic methods for the ``GridModel`` class, setting variable attributes like units through the data catalog, and the ability to detect compatability issues between Datacatalog and HydroMT versions. It also includes a minor breaking change since now geometry masks are only set if the `mask` in `raster.clip_geom` is set to `True` to improve memory usage.
+This release contains several new features, including extreme value analysis, new generic methods for the ``GridModel`` class, setting variable attributes like units through the data catalog, and the ability to detect compatibility issues between Datacatalog and HydroMT versions. It also includes a minor breaking change since now geometry masks are only set if the `mask` in `raster.clip_geom` is set to `True` to improve memory usage.
 
 
 Added
@@ -557,7 +557,7 @@ v0.7.0 (22 February 2023)
 
 This release contains several major updates of the code. These following updates might require small changes to your code:
 
-- Most noticeable is the change in the ``hydromt build`` CLI, where made the region argument optional and deprecated the resolution option. Futhermore, the user has to force existing folders to be overwritten when building new models.
+- Most noticeable is the change in the ``hydromt build`` CLI, where made the region argument optional and deprecated the resolution option. Furthermore, the user has to force existing folders to be overwritten when building new models.
 - We also did a major overhaul of the ``GeoDataset`` and the associated ``.vector`` assessor to support any type of vector geometries (before only points).
 
 More new features, including support for rotated grids, new cloud data catalogs and (caching of) tiled raster datasets and more details are listed below.
@@ -665,12 +665,12 @@ Added
 
 Changed
 -------
-- splitted data_adapter.py into a  data_catalog and data_adapter submodule with py scripts per adapter
+- split data_adapter.py into a  data_catalog and data_adapter submodule with py scripts per adapter
 - Add rioxarray dependency to read raster data
 - In build or update methods, the setup_config component is not forced to run first anymore but according to order of the components in the ini config (opt dict).
 - In DataCatalog.get_RasterDataset & DataCatalog.get_GeoDataset methods, variables can now also be a str as well as a list of strings.
 - In DataCatalog.get_RasterDataset & DataCatalog.get_GeoDataset methods, automatic renaming of single variable datasets based on the variables argument will be deprecated
-- Interpolate missing values based on D4 neighbors of missing value cells only. This largely improves the performance without loosing accuracy.
+- Interpolate missing values based on D4 neighbors of missing value cells only. This largely improves the performance without losing accuracy.
   Changes have been observed when `nearest` method is used but this should not impact quality of the interpolation.
 - New source_names argument to DataCatalog.to_yml
 
@@ -829,7 +829,7 @@ Changed
 -------
 
 - Changed the **data-artifacts** version to **v0.0.4**. This includes renaming from hydrom_merit to merit_hydro.
-- moved binder to seperate folder with postBuild script
+- moved binder to separate folder with postBuild script
 - Bump Black version (formatting).
 
 Fixed
@@ -849,7 +849,7 @@ Documentation
 
 v0.4.0 (23 April 2021)
 ======================
-This is the first stable release of hydroMT. Noticeable changes are the addition of the ``deltares-data`` flag, improvements with basin masking functionnalities, and the creation of examples notebooks available
+This is the first stable release of hydroMT. Noticeable changes are the addition of the ``deltares-data`` flag, improvements with basin masking functionalities, and the creation of examples notebooks available
 in the documentation and in Binder.
 
 Added

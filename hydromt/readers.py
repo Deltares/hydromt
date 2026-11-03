@@ -139,7 +139,7 @@ def open_mfcsv(
         segmented by var, the keys of this dictionaires should be the
         names of the variables.
     concat_dim : str,
-        name of the dimension that will be created by concatinating
+        name of the dimension that will be created by concatenating
         all of the supplied csv files.
     filesystem : AbstractFileSystem | None, optional
         fsspec filesystem to read the files from. None (default) means the
@@ -187,7 +187,7 @@ def open_mfcsv(
             else:
                 csv_index_name = df.index.name
         else:
-            # could have done this in one giant boolean expression but throught
+            # could have done this in one giant boolean expression but thought
             # this was clearer
             if df.index.name is None:
                 if csv_index_name != "index":
@@ -355,7 +355,7 @@ def open_mfraster(
         Chunk sizes along each dimension, e.g., 5, (5, 5) or {'x': 5, 'y': 5}.
         If chunks is provided, it used to load the new DataArray into a dask array.
     concat: bool, optional
-        If True, concatenate raster along ``concat_dim``. We destinguish the following
+        If True, concatenate raster along ``concat_dim``. We distinguish the following
         filenames from which the numerical index and variable name are inferred, where
         the variable name is based on the first raster.
         ``<name>_<index>.<extension>``
@@ -366,7 +366,7 @@ def open_mfraster(
         Dimension name of concatenate index, by default 'dim0'
     mosaic: bool, optional
         If True create mosaic of several rasters. The variable is named based on
-        variable name infered from the first raster.
+        variable name inferred from the first raster.
     mosaic_kwargs: dict, optional
         Mosaic key_word arguments to unify raster crs and/or resolution. See
         :py:meth:`hydromt.merge.merge` for options.
@@ -615,7 +615,7 @@ def open_raster_from_tindex(
     ds_out = ds_out.raster.clip_geom(geom)
     name = ".".join(basename(tindex_path).split(".")[:-1])
     ds_out = ds_out.rename({ds_out.raster.vars[0]: name})
-    # dataset to be consitent with open_mfraster
+    # dataset to be consistent with open_mfraster
     return attach_closers(ds_out, closers)
 
 

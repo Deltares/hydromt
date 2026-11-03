@@ -216,7 +216,7 @@ def test_eva(ts_extremes):
     xr.testing.assert_equal(bm_eva, bm_test)
     del da_params, da_rps
 
-    # Test fot POT
+    # Test for POT
     pot_eva = extremes.eva(
         ts_extremes, ev_type="POT", qthresh=0.996, distribution="gpd"
     )

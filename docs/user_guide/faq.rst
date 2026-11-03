@@ -13,7 +13,7 @@ Working with models in HydroMT
 HydroMT focusses on the setup of models and analysis of model simulations, but does not contain the model software itself.
 In between the setup and analysis the model software needs to be executed to run a model simulation.
 
- | **Q**: Can I re-use the same method when building / updating a model from the command line interface with an .yaml configuration file.
+ | **Q**: Can I reuse the same method when building / updating a model from the command line interface with an .yaml configuration file.
 
 Yes, that is possible. In the YAML file, each setup or update method is listed under the steps section.
 So you can easily repeat the same method multiple times with different arguments. For example:

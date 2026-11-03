@@ -33,7 +33,7 @@ class SpatialModelComponent(ModelComponent, ABC):
         This component serves as a base class for components that are geospatial and
         require a region.
 
-        To re-use in your won component, make sure you implement the `_region_data`
+        To reuse in your won component, make sure you implement the `_region_data`
         property.
 
         Parameters

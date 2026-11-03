@@ -276,7 +276,7 @@ class MeshComponent(SpatialModelComponent):
 
     @property
     def mesh_datasets(self) -> dict[str, xu.UgridDataset]:
-        """Dictionnary of grid names and corresponding UgridDataset topology and data variables in mesh."""  # noqa: E501
+        """Dictionary of grid names and corresponding UgridDataset topology and data variables in mesh."""  # noqa: E501
         if not self.is_empty:
             return {
                 grid.name: self.get_mesh(grid_name=grid.name, include_data=True)

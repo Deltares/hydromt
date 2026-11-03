@@ -17,7 +17,7 @@ but the model methods (i.e. sections and options in the .yaml configuration file
 
 
 The ``hydromt build`` method can be run from the command line or Python after the right conda environment is activated.
-The HydroMT core package contain implementation for generalized model classes. Specific model implementation for softwares have to be built
+The HydroMT core package contain implementation for generalized model classes. Specific model implementation for software have to be built
 from associated :ref:`HydroMT plugin <plugins>` that needs to be installed to your Python environment.
 
 If you work from command line, you can check which models are available by running:

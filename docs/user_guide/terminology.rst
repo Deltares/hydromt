@@ -21,7 +21,7 @@ Model                           A set of files describing the schematization, fo
 Model class                     A model instance can be instantiated from different model schematization concepts. Generalized
                                 model classes currently supported within HydroMT are Grid Model (distributed models), vector Model
                                 (semi-distributed), Mesh Model (unstructured) and in the future
-                                Network Model (relational model). Specific model classes for specific softwares have been implemented
+                                Network Model (relational model). Specific model classes for specific software have been implemented
                                 as plugins, see Model plugin.
 Model attributes                Direct properties of a model, such as the model root. They can be called when using
                                 HydroMT from python.

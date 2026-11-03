@@ -579,7 +579,7 @@ class GeoBase(XGeoBase):
         geometry = self.geometry.to_crs(pyproj.CRS.from_user_input(dst_crs))
         return self.update_geometry(geometry)
 
-    # Constructers
+    # Constructors
     # i.e. from other datatypes or files
 
     ## Output methods
@@ -717,7 +717,7 @@ class GeoDataArray(GeoBase):
 
         Parameters
         ----------
-        nodata : float, int, opional
+        nodata : float, int, optional
             nodata value
         """
         # Only numerical nodata values are supported
