@@ -309,12 +309,15 @@ def has_credentials() -> bool:
     session = botocore.session.get_session()
     try:
         creds = session.get_credentials()
+        # NOTE: accessing creds.access_key is what actually triggers the
+        # lazy credential refresh (e.g. an SSO token renewal) and can
+        # raise (TokenRetrievalError etc.) — it MUST stay inside this try.
+        return creds is not None and creds.access_key is not None
     except Exception as e:
         logger.debug(
             f"Could not resolve AWS credentials ({e}); using anonymous access."
         )
         return False
-    return creds is not None and creds.access_key is not None
 
 
 def _download_tile(fs: Any, bucket: str, key: str, filename: str) -> bool:
@@ -334,6 +337,7 @@ def _download_missing_tiles(
     s3_bucket: str,
     s3_key: str,
     tile_indices: list[tuple[int, int, int]],
+    s3_endpoint: str | None = None,
 ) -> int:
     """Download missing tiles from S3 in parallel.
 
@@ -347,6 +351,8 @@ def _download_missing_tiles(
         S3 key prefix (e.g. ``'data/bathymetry/gebco_2024'``).
     tile_indices : list of (zoom, x_tile, y_tile)
         Tiles to check and download if missing.
+    s3_endpoint : str, optional
+        Endpoint URL for S3-compatible stores; ``None`` (default) uses AWS.
 
     Returns
     -------
@@ -372,7 +378,10 @@ def _download_missing_tiles(
         f"Downloading {len(to_download)} missing tiles from s3://{s3_bucket}/{s3_key}/ ..."
     )
 
-    fs = s3fs.S3FileSystem(anon=not has_credentials())
+    if s3_endpoint:
+        fs = s3fs.S3FileSystem(anon=True, endpoint_url=s3_endpoint)
+    else:
+        fs = s3fs.S3FileSystem(anon=not has_credentials())
 
     downloaded = 0
     with ThreadPoolExecutor() as pool:
@@ -423,6 +432,10 @@ class SlippyTileOptions(DriverOptions):
     tile_size: int = Field(default=256, description="Tile pixel size")
     s3_bucket: str | None = Field(default=None, description="S3 bucket name")
     s3_key: str | None = Field(default=None, description="S3 key prefix")
+    s3_endpoint: str | None = Field(
+        default=None,
+        description="Endpoint URL for S3-compatible stores (None = AWS S3)",
+    )
 
 
 class SlippyTileDriver(RasterDatasetDriver):
@@ -522,6 +535,7 @@ class SlippyTileDriver(RasterDatasetDriver):
                 tile_root=tile_root,
                 s3_bucket=opts.s3_bucket,
                 s3_key=opts.s3_key,
+                s3_endpoint=opts.s3_endpoint,
                 tile_indices=tile_list,
             )
 
