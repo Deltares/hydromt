@@ -329,7 +329,7 @@ Methods and processes
 ----------------------
 HydroMT provides a set of methods and (GIS) processes to process input data in order to
 prepare ready to run models. You can find more information on the available methods and
-processes in the :ref:`supporting functionnalities <methods_processes>`, :ref:`model processes <model_processes>` and in
+processes in the :ref:`supporting functionalities <methods_processes>`, :ref:`model processes <model_processes>` and in
 the :ref:`API reference <api_reference>`.
 
 These methods and processes are only available via the Python API. You can use them

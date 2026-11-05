@@ -325,7 +325,7 @@ def reproject_hydrography_like(
     river_upa: float, optional
         Minimum upstream area threshold [km2] for inflowing rivers, by default 5 km2
     river_len: float, optional
-        Mimimum distance from river outlet for inflowing river location,
+        Minimum distance from river outlet for inflowing river location,
         by default 1000 m.
     uparea_name, flwdir_name : str, optional
         Name of upstream area (default "uparea") and flow direction ("flwdir") variables
@@ -373,7 +373,7 @@ def reproject_hydrography_like(
     elvsyn_reproj.raster.set_crs(crs)
     elvsyn_reproj.raster.set_nodata(nodata)
     # get flow directions based on reprojected synthetic elevation
-    logger.info("Deriving flow direction from reprojected synthethic elevation.")
+    logger.info("Deriving flow direction from reprojected synthetic elevation.")
     da_flw1 = d8_from_dem(elvsyn_reproj, **kwargs)
     flwdir = flwdir_from_da(da_flw1, ftype="d8", mask=elv_mask)
     # find source river cells outside destination grid bbox

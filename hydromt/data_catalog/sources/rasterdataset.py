@@ -214,8 +214,8 @@ class RasterDatasetSource(DataSource):
     ) -> TimeRange:
         """Detect the temporal range of the dataset.
 
-        If no dataset is provided, it will be fetched accodring to the settings in the
-        addapter. also see :py:meth:`hydromt.RasterdatasetAdapter.get_data`.
+        If no dataset is provided, it will be fetched according to the settings in the
+        adapter. also see :py:meth:`hydromt.RasterdatasetAdapter.get_data`.
 
         Parameters
         ----------
@@ -282,7 +282,7 @@ class RasterDatasetSource(DataSource):
                 )
         except (IndexError, KeyError, CRSError):
             exec_nodata_strat(
-                f"Skipping {self.name} during stac conversion because detecting spacial extent failed.",
+                f"Skipping {self.name} during stac conversion because detecting spatial extent failed.",
                 strategy=handle_nodata,
             )
             return None

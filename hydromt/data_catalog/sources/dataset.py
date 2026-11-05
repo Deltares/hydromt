@@ -214,7 +214,7 @@ class DatasetSource(DataSource):
                 )
         except (IndexError, KeyError, CRSError):
             exec_nodata_strat(
-                f"Skipping {self.name} during stac conversion because detecting spacial extent failed.",
+                f"Skipping {self.name} during stac conversion because detecting spatial extent failed.",
                 handle_nodata,
             )
             return None

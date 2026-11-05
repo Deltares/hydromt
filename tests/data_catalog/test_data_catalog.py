@@ -1100,7 +1100,7 @@ class TestGetRasterDataset:
     def test_zoom_levels_cog_zoom_resolution(
         self, zoom_level_cog: str, data_catalog: DataCatalog, rioda_large: xr.DataArray
     ):
-        # reurn zoom level 1
+        # return zoom level 1
         res = np.asarray(rioda_large.raster.res)
         da1 = data_catalog.get_rasterdataset(
             zoom_level_cog, zoom=(res[0] * 2, "degree")
@@ -1360,7 +1360,7 @@ class TestGetGeoDataFrame:
     ):
         gdf1 = data_catalog.get_geodataframe(
             uri_geojson,
-            # only really care that the bbox doesn't intersect with anythign
+            # only really care that the bbox doesn't intersect with anything
             bbox=[12.5, 12.6, 12.7, 12.8],
             predicate="within",
             handle_nodata=NoDataStrategy.IGNORE,
@@ -1375,7 +1375,7 @@ class TestGetGeoDataFrame:
         with pytest.raises(NoDataException):
             data_catalog.get_geodataframe(
                 uri_geojson,
-                # only really care that the bbox doesn't intersect with anythign
+                # only really care that the bbox doesn't intersect with anything
                 bbox=[12.5, 12.6, 12.7, 12.8],
                 predicate="within",
                 handle_nodata=NoDataStrategy.RAISE,
@@ -1587,7 +1587,7 @@ class TestGetGeoDataset:
     def test_nodata_ignore(self, nc_dataset: str, data_catalog: DataCatalog):
         da: Optional[xr.DataArray] = data_catalog.get_geodataset(
             nc_dataset,
-            # only really care that the bbox doesn't intersect with anythign
+            # only really care that the bbox doesn't intersect with anything
             source_kwargs={"driver": "geodataset_xarray"},
             bbox=[12.5, 12.6, 12.7, 12.8],
             handle_nodata=NoDataStrategy.IGNORE,
@@ -1600,7 +1600,7 @@ class TestGetGeoDataset:
             data_catalog.get_geodataset(
                 nc_dataset,
                 source_kwargs={"driver": "geodataset_xarray"},
-                # only really care that the bbox doesn't intersect with anythign
+                # only really care that the bbox doesn't intersect with anything
                 bbox=(12.5, 12.6, 12.7, 12.8),
                 handle_nodata=NoDataStrategy.RAISE,
             )
