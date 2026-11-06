@@ -2,6 +2,7 @@
 """Tests for the hydromt.raster submodule."""
 
 import datetime
+import logging
 import warnings
 from pathlib import Path
 
@@ -828,3 +829,14 @@ def test_time_dim_multiple_datetime_dims_error():
     )
     with pytest.raises(ValueError, match="Multiple time dimensions found"):
         _ = da.raster.time_dim
+
+
+def test_reclassify_missing_nodata_warns(rioda: xr.DataArray, caplog):
+    reclass_df = pd.DataFrame({"val": [10.0]}, index=[1])
+    with caplog.at_level(logging.WARNING):
+        ds_out = rioda.raster.reclassify(reclass_df)
+    assert (
+        f"The nodata value {rioda.raster.nodata} is not in the reclass table."
+        in caplog.text
+    )
+    assert ds_out["val"].attrs.get("_FillValue") is None

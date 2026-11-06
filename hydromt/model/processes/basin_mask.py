@@ -93,6 +93,10 @@ def get_basin_geometry(
         if name not in ds.data_vars:
             raise ValueError(f"Dataset variable {name} not in ds.")
 
+    if geom is not None and geom.crs is not None and ds.raster.crs is not None:
+        if geom.crs != ds.raster.crs:
+            geom = geom.to_crs(ds.raster.crs)
+
     # for interbasins we can limit the domain based on either bbox / geom or bounds
     if kind == "interbasin" and bounds is None:
         if bbox is None and geom is None:
@@ -116,12 +120,17 @@ def get_basin_geometry(
                 xy0 = np.atleast_1d(xy[0])
                 xy1 = np.atleast_1d(xy[1])
                 kwargs.update(
-                    bbox=[
-                        min(xy0) - 0.1,
-                        min(xy1) - 0.1,
-                        max(xy0) + 0.1,
-                        max(xy1) + 0.1,
-                    ]
+                    mask=gpd.GeoDataFrame(
+                        geometry=[
+                            box(
+                                min(xy0) - 0.1,
+                                min(xy1) - 0.1,
+                                max(xy0) + 0.1,
+                                max(xy1) + 0.1,
+                            )
+                        ],
+                        crs=ds.raster.crs,
+                    )
                 )
             gdf_bas = basin_index.read_data(**kwargs)
         elif isinstance(basin_index, gpd.GeoDataFrame):

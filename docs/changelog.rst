@@ -25,6 +25,8 @@ Changed
 
 Fixed
 -----
+- ``GeoDataFrameSource.read_data`` now passes ``self.metadata.crs`` to ``_parse_geom_bbox_buffer``, and ``get_basin_geometry`` now preserves/reprojects the geometry and ``xy`` mask CRS to match ``ds.raster.crs`` so basin GeoJSON files in non-EPSG:4326 projections work properly. (#1563)
+- ``raster.reclassify`` now logs the actual missing nodata value instead of ``None`` when the raster nodata value is absent from the reclassification table, and ``mesh2d_from_rasterdataset`` checks ``len(ds.data_vars)`` when ``variables=None``.
 - Fractions not more than 1 in ``raster.rasterize_geometry`` output.
 - Format flag for cli command ``check`` now correctly accepts strings instead of enum members.
 - ``readers.open_raster`` no longer returns a DataArray backed by a closed file handle when reading from a remote filesystem. The handle stays open for as long as the DataArray lives and is closed when the DataArray - or the Dataset returned by ``readers.open_mfraster`` and ``readers.open_raster_from_tindex`` - is closed. Remote rasters are still read lazily.
