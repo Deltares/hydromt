@@ -657,7 +657,7 @@ def clip_basins(
     flwdir_name : str, optional
         name of flow direction DataArray, by default 'flwdir'
     kwargs : key-word arguments
-        Keyword arguments based to the :py:meth:`~hydromt.flw.basin_map` method.
+        Keyword arguments based to the :py:meth:`~hydromt.gis.flw.basin_map` method.
 
     Returns
     -------

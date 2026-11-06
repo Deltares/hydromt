@@ -68,11 +68,11 @@ def get_basin_geometry(
     outlets : bool, optional
         If True, include (sub)basins of outlets within domain only. By default False
     basins_name : str, optional
-        Name of flow direction variable in source, by default "basins"
+        Name of basins map variable in source, by default "basins"
     flwdir_name : str, optional
         Name of flow direction variable in source, by default "flwdir"
-    ftype : {'d8', 'ldd', 'nextxy'}, optional
-        Name of flow direction type, by default None; use input ftype.
+    ftype : {'d8', 'ldd', 'nextxy', 'nextidx', 'infer'}, optional
+        Type of flow direction encoding, by default "infer".
     buffer : int, optional
         The buffer to apply, by default 10
     **stream_kwargs : dict
