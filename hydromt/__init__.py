@@ -9,10 +9,11 @@ try:
     import rasterio as _rasterio
     from packaging.version import Version
 
-    if Version(_rasterio.__version__) >= Version("1.5.0"):
-        # Rasterio 1.5 installs a broken sys.excepthook that recurses infinitely
+    if Version("1.5.0") <= Version(_rasterio.__version__) < Version("1.5.1"):
+        # Rasterio 1.5.0 installs a broken sys.excepthook that recurses infinitely
         # on interpreter shutdown. Reset it to a safe version that prints the exception
         # and then calls the original hook wrapped in a try-except.
+        # Fixed upstream in rasterio 1.5.1, so newer versions need no patch.
         # See: https://github.com/rasterio/rasterio/issues/3563
         import sys as _sys
         import traceback as _traceback
@@ -31,7 +32,7 @@ try:
 
 except Exception:
     warnings.warn(
-        "Failed to patch the broken sys.excepthook installed by rasterio 1.5. "
+        "Failed to patch the broken sys.excepthook installed by rasterio 1.5.0. "
         "This may cause a harmless, but annoying recursive error on interpreter "
         "shutdown. To fix this, upgrade rasterio to a version that resolves the issue "
         "or downgrade to rasterio <1.5. You can safely ignore this warning if you do "

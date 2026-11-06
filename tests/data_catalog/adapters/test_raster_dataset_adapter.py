@@ -161,6 +161,19 @@ class TestRasterDatasetAdapter:
         )
         assert ds is None
 
+    def test_set_nodata_single_value(self, example_raster_ds: xr.Dataset):
+        adapter = RasterDatasetAdapter()
+        ds = adapter.transform(example_raster_ds, SourceMetadata(nodata=-999))
+        for name in ds.data_vars:
+            assert ds[name].raster.nodata == -999
+
+    def test_set_nodata_per_variable(self, example_raster_ds: xr.Dataset):
+        adapter = RasterDatasetAdapter()
+        nodata = {"temperature": -999, "precipitation": -1}
+        ds = adapter.transform(example_raster_ds, SourceMetadata(nodata=nodata))
+        assert ds["temperature"].raster.nodata == -999
+        assert ds["precipitation"].raster.nodata == -1
+
     def test_transform_missing_variables_respects_nodata_strategy(
         self, example_raster_ds: xr.Dataset
     ):
