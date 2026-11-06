@@ -57,7 +57,12 @@ class GeoDataFrameSource(DataSource):
         self._log_start_read_data()
 
         if bbox is not None or (mask is not None and buffer > 0):
-            mask = _parse_geom_bbox_buffer(mask, bbox, buffer)
+            mask = _parse_geom_bbox_buffer(
+                mask,
+                bbox,
+                buffer,
+                crs=self.metadata.crs,
+            )
 
         vrs: Optional[List[str]] = self.data_adapter._to_source_variables(variables)
 

@@ -9,7 +9,7 @@ import pandas as pd
 import xarray as xr
 import xugrid as xu
 from pyproj import CRS
-from shapely.geometry import box
+from shapely import box
 
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis import parse_crs
@@ -241,14 +241,13 @@ def create_mesh2d_from_geom(
     ncol = round((xmax - xmin) / res)  # int((xmax - xmin) // res)
     nrow = round((ymax - ymin) / res)  # int((ymax - ymin) // res)
     dx, dy = res, -res
-    faces = []
-    for i in range(nrow):
-        top = ymax + i * dy
-        bottom = ymax + (i + 1) * dy
-        for j in range(ncol):
-            left = xmin + j * dx
-            right = xmin + (j + 1) * dx
-            faces.append(box(left, bottom, right, top))
+    i = np.arange(nrow)
+    j = np.arange(ncol)
+    top = np.repeat(ymax + i * dy, ncol)
+    bottom = np.repeat(ymax + (i + 1) * dy, ncol)
+    left = np.tile(xmin + j * dx, nrow)
+    right = np.tile(xmin + (j + 1) * dx, nrow)
+    faces = box(left, bottom, right, top)
     grid = gpd.GeoDataFrame(geometry=faces, crs=geom.crs)
     # clip to geom
     if clip_to_geom:
@@ -320,7 +319,7 @@ def mesh2d_from_rasterdataset(
     if len(resampling_method) == 1:
         resampling_method = np.repeat(resampling_method, len(ds.data_vars))
     # one reproject method per variable
-    elif len(resampling_method) != len(variables):
+    elif len(resampling_method) != len(ds.data_vars):
         raise ValueError(
             f"resampling_method should have length 1 or {len(ds.data_vars)}"
         )

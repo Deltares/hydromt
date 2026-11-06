@@ -147,6 +147,24 @@ def test_mesh2d_from_rasterdataset_full():
     assert "a" not in out
     assert "b" not in out
 
+    # Act & Assert: variables=None with list resampling_method
+    out_none_vars = mesh2d_from_rasterdataset(
+        ds=ds,
+        mesh2d=mesh,
+        variables=None,
+        resampling_method=["centroid", "centroid"],
+    )
+    assert set(out_none_vars.data_vars) == {"a", "b"}
+
+    msg = "resampling_method should have length 1 or 2"
+    with pytest.raises(ValueError, match=msg):
+        mesh2d_from_rasterdataset(
+            ds=ds,
+            mesh2d=mesh,
+            variables=None,
+            resampling_method=["centroid", "centroid", "centroid"],
+        )
+
 
 def test_mesh2d_from_raster_reclass_full():
     # Arrange: basic raster setup
