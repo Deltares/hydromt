@@ -303,20 +303,25 @@ def df():
     return df
 
 
+@pytest.fixture(scope="session")
+def session_rng():
+    """Session-scoped RNG for deterministic random sampling in tests."""
+    return np.random.default_rng(100)
+
+
 @pytest.fixture
-def timeseries_df():
+def timeseries_df(session_rng):
     # Create a date range from 2020-01-01 to 2020-12-31
     dates = pd.date_range(start="2020-01-01", end="2020-12-31", freq="D")
 
     # Generate random values for three columns
-    np.random.seed(42)  # for reproducibility
-    col1 = np.random.randint(0, 100, len(dates))  # integers from 0 to 99
-    col2 = np.random.normal(
+    col1 = session_rng.integers(0, 100, len(dates))  # integers from 0 to 99
+    col2 = session_rng.normal(
         50, 10, len(dates)
     )  # normal distribution with mean 50 and standard deviation 10
-    col3 = np.random.choice(
-        ["A", "B", "C"], len(dates)
-    )  # categorical values from A, B, or C
+    col3 = np.array(["A", "B", "C"])[
+        session_rng.integers(0, 3, len(dates))
+    ]  # categorical values from A, B, or C
 
     # Create a dataframe with the dates as index and the columns as values
     df = pd.DataFrame({"col1": col1, "col2": col2, "col3": col3}, index=dates)
@@ -391,12 +396,12 @@ def world(test_data_dir) -> gpd.GeoDataFrame:
 
 
 @pytest.fixture
-def ts(geodf):
+def ts(geodf, session_rng):
     dates = pd.date_range("01-01-2000", "12-31-2000", name="time")
     ts = pd.DataFrame(
         index=geodf.index.values,
         columns=dates,
-        data=np.random.rand(geodf.index.size, dates.size),
+        data=session_rng.random((geodf.index.size, dates.size)),
     )
     return ts
 
@@ -415,6 +420,8 @@ def geods(geoda):
 
 @pytest.fixture
 def demda():
+    # NOTE keep the legacy seed: tests/gis/test_flw.py asserts exact flow
+    # direction values derived from this random DEM.
     np.random.seed(11)
     da = xr.DataArray(
         data=np.random.rand(15, 10),
@@ -428,12 +435,11 @@ def demda():
 
 
 @pytest.fixture
-def lulcda():
+def lulcda(session_rng):
     """Imitate VITO land use land cover data."""
-    np.random.seed(11)
     da = xr.DataArray(
         # vito lulc classes
-        data=np.random.choice([20, 30, 40, 110], size=(15, 10)),
+        data=np.array([20, 30, 40, 110])[session_rng.integers(0, 4, (15, 10))],
         dims=("y", "x"),
         coords={"y": -np.arange(0, 1500, 100), "x": np.arange(0, 1000, 100)},
         attrs=dict(_FillValue=255),
@@ -483,6 +489,8 @@ def hydds(flwda, flwdir):
 
 @pytest.fixture
 def obsda():
+    # NOTE keep the legacy seed: tests/stats/test_stats_skill.py asserts exact
+    # skill statistics derived from this series.
     rng = np.random.default_rng(12345)
     da = xr.DataArray(
         data=rng.random(size=365) * 100,
@@ -495,9 +503,9 @@ def obsda():
 
 
 @pytest.fixture
-def raster_ds():
-    temp = 15 + 8 * np.random.randn(2, 2, 3)
-    precip = 10 * np.random.rand(2, 2, 3)
+def raster_ds(session_rng):
+    temp = 15 + 8 * session_rng.standard_normal((2, 2, 3))
+    precip = 10 * session_rng.random((2, 2, 3))
     lon = [[-99.83, -99.32], [-99.79, -99.23]]
     lat = [[42.25, 42.21], [42.63, 42.59]]
     return xr.Dataset(
@@ -516,6 +524,8 @@ def raster_ds():
 
 @pytest.fixture
 def ts_extremes():
+    # NOTE keep the legacy seed: tests/stats/test_stats_extremes.py asserts
+    # exact fitted parameters derived from this series.
     rng = np.random.default_rng(12345)
     normal = pd.DataFrame(
         rng.random(size=(365 * 100, 2)) * 100,
