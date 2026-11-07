@@ -5,7 +5,9 @@ from pathlib import Path
 
 import pytest
 import xarray as xr
+from affine import Affine
 
+from hydromt.gis import full_from_transform
 from hydromt.writers import write_nc
 
 
@@ -58,6 +60,23 @@ def test_write_nc_gdal_compliant(tmp_path: Path, rioda: xr.DataArray):
     ds = xr.open_dataset(Path(tmp_path, "foo_r.nc"))
     assert "x" not in ds.dims
     assert "longitude" in ds.dims
+
+
+def test_write_nc_gdal_compliant_rotated(tmp_path: Path):
+    da = full_from_transform(
+        Affine.rotation(27) * Affine.scale(50, 50),
+        shape=(10, 10),
+        fill_value=1.0,
+        crs=32633,
+        name="depth",
+    )
+    write_nc(ds=da, file_path=Path(tmp_path, "foo.nc"), gdal_compliant=True)
+
+    ds = xr.open_dataset(Path(tmp_path, "foo.nc"))
+    assert ds.depth.attrs["grid_mapping"] == "spatial_ref"
+    assert ds.raster.crs.to_epsg() == 32633
+    assert ds.raster.rotation == pytest.approx(27)
+    xr.testing.assert_allclose(ds.xc, da.xc)
 
 
 def test_write_nc_no_progress(

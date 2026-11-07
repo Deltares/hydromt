@@ -145,8 +145,10 @@ def write_nc(
         y_old, x_old = ds.raster.dims
         ds = ds.raster.gdal_compliant(rename_dims=rename_dims, force_sn=force_sn)
         y_dim, x_dim = ds.raster.dims
-        encoding[y_dim] = encoding.pop(y_old)
-        encoding[x_dim] = encoding.pop(x_old)
+        # rotated grids have no x/y coordinate variables, so no encoding to move
+        for old, new in ((y_old, y_dim), (x_old, x_dim)):
+            if old in encoding:
+                encoding[new] = encoding.pop(old)
 
     to_netcdf_kwargs["encoding"] = encoding
 
