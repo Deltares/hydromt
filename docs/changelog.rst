@@ -30,6 +30,7 @@ Fixed
 - ``readers.open_raster`` no longer returns a DataArray backed by a closed file handle when reading from a remote filesystem. The handle stays open for as long as the DataArray lives and is closed when the DataArray - or the Dataset returned by ``readers.open_mfraster`` and ``readers.open_raster_from_tindex`` - is closed. Remote rasters are still read lazily.
 - ``readers.open_mfraster`` now closes the file handles it already opened when reading a later file fails, instead of leaking them.
 - ``readers.open_raster_from_tindex`` no longer silently drops tiles whose location in the tile index is an absolute path, and reads the tile index itself through the given filesystem.
+- ``ModelRoot`` pointing to a file (e.g. a model config file) no longer raises ``NotADirectoryError`` when the root is changed with ``set`` or when the object is garbage collected. Cleanup now only removes empty directories. (#1400)
 
 
 v1.4.1 (2026-08-06)
