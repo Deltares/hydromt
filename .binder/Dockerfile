@@ -7,7 +7,7 @@ WORKDIR /home/deltares
 ENV PATH=/home/deltares/.pixi/bin:$PATH
 ENV HOME=/home/deltares/
 
-COPY pixi.lock pyproject.toml README.rst ./
+COPY pixi.lock pyproject.toml README.rst LICENSE ./
 COPY ./hydromt ./hydromt
 COPY ./docs ./docs
 COPY examples ./examples
