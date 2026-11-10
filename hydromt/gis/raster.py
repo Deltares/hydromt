@@ -1022,11 +1022,11 @@ class XRasterBase(XGeoBase):
             nodata_line = reclass_table[reclass_table.index == nodata_ref]
             if nodata_line.empty:
                 # None will be used
+                nodata_ref = None
                 logger.warning(
                     f"The nodata value {nodata_ref} is not in the reclass table."
                     "None will be used for the params."
                 )
-                nodata_ref = None
 
         # apply for each parameter
         for param in params:
