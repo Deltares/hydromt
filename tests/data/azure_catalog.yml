@@ -1,6 +1,5 @@
 meta:
-  hydromt_version: ">=1.0a, <2.0"
-  version: v1.0.0
+  format_version: 2
 
 # Anonymous access to Azure Blob Storage using the default ConventionResolver.
 # This mirrors the AWS S3 pattern (filesystem protocol + anon: true) and
@@ -11,12 +10,12 @@ meta:
 noaa_isd_azure:
   data_type: DataFrame
   uri: abfs://isdweatherdatacontainer/ISDWeather/year=2020/month=1/*.parquet
+  filesystem:
+    protocol: abfs
+    account_name: azureopendatastorage
+    anon: true
   driver:
     name: pandas
-    filesystem:
-      protocol: abfs
-      account_name: azureopendatastorage
-      anon: true
   provider: abfs
   metadata:
     category: meteo

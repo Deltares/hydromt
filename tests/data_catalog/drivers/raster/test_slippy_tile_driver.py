@@ -370,6 +370,16 @@ def gebco_2024_catalog_path(test_data_dir):
 class TestSlippyTileDriverS3Integration:
     """End-to-end tests against the public deltares-ddb GEBCO 2024 tile set."""
 
+    @pytest.fixture(autouse=True)
+    def _anonymous_s3(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Ensure anonymous S3 access is used for the public bucket."""
+        # The deltares-ddb bucket is public, so force anonymous access for these tests.
+        # Otherwise, if you have credentials configured for other buckets, it will raise ``PermissionError: Forbidden``
+        monkeypatch.setattr(
+            "hydromt.data_catalog.drivers.raster.slippy_tile_driver.has_credentials",
+            lambda *args, **kwargs: False,
+        )
+
     def test_downloads_north_sea(self, tmp_path, gebco_2024_catalog_path):
         """Download tiles for a North Sea bbox from the public S3 bucket.
 

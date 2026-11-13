@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """command line interface for hydromt models."""
 
+import copy
 import logging
 from ast import literal_eval
 from datetime import datetime
@@ -13,8 +14,8 @@ import numpy as np
 from pydantic import ValidationError
 
 from hydromt import __version__, log
-from hydromt._utils import CatalogDumper
-from hydromt._validators import Format
+from hydromt._utils import CatalogDumper, Format
+from hydromt._utils.catalog_migrations import MigrationError, migrate_catalog
 from hydromt._validators.data_catalog_v0x import DataCatalogV0Validator
 from hydromt._validators.data_catalog_v1x import DataCatalogV1Validator
 from hydromt._validators.model_config import HydromtModelSetup
@@ -22,7 +23,7 @@ from hydromt.cli import _utils
 from hydromt.data_catalog import DataCatalog
 from hydromt.error import NoDataStrategy
 from hydromt.plugins import PLUGINS
-from hydromt.readers import read_workflow_yaml, read_yaml
+from hydromt.readers import _yml_from_uri_or_path, read_workflow_yaml, read_yaml
 from hydromt.typing.type_def import StrPath, TimeRange
 from hydromt.writers import write_yaml
 
@@ -334,45 +335,51 @@ def update(
     mod.update(model_out=model_out, steps=steps, forceful_overwrite=fo)
 
 
-def _validate_catalog(
-    cat_path: Path,
-    fmt: Format,
-    upgrade: bool,
-    sort: bool,
-) -> bool:
-    """Validate a catalog file. Returns True if valid, False otherwise."""
+def _validate_catalog(cat_path: Path, fmt: Format, upgrade: bool, sort: bool) -> bool:
     logger.info(f"Validating catalog at {cat_path}")
+    raw = _yml_from_uri_or_path(cat_path)
 
-    if fmt == Format.v0:
+    if fmt == Format.v0:  # keep the v0-specific validation/messages for --format v0
         try:
-            v0_catalog = DataCatalogV0Validator.from_yml(cat_path)
+            DataCatalogV0Validator.from_dict(copy.deepcopy(raw))
         except ValidationError as e:
             logger.error(f"Catalog {cat_path} has the following error(s): {e}")
             return False
+        if not upgrade:
+            logger.info(f"Catalog {cat_path} is valid!")
+            return True
 
-        if upgrade:
-            v1_catalog = DataCatalogV1Validator.from_v0(v0_catalog)
-            out_path = cat_path.with_stem(f"{cat_path.stem}_v1")
-            write_yaml(
-                out_path,
-                v1_catalog.model_dump(
-                    exclude_unset=True,
-                    exclude_defaults=True,
-                    exclude_none=True,
-                ),
-                sort_keys=sort,
-                Dumper=CatalogDumper,
-            )
-            logger.info(f"Upgraded catalog written to {out_path}")
-    elif fmt == Format.v1:
-        try:
-            DataCatalogV1Validator.from_yml(cat_path)
-        except ValidationError as e:
-            logger.error(f"Catalog {cat_path} has the following error(s): {e}")
-            return False
-    else:
-        logger.error(f"Unknown format {fmt} for catalog {cat_path}")
+    try:
+        migrated, report = migrate_catalog(raw)
+    except MigrationError as e:
+        logger.error(f"Catalog {cat_path} can't be upgraded automatically: {e}")
         return False
+
+    blocking = [(n, m) for n, m in report.applied if not m.runtime]
+    if blocking and not upgrade:
+        for name, m in blocking:
+            logger.error(f"{name}: {m.description}")
+        logger.error(
+            f"Catalog {cat_path} uses an outdated layout; re-run with --upgrade."
+        )
+        return False
+
+    try:
+        DataCatalogV1Validator.from_dict(copy.deepcopy(migrated))
+    except ValidationError as e:
+        logger.error(f"Catalog {cat_path} has the following error(s): {e}")
+        return False
+
+    for name, m in report.applied:
+        if m.runtime:
+            logger.warning(f"{name}: {m.description}")
+
+    if upgrade and report.applied:
+        out_path = cat_path.with_stem(f"{cat_path.stem}_upgraded")
+        write_yaml(out_path, migrated, sort_keys=sort, Dumper=CatalogDumper)
+        logger.info(f"Upgraded catalog written to {out_path}")
+        for note in report.notes:
+            logger.info(note)
 
     logger.info(f"Catalog {cat_path} is valid!")
     return True

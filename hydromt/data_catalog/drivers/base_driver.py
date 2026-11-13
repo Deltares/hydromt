@@ -110,7 +110,8 @@ class BaseDriver(AbstractBaseModel, ABC):
 
     filesystem: FSSpecFileSystem = Field(
         default_factory=FSSpecFileSystem,
-        description="Filesystem to use for accessing the data.",
+        exclude=True,  # owned by DataSource, is serialized there
+        description="Injected by the DataSource; do not set in the catalog.",
     )
     options: DriverOptions = Field(
         default_factory=DriverOptions, description=DRIVER_OPTIONS_DESCRIPTION

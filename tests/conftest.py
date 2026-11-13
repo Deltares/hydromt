@@ -225,7 +225,7 @@ def example_zarr_file(managed_tmp_path: Path) -> Path:
 @pytest.fixture
 def data_catalog(_local_catalog_eps) -> DataCatalog:
     """DataCatalog instance that points to local predefined catalogs."""
-    return DataCatalog("artifact_data=v1.0.0")
+    return DataCatalog("artifact_data")
 
 
 @pytest.fixture

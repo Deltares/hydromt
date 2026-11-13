@@ -20,6 +20,7 @@ from pyproj import CRS
 from pyproj.exceptions import CRSError
 
 from hydromt import __version__ as HYDROMT_VERSION
+from hydromt._utils.catalog_migrations import DRIVER_RENAME_MAPPING
 from hydromt._validators.data_catalog_v0x import (
     DataCatalogV0Item,
     DataCatalogV0ItemMetadata,
@@ -29,39 +30,6 @@ from hydromt._validators.data_catalog_v0x import (
 from hydromt.data_catalog.drivers.base_driver import DriverOptions
 from hydromt.readers import _yml_from_uri_or_path
 from hydromt.typing import Bbox, Number, TimeRange
-
-DRIVER_RENAME_MAPPING: Dict[str, Dict[str, str]] = {
-    "RasterDataset": {
-        "raster": "rasterio",
-        "zarr": "raster_xarray",
-        "netcdf": "raster_xarray",
-        "raster_tindex": "rasterio",
-    },
-    "GeoDataset": {
-        "vector": "geodataset_vector",
-        "zarr": "geodataset_xarray",
-        "netcdf": "geodataset_xarray",
-    },
-    "GeoDataFrame": {
-        "csv": "geodataframe_table",
-        "parquet": "geodataframe_table",
-        "xls": "geodataframe_table",
-        "xlsx": "geodataframe_table",
-        "xy": "geodataframe_table",
-        "vector": "pyogrio",
-    },
-    "DataFrame": {
-        "csv": "pandas",
-        "parquet": "pandas",
-        "xls": "pandas",
-        "xlsx": "pandas",
-        "fwf": "pandas",
-    },
-    "DataSet": {
-        "zarr": "dataset_xarray",
-        "netcdf": "dataset_xarray",
-    },
-}
 
 
 class SourceSpec(BaseModel):
@@ -115,6 +83,7 @@ class DataCatalogV1MetaData(BaseModel):
 
     roots: List[Path] | None = None
     version: str | Number | None = None
+    format_version: int | str | None = None
     hydromt_version: str | None = None
     name: str | None = None
     category: str | None = None
@@ -146,12 +115,11 @@ class DataCatalogV1MetaData(BaseModel):
         requested = SpecifierSet(self.hydromt_version, prereleases=True)
         version = Version(HYDROMT_VERSION)
 
-        if version in requested:
-            return self
-        else:
+        if Version(version.base_version) not in requested:
             raise ValueError(
                 f"Current hydromt version {HYDROMT_VERSION} is not compatible with version specified in catalog {self.hydromt_version}"
             )
+        return self
 
     @staticmethod
     def from_dict(input_dict: Dict[str, Any]) -> "DataCatalogV1MetaData":
@@ -256,8 +224,9 @@ class DataCatalogV1Item(BaseModel):
     metadata: DataCatalogV1ItemMetadata | None = None
     variants: List[SourceVariant] | None = None
     version: str | Number | None = None
-    placeholder: dict[str, list[str]] | None = None
+    placeholders: dict[str, list[str]] | None = None
     data_adapter: DataCatalogV1DataAdapter | None = None
+    filesystem: dict[str, Any] | None = None
 
     model_config = ConfigDict(
         str_strip_whitespace=True,

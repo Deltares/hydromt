@@ -1,6 +1,5 @@
 meta:
-  hydromt_version: '>=1.0a, <2.0'
-  version: v1.0.0
+  format_version: 2
 era5:
   data_type: RasterDataset
   uri: ERA5/daily/era5_{year}_daily.nc

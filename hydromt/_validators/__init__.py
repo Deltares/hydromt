@@ -1,7 +1,5 @@
 """Pydantic models for validation of various hydromt internal components."""
 
-from enum import StrEnum
-
 from hydromt._validators.data_catalog_v0x import (
     DataCatalogV0Item,
     DataCatalogV0ItemMetadata,
@@ -37,10 +35,4 @@ __all__ = [
     "validate_region",
     "HydromtModelStep",
     "HydromtModelSetup",
-    "Format",
 ]
-
-
-class Format(StrEnum):
-    v0 = "v0"
-    v1 = "v1"

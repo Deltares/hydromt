@@ -58,7 +58,7 @@ def test_falls_back_to_first_root_when_none_found(
     roots = [tmp_path / p for p in ["a", "b", "c", "d", "4", "⽀"]]
     d = {
         "meta": {
-            "hydromt_version": ">=1.0a,<2",
+            "version": "v2.0.0",
             "roots": roots,
         },
     }
@@ -73,7 +73,7 @@ def test_finds_later_roots(tmp_path: Path):
     Path(tmp_path, "asasdfasdf").mkdir()
     d = {
         "meta": {
-            "hydromt_version": ">=1.0a,<2",
+            "version": "v2.0.0",
             "roots": [tmp_path / p for p in ["a", "b", "c", "d", "4", "asasdfasdf"]],
         },
     }
@@ -87,7 +87,7 @@ def test_finds_roots_in_correct_order(tmp_path: Path):
         p.mkdir()
 
     d = {
-        "meta": {"hydromt_version": ">=1.0a,<2", "roots": paths},
+        "meta": {"version": "v2.0.0", "roots": paths},
     }
     cat = DataCatalog().from_dict(d)
     assert cat.root == Path(tmp_path, "a")
@@ -95,7 +95,7 @@ def test_finds_roots_in_correct_order(tmp_path: Path):
 
 def test_from_yml_no_root(tmp_path: Path):
     d = {
-        "meta": {"hydromt_version": ">=1.0a,<2"},
+        "meta": {"version": "v2.0.0"},
     }
 
     cat_file = tmp_path / "cat.yml"
@@ -484,10 +484,28 @@ def test_data_catalog_from_deltares_data():
     assert len(data_catalog._sources) > 0
 
 
-def test_data_catalog_hydromt_version(tmp_path: Path):
+def test_data_catalog_ignores_hydromt_version(tmp_path: Path):
     yml_path = tmp_path / "test.yml"
-    data_catalog = DataCatalog()
-    data_catalog.to_yml(yml_path, meta={"hydromt_version": "0.7.0"})
+    yml_path.write_text("meta:\n  hydromt_version: '<0.1'\n")
+    DataCatalog().from_yml(yml_path)
+
+
+@pytest.mark.parametrize(
+    ("fmt", "match"),
+    [(3, "not supported by hydromt"), (0, "--upgrade")],
+)
+def test_data_catalog_unsupported_format_raises(tmp_path: Path, fmt, match):
+    yml_path = tmp_path / "test.yml"
+    yml_path.write_text(f"meta:\n  format_version: {fmt}\n")
+    with pytest.raises(RuntimeError, match=match):
+        DataCatalog().from_yml(yml_path)
+
+
+@pytest.mark.parametrize("version", ["2023", "2023.05.14", "v3.0.0"])
+def test_data_catalog_version_does_not_determine_format(tmp_path: Path, version):
+    yml_path = tmp_path / "test.yml"
+    yml_path.write_text(f"meta:\n  version: '{version}'\n")
+    DataCatalog().from_yml(yml_path)
 
 
 @pytest.mark.skipif(not HAS_S3FS, reason="s3fs is not installed")
@@ -526,7 +544,7 @@ def test_from_predefined_catalogs(data_catalog):
     assert len(data_catalog.predefined_catalogs) > 0
     for name in data_catalog.predefined_catalogs:
         data_catalog._sources = {}  # reset
-        data_catalog.from_predefined_catalogs(f"{name}=latest")
+        data_catalog.from_predefined_catalogs(name)
         assert len(data_catalog._sources) > 0
 
 
@@ -576,7 +594,7 @@ def test_export_global_datasets(tmp_path: Path, export_test_slice_objects):
         yml_list = f.readlines()
     assert yml_list[0].strip() == "meta:"
     assert yml_list[1].strip() == "version: 1"
-    assert yml_list[2].strip().startswith("root:")
+    assert yml_list[2].strip() == "format_version: 2"
 
 
 def test_export_global_datasets_overwrite(tmp_path: Path, export_test_slice_objects):
@@ -611,7 +629,7 @@ def test_export_global_datasets_overwrite(tmp_path: Path, export_test_slice_obje
         yml_list = f.readlines()
     assert yml_list[0].strip() == "meta:"
     assert yml_list[1].strip() == "version: 2"
-    assert yml_list[2].strip().startswith("root:")
+    assert yml_list[2].strip() == "format_version: 2"
 
 
 @pytest.mark.integration
@@ -1202,20 +1220,17 @@ class TestGetRasterDataset:
         da = data_catalog.get_rasterdataset(
             data,
             source_kwargs={
-                "driver": {
-                    "name": "rasterio",
-                    "filesystem": {"protocol": "s3", "anon": "true"},
-                },
+                "driver": "rasterio",
+                "filesystem": {"protocol": "s3", "anon": "true"},
             },
         )
 
         assert isinstance(da, xr.DataArray)
 
     @pytest.mark.skipif(not HAS_S3FS, reason="S3FS not installed.")
-    def test_aws_worldcover(self, test_settings: Settings, catalog_dir: Path):
-        catalog_fn = catalog_dir / "aws_data" / "v1.0.0" / "data_catalog.yml"
+    def test_aws_worldcover(self, test_settings: Settings):
         data_catalog = DataCatalog(
-            data_libs=[catalog_fn],
+            data_libs="aws_data",
             cache=True,
             cache_dir=test_settings.cache_root.as_posix(),
         )
@@ -2099,9 +2114,10 @@ def require_earthdatahub_credentials():
                 "No netrc file found (.netrc/_netrc) for Earth Data Hub mirror authentication."
             )
 
-    if "api.earthdatahub.destine.eu" not in credentials.hosts:
+    # the datasets are served from the data host, so netrc must contain that host
+    if "data.earthdatahub.destine.eu" not in credentials.hosts:
         pytest.skip(
-            "No Earth Data Hub credentials found in netrc file (.netrc/_netrc) for host api.earthdatahub.destine.eu."
+            "No Earth Data Hub credentials found in netrc file (.netrc/_netrc) for host data.earthdatahub.destine.eu."
         )
 
 

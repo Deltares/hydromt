@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 from abc import ABC, abstractmethod
 from copy import deepcopy
@@ -21,15 +22,20 @@ from pydantic import (
 from pyproj import CRS
 from pystac import Catalog as StacCatalog
 
+from hydromt._utils.catalog_migrations import Migration, get_migration, migrate_source
 from hydromt._utils.uris import _is_valid_url
+from hydromt._utils.warnings import deprecation_warning
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.data_catalog.drivers import BaseDriver
 from hydromt.data_catalog.uri_resolvers import ConventionResolver, URIResolver
 from hydromt.error import NoDataStrategy
-from hydromt.typing import DataType, SourceMetadata
+from hydromt.typing import DataType, FSSpecFileSystem, SourceMetadata
 from hydromt.typing.type_def import TimeRange, TotalBounds
 
 logger = logging.getLogger(__name__)
+
+# Put here to run at import time, so we know the migration function is always available.
+_FILESYSTEM_MIGRATION = get_migration("filesystem-to-root")
 
 T = TypeVar("T")
 
@@ -56,6 +62,7 @@ class DataSource(BaseModel, ABC):
     data_adapter: DataAdapterBase
     driver: BaseDriver
     uri_resolver: URIResolver = Field(default_factory=ConventionResolver)
+    filesystem: FSSpecFileSystem = Field(default_factory=FSSpecFileSystem)
     data_type: ClassVar[DataType]
     root: Optional[str] = Field(
         default=None, exclude=True
@@ -88,14 +95,55 @@ class DataSource(BaseModel, ABC):
     @classmethod
     def _validate_data_type(cls, data: Any) -> Any:
         """Pydantic does not check class variables, so it is checked here."""
-        copy_data: dict = deepcopy(data)
-        if isinstance(copy_data, dict):
-            if data_type := copy_data.pop("data_type", None):
+        if isinstance(data, dict):
+            if data_type := data.pop("data_type", None):
                 if data_type != cls.data_type:
                     raise ValueError(f"'data_type' must be '{cls.data_type}'.")
-            if not copy_data.get("driver"):
-                copy_data["driver"] = cls._infer_default_driver(copy_data.get("uri"))
-        return copy_data
+            if not data.get("driver"):
+                data["driver"] = cls._infer_default_driver(data.get("uri"))
+        return data
+
+    @model_validator(mode="before")
+    @classmethod
+    def _migrate_legacy_layout(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
+        applied = migrate_source(data, runtime_only=True)
+        for m in applied:
+            _warn_migration(m, data.get("name"))
+        return data
+
+    @model_validator(mode="after")
+    def _inject_filesystem(self) -> DataSource:
+        components = (self.driver, self.uri_resolver)
+
+        if "filesystem" not in self.model_fields_set:
+            defined_on_component = [
+                c.filesystem for c in components if "filesystem" in c.model_fields_set
+            ]
+            if len({_fs_key(fs) for fs in defined_on_component}) > 1:
+                raise ValueError(
+                    "driver and uri_resolver have different filesystems; "
+                    "set a single `filesystem` on the DataSource."
+                )
+            if defined_on_component:
+                _warn_migration(_FILESYSTEM_MIGRATION, self.name)
+                # bypass validate_assignment
+                object.__setattr__(self, "filesystem", defined_on_component[0])
+        else:
+            for c in components:
+                if "filesystem" in c.model_fields_set and _fs_key(
+                    c.filesystem
+                ) != _fs_key(self.filesystem):
+                    raise ValueError(
+                        f"`filesystem` set on {type(c).__name__} conflicts with the "
+                        "DataSource-level filesystem."
+                    )
+
+        for c in components:
+            # bypass validate_assignment
+            object.__setattr__(c, "filesystem", self.filesystem)
+        return self
 
     @classmethod
     def _infer_default_driver(
@@ -116,28 +164,12 @@ class DataSource(BaseModel, ABC):
 
     @model_validator(mode="wrap")
     @classmethod
-    def _wrap_driver_validation(cls, data, handler):
-        driver = data.get("driver")
-        if isinstance(driver, BaseDriver):
-            data["driver"] = driver.model_dump()
-        return handler(data)
+    def _copy_input(cls, data, handler):
+        """Validate a copy, so the before validators can mutate their input.
 
-    @model_validator(mode="after")
-    def _validate_fs_equal_if_not_set(self) -> DataSource:
+        Defined after the before validators: the last defined runs first.
         """
-        Validate and change the filesystems.
-
-        They have to be equal between driver and uri resolver if they are not set.
-        They can be different, but only if set explicitly.
-        """
-        driver_fs_set = "filesystem" in self.driver.model_fields_set
-        uri_res_fs_set = "filesystem" in self.uri_resolver.model_fields_set
-        if driver_fs_set ^ uri_res_fs_set:
-            if driver_fs_set:
-                self.uri_resolver.filesystem = self.driver.filesystem
-            else:
-                self.driver.filesystem = self.uri_resolver.filesystem
-        return self
+        return handler(deepcopy(data) if isinstance(data, dict) else data)
 
     @property
     def full_uri(self) -> str:
@@ -348,3 +380,18 @@ def _abs_path(root: Union[Path, str], rel_path: Union[Path, str]) -> str:
             rel_path = join(root, rel_path)
         path = Path(abspath(rel_path))
     return str(path)
+
+
+def _fs_key(fs: FSSpecFileSystem) -> str:
+    return json.dumps(fs.model_dump(), sort_keys=True, default=str)
+
+
+def _warn_migration(m: Migration, name: str | None) -> None:
+    deprecation_warning(
+        message=f"Data source '{name}': {m.description}",
+        removed_in_release=m.removed_in,
+        alternative=(
+            "Update your data catalog automatically by running the cli command: "
+            "`hydromt check -d <catalog_path> --upgrade`"
+        ),
+    )

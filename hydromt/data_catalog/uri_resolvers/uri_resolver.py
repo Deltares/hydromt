@@ -24,7 +24,11 @@ class URIResolver(AbstractBaseModel, ABC):
     """URI Resolver responsible for finding the data using the URI in the Data Catalog."""
 
     model_config = ConfigDict(extra="forbid")
-    filesystem: FSSpecFileSystem = Field(default_factory=FSSpecFileSystem)
+    filesystem: FSSpecFileSystem = Field(
+        default_factory=FSSpecFileSystem,
+        exclude=True,  # owned by DataSource, is serialized there
+        description="Injected by the DataSource; do not set in the catalog.",
+    )
     options: dict[str, Any] = Field(default_factory=dict)
 
     @abstractmethod
