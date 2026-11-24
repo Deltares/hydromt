@@ -694,7 +694,7 @@ def _extract_coords_from_basin(
 
     if not res:
         logger.info(
-            "res argument not defined, using resolution of ",
+            "res argument not defined, using resolution of "
             f"hydrography data {da_hyd.raster.res}",
         )
         res = da_hyd.raster.res
