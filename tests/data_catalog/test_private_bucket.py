@@ -27,7 +27,7 @@ meta:
 
 merit_hydro:
   data_type: RasterDataset
-  uri: s3://hydromt-data/merit_hydro/merit_hydro.zarr
+  uri: s3://hydromt-data/curated/merit-hydro/1.0.1/merit_hydro.zarr
   driver:
     name: raster_xarray
     filesystem:
