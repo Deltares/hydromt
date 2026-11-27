@@ -145,3 +145,30 @@ class TestPandasDriver:
         vars_slice = ["city", "country"]
         df_filtered = driver.read([str(df_path)], variables=vars_slice)
         assert np.all(df_filtered.columns == vars_slice)
+
+    @pytest.mark.parametrize(
+        "filename", ["temp_2.csv", temp_2_xls_param, temp_2_xlsx_param]
+    )
+    @pytest.mark.parametrize("index_position", [0, 1])
+    @pytest.mark.parametrize("variables", [None, ["windx"], ["windx", "time"]])
+    def test_reads_named_index(
+        self,
+        filename: str,
+        index_position: int,
+        variables: list[str] | None,
+        tmp_path: Path,
+    ):
+        df = pd.DataFrame({"windx": [2.5, 3.5], "windy": [4.5, 5.5]})
+        df.insert(index_position, "time", pd.to_datetime(["2020-01-01", "2020-01-02"]))
+        path = tmp_path / filename
+        driver = PandasDriver(options={"index_col": "time", "parse_dates": ["time"]})
+        driver.write(path, df, write_kwargs={"index": False})
+        original_variables = None if variables is None else variables.copy()
+
+        result = driver.read([str(path)], variables=variables)
+
+        expected = df.set_index("time")
+        if variables is not None:
+            expected = expected[["windx"]]
+        pd.testing.assert_frame_equal(result, expected)
+        assert variables == original_variables
