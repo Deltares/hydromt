@@ -30,6 +30,9 @@ Fixed
 - ``readers.open_raster`` no longer returns a DataArray backed by a closed file handle when reading from a remote filesystem. The handle stays open for as long as the DataArray lives and is closed when the DataArray - or the Dataset returned by ``readers.open_mfraster`` and ``readers.open_raster_from_tindex`` - is closed. Remote rasters are still read lazily.
 - ``readers.open_mfraster`` now closes the file handles it already opened when reading a later file fails, instead of leaking them.
 - ``readers.open_raster_from_tindex`` no longer silently drops tiles whose location in the tile index is an absolute path, and reads the tile index itself through the given filesystem.
+- A per-variable ``nodata`` mapping in a RasterDataset catalog entry is now applied to each variable, instead of being skipped as a non-numeric nodata value.
+- The workaround for the recursive ``sys.excepthook`` bug now only applies to rasterio 1.5.0, which is the only affected version.
+- Upgrading a v0 data catalog renames the ``fn_data`` option of GeoDataset vector sources to ``data_path``, so the upgraded source still reads its time series file (#1558).
 
 
 v1.4.1 (2026-08-06)

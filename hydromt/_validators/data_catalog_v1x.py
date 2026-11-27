@@ -63,6 +63,12 @@ DRIVER_RENAME_MAPPING: Dict[str, Dict[str, str]] = {
     },
 }
 
+# driver options renamed in v1, keyed by the v1 driver name. Options are forwarded
+# to the reader, whose argument names changed, so an old name no longer reaches it.
+OPTION_RENAME_MAPPING: Dict[str, Dict[str, str]] = {
+    "geodataset_vector": {"fn_data": "data_path"},
+}
+
 
 class SourceSpec(BaseModel):
     """A complete source variant specification."""
@@ -279,6 +285,15 @@ class DataCatalogV1Item(BaseModel):
 
         if v0_item.kwargs and len(v0_item.kwargs) > 0:
             options = {**options, **v0_item.kwargs}
+
+        option_renames = OPTION_RENAME_MAPPING.get(driver_name, {})
+        if option_renames:
+            # copy first: options may still alias the v0 item's own field
+            options = dict(options)
+            for old_name, new_name in option_renames.items():
+                if old_name in options:
+                    # an entry carrying both names keeps the v1 one
+                    options.setdefault(new_name, options.pop(old_name))
 
         if driver_name:
             driver = DataCatalogV1DriverItem(
