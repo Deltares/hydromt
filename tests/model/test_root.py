@@ -69,6 +69,32 @@ def test_model_root__clean_up(tmp_path: Path):
     assert not p.exists()
 
 
+def test_model_root__clean_up_file(tmp_path: Path):
+    # A model root can point to a file, e.g. a model config file
+    p = Path(tmp_path, "model.toml")
+    p.touch()
+    root = ModelRoot(path=p, mode="r")
+    assert root.path == p
+
+    # Cleaning up must leave the file alone instead of trying to list it
+    root._cleanup()
+    assert p.is_file()
+
+
+def test_model_root_set_from_file(tmp_path: Path):
+    # Set up the root on a file in read mode
+    p1 = Path(tmp_path, "model.toml")
+    p1.touch()
+    root = ModelRoot(path=p1, mode="r")
+
+    # Moving the root away from the file should work
+    p2 = Path(tmp_path, "foo")
+    _ = root.set(path=p2, mode="w")
+    assert root.path == p2
+    assert p2.is_dir()
+    assert p1.is_file()
+
+
 def test_model_root_read_check(tmp_path: Path):
     # Set up the root
     root = ModelRoot(path=tmp_path, mode="r")

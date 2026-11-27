@@ -50,7 +50,9 @@ class ModelRoot:
 
     def _cleanup(self) -> None:
         """Clean up the afterwards."""
-        if self.path is None or not self.path.exists():
+        # Only an empty directory is removed. The root can also be a file (e.g. a
+        # model config file), which must be left alone.
+        if self.path is None or not self.path.is_dir():
             return
         if len(list(self.path.iterdir())) == 0:
             self.path.rmdir()
