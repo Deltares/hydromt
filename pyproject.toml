@@ -1,5 +1,5 @@
 [build-system]
-requires = ["flit_core >=3.4.0,<5"]
+requires = ["flit_core >=3.11,<5"]
 build-backend = "flit_core.buildapi"
 
 [project]
@@ -50,12 +50,13 @@ dependencies = [
 
 requires-python = ">=3.11,<3.15"
 readme = "README.rst"
+license = "MIT"
+license-files = ["LICENSE"]
 classifiers = [
 	"Development Status :: 5 - Production/Stable",
 	"Intended Audience :: Developers",
 	"Intended Audience :: Science/Research",
 	"Topic :: Scientific/Engineering :: Hydrology",
-	"License :: OSI Approved :: MIT License",
 	"Programming Language :: Python :: 3",
 	"Programming Language :: Python :: 3.12",
 	"Programming Language :: Python :: 3.13",
@@ -141,9 +142,6 @@ core = "hydromt.data_catalog.predefined_catalog"
 
 [project.entry-points."hydromt.uri_resolvers"]
 core = "hydromt.data_catalog.uri_resolvers"
-
-[tool.setuptools.dynamic]
-description = { file = "hydromt/__init__.py" }
 
 [tool.ruff]
 line-length = 88
