@@ -30,6 +30,7 @@ Fixed
 - ``readers.open_raster`` no longer returns a DataArray backed by a closed file handle when reading from a remote filesystem. The handle stays open for as long as the DataArray lives and is closed when the DataArray - or the Dataset returned by ``readers.open_mfraster`` and ``readers.open_raster_from_tindex`` - is closed. Remote rasters are still read lazily.
 - ``readers.open_mfraster`` now closes the file handles it already opened when reading a later file fails, instead of leaking them.
 - ``readers.open_raster_from_tindex`` no longer silently drops tiles whose location in the tile index is an absolute path, and reads the tile index itself through the given filesystem.
+- ``writers.write_nc`` with ``gdal_compliant=True`` no longer raises a ``KeyError`` for rotated grids, which have no x/y coordinate variables to carry an encoding.
 
 
 v1.4.1 (2026-08-06)
