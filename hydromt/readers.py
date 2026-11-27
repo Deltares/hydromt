@@ -1115,9 +1115,9 @@ def read_workflow_yaml(
     defaults : dict, optional
         Nested dictionary with default options, by default dict()
     abs_path : bool, optional
-        If True, parse string values to an absolute path if the a file or folder
-        with that name (string value) relative to the config file exist,
-        by default True
+        If True, parse string values that look like a path (with a directory part
+        or a file extension) to an absolute path if a file or folder with that
+        name relative to the config file exists, by default True
     skip_abspath_sections: list
         These sections are not evaluated for absolute paths if abs_path=True,
         by default ["setup_config"]
@@ -1175,9 +1175,9 @@ def _config_read(
     defaults : dict[str, Any] | None, optional
         Nested dictionary with default options, by default None
     abs_path : bool, optional
-        If True, parse string values to an absolute path if the a file or folder
-        with that name (string value) relative to the config file exist,
-        by default False
+        If True, parse string values that look like a path (with a directory part
+        or a file extension) to an absolute path if a file or folder with that
+        name relative to the config file exists, by default False
     skip_abspath_sections: list[str] | None, optional
         These sections are not evaluated for absolute paths if abs_path=True,
         by default ["setup_config"]

@@ -287,6 +287,27 @@ def test_open_nc_geo_map_coord_sets_close(tmpdir):
     assert ds2._close is not None
 
 
+def test_read_workflow_yaml_keeps_names(tmp_path: Path):
+    # a data catalog source named like a folder next to the workflow file (#1562)
+    (tmp_path / "hydrography").mkdir()
+    (tmp_path / "basins.geojson").touch()
+    workflow = tmp_path / "build.yml"
+    workflow.write_text(
+        "steps:\n"
+        "  - setup_basemaps:\n"
+        "      hydrography_fn: hydrography\n"
+        "      hydrography_dir: ./hydrography\n"
+        "      basin_index_fn: basins.geojson\n"
+    )
+
+    _, _, steps = read_workflow_yaml(workflow)
+
+    kwargs = steps[0]["setup_basemaps"]
+    assert kwargs["hydrography_fn"] == "hydrography"
+    assert kwargs["hydrography_dir"] == tmp_path / "hydrography"
+    assert kwargs["basin_index_fn"] == tmp_path / "basins.geojson"
+
+
 def test_read_workflow_yaml(test_data_dir: Path):
     model_type, model_init, steps = read_workflow_yaml(
         test_data_dir / "build_config.yml",

@@ -42,7 +42,10 @@ def _make_config_paths_absolute(
     skip_abspath_sections = skip_abspath_sections or ["setup_config"]
 
     def _abspath(value, root):
-        if exists(join(root, value)):
+        # only values that look like a path, so that a name (e.g. a data catalog
+        # source) is not replaced by a file or folder with the same name
+        looks_like_path = Path(value).name != value or Path(value).suffix != ""
+        if looks_like_path and exists(join(root, value)):
             value = Path(abspath(join(root, value)))
         return value
 
