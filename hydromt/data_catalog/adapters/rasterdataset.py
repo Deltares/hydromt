@@ -224,27 +224,29 @@ class RasterDatasetAdapter(DataAdapterBase):
         buffer: int = 0,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ):
-        # make sure bbox is in data crs
+        # Make sure bbox is in data crs
         bbox = None
         crs = ds.raster.crs
         epsg = crs.to_epsg()  # this could return None
         if mask is not None:
             bbox = mask.to_crs(crs).total_bounds
-        # work with 4326 data that is defined at 0-360 degrees longtitude
+        # Work with 4326 data that is defined at 0-360 degrees longtitude
         w, _, e, _ = ds.raster.bounds
-        if epsg == 4326 and np.isclose(e - w, 360):  # allow for rounding errors
+        if epsg == 4326 and np.isclose(e - w, 360):  # Allow for rounding errors
             ds = _meridian_offset(ds, bbox)
 
-        # clip with bbox
-        if bbox is not None:
-            # check if bbox is fully covered
+        # Clip with mask
+        if mask is not None:
+            # Check if bbox is fully covered
             bbox_str = ", ".join([f"{c:.3f}" for c in bbox])
 
             def _lt_or_close(a: float, b: float) -> bool:
                 return np.isclose(a, b) or a < b
 
+            # Get the bounds of the dataset
             w, s, e, n = ds.raster.bounds
 
+            # Produce a warning when the area is not fully covered by the data
             if not any(
                 map(_lt_or_close, (w, s, bbox[2], bbox[3]), (bbox[0], bbox[1], e, n))
             ):
@@ -252,8 +254,9 @@ class RasterDatasetAdapter(DataAdapterBase):
                     f"Dataset [{w}, {s}, {e}, {n}] does not fully cover bbox [{bbox_str}]"
                 )
 
-            logger.debug(f"Clip to [{bbox_str}] (epsg:{epsg}))")
-            ds = ds.raster.clip_bbox(bbox, align=align, buffer=buffer)
+            # Clip the data specifically to the mask
+            logger.debug(f"Clip to mask with bounds [{bbox_str}] (epsg:{epsg}))")
+            ds = ds.raster.clip_geom(mask, align=align, buffer=buffer)
             if _has_no_data(ds):
                 exec_nodata_strat("No data left after bbox clipping.", handle_nodata)
                 return None
