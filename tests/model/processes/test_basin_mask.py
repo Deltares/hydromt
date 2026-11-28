@@ -2,11 +2,15 @@
 """Tests for the hydromt.workflows.basin_mask."""
 
 import logging
+from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
 import pytest
+from pyproj import Transformer
+from shapely.geometry import box
 
+from hydromt import DataCatalog
 from hydromt.gis import raster_utils
 from hydromt.model.processes.basin_mask import (
     _check_size,
@@ -225,3 +229,94 @@ def test_check_size(caplog):
     )
     _check_size(test_raster)
     assert "Loading very large spatial domain to derive a subbasin." in caplog.text
+
+
+def test_basin_geom_non_4326_crs(basin_files):
+    _, ds, gdf_bas_index, _ = basin_files
+    geom_4326 = gpd.GeoDataFrame(
+        geometry=[box(12.2, 46.2, 12.4, 46.3)],
+        crs=4326,
+    )
+    geom_32633 = geom_4326.to_crs(32633)
+
+    gdf_inter_4326, _ = get_basin_geometry(
+        ds,
+        kind="interbasin",
+        basin_index=gdf_bas_index,
+        geom=geom_4326,
+        strord=6,
+    )
+    gdf_inter_32633, _ = get_basin_geometry(
+        ds,
+        kind="interbasin",
+        basin_index=gdf_bas_index,
+        geom=geom_32633,
+        strord=6,
+    )
+    assert gdf_inter_32633.index.size == gdf_inter_4326.index.size == 1
+
+    gdf_sub_4326, _ = get_basin_geometry(
+        ds,
+        kind="subbasin",
+        basin_index=gdf_bas_index,
+        geom=geom_4326,
+        strord=6,
+    )
+    gdf_sub_32633, _ = get_basin_geometry(
+        ds,
+        kind="subbasin",
+        basin_index=gdf_bas_index,
+        geom=geom_32633,
+        strord=6,
+    )
+    assert gdf_sub_32633.index.size == gdf_sub_4326.index.size == 1
+
+
+def test_basin_index_source_projected_crs(basin_files, tmp_path: Path):
+    _, ds, gdf_bas_index, _ = basin_files
+    gdf_32633 = gdf_bas_index.to_crs(32633)
+    geojson_path = tmp_path / "basins_32633.geojson"
+    gdf_32633.to_file(geojson_path, driver="GeoJSON")
+
+    cat = DataCatalog()
+    cat.from_dict(
+        {
+            "basins_no_meta_crs": {
+                "uri": str(geojson_path),
+                "data_type": "GeoDataFrame",
+                "driver": "pyogrio",
+            },
+            "basins_with_meta_crs": {
+                "uri": str(geojson_path),
+                "data_type": "GeoDataFrame",
+                "driver": "pyogrio",
+                "metadata": {"crs": 32633},
+            },
+        }
+    )
+
+    transformer = Transformer.from_crs(4326, 32633, always_xy=True)
+    x_proj, y_proj = transformer.transform(12.2051, 45.8331)
+
+    # Direct read_data with bbox when metadata.crs is set (#1563)
+    src_meta = cat.get_source("basins_with_meta_crs")
+    gdf_read = src_meta.read_data(
+        bbox=[x_proj - 0.1, y_proj - 0.1, x_proj + 0.1, y_proj + 0.1]
+    )
+    assert gdf_read is not None
+    assert len(gdf_read) > 0
+    assert gdf_read.crs.to_epsg() == 32633
+
+    # get_basin_geometry with projected ds, xy, and GeoDataFrameSource (#1563)
+    ds_clip = ds.raster.clip_bbox([12.0, 45.6, 12.5, 46.1])
+    ds_32633 = ds_clip.raster.reproject(dst_crs=32633)
+    gdf_bas, gdf_out = get_basin_geometry(
+        ds_32633,
+        kind="subbasin",
+        basin_index=cat.get_source("basins_no_meta_crs"),
+        xy=[x_proj, y_proj],
+        strord=4,
+    )
+    assert gdf_bas.index.size == 1
+    assert gdf_bas.crs.to_epsg() == 32633
+    assert gdf_out is not None
