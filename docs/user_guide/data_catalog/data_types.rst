@@ -384,7 +384,7 @@ To read a vector time-series dataset from a multiple file netcdf archive the fol
 is used, where the options are passed to :py:func:`xarray.open_mfdataset`
 (or :py:func:`xarray.open_zarr` for zarr data).
 In case the CRS cannot be inferred from the netcdf data it is defined here.
-The path to multiple files can be set using a sting glob or several keys,
+The path to multiple files can be set using a string glob or several keys,
 see description of the ``uri`` argument in the :ref:`yaml file description <data_yaml>`.
 In this example additional renaming and unit conversion preprocessing steps are added to
 unify the data to match the HydroMT naming and unit :ref:`terminology <terminology>`.

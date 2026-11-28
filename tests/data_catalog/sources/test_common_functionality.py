@@ -432,4 +432,4 @@ class TestValidators:
             RuntimeError,
             match=f"driver: '{mock_driver.name}' does not support writing data",
         ):
-            source.to_file("/non/existant/test", driver_override=mock_driver)
+            source.to_file("/non/existent/test", driver_override=mock_driver)

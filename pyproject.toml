@@ -20,7 +20,7 @@ dependencies = [
 	"mercantile>=1.0",         # tile handling
 	"netcdf4>=1.7",            # netcfd IO
 	"numba>=0.63.0",           # speed up computations (used in e.g. stats)
-	"numpy>=2.2.0",            # pin necessary to ensure compatability with C headers
+	"numpy>=2.2.0",            # pin necessary to ensure compatibility with C headers
 	"packaging>=25.0",         # compare versions of hydromt
 	"pandas>=2.3,<4",          # Dataframes
 	"pooch>=1.8",              # data fetching
@@ -33,15 +33,15 @@ dependencies = [
 	"pystac>=1.11",            # STAC integration
 	"pyyaml>=6.0.2",           # yaml interface (6.0.2 adds py3.13 wheels, older builds fail)
 	"rasterio>=1.5",           # raster wrapper around gdal
-	"requests>=2.32.2",        # donwload stuff
+	"requests>=2.32.2",        # download stuff
 	"rio-vrt>=0.3.1",          # building vrt files for caching of mosaic rasters
-	"rioxarray>=0.18",         # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
+	"rioxarray>=0.18",         # wraps rasterio and xarray. Almost superseded by hydromt/raster.py
 	"scipy>=1.15",             # scientific utilities
 	"shapely>=2.1.2",          # geometry transforms
 	"tenacity>=9.1",           # general-purpose retrying library
 	"tomli>=2.0",              # parsing toml files
 	"tomli-w>=1.0",            # writing toml files
-	"universal_pathlib>=0.2",  # provides path compatability between different filesystems
+	"universal_pathlib>=0.2",  # provides path compatibility between different filesystems
 	"xarray>=2025.06",         # ndim data arrays
 	"xmltodict>=1.0",          # xml parser also used to read VRT
 	"xugrid[all]>=0.15.1",     # xarray wrapper for mesh processing
@@ -415,3 +415,16 @@ low-py312 = { features = [
 	"examples",
 ] }
 min-py312 = { features = ["py312", "test"], solve-group = "py312" }
+
+
+[tool.codespell]
+skip = "*.lock,./joss_paper,hydromt-core-sbom.json"
+ignore-words-list = [
+    "ETo",
+    "fo",
+    "implementors",
+    "Linke",
+    "nd",
+    "slippy",
+    "wth",
+]

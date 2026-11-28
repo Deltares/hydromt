@@ -98,7 +98,7 @@ class VectorComponent(SpatialModelComponent):
 
         If vector already contains a geometry layer different than data,
         `overwrite_geom` can be set to True to overwrite the complete vector
-        object wit data (use with caution as previous data could be lost).
+        object with data (use with caution as previous data could be lost).
 
         Parameters
         ----------

@@ -99,7 +99,7 @@ To preserve reproducibility for older versions of the catalogs, we DO NOT modify
 5.  run update_versions.py, this will create a registry file with the versions and SHA256 hashes of the data catalogs. It is very important that the files have Linux style line endings (LF) as opposed to windows style line endings (CRLF) to keep hashes consistent. If this is not done, pooch will not be able to find the catalogs. This is done automatically for you (CRLF -> LF) if you are updating from windows.
 6. test your yml file, (for more information on testing see section below).
 7. create a pull request targeting the main branch
-8. Once the pull request get's merged into the `main` branch, it should be available to all HydroMT users.
+8. Once the pull request gets merged into the `main` branch, it should be available to all HydroMT users.
 
 Testing
 -------
@@ -109,7 +109,7 @@ Testing a new data catalog should be fairly straight forward once it is created.
 
 1. Instantiate a catalog, and retrieve the dataset from it using the appropriate `get_*` function (e.g. `get_rasterdataset` for raster data)
 2. The dataset should slice properly in whatever ways are appropriate. (e.g. requesting a dataset with only certain variables should return only that data if the driver supports it)
-3. If the dataset requires special logic to merge several parts please add tests to demostrate the correct working of this as well.
+3. If the dataset requires special logic to merge several parts please add tests to demonstrate the correct working of this as well.
 4. Units should be acounted for properly using properties such as `unit`, `unti_add`, and `unit_mult` where appropriate
 5. Whatever domain specific quality assurance should be done, to avoid for example, rounding errors near the boundaries.
 

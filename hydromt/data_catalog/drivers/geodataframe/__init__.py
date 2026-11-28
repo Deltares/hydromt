@@ -1,4 +1,4 @@
-"""All drivers for readin GeoDataframe datasets."""
+"""All drivers for reading GeoDataframe datasets."""
 
 from hydromt.data_catalog.drivers.geodataframe.geodataframe_driver import (
     GeoDataFrameDriver,

@@ -18,7 +18,7 @@ Key format changes:
 
 - ``path`` is renamed to ``uri``
 - **driver**: ``filesystem`` or ``driver_kwargs`` moved under ``driver``. ``driver`` can
-  be a single string or a dictionnary with name and options (passed to underlying function
+  be a single string or a dictionary with name and options (passed to underlying function
   that will read the data, e.g. xarray.open_mfdataset, etc.).
 - **data_adapter**:``unit_add``, ``unit_mult``, ``rename``, etc. moved under ``data_adapter``
 - **uri_resolver**: can be specified mostly in the case of tiled rasters to pass required options.

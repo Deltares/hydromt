@@ -68,8 +68,8 @@ In the core of HydroMT, the available components are:
 | VectorModel.vector                                        | VectorComponent            | Component for managing geospatial vector data |
 +-----------------------------------------------------------+----------------------------+-----------------------------------------------+
 
-This change however means that you are now free to develop your own model components without having to re-use or adhere to the
-terminology of the core model. You can now also only re-use the core components that you actually need!
+This change however means that you are now free to develop your own model components without having to reuse or adhere to the
+terminology of the core model. You can now also only reuse the core components that you actually need!
 
 Check the custom objects implementation guide to see how to:
 
@@ -163,7 +163,7 @@ Setup methods from core
 Some of the setup methods that were previously part of the ``Model`` class or of the
 ``GridModel`` and ``MeshModel`` subclasses have been removed and were not migrated to the
 new ``GridComponent`` or ``MeshComponent``. The rationale behind this method is that users
-may not wish to always inherit all these methods when re-using core components.
+may not wish to always inherit all these methods when reusing core components.
 
 However, the functionality of these methods has not been removed, and is still fully available in the
 ``hydromt.model.processes.grid`` and ``hydromt.model.processes.mesh`` submodules. So if you do

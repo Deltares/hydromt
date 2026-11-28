@@ -43,7 +43,7 @@ and ``x`` dimension, and additionally the data inside it must have the correct
         def test_equal(self, other: "ModelComponent") -> tuple[bool, Dict[str, str]]:
             errors: Dict[str, str] = {}
             if not isinstance(other, self.__class__):
-                errors['type'] = """Other is not of type RainfallComponent and therfore
+                errors['type'] = """Other is not of type RainfallComponent and therefore
                 cannot be equal"""
                 return (False, errors)
 

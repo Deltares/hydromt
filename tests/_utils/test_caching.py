@@ -20,7 +20,7 @@ def test__copy_to_local(tmp_path: Path, test_data_dir: Path):
         tmp_path,
     )
 
-    # Assert the output, i.e. copying succeded
+    # Assert the output, i.e. copying succeeded
     assert Path(tmp_path, "parameters_data.yml").is_file()
 
 

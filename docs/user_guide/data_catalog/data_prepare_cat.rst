@@ -53,7 +53,7 @@ The catalog file can start with an *optional* global **metadata** data section:
   tree.
 - **version** (recommended): data catalog version
 - **hydromt_version** (recommended): range of hydromt version that can read this
-  catalog. Format should be acording to `PEP 440
+  catalog. Format should be according to `PEP 440
   <https://peps.python.org/pep-0440/#version-specifiers>`_.
 - **category** (optional): used if all data source in catalog belong to the same
   category. Usual categories within HydroMT are *geography*, *topography*,
@@ -156,7 +156,7 @@ also possible.
 
 .. tab-set::
 
-    .. tab-item:: HydroMT worflow file (CLI)
+    .. tab-item:: HydroMT workflow file (CLI)
 
       Example 1:
 
@@ -200,7 +200,7 @@ also possible.
         # get a 2020 version. This will return the 2020 version from the last provider (aws)
         ds = dc.get_rasterdataset("esa_worldcover", version=2020)
         # get a 2021 version. This will return the 2021 version from the local provider as
-        # this verion is not available from aws .
+        # this version is not available from aws .
         ds = dc.get_rasterdataset("esa_worldcover", version=2021)
         # get the 2020 version from the local provider
         ds = dc.get_rasterdataset("esa_worldcover", version=2020, provider="local")

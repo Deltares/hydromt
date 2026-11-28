@@ -613,9 +613,9 @@ def rotated_grid(
     res : float
         Resolution of the grid
     dec_origin:
-        Number of signifiant numbers to round the origin points to.
+        Number of significant numbers to round the origin points to.
     dec_rotation:
-        Number of signifiant numbers to round the rotation to.
+        Number of significant numbers to round the rotation to.
     """
 
     def _azimuth(point1, point2):

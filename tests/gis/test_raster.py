@@ -322,7 +322,7 @@ def test_clip(transform, shape):
     da1 = da[:2, :2]
     assert da1.raster._transform is None
     assert da1.raster._crs is None
-    # attributes do persisit when slicing using clip_bbox
+    # attributes do persist when slicing using clip_bbox
     raster1d = da.raster.clip(slice(1, 2), slice(0, 2))
     assert raster1d.raster._crs is not None
     assert raster1d.raster.transform is not None

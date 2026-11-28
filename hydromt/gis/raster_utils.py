@@ -410,7 +410,7 @@ def spread2d(
     da_friction: Optional[xr.DataArray] = None,
     nodata: Optional[float] = None,
 ) -> xr.Dataset:
-    """Return values of `da_obs` spreaded to cells with `nodata` value within `da_mask`.
+    """Return values of `da_obs` spread to cells with `nodata` value within `da_mask`.
 
     powered by :py:meth:`pyflwdir.gis_utils.spread2d`.
 
@@ -422,7 +422,7 @@ def spread2d(
     da_mask :  xarray.DataArray, optional
         Mask of cells to fill with the spreading algorithm, by default None
     da_friction :  xarray.DataArray, optional
-        Friction values used by the spreading algorithm to calcuate the friction
+        Friction values used by the spreading algorithm to calculate the friction
         distance, by default None
     nodata : float, optional
         Nodata or background value. Must be finite numeric value. If not given the
@@ -431,7 +431,7 @@ def spread2d(
     Returns
     -------
     ds_out: xarray.Dataset
-        Dataset with spreaded source values, linear index of the source cell
+        Dataset with spread source values, linear index of the source cell
         "source_idx" and friction distance to the source cell "source_dst".
     """
     nodata = da_obs.raster.nodata if nodata is None else nodata

@@ -1,4 +1,4 @@
-"""Implementaion of forcing workflows."""
+"""Implementation of forcing workflows."""
 
 import logging
 import re
@@ -91,7 +91,7 @@ def precip(
             clim = clim.rename({clim.raster.dim0: "month"})
         if clim["month"].size != 12:
             raise ValueError("Precip climatology does not contain 12 months.")
-        # set missings to NaN
+        # set missing to NaN
         clim = clim.raster.mask_nodata()
         assert clim is not None
         # calculate downscaling multiplication factor
@@ -496,7 +496,7 @@ def press_correction(
         specific gas constant for dry air [J mol-1 K-1]
     Mo : float, default 0.0289644
         molecular weight of gas [kg / mol]
-    lapse_rate : float, deafult -0.0065
+    lapse_rate : float, default -0.0065
         lapse rate of temperature [C m-1]
 
     Returns

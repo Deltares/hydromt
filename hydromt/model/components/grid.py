@@ -345,4 +345,4 @@ class GridComponent(SpatialModelComponent):
         for ds in args:
             if mask in ds:
                 return ds[mask] != ds[mask].raster.nodata
-        return None  # Nothin found
+        return None  # Nothing found

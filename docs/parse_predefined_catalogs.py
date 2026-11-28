@@ -76,7 +76,7 @@ def write_nested_dropdown(name, df_dict: dict, note: str=""):
     return path.relative_to(FILE_ROOT)
 
 def write_sources_panel(f, df, level, sources=None):
-    attrs = [a for a in ATTRS if a in df.columns]  # accomodate older versions
+    attrs = [a for a in ATTRS if a in df.columns]  # accommodate older versions
     if sources is None:
         sources = df.index
     sources = sorted(set(sources))

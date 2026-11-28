@@ -55,7 +55,7 @@ def create_registry_file(root: Path, registry_path: Optional[Path] = None) -> No
     root: Path
         root directory to search for data_catalog.yml files
     """
-    # we don't use pooch.create_registry here as we want to only include vaild data_catalog.yml files
+    # we don't use pooch.create_registry here as we want to only include valid data_catalog.yml files
     registry = {}
     for path in root.glob("**/data_catalog.yml"):
         key = path.relative_to(root).as_posix()
