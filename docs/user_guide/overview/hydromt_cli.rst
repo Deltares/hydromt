@@ -54,7 +54,7 @@ that can be used with HydroMT. For example:
       --version     Show the version and exit.
       --models      Print available model plugins and exit.
       --components  Print available component plugins and exit.
-      --plugins     Print available component plugins and exit.
+      --plugins     Print available plugins and exit.
       --help        Show this message and exit.
 
     Commands:

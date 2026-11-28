@@ -122,7 +122,7 @@ def full_from_transform(
 ) -> xr.DataArray:
     """Return a full DataArray based on a geospatial transform and shape.
 
-    See :py:meth:`~hydromt.raster_utils.full` for all options.
+    See :py:meth:`~hydromt.gis.raster_utils.full` for all options.
 
     Parameters
     ----------
@@ -514,7 +514,7 @@ def merge(
         * new: assert no pixel overlap
     **kwargs:
         Key-word arguments passed to
-        :py:meth:`~hydromt.raster.RasterDataArray.reproject`
+        :py:meth:`~hydromt.gis.raster.RasterDataArray.reproject`
 
     Returns
     -------

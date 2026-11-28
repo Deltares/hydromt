@@ -12,7 +12,7 @@ from hydromt._utils.deep_merge import _deep_merge
 from hydromt._utils.dictionaries import _partition_dictionaries
 from hydromt._utils.elevation import _elevation2rgba, _rgba2elevation
 from hydromt._utils.format import CatalogDumper
-from hydromt._utils.nodata import _has_no_data, _set_raster_nodata, _set_vector_nodata
+from hydromt._utils.nodata import _has_no_data, _set_vector_nodata
 from hydromt._utils.path import _make_config_paths_absolute, _make_config_paths_relative
 from hydromt._utils.rgetattr import _rgetattr
 from hydromt._utils.steps_validator import _validate_steps
@@ -34,7 +34,6 @@ __all__ = [
     "_elevation2rgba",
     "_rgba2elevation",
     "_has_no_data",
-    "_set_raster_nodata",
     "_set_vector_nodata",
     "_rgetattr",
     "_validate_steps",
@@ -45,8 +44,3 @@ __all__ = [
     "_make_config_paths_relative",
     "temp_env",
 ]
-
-
-class _classproperty(property):
-    def __get__(self, owner_self, owner_cls):
-        return self.fget(owner_cls)

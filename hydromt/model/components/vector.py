@@ -270,7 +270,7 @@ class VectorComponent(SpatialModelComponent):
             * The geojson file contains both the attribute and the geometry data
                 (filename set to None). This option is possible only if all data variables
                 are 1D. Else the data will be written to netcdf. Key-word arguments are
-                passed to :py:meth:`~hydromt.vector.GeoDataset.to_gdf`
+                passed to :py:meth:`~hydromt.gis.vector.GeoDataset.to_gdf`
 
         Parameters
         ----------
@@ -283,7 +283,7 @@ class VectorComponent(SpatialModelComponent):
         ogr_compliant : bool
             If filename only, write the netCDF4 file in an ogr compliant format
             This makes it readable as a vector file in e.g. QGIS
-            see :py:meth:`~hydromt.vector.GeoBase.ogr_compliant` for more details.
+            see :py:meth:`~hydromt.gis.vector.GeoBase.ogr_compliant` for more details.
         to_netcdf_kwargs: dict, optional
             Additional keyword arguments that are passed to the `write_nc` function.
         to_gdf_kwargs: dict, optional

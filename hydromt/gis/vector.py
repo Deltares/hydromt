@@ -492,7 +492,7 @@ class GeoBase(XGeoBase):
         ----------
         ogr_compliant: bool, optional
             Whether to create a OGR compliant Dataset/Array
-            see :py:meth:`~hydromt.vector.GeoBase.ogr_compliant` for more details.
+            see :py:meth:`~hydromt.gis.vector.GeoBase.ogr_compliant` for more details.
         reducer : callable, optional
             method by which multidimensional data is reduced to 1 dimensional
             e.g. numpy.mean
@@ -651,7 +651,7 @@ class GeoBase(XGeoBase):
         ogr_compliant : bool
             write the netCDF4 file in an ogr compliant format
             This makes it readable as a vector file in e.g. QGIS
-            see :py:meth:`~hydromt.vector.GeoBase.ogr_compliant` for more details.
+            see :py:meth:`~hydromt.gis.vector.GeoBase.ogr_compliant` for more details.
         reducer : callable, optional
             Method by which multidimensional data is reduced to 1 dimensional
             e.g. numpy.mean
@@ -682,7 +682,7 @@ class GeoBase(XGeoBase):
         ogr_compliant : bool
             write the netCDF4 file in an ogr compliant format
             This makes it readable as a vector file in e.g. QGIS
-            see :py:meth:`~hydromt.vector.GeoBase.ogr_compliant` for more details.
+            see :py:meth:`~hydromt.gis.vector.GeoBase.ogr_compliant` for more details.
         reducer : callable, optional
             Method by which multidimensional data is reduced to 1 dimensional
             e.g. numpy.mean

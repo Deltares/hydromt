@@ -1493,7 +1493,7 @@ class XRasterBase(XGeoBase):
         """Return the density in [unit/m2] of raster(s).
 
         The cell areas are calculated using
-        :py:meth:`~hydromt.raster.XRasterBase.area_grid`.
+        :py:meth:`~hydromt.gis.raster.XRasterBase.area_grid`.
 
         Returns
         -------
@@ -1525,7 +1525,6 @@ class XRasterBase(XGeoBase):
         dst_height=None,
         align=False,
     ):
-        # NOTE dst_tranform may get overwritten here?!
         if dst_transform is None or dst_width is None or dst_height is None:
             (
                 dst_transform,
@@ -1576,7 +1575,7 @@ class XRasterBase(XGeoBase):
         Powered by pyproj and k-d tree lookup. Index mappings typically are used
         in reprojection workflows of time series, or combinations of time series.
 
-        ... Note: Is used by :py:meth:`~hydromt.raster.RasterDataArray.reproject` if
+        ... Note: Is used by :py:meth:`~hydromt.gis.raster.RasterDataArray.reproject` if
         method equals 'nearest_index'
 
         Arguments
@@ -1659,7 +1658,6 @@ class XRasterBase(XGeoBase):
         )
         index.raster.set_crs(dst_crs)
         index.raster.set_nodata(-1)
-        index.raster._tranform = dst_transform
         return index
 
 
@@ -1984,7 +1982,7 @@ class RasterDataArray(XRasterBase):
         other : xarray.DataArray or Dataset
             DataArray of the target resolution and projection.
         method : str, optional
-            See :py:meth:`~hydromt.raster.RasterDataArray.reproject` for existing
+            See :py:meth:`~hydromt.gis.raster.RasterDataArray.reproject` for existing
             methods, by default 'nearest'.
 
         Returns
@@ -2037,7 +2035,7 @@ class RasterDataArray(XRasterBase):
         """Return reprojected DataArray object based on simple reindexing.
 
         Use linear indices in ``index``, which can be calculated with
-        :py:meth:`~hydromt.raster.RasterDataArray.nearest_index`.
+        :py:meth:`~hydromt.gis.raster.RasterDataArray.nearest_index`.
 
         This is typically used to downscale time series data.
 
@@ -2517,7 +2515,7 @@ class RasterDataset(XRasterBase):
         method: dict, optional
             Reproject method mapping. If a string is provided all variables are
             reprojecte with the same method. See
-            :py:meth:`~hydromt.raster.RasterDataArray.reproject` for existing methods,
+            :py:meth:`~hydromt.gis.raster.RasterDataArray.reproject` for existing methods,
             by default nearest.
 
         Returns
@@ -2568,7 +2566,7 @@ class RasterDataset(XRasterBase):
         """Return reprojected Dataset based on simple reindexing.
 
         Uses linear indices in ``index``, which can be calculated with
-        :py:meth:`~hydromt.raster.RasterDataArray.nearest_index`.
+        :py:meth:`~hydromt.gis.raster.RasterDataArray.nearest_index`.
 
         Arguments
         ---------

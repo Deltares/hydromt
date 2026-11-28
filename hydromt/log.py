@@ -70,7 +70,7 @@ def initialize_logging(
 def set_log_level(log_level: int) -> None:
     """Set the log level of the hydromt root logger.
 
-    This also affects all child loggers (e.g., ``hydromt.core``),
+    This also affects all child loggers (e.g., ``hydromt.model``),
     unless they have their own log level explicitly set.
 
     Parameters
