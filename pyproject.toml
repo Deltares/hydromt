@@ -13,6 +13,7 @@ dependencies = [
 	"affine>=2.4,<3.0",        # Spatial rasterers affine transformations (bbox pixel coalision)
 	"bottleneck>=1.6",         # Spearmen rank computation
 	"click>=8.2",              # CLI configuration
+	"certifi>=2026.10.23",     # SSL certificate bundles
 	"dask[distributed]>=2024", # lazy computing
 	"fsspec[http]>=2025",      # general file systems utilities
 	"geopandas[all]>=1.0",     # pandas but geo, wraps fiona and shapely
